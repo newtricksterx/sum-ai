@@ -1,0 +1,23 @@
+{
+    "manifest_version": 3,
+    "name": "recap.ai",
+    "icons": {
+        "32": "AIRecap32.png"
+    },
+    "version": "1.0.0",
+    "background": {
+        "service_worker": "service-worker.js",
+        "type": "module"
+    },
+    "action": {
+        "default_popup": "index.html"
+    },
+    "permissions": [
+        "scripting",
+        "storage"
+    ],
+    "host_permissions": [
+        "http://*/*",
+        "https://*/*"
+    ]
+}

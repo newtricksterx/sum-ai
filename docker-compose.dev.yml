@@ -1,0 +1,50 @@
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend    
+    env_file:
+      - ./.env
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    expose:
+      - 8000
+    networks:
+      - my_network  
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: always
+    env_file:
+      - ./.env
+    command: npm run build
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - my_network
+
+
+  nginx:
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
