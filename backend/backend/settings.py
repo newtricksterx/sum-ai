@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import environ
 import json
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +28,10 @@ env = environ.Env(
 )
 
 # Load the .env file from the root directory
-environ.Env.read_env(os.path.join(BASE_DIR, '../.env'))
+# environ.Env.read_env(os.path.join(BASE_DIR, '../.env'))
+
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 
 # Quick-start development settings - unsuitable for production

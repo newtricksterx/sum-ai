@@ -5,9 +5,9 @@ import requests
 from trafilatura import fetch_url, extract
 from trafilatura.sitemaps import sitemap_search
 import os
+from google import genai
 
 def CreateQuery(url, length, regenerate, format, language):
-    
     
     html = fetch_url(url)
     text = extract(html, include_links=True, favor_recall=True)
@@ -50,23 +50,28 @@ def CreateQuery(url, length, regenerate, format, language):
     
 
 def QueryAI(query):
-    client = openai.OpenAI(  
-        api_key=os.getenv("OPENAI_API_KEY")
+    client = genai.Client(
+        api_key=os.getenv("GEMINI_API_KEY")
     )
 
-    completion = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {
-                "role": "user",
-                "content": query
-            }
-        ]
+    response = client.models.generate_content(
+        model="gemini-2.5-flash", 
+        contents=query
     )
+
+    #completion = client.chat.completions.create(
+    #    model="gpt-4o-mini",
+    #    messages=[
+    #        {
+    #            "role": "user",
+    #            "content": query
+    #       }
+    #   ]
+    #)
         
-    return completion.choices[0].message.content
+    #return completion.choices[0].message.content
     
-    #return "temp query"
+    return response.text
 
    
 def SummarizeContent(url, length, regenerate, format, language):
@@ -75,6 +80,8 @@ def SummarizeContent(url, length, regenerate, format, language):
     #print(query)
     
     result = QueryAI(query)
+
+    #result = query
     
     #print(result)
     
