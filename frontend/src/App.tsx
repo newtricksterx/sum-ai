@@ -68,7 +68,7 @@ function App() {
       return;
     }
 
-    let [tab] = await chrome.tabs.query({active: true});
+    const [tab] = await chrome.tabs.query({active: true});
     const url = tab.url;
 
     //console.log(url)

@@ -58,18 +58,6 @@ def QueryAI(query):
         model="gemini-2.5-flash", 
         contents=query
     )
-
-    #completion = client.chat.completions.create(
-    #    model="gpt-4o-mini",
-    #    messages=[
-    #        {
-    #            "role": "user",
-    #            "content": query
-    #       }
-    #   ]
-    #)
-        
-    #return completion.choices[0].message.content
     
     return response.text
 
