@@ -55,7 +55,7 @@ def QueryAI(query):
     )
 
     response = client.models.generate_content(
-        model="gemini-2.5-flash", 
+        model=os.getenv("GEMINI_API_MODEL"), 
         contents=query
     )
     
@@ -67,9 +67,9 @@ def SummarizeContent(url, length, regenerate, format, language):
     
     #print(query)
     
-    result = QueryAI(query)
+    #result = QueryAI(query)
 
-    #result = query
+    result = query
     
     #print(result)
     

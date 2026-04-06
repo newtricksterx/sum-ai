@@ -78,19 +78,15 @@ input::-webkit-inner-spin-button {
 }
 
 #loader {
-  height: 1.5em;
-  width: 1.5em;
-  border: 0.25em solid #ffffff;
+  height: 1.25rem; /* Using rem for better scaling than em in menus */
+  width: 1.25rem;
+  border: 2px solid rgb(208, 213, 217); /* Thinner border looks more "pro" in small sizes */
+  border-top-color: rgb(78, 78, 78);
   position: absolute;
   margin: auto;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
+  inset: 0; /* Shorthand for top/bottom/left/right: 0 */
   border-radius: 50%;
-  border-color: rgb(208, 213, 217);
-  border-top-color:  rgb(78, 78, 78);
-  animation: spin 1s infinite;
+  animation: spin 1s linear infinite; /* Added 'linear' for smooth rotation */
 }
 
 @keyframes spin {
