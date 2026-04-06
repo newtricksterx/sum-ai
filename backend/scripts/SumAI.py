@@ -67,9 +67,9 @@ def SummarizeContent(url, length, regenerate, format, language):
     
     #print(query)
     
-    #result = QueryAI(query)
+    result = QueryAI(query)
 
-    result = query
+    #result = query
     
     #print(result)
     
