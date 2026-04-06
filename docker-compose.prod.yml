@@ -1,0 +1,25 @@
+services:
+  backend:
+    build: ./backend
+    container_name: backend
+    restart: always
+    env_file: .env
+    # Use Gunicorn instead of runserver for AWS
+    command: gunicorn --bind 0.0.0.0:8000 backend.wsgi:application
+    networks:
+      - app_network
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
