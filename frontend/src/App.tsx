@@ -1,7 +1,6 @@
 import './App.css'
 import { useState } from 'react'
 import MenuBar from './components/MenuBar'
-import { BASE_URL, isDebugMode } from './utils/constants'
 import { useSettingsStore } from './stores/settingsStore'
 import { GetPageFromStorage, GetSummaryFromStorage, UpdatePageStorage, UpdateSummaryStorage } from './utils/storage'
 import { NotebookPen } from 'lucide-react';
@@ -21,23 +20,21 @@ function App() {
   const UserInterface = () => {
     if(currentPage === 1 && summarizedContent == null){
       return (
-        <LoaderCircle />
+        <div className="flex-1 flex justify-center items-center min-h-[200px]">
+          <LoaderCircle />
+        </div>
       )
     }
 
-    /*
-        <p style={{ fontSize: `${fontSize}px` }} className={`font-noto p-2 m-2 border-2 border-solid rounded-md overflow-hidden text-clip`}>
-          {summarizedContent}
-        </p>
-    */
-
     if(currentPage === 1){
       return (        
-        <div style={{ fontSize: `${fontSize}px` }} className={`font-noto p-2 m-2 border-2 border-solid rounded-md overflow-hidden text-clip`} dangerouslySetInnerHTML={{ __html:
-          
-          summarizedContent!
-          
-        }}>
+        <div style={{ fontSize: `${fontSize}px` }} 
+              className={`font-noto p-2 m-2 border-2 border-solid rounded-md text-clip`} 
+              dangerouslySetInnerHTML={{ __html:
+                
+                summarizedContent!
+                
+              }}>
 
         </div>
       )
@@ -46,7 +43,8 @@ function App() {
     return (
       <button onClick={onClickSumPage} 
         className="flex flex-row gap-2 items-center cursor-pointer border-0 rounded-3xl bg-[#303030] text-gray-100 hover:bg-[#373737]
-        dark:bg-gray-100 dark:text-black py-1.5 px-3 dark:hover:bg-gray-200 text-[14px] mx-auto my-auto font-noto" >
+        dark:bg-gray-100 dark:text-black py-1.5 px-3 dark:hover:bg-gray-200 text-[14px] mx-auto my-auto font-noto
+        mt-2 mb-2" >
         <NotebookPen />
         Summarize This Page
       </button>
@@ -56,12 +54,12 @@ function App() {
   const Summarize = async (regenerateBool: boolean) => {
     SetSummarizedContent(null)
 
-    //console.log("BASE URL: " + BASE_URL)
-    //console.log("Debug Mode: " + isDebugMode)
+    // console.log("BASE URL: " + BASE_URL)
+    // console.log("All Env Variables:", import.meta.env);
 
-    if(isDebugMode){
+    if(import.meta.env.VITE_DEBUG_STATUS === "true"){
       const query = "summarize the content in this page: (text), where the length is: " + length.toString() + 
-      `. ${regenerateBool ? "It also must be a different version" : ""}` + Math.floor(Math.random() * 100).toString(); 
+      `. ${regenerateBool ? "It also must be a different version " : ""}` + Math.floor(Math.random() * 100).toString(); 
 
       SetSummarizedContent(query);
       UpdateSummaryStorage(query);
@@ -86,10 +84,8 @@ function App() {
     console.log(results[0].result!)
     */
 
-    
-
     try {
-      const response = await fetch(`${BASE_URL}/api/summarize`, {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/summarize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -140,41 +136,26 @@ function App() {
   }
 
   return (
-    <section className={`${theme} flex flex-col w-[360px] h-full`}>          
-      <MenuBar onClickReturn={onClickReturn} onClickForward={onClickForward} onClickClose={onClickClose}
-        onClickRegenerate={onClickRegenerate} onClickRefresh={onClickRefresh}/>
-      <UserInterface />
+    <section className={`${theme} flex flex-col w-[360px] max-h-[510px]`}>           
+      <MenuBar 
+        onClickReturn={onClickReturn} 
+        onClickForward={onClickForward} 
+        onClickClose={onClickClose}
+        onClickRegenerate={onClickRegenerate} 
+        onClickRefresh={onClickRefresh}
+      />
+      
+      {/* flex-1: Fills the remaining height of the 580px section.
+        overflow-y-auto: Shows scrollbar only when needed.
+        min-h-0: CRITICAL for flex children to allow shrinking/scrolling.
+      */}
+      <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar min-h-0 h-auto">
+        <UserInterface />
+      </div>
     </section>
   )
 }
 
 export default App
 
-  /*
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1 className='text-red-300'>Vite + React</h1>
-      <div className="card">
-        <input type="color" defaultValue={colour} onChange={(e) => SetColour(e.target.value)}/>
-        <button onClick={onclick}>
-          Click Here
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-  */
 

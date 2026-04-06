@@ -7,3 +7,16 @@ export type Language = "english" | "french" | "spanish";
 export type Format = "bullet-point" | "paragraph"
 
 export type ButtonDisplyStatus = "block" | "hidden";
+
+export type Settings = {
+    language: Language;
+    length: Length;
+    theme: Theme;
+    fontSize: number;
+    format: Format;
+    UpdateLanguage: (lang: Language) => void;
+    UpdateLength: (length: Length) => void;
+    UpdateFontSize: (fontSize: number) => void;
+    UpdateFormat: (format: Format) => void;
+    UpdateTheme: () => void;
+}

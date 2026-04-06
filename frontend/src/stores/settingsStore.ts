@@ -1,19 +1,6 @@
 import { create } from "zustand";
-import { Format, Language, Length, Theme } from "../utils/types";
+import { Settings } from "../utils/types";
 import { GetFontSizeFromStorage, GetFormatFromStorage, GetLangFromStorage, GetLengthFromStorage, GetThemeFromStorage, UpdateFontSizeStorage, UpdateFormatStorage, UpdateLanguageStorage, UpdateLengthStorage, UpdateThemeStorage } from "../utils/storage";
-
-export type Settings = {
-    language: Language;
-    length: Length;
-    theme: Theme;
-    fontSize: Number;
-    format: Format;
-    UpdateLanguage: (lang: Language) => void;
-    UpdateLength: (length: Length) => void;
-    UpdateFontSize: (fontSize: Number) => void;
-    UpdateFormat: (format: Format) => void;
-    UpdateTheme: () => void;
-}
 
 export const useSettingsStore = create<Settings>()((set) => ({
     language: GetLangFromStorage() ?? "english",

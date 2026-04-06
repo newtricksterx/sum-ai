@@ -1,7 +1,7 @@
 import Button from "./Button";
 import { MenuBarProps } from "../utils/interfaces";
 import { MenuIconSize } from '../utils/constants'
-import { Sun, Moon, ArrowLeft, RefreshCcw, RotateCw, X, ArrowRight } from 'lucide-react';
+import { Sun, Moon, ArrowLeft, RotateCw, X, ArrowRight, Sparkles } from 'lucide-react';
 import SettingsDropdown from "./SettingsDropdown";
 import { useSettingsStore } from "../stores/settingsStore";
 import { ForwardState, RegenerateState, ReturnState } from "../utils/states";
@@ -19,18 +19,18 @@ function MenuBar({onClickReturn, onClickForward, onClickClose, onClickRefresh, o
         <Button onClick={onClickForward} className={`p-2 rounded-3xl m-1 ${ForwardState() ? "" : "opacity-50"}`} disabled={!ForwardState()} title="Go back to previous page">
             <ArrowRight  size={MenuIconSize}/>
         </Button>
+        <Button className={`p-2 rounded-3xl m-1 ${RegenerateState() ? "" : "opacity-50"}`} disabled={!RegenerateState()} onClick={onClickRegenerate} title="Generate summary">
+          <Sparkles size={MenuIconSize}/>
+        </Button>
+        <Button className="p-2 rounded-3xl m-1" onClick={onClickRefresh} title="Refresh summary">
+          <RotateCw size={MenuIconSize}/>
+        </Button>
+        <SettingsDropdown />
         <Button onClick={onClickTheme} className="p-2 rounded-3xl m-1" title="Select theme">
           {
             theme === "light" ? <Sun size={MenuIconSize}/> : <Moon size={MenuIconSize}/>
           }
         </Button>
-        <Button className="p-2 rounded-3xl m-1" onClick={onClickRefresh} title="Refresh summary">
-          <RotateCw size={MenuIconSize}/>
-        </Button>
-        <Button className={`p-2 rounded-3xl m-1 ${RegenerateState() ? "" : "opacity-50"}`} disabled={!RegenerateState()} onClick={onClickRegenerate} title="Regenerate summary">
-          <RefreshCcw size={MenuIconSize}/>
-        </Button>
-        <SettingsDropdown />
         <Button onClick={onClickClose} className="p-2 hover:bg-red-500 dark:hover:bg-red-500" title="Close extension">
           <X size={MenuIconSize}/>
         </Button> 

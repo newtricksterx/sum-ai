@@ -23,6 +23,7 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  height: auto;
   /*
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
@@ -41,7 +42,7 @@ body {
   justify-content: center; 
   align-items: flex-start; 
   min-width: 360px;
-  min-height: 250px;
+  height: auto;
 }
 
 ul {

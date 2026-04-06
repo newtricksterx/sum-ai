@@ -8,7 +8,7 @@ export const UpdateLengthStorage = (currentLength: Length) => {
     localStorage.setItem('length', currentLength)
 }
 
-export const UpdateFontSizeStorage = (currentFontSize: Number) => {
+export const UpdateFontSizeStorage = (currentFontSize: number) => {
     localStorage.setItem('fontSize', currentFontSize.toString())
 }
 
@@ -24,7 +24,7 @@ export const UpdateFormatStorage = (currentFormat: Format) => {
     localStorage.setItem('format', currentFormat)
 }
 
-export const UpdatePageStorage = (currentPage: Number) => {
+export const UpdatePageStorage = (currentPage: number) => {
     localStorage.setItem('page', currentPage.toString());
 }
 

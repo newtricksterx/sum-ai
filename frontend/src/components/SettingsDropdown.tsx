@@ -1,7 +1,7 @@
 import { Settings, Save } from "lucide-react";
 import { all_formats, all_languages, all_lengths, MenuIconSize } from "../utils/constants";
 import Button from "./Button";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ButtonDisplyStatus, Format, Language, Length } from "../utils/types";
 import Dropdown from "./Dropdown";
 import { useSettingsStore } from "../stores/settingsStore";
@@ -16,24 +16,38 @@ export default function SettingsDropdown() {
 
     const [language, SetLanguage] = useState<Language>(settings_lang);
     const [length, SetLength] = useState<Length>(settings_length);
-    const [fontSize, SetFontSize] = useState<Number>(settings_fontSize);
+    const [fontSize, SetFontSize] = useState<number>(settings_fontSize);
     const [format, SetFormat] = useState<Format>(settings_format)
     const [saved, SetSaved] = useState(false);
+
+    const menuRef = useRef<HTMLDivElement>(null);
 
     const UpdateLang = useSettingsStore((state) => state.UpdateLanguage);
     const UpdateLength = useSettingsStore((state) => state.UpdateLength);
     const UpdateFontSize = useSettingsStore((state) => state.UpdateFontSize);
     const UpdateFormat = useSettingsStore((state) => state.UpdateFormat);
 
-
-    function onClickSettings() {
-        if(displayStatus === "hidden"){
+    const onClickSettings = useCallback(() => {
+        if (displayStatus === "hidden") {
             SetDisplayStatus("block");
+        } else {
+            SetDisplayStatus("hidden");
         }
-        else{
-            SetDisplayStatus("hidden")
-        }
-    }
+    }, [displayStatus]); // Only re-create if displayStatus changes
+
+    useEffect(() => {
+
+        // handles what happens when clicked outside of the settings menu
+        const handleClickOutside = (event: MouseEvent) => {
+            if(displayStatus == "block" && menuRef.current && !menuRef.current.contains(event.target as Node)){
+                onClickSettings()
+            }
+        };
+
+        // add event in which a click happens (makes a call to handleClickOutside)
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [displayStatus, menuRef, onClickSettings])
 
     function backgroundActive() {
         return displayStatus === "block" ? "bg-gray-100 dark:bg-[#373737]" : "bg-white dark:bg-[#303030]" 
@@ -53,7 +67,7 @@ export default function SettingsDropdown() {
     }
 
     return (
-        <div className="relative">
+        <div className="relative" ref={menuRef}>
             <Button onClick={onClickSettings} className={`${backgroundActive()} p-2 rounded-3xl`} title="Settings">
                 <Settings size={MenuIconSize}/>
             </Button>
