@@ -1,6 +1,5 @@
 import sys
 from bs4 import BeautifulSoup
-import openai
 import requests
 from trafilatura import fetch_url, extract
 from trafilatura.sitemaps import sitemap_search
@@ -67,9 +66,9 @@ def SummarizeContent(url, length, regenerate, format, language):
     
     #print(query)
     
-    result = QueryAI(query)
+    #result = QueryAI(query)
 
-    #result = query
+    result = query
     
     #print(result)
     

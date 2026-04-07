@@ -14,5 +14,5 @@ COPY . .
 # Expose port
 EXPOSE 3000
 
-# Start Next.js
+# Start Vite
 CMD ["npm", "run", "build"]

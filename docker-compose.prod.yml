@@ -3,7 +3,7 @@ services:
     build: ./backend
     container_name: backend
     restart: always
-    env_file: .env
+    env_file: ./backend/.env
     # Use Gunicorn instead of runserver for AWS
     command: gunicorn --bind 0.0.0.0:8000 backend.wsgi:application
     networks:

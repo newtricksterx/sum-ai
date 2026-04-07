@@ -1,50 +1,30 @@
 
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: backend    
-    env_file:
-      - ./.env
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - ./backend:/app
+    build: ./backend
     ports:
       - "8000:8000"
-    expose:
-      - 8000
-    networks:
-      - my_network  
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: frontend
+    volumes:
+      - ./backend:/app  # This maps your local folder to the container's /app folder
+    container_name: backend
     restart: always
-    env_file:
-      - ./.env
-    command: npm run build
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
+    env_file: ./backend/.env
+    # dev file uses runserver - development mode
+    command: python manage.py runserver 0.0.0.0:8000
     networks:
-      - my_network
-
+      - app_network
 
   nginx:
-    build: 
-      context: ./nginx
-      dockerfile: Dockerfile
+    build: ./nginx
+    container_name: nginx
+    restart: always
     ports:
       - "80:80"
     depends_on:
       - backend
-      - frontend
     networks:
-      - my_network
+      - app_network
 
 networks:
-  my_network:
+  app_network:
     driver: bridge
