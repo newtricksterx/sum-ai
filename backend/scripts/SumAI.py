@@ -1,7 +1,5 @@
 import os
 import time
-os.environ['REQUESTS_CA_BUNDLE'] = '/etc/ssl/certs/ca-certificates.crt'
-
 import sys
 from bs4 import BeautifulSoup
 import requests
@@ -50,23 +48,16 @@ def QueryAI(query):
 
    
 def SummarizeContent(url, length, regenerate, format, language):
-    start = time.time()
+    print(f"Request made at: {time.time()}", flush=True)
+    #start = time.time()
     
     query = CreateQuery(url, length, regenerate, format, language)
-    print(f"Query creation took: {time.time() - start:.2f} seconds")
+    #print(f"Query creation took: {time.time() - start:.2f} seconds")
 
     #time.sleep(3)
     
-    result = QueryAI(query)
-    #result = query
-    print(f"AI response took: {time.time() - start:.2f} seconds")
+    #result = QueryAI(query)
+    result = query
+    #print(f"AI response took: {time.time() - start:.2f} seconds")
     
     return result
-   
-
-if __name__ == "__main__":
-    args = sys.argv[1]
-    
-    URL = str(args)
-    query = CreateQuery(URL)
-    result = QueryAI(query)

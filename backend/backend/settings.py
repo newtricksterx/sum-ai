@@ -16,10 +16,9 @@ import environ
 import json
 from dotenv import load_dotenv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv()
 
-# Define the base directory
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Initialize environment variables
@@ -27,10 +26,8 @@ env = environ.Env(
     DEBUG=(bool, False)
 )
 
-# Load the .env file from the root directory
 # environ.Env.read_env(os.path.join(BASE_DIR, '../.env'))
 
-load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 
@@ -153,6 +150,15 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
-    "chrome-extension://dehgeekhhggiafmaphflfoldcaplaifk", 
+    f"chrome-extension://{os.getenv("EXT_ID")}", 
     "http://localhost:5173",
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/minute',
+    }
+}

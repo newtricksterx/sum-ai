@@ -8,8 +8,7 @@ WORKDIR /app
 
 # Update the package list and install the CA certificates package
 RUN apt-get update && \
-    apt-get install -y ca-certificates && \
-    update-ca-certificates
+    apt-get install -y
 
 RUN pip install --upgrade pip
 COPY requirements.txt .

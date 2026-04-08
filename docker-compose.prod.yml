@@ -1,12 +1,14 @@
 services:
   backend:
-    build: ./backend
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.prod
     environment:
       # This tells Python to use the system-wide certificate store
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     container_name: backend
     restart: always
-    env_file: ./backend/.env
+    env_file: ./backend/.env.production
     # Use Gunicorn instead of runserver for AWS
     command: gunicorn --bind 0.0.0.0:8000 backend.wsgi:application
     networks:
