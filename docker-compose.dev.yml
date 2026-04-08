@@ -2,6 +2,9 @@
 services:
   backend:
     build: ./backend
+    environment:
+      # This tells Python to use the system-wide certificate store
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     ports:
       - "8000:8000"
     volumes:

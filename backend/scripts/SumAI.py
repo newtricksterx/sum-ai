@@ -1,39 +1,29 @@
+import os
+import time
+os.environ['REQUESTS_CA_BUNDLE'] = '/etc/ssl/certs/ca-certificates.crt'
+
 import sys
 from bs4 import BeautifulSoup
 import requests
 from trafilatura import fetch_url, extract
-from trafilatura.sitemaps import sitemap_search
-import os
 from google import genai
 
+session = requests.Session()
+
 def CreateQuery(url, length, regenerate, format, language):
+    response = session.get(url, timeout=10)
+    html = response.text
     
-    html = fetch_url(url)
+    soup = BeautifulSoup(html, 'html.parser')
+    
     text = extract(html, include_links=True, favor_recall=True)
-    
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
     
     # Find all anchor tags (<a>) with the 'href' attribute
     links = soup.find_all('a', href=True)
-
-    # Extract and print the href attribute (the link)
-    link_string = ""
+    link_string = ", ".join([link['href'] for link in links])
     
-    for link in links:
-        link_string = link_string + link['href'] + ", "
+    different = "It also must be a different version" if regenerate else ""
     
-    
-    different = ""
-    
-    if regenerate:
-        different = "It also must be a different version" 
-    
-    #query = "summarize the content in this page: " + text + ", where the length is: " + str(length) + ". " + different + ". Format: " + format + \
-    #    ". Return prompt as HTML, tailwind css, and dont use classname nor class. Make sure to have a title. if there are any links, make it so that it opens to new window \
-    #    . If it's a video, summarize the video transcript. Remove the ```html and ``` part."
-        
-        
     query = f"""
             Please summarize the content of the following page: "{text}" in {language}, reference these links: "{link_string}", where the length is {length}. 
             Consider the additional instruction: "{different}". 
@@ -42,8 +32,6 @@ def CreateQuery(url, length, regenerate, format, language):
             If there are any links, make them open in a new window. 
             Remove any ```html and ``` tags from the response.
             """
-
-    #print(query)
     
     return query
     
@@ -62,20 +50,19 @@ def QueryAI(query):
 
    
 def SummarizeContent(url, length, regenerate, format, language):
-    query = CreateQuery(url, length, regenerate, format, language)
+    start = time.time()
     
-    #print(query)
+    query = CreateQuery(url, length, regenerate, format, language)
+    print(f"Query creation took: {time.time() - start:.2f} seconds")
+
+    time.sleep(3)
     
     #result = QueryAI(query)
-
     result = query
-    
-    #print(result)
+    print(f"AI response took: {time.time() - start:.2f} seconds")
     
     return result
    
-
-
 
 if __name__ == "__main__":
     args = sys.argv[1]

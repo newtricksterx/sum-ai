@@ -6,10 +6,10 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
 
+# Update the package list and install the CA certificates package
 RUN apt-get update && \
-    apt-get install -y libpq-dev gcc && \
-    rm -rf /var/lib/apt/lists/
-
+    apt-get install -y ca-certificates && \
+    update-ca-certificates
 
 RUN pip install --upgrade pip
 COPY requirements.txt .

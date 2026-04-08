@@ -1,6 +1,9 @@
 services:
   backend:
     build: ./backend
+    environment:
+      # This tells Python to use the system-wide certificate store
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     container_name: backend
     restart: always
     env_file: ./backend/.env

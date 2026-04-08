@@ -20,7 +20,7 @@ function App() {
   const UserInterface = () => {
     if(currentPage === 1 && summarizedContent == null){
       return (
-        <div className="flex-1 flex relative justify-center items-center min-h-[200px]">
+        <div className="flex-1 flex relative justify-center items-center min-h-[200px] z-40">
           <LoaderCircle />
         </div>
       )

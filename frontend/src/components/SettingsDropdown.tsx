@@ -67,7 +67,7 @@ export default function SettingsDropdown() {
     }
 
     return (
-        <div className="relative" ref={menuRef}>
+        <div className="relative z-50" ref={menuRef}>
             <Button onClick={onClickSettings} className={`${backgroundActive()} p-2 rounded-3xl`} title="Settings">
                 <Settings size={MenuIconSize}/>
             </Button>
