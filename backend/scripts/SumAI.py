@@ -1,12 +1,29 @@
 import os
+import certifi
+
+DEBUG_MODE = os.getenv("DEBUG", "False").lower() == "true"
+
+print(DEBUG_MODE)
+
+if DEBUG_MODE:
+    os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
+    os.environ['SSL_CERT_FILE'] = certifi.where()
+
 import time
 import sys
 from bs4 import BeautifulSoup
 import requests
 from trafilatura import fetch_url, extract
 from google import genai
+import logging
+
+# This tells the 'trafilatura' library to only show ERRORS, not info/debug logs
+logging.getLogger('trafilatura').setLevel(logging.ERROR)
+# You might want to do the same for 'requests' and 'urllib3'
+logging.getLogger('urllib3').setLevel(logging.ERROR)
 
 session = requests.Session()
+session.verify = certifi.where()
 
 def CreateQuery(url, length, regenerate, format, language):
     response = session.get(url, timeout=10)
@@ -55,9 +72,12 @@ def SummarizeContent(url, length, regenerate, format, language):
     #print(f"Query creation took: {time.time() - start:.2f} seconds")
 
     #time.sleep(3)
-    
-    #result = QueryAI(query)
-    result = query
+
+    if not DEBUG_MODE:
+        result = QueryAI(query=query)
+    else:
+        result = query
+
     #print(f"AI response took: {time.time() - start:.2f} seconds")
     
     return result
