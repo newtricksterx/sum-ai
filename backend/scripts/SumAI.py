@@ -3,7 +3,7 @@ import certifi
 
 DEBUG_MODE = os.getenv("DEBUG", "False").lower() == "true"
 
-print(DEBUG_MODE)
+#print(DEBUG_MODE)
 
 if DEBUG_MODE:
     os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
