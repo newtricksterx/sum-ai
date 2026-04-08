@@ -20,7 +20,7 @@ function App() {
   const UserInterface = () => {
     if(currentPage === 1 && summarizedContent == null){
       return (
-        <div className="flex-1 flex relative justify-center items-center min-h-[200px] z-40">
+        <div className="flex-1 flex relative justify-center items-center min-h-[210px] z-40">
           <LoaderCircle />
         </div>
       )
@@ -29,7 +29,7 @@ function App() {
     if(currentPage === 1){
       return (        
         <div style={{ fontSize: `${fontSize}px` }} 
-              className={`font-noto p-2 m-2 border-2 border-solid rounded-md text-clip`} 
+              className={`font-noto p-2 m-2 border-2 border-solid rounded-md text-clip min-h-[210px]`} 
               dangerouslySetInnerHTML={{ __html:
                 
                 summarizedContent!
@@ -41,13 +41,16 @@ function App() {
     }
 
     return (
-      <button onClick={onClickSumPage} 
-        className="flex flex-row gap-2 items-center cursor-pointer border-0 rounded-3xl bg-[#303030] text-gray-100 hover:bg-[#373737]
-        dark:bg-gray-100 dark:text-black py-1.5 px-3 dark:hover:bg-gray-200 text-[14px] mx-auto my-auto font-noto
-        mt-2 mb-2" >
-        <NotebookPen />
-        Summarize This Page
-      </button>
+      <div className='flex-1 flex relative justify-center items-center min-h-[210px]'>
+          <button onClick={onClickSumPage} 
+            className="flex flex-row gap-2 items-center cursor-pointer border-0 rounded-3xl bg-[#303030] text-gray-100 hover:bg-[#373737]
+            dark:bg-gray-100 dark:text-black py-1.5 px-3 dark:hover:bg-gray-200 text-[14px] mx-auto my-auto font-noto
+            mt-2 mb-2" >
+          <NotebookPen />
+          Summarize This Page
+        </button>
+      </div>
+
     )
   }
 

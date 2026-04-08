@@ -55,10 +55,10 @@ def SummarizeContent(url, length, regenerate, format, language):
     query = CreateQuery(url, length, regenerate, format, language)
     print(f"Query creation took: {time.time() - start:.2f} seconds")
 
-    time.sleep(3)
+    #time.sleep(3)
     
-    #result = QueryAI(query)
-    result = query
+    result = QueryAI(query)
+    #result = query
     print(f"AI response took: {time.time() - start:.2f} seconds")
     
     return result
