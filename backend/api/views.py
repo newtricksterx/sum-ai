@@ -8,8 +8,6 @@ import time
 
 class SummarizeText(APIView):
     def post(self, request):
-        #print("Received data:", request.data.get('html'))
-        #print("Received body:", request.data.get('length'))
 
         html = request.data.get('html')
 
