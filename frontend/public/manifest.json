@@ -1,8 +1,11 @@
 {
     "manifest_version": 3,
-    "name": "recap.ai",
+    "name": "Super Simple Summarizer",
     "icons": {
-        "32": "AIRecap32.png"
+        "16": "sss_icon16.png",
+        "32": "sss_icon32.png",
+        "48": "sss_icon48.png",
+        "128": "sss_icon128.png"
     },
     "version": "1.0.0",
     "background": {
