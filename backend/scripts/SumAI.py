@@ -40,18 +40,32 @@ def CreateQuery(url, length, regenerate, format, language):
     different = "It also must be a different version" if regenerate else ""
     
     query = f"""
-            Please summarize the content of the following page: "{text}" in {language}, reference these links: "{link_string}", where the length is {length}. 
-            Consider the additional instruction: "{different}". 
-            Format the output using HTML and Tailwind CSS in {format}, but avoid using 'class' or 'className' or any styles. 
-            Ensure the response includes a title as a header such as h1. 
-            If there are any links, make them open in a new window. 
-            Remove any ```html and ``` tags from the response.
+                # ROLE
+                You are a professional content summarizer that outputs clean, valid HTML.
+
+                # TASK
+                Summarize the following text in {language}.
+                Text: "{text}"
+
+                # CONSTRAINTS
+                - Length: {length}
+                - Style: {different}
+                - Format: Use {format} structure.
+                - Links: Reference these URLs: {link_string}. All <a> tags MUST include target="_blank" and rel="noopener noreferrer". If no links are provided, do not include a references section.
+                - Technical: Use ONLY semantic HTML tags (e.g., <h1>, <p>, <ul>). 
+                - STRIKINGLY IMPORTANT: Do NOT use 'class', 'className', or 'style' attributes. Do NOT include markdown code blocks (```html).
+
+                # STRUCTURE
+                1. Start immediately with an <h1> title.
+                2. Follow with the summary body. Make it easy to read.
             """
     
     return query
     
 
 def QueryAI(query):
+    print(os.getenv("GEMINI_API_MODEL"))
+
     client = genai.Client(
         api_key=os.getenv("GEMINI_API_KEY")
     )
