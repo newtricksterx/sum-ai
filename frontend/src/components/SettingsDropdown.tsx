@@ -50,7 +50,7 @@ export default function SettingsDropdown() {
     }, [displayStatus, menuRef, onClickSettings])
 
     function backgroundActive() {
-        return displayStatus === "block" ? "bg-gray-100 dark:bg-[#373737]" : "bg-white dark:bg-[#303030]" 
+        return displayStatus === "block" ? "bg-gray-100 dark:bg-[#373737]" : "bg-[#eee] dark:bg-[#303030]" 
     }
 
     function savedActive(){
@@ -71,7 +71,7 @@ export default function SettingsDropdown() {
             <Button onClick={onClickSettings} className={`${backgroundActive()} p-2 rounded-3xl`} title="Settings">
                 <Settings size={MenuIconSize}/>
             </Button>
-            <div className={`${displayStatus} absolute border-2 font-noto bg-white border-gray-200 dark:bg-[#303030] dark:border-[#373737] shadow-xs py-2 rounded-lg right-0`}>
+            <div className={`${displayStatus} absolute border-2 font-noto bg-[#eee] border-gray-200 dark:bg-[#303030] dark:border-[#373737] shadow-xs py-2 rounded-lg right-0`}>
                 <form className="flex flex-col items-start gap-1" onSubmit={(e) => onSaveSettings(e)}>
                     <div className="flex flex-row gap-2 w-full px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-600">
                         <Dropdown title="language" list={all_languages} onChangeDropdown={(e) => {

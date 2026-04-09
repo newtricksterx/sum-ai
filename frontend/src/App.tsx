@@ -29,7 +29,7 @@ function App() {
     if(currentPage === 1){
       return (        
         <div style={{ fontSize: `${fontSize}px` }} 
-              className={`font-noto p-2 m-2 border-2 border-solid rounded-md text-clip min-h-[210px]`} 
+              className={`font-noto p-2 m-2 text-clip min-h-[210px]`} 
               dangerouslySetInnerHTML={{ __html:
                 
                 summarizedContent!
