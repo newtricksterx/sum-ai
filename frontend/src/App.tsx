@@ -72,21 +72,6 @@ function App() {
     const [tab] = await chrome.tabs.query({active: true});
     const url = tab.url;
 
-    //console.log(url)
-    /*
-    let results = await chrome.scripting.executeScript({
-      target: {tabId: tab.id!},
-      args: [tab.url],
-      func: (url) => {
-        // return document.body.innerHTML.toString()
-        console.log(url)
-        return url;
-      }
-    })
-
-    console.log(results[0].result!)
-    */
-
     try {
       const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/summarize`, {
         method: 'POST',
