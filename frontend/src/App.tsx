@@ -55,22 +55,25 @@ function App() {
   }
 
   const Summarize = async (regenerateBool: boolean) => {
-    SetSummarizedContent(null)
+    SetSummarizedContent(null);
 
-    // console.log("BASE URL: " + BASE_URL)
-    // console.log("All Env Variables:", import.meta.env);
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    if (!tab.id) return;
 
-    if(import.meta.env.VITE_DEBUG_STATUS === "true"){
-      const query = "summarize the content in this page: (text), where the length is: " + length.toString() + 
-      `. ${regenerateBool ? "It also must be a different version " : ""}` + Math.floor(Math.random() * 100).toString(); 
+    // 1. Extract text directly from the user's current tab
+    const injectionResults = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: () => {
+        // Try to get the main article content specifically, otherwise fallback to body
+        const article = document.querySelector('article');
+        return article ? article.innerText : document.body.innerText;
+      },
+    });
 
-      SetSummarizedContent(query);
-      UpdateSummaryStorage(query);
-      return;
-    }
+    const pageText = injectionResults[0].result;
 
-    const [tab] = await chrome.tabs.query({active: true});
-    const url = tab.url;
+    console.log(pageText);
 
     try {
       const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/summarize`, {
@@ -78,19 +81,23 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ html: url, length: length, regenerate: regenerateBool, format: format, language: language })
-      }) // html: results[0].result!
+          // 2. Send the actual text content instead of just the URL
+        body: JSON.stringify({ 
+          content: pageText, 
+          length: length, 
+          regenerate: regenerateBool, 
+          format: format, 
+          language: language 
+        })
+      });
 
-      const result = await response.json()
-
-      //console.log('Full result:', result);
-
+      const result = await response.json();
       SetSummarizedContent(result.data);
       UpdateSummaryStorage(result.data);
-    } catch(error){
-      console.log(error)
+    } catch (error) {
+      console.log("Fetch Error:", error);
     }
-  }
+  };
 
   const onClickSumPage = async () => {
     SetCurrentPage(1)

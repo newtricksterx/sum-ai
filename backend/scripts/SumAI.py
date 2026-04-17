@@ -24,18 +24,24 @@ logging.getLogger('urllib3').setLevel(logging.ERROR)
 
 session = requests.Session()
 session.verify = certifi.where()
+session.headers.update({
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+})
 
-def CreateQuery(url, length, regenerate, format, language):
-    response = session.get(url, timeout=10)
-    html = response.text
+def CreateQuery(page_content, length, regenerate, format, language):
     
-    soup = BeautifulSoup(html, 'html.parser')
+    # Clean the content (works on both raw HTML and raw Text)
+    text = extract(page_content, include_links=True, favor_recall=True)
     
-    text = extract(html, include_links=True, favor_recall=True)
-    
-    # Find all anchor tags (<a>) with the 'href' attribute
+    # If trafilatura fails to find text (e.g., content was already just text), 
+    # fall back to the raw content
+    if not text:
+        text = page_content[:10000] # Cap it to avoid token limits
+
+    # For link referencing, we use BeautifulSoup on the passed content
+    soup = BeautifulSoup(page_content, 'html.parser')
     links = soup.find_all('a', href=True)
-    link_string = ", ".join([link['href'] for link in links])
+    link_string = ", ".join([link['href'] for link in links[:15]]) # Limit links to save tokens
     
     different = "It also must be a different version" if regenerate else ""
     
@@ -51,20 +57,19 @@ def CreateQuery(url, length, regenerate, format, language):
                 - Length: {length}
                 - Style: {different}
                 - Format: Use {format} structure.
-                - Links: Reference these URLs: {link_string}. All <a> tags MUST include target="_blank" and rel="noopener noreferrer". If no links are provided, do not include a references section.
+                - Links: Reference these URLs: {link_string}. All <a> tags MUST include target="_blank" and rel="noopener noreferrer".
                 - Technical: Use ONLY semantic HTML tags (e.g., <h1>, <p>, <ul>). 
                 - STRIKINGLY IMPORTANT: Do NOT use 'class', 'className', or 'style' attributes. Do NOT include markdown code blocks (```html).
 
                 # STRUCTURE
-                1. Start immediately with an <h1> title.
-                2. Follow with the summary body. Make it easy to read.
+                1. Start immediately with an <h1> title. Remove the ```html
+                2. Follow with the summary body.
             """
-    
     return query
     
 
 def QueryAI(query):
-    print(os.getenv("GEMINI_API_MODEL"))
+    #print(os.getenv("GEMINI_API_MODEL"))
 
     client = genai.Client(
         api_key=os.getenv("GEMINI_API_KEY")
@@ -78,11 +83,11 @@ def QueryAI(query):
     return response.text
 
    
-def SummarizeContent(url, length, regenerate, format, language):
+def SummarizeContent(content, length, regenerate, format, language):
     print(f"Request made at: {time.time()}", flush=True)
     #start = time.time()
     
-    query = CreateQuery(url, length, regenerate, format, language)
+    query = CreateQuery(content, length, regenerate, format, language)
     #print(f"Query creation took: {time.time() - start:.2f} seconds")
 
     #time.sleep(3)

@@ -12,9 +12,11 @@
         "default_popup": "index.html"
     },
     "permissions": [
+        "scripting",
         "tabs"
     ],
     "host_permissions": [
-        "https://super-summarizer.ddns.net/*"
+        "https://super-summarizer.ddns.net/*",
+        "<all_urls>"
     ]
 }

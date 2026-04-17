@@ -9,15 +9,15 @@ import time
 class SummarizeText(APIView):
     def post(self, request):
 
-        html = request.data.get('html')
+        content = request.data.get('content')
 
-        if not html:
+        if not content:
             return Response(
-                {"error": "Missing required field: 'html'"},
+                {"error": "Missing required field: 'content'"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        summary = SumAI.SummarizeContent(request.data.get('html'), 
+        summary = SumAI.SummarizeContent(request.data.get('content'), 
                                          request.data.get('length'), 
                                          request.data.get('regenerate'), 
                                          request.data.get("format"), 
