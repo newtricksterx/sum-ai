@@ -16,6 +16,7 @@ import requests
 from trafilatura import fetch_url, extract
 from google import genai
 import logging
+import re
 
 # This tells the 'trafilatura' library to only show ERRORS, not info/debug logs
 logging.getLogger('trafilatura').setLevel(logging.ERROR)
@@ -29,12 +30,16 @@ session.headers.update({
 })
 
 def CreateQuery(page_content, length, regenerate, format, language):
+
+    #print(f"Content Length received: {len(page_content)}")
+    #print(f"Content Preview: {page_content[:500]}") # Check the first 500 chars
     
     # Clean the content (works on both raw HTML and raw Text)
-    text = extract(page_content, include_links=True, favor_recall=True)
+    #text = extract(page_content, include_links=True, favor_recall=True)
     
     # If trafilatura fails to find text (e.g., content was already just text), 
     # fall back to the raw content
+    text = page_content
     if not text:
         text = page_content[:10000] # Cap it to avoid token limits
 
@@ -46,25 +51,27 @@ def CreateQuery(page_content, length, regenerate, format, language):
     different = "It also must be a different version" if regenerate else ""
     
     query = f"""
-                # ROLE
-                You are a professional content summarizer that outputs clean, valid HTML.
+        # ROLE
+        You are a specialized API that converts text into raw, semantic HTML. You do not talk to the user.
 
-                # TASK
-                Summarize the following text in {language}.
-                Text: "{text}"
+        # TASK
+        Summarize the following text in {language}.
+        Text: "{text}"
 
-                # CONSTRAINTS
-                - Length: {length}
-                - Style: {different}
-                - Format: Use {format} structure.
-                - Links: Reference these URLs: {link_string}. All <a> tags MUST include target="_blank" and rel="noopener noreferrer".
-                - Technical: Use ONLY semantic HTML tags (e.g., <h1>, <p>, <ul>). 
-                - STRIKINGLY IMPORTANT: Do NOT use 'class', 'className', or 'style' attributes. Do NOT include markdown code blocks (```html).
+        # CONSTRAINTS
+        - Length: {length}
+        - Style: {different}
+        - Format: Use {format} structure.
+        - Links: Reference these URLs if relevant: {link_string}. 
+        - Link Safety: All <a> tags must include target="_blank" and rel="noopener noreferrer".
+        - Forbidden: No Markdown (###, **, ```), no 'class', no 'style', no <html>/<body> tags.
 
-                # STRUCTURE
-                1. Start immediately with an <h1> title. Remove the ```html
-                2. Follow with the summary body.
-            """
+        # OUTPUT TEMPLATE
+        <h1>Title of the Summary</h1>
+        (Output based on Format goes here)
+        <strong>(any key points)</strong>
+        """
+
     return query
     
 
@@ -98,5 +105,16 @@ def SummarizeContent(content, length, regenerate, format, language):
         result = query
 
     #print(f"AI response took: {time.time() - start:.2f} seconds")
+    # 1. Strip triple backticks and the word "html"
+    result = re.sub(r'```html|```', '', result).strip()
+
+    # 2. Check if the AI ignored you and sent Markdown anyway (starts with #)
+    if result.startswith("#"):
+        # This is a 'dirty' fix: replace Markdown headers with HTML
+        result = re.sub(r'^# (.*)', r'<h1>\1</h1>', result, flags=re.M)
+        result = re.sub(r'^## (.*)', r'<h2>\1</h2>', result, flags=re.M)
+        result = re.sub(r'^\* (.*)', r'<li>\1</li>', result, flags=re.M)
+        # Wrap lone li tags in a ul if needed, or just warn yourself in logs
+        print("Warning: AI returned Markdown. Applied basic regex cleaning.")
     
     return result

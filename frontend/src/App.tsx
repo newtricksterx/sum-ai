@@ -5,6 +5,7 @@ import { useSettingsStore } from './stores/settingsStore'
 import { GetPageFromStorage, GetSummaryFromStorage, UpdatePageStorage, UpdateSummaryStorage } from './utils/storage'
 import { NotebookPen } from 'lucide-react';
 import LoaderCircle from './components/LoaderCircle'
+import DOMPurify from 'dompurify'
 
 
 function App() {
@@ -18,6 +19,14 @@ function App() {
   const format = useSettingsStore((state) => state.format)
 
   const UserInterface = () => {
+    const cleanedContent = DOMPurify.sanitize(summarizedContent || "", 
+      {
+        ALLOWED_TAGS: ['h1', 'h2', 'p', 'ul', 'li', 'strong', 'em', 'a', 'br'],
+        ALLOWED_ATTR: ['href', 'target', 'rel'] 
+      }
+    )
+
+
     if(currentPage === 1 && summarizedContent == null){
       return (
         <div className="flex-1 flex relative justify-center items-center min-h-[210px] z-40">
@@ -32,10 +41,9 @@ function App() {
               className={`font-noto p-2 m-2 min-h-[210px] h-max flex-shrink-0`} 
               dangerouslySetInnerHTML={{ __html:
                 
-                summarizedContent!
+                cleanedContent!
                 
               }}>
-
         </div>
       )
     }
@@ -65,7 +73,6 @@ function App() {
     const injectionResults = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: () => {
-        // Try to get the main article content specifically, otherwise fallback to body
         const article = document.querySelector('article');
         return article ? article.innerText : document.body.innerText;
       },
@@ -73,7 +80,7 @@ function App() {
 
     const pageText = injectionResults[0].result;
 
-    console.log(pageText);
+    // console.log(pageText);
 
     try {
       const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/summarize`, {
@@ -81,7 +88,7 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-          // 2. Send the actual text content instead of just the URL
+        
         body: JSON.stringify({ 
           content: pageText, 
           length: length, 
@@ -139,11 +146,6 @@ function App() {
         onClickRegenerate={onClickRegenerate} 
         onClickRefresh={onClickRefresh}
       />
-      
-      {/* flex-1: Fills the remaining height of the 580px section.
-        overflow-y-auto: Shows scrollbar only when needed.
-        min-h-0: CRITICAL for flex children to allow shrinking/scrolling.
-      */}
       <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar min-h-0 h-auto">
         <UserInterface />
       </div>
