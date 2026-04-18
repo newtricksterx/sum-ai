@@ -18,10 +18,8 @@ from google import genai
 import logging
 import re
 
-# This tells the 'trafilatura' library to only show ERRORS, not info/debug logs
 # logging.getLogger('trafilatura').setLevel(logging.ERROR)
-# You might want to do the same for 'requests' and 'urllib3'
-logging.getLogger('urllib3').setLevel(logging.ERROR)
+# logging.getLogger('urllib3').setLevel(logging.ERROR)
 
 session = requests.Session()
 session.verify = certifi.where()
@@ -103,10 +101,8 @@ def SummarizeContent(content, length, regenerate, format, language):
         result = query
 
     #print(f"AI response took: {time.time() - start:.2f} seconds")
-    # 1. Strip triple backticks and the word "html"
     result = re.sub(r'```html|```', '', result).strip()
 
-    # 2. Check if the AI Markdown anyway (starts with #)
     if result.startswith("#"):
         # This is a 'dirty' fix: replace Markdown headers with HTML
         result = re.sub(r'^# (.*)', r'<h1>\1</h1>', result, flags=re.M)
