@@ -16,7 +16,6 @@
         "tabs"
     ],
     "host_permissions": [
-        "https://super-summarizer.ddns.net/*",
-        "<all_urls>"
+        "https://super-summarizer.ddns.net/*"
     ]
 }
