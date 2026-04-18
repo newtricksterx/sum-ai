@@ -79,9 +79,7 @@ function App() {
     });
 
     const pageText = injectionResults[0].result;
-
-    // console.log(pageText);
-
+    
     try {
       const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/summarize`, {
         method: 'POST',
