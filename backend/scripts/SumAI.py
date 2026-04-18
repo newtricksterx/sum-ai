@@ -19,7 +19,7 @@ import logging
 import re
 
 # This tells the 'trafilatura' library to only show ERRORS, not info/debug logs
-logging.getLogger('trafilatura').setLevel(logging.ERROR)
+# logging.getLogger('trafilatura').setLevel(logging.ERROR)
 # You might want to do the same for 'requests' and 'urllib3'
 logging.getLogger('urllib3').setLevel(logging.ERROR)
 
@@ -36,17 +36,15 @@ def CreateQuery(page_content, length, regenerate, format, language):
     
     # Clean the content (works on both raw HTML and raw Text)
     #text = extract(page_content, include_links=True, favor_recall=True)
-    
-    # If trafilatura fails to find text (e.g., content was already just text), 
-    # fall back to the raw content
+
     text = page_content
     if not text:
-        text = page_content[:10000] # Cap it to avoid token limits
+        text = page_content[:10000]
 
     # For link referencing, we use BeautifulSoup on the passed content
     soup = BeautifulSoup(page_content, 'html.parser')
     links = soup.find_all('a', href=True)
-    link_string = ", ".join([link['href'] for link in links[:15]]) # Limit links to save tokens
+    link_string = ", ".join([link['href'] for link in links[:15]]) 
     
     different = "It also must be a different version" if regenerate else ""
     
@@ -108,7 +106,7 @@ def SummarizeContent(content, length, regenerate, format, language):
     # 1. Strip triple backticks and the word "html"
     result = re.sub(r'```html|```', '', result).strip()
 
-    # 2. Check if the AI ignored you and sent Markdown anyway (starts with #)
+    # 2. Check if the AI Markdown anyway (starts with #)
     if result.startswith("#"):
         # This is a 'dirty' fix: replace Markdown headers with HTML
         result = re.sub(r'^# (.*)', r'<h1>\1</h1>', result, flags=re.M)
