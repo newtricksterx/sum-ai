@@ -13,10 +13,10 @@ function MenuBar({onClickReturn, onClickForward, onClickClose, onClickRefresh, o
 
   return (
     <nav className="flex flex-row gap-1 justify-between items-center border-b-[1px] border-b-gray-400 w-full">
-        <Button onClick={onClickReturn} className={`p-2 rounded-3xl m-1 ${ReturnState() ? "" : "opacity-50"}`} disabled={!ReturnState()} title="Go back to previous page">
+        <Button onClick={onClickReturn} className={`p-2 rounded-3xl m-1 ${ReturnState() ? "" : "opacity-50"}`} disabled={!ReturnState()} title="Go to home page">
             <ArrowLeft  size={MenuIconSize}/>
         </Button>
-        <Button onClick={onClickForward} className={`p-2 rounded-3xl m-1 ${ForwardState() ? "" : "opacity-50"}`} disabled={!ForwardState()} title="Go back to previous page">
+        <Button onClick={onClickForward} className={`p-2 rounded-3xl m-1 ${ForwardState() ? "" : "opacity-50"}`} disabled={!ForwardState()} title="Go to summary page">
             <ArrowRight  size={MenuIconSize}/>
         </Button>
         <Button className={`p-2 rounded-3xl m-1 ${RegenerateState() ? "" : "opacity-50"}`} disabled={!RegenerateState()} onClick={onClickRegenerate} title="Generate summary">

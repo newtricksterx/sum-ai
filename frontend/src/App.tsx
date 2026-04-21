@@ -4,9 +4,9 @@ import { useState } from 'react'
 import MenuBar from './components/MenuBar'
 import { useSettingsStore } from './stores/settingsStore'
 import { GetPageFromStorage, GetSummaryFromStorage, UpdatePageStorage, UpdateSummaryStorage } from './utils/storage'
-import { NotebookPen } from 'lucide-react';
 import LoaderCircle from './components/LoaderCircle'
 import DOMPurify from 'dompurify'
+import FrontPage from './pages/FrontPage'
 
 
 function App() {
@@ -49,16 +49,7 @@ function App() {
 }
     // Display the front page content
     return (
-      <div className='flex-1 flex relative justify-center items-center min-h-[210px]'>
-          <button onClick={onClickSumPage} 
-            className="flex flex-row gap-2 items-center cursor-pointer border-0 rounded-3xl bg-[#303030] text-gray-100 hover:bg-[#373737]
-            dark:bg-gray-100 dark:text-black py-1.5 px-3 dark:hover:bg-gray-200 text-[14px] mx-auto my-auto font-noto
-            mt-2 mb-2" >
-          <NotebookPen />
-          Summarize This Page
-        </button>
-      </div>
-
+      <FrontPage />
     )
   }
 
@@ -70,7 +61,7 @@ function App() {
 
     // 1. MOCK CHECK: Short-circuit the API call if in development mode
     if (import.meta.env.VITE_DEV) {
-      console.log("🛠️ Dev Mode: Using Mock Summary");
+      console.log("Dev Mode: Using Mock Summary");
       
       // Simulate a 1-second network delay
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -123,12 +114,6 @@ function App() {
       console.log("Fetch Error:", error);
     }
   };
-
-  const onClickSumPage = async () => {
-    SetCurrentPage(1)
-    UpdatePageStorage(1);
-    await Summarize(false);
-  }
 
   const onClickReturn = () => {
     SetCurrentPage(0);

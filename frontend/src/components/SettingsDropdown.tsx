@@ -73,7 +73,7 @@ export default function SettingsDropdown() {
                     absolute border-2 font-noto bg-[#eee] border-gray-200
                     dark:bg-[#303030] dark:border-[#373737] shadow-xs rounded-lg right-0
                     grid transition-[grid-template-rows,opacity] duration-200 ease-out
-                    overflow-hidden
+                    overflow-hidden w-[130px]
                     ${isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none border-transparent"}
                 `}>
                 {/* header */}
@@ -88,8 +88,8 @@ export default function SettingsDropdown() {
                     {/* each row */}
                     {[
                     { label: "Language", id: "lang", list: all_languages, value: language, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => { SetSaved(false); SetLanguage(e.target.value as Language); } },
-                    { label: "Summary format", id: "format", list: all_formats, value: format, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => { SetSaved(false); SetFormat(e.target.value as Format); } },
-                    { label: "Summary length", id: "length", list: all_lengths, value: length, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => { SetSaved(false); SetLength(e.target.value as Length); } },
+                    { label: "Summary Format", id: "format", list: all_formats, value: format, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => { SetSaved(false); SetFormat(e.target.value as Format); } },
+                    { label: "Summary Length", id: "length", list: all_lengths, value: length, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => { SetSaved(false); SetLength(e.target.value as Length); } },
                     ].map(({ label, id, list, value, onChange }) => (
                     <div key={id} className="flex flex-col gap-1 px-3.5 py-2.5 border-b border-gray-100 dark:border-[#2e2e2e]">
                         <label htmlFor={id} className="text-[11px] text-gray-400 dark:text-gray-500">{label}</label>
@@ -114,13 +114,19 @@ export default function SettingsDropdown() {
                     {/* footer */}
                     <div className="px-3.5 py-2.5 flex justify-end">
                         {saved ? (
-                            <span className="flex items-center gap-1.5 text-[12px] text-gray-400">
+                            <button
+                            className="flex items-center gap-1.5 text-[12px] font-medium px-3.5 py-1 rounded-full border
+                             border-gray-200 dark:border-[#3a3a3a] hover:bg-gray-100 dark:hover:bg-[#2a2a2a] 
+                             transition-colors"
+                            >
                             <Check size={12} className="text-green-500" /> Saved
-                            </span>
+                            </button>
                         ) : (
                             <button
                             type="submit"
-                            className="flex items-center gap-1.5 text-[12px] font-medium px-3.5 py-1 rounded-full border border-gray-200 dark:border-[#3a3a3a] hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
+                            className="flex items-center gap-1.5 text-[12px] 
+                            font-medium px-3.5 py-1 rounded-full border 
+                            border-gray-200 dark:border-[#3a3a3a] hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
                             >
                             <Save size={12} /> Save
                             </button>

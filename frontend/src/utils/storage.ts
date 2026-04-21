@@ -45,8 +45,7 @@ export const GetThemeFromStorage = () => {
 }
 
 export const GetSummaryFromStorage = () => {
-    return localStorage && localStorage.getItem('summary') ? localStorage.getItem('summary') as string : "empty"
-}
+    return localStorage && localStorage.getItem('summary') ? localStorage.getItem('summary') as string : `Please Click the ${"Generate summary"} button`}
 
 export const GetFormatFromStorage = () => {
     return localStorage && localStorage.getItem('format') ? localStorage.getItem('format') as Format : null
