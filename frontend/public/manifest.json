@@ -7,13 +7,13 @@
         "48": "sss_icon48.png",
         "128": "sss_icon128.png"
     },
-    "version": "1.0.0",
+    "version": "1.0.1",
     "action": {
         "default_popup": "index.html"
     },
     "permissions": [
-        "scripting",
-        "tabs"
+        "activeTab",
+        "scripting"
     ],
     "host_permissions": [
         "https://super-summarizer.ddns.net/*"

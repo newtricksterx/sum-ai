@@ -13,5 +13,6 @@ module.exports = {
                 process: 'process/browser',
             }
         ),
+        require('@tailwindcss/typography'),
     ],
 };
