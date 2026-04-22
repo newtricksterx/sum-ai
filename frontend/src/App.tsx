@@ -8,6 +8,8 @@ import LoaderCircle from './components/LoaderCircle'
 import DOMPurify from 'dompurify'
 import FrontPage from './pages/FrontPage'
 import SummaryPage from './pages/SummaryPage'
+import { summarizeActiveTab } from './services/summarizeService'
+import { getPlainTextFromHtml } from './utils/html'
 
 
 function App() {
@@ -65,64 +67,16 @@ function App() {
   const Summarize = async (regenerateBool: boolean) => {
     SetSummarizedContent(null);
 
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab.id) return;
+    const summaryHtml = await summarizeActiveTab({
+      baseUrl: import.meta.env.VITE_BASE_URL,
+      length,
+      regenerate: regenerateBool,
+      format,
+      language,
+    });
 
-    // 1. MOCK CHECK: Short-circuit the API call if in development mode
-    if (import.meta.env.VITE_DEV === 'true') {
-      console.log("Dev Mode: Using Mock Summary");
-      
-      // Simulate a 1-second network delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockHtml = `
-        <h1>Development Mock Summary</h1>
-        <p>This is a <strong>simulated response</strong> to help you style your UI without calling Gemini.</p>
-        <ul>
-          <li><strong>Cost:</strong> $0.00 (Local)</li>
-          <li><strong>Speed:</strong> Instant</li>
-          <li><strong>Format:</strong> Matches your production HTML</li>
-        </ul>
-        <p>Check out <a href="https://google.com" target="_blank" rel="noopener">this test link</a> to see if your link styles work.</p>
-      `;
-      
-      SetSummarizedContent(mockHtml);
-      UpdateSummaryStorage(mockHtml);
-      return; // Exit function early
-    }
-
-    // 2. REAL LOGIC: Only runs in Production
-    const injectionResults = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: () => {
-              const article = document.querySelector('article') || document.querySelector('main');
-              const text = article ? article.innerText : document.body.innerText;
-              // Basic cleanup: remove extra whitespace and newlines
-              return text.replace(/\s\s+/g, ' ').trim().slice(0, 10000); 
-            },
-      });
-
-    const pageText = injectionResults[0].result;
-    
-    try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/summarize`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          content: pageText, 
-          length: length, 
-          regenerate: regenerateBool, 
-          format: format, 
-          language: language 
-        })
-      });
-
-      const result = await response.json();
-      SetSummarizedContent(result.data);
-      UpdateSummaryStorage(result.data);
-    } catch (error) {
-      console.log("Fetch Error:", error);
-    }
+    SetSummarizedContent(summaryHtml);
+    UpdateSummaryStorage(summaryHtml);
   };
 
   const onClickReturn = () => {
@@ -150,12 +104,6 @@ function App() {
     SetCurrentPage(1);
     UpdatePageStorage(1);
     await Summarize(false);
-  }
-
-  const getPlainTextFromHtml = (html: string) => {
-    const parser = document.createElement('div');
-    parser.innerHTML = html;
-    return parser.textContent?.trim() ?? '';
   }
 
   const onClickCopy = async () => {

@@ -161,11 +161,17 @@ CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_cors_allowed_origins))
 
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
+THROTTLE_SUMMARIES_COUNT = env.int("THROTTLE_SUMMARIES_COUNT", default=1)
+THROTTLE_SUMMARIES_PERIOD = env.str("THROTTLE_SUMMARIES_PERIOD", default="day").lower()
+if THROTTLE_SUMMARIES_PERIOD not in {"sec", "min", "hour", "day"}:
+    THROTTLE_SUMMARIES_PERIOD = "day"
+
 REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'api.exception_handlers.custom_exception_handler',
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '1/day',
+        'anon': f'{THROTTLE_SUMMARIES_COUNT}/{THROTTLE_SUMMARIES_PERIOD}',
     }
 }
