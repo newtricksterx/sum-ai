@@ -12,23 +12,20 @@ export default function SettingsDropdown() {
     const settings_length = useSettingsStore((state) => state.length);
     const settings_fontSize = useSettingsStore((state) => state.fontSize);
     const settings_format = useSettingsStore((state) => state.format);
-
-    // const [displayStatus, SetDisplayStatus] = useState<ButtonDisplyStatus>("hidden");
+    const UpdateLang = useSettingsStore((state) => state.UpdateLanguage);
+    const UpdateLength = useSettingsStore((state) => state.UpdateLength);
+    const UpdateFontSize = useSettingsStore((state) => state.UpdateFontSize);
+    const UpdateFormat = useSettingsStore((state) => state.UpdateFormat);
 
     const [language, SetLanguage] = useState<Language>(settings_lang);
     const [length, SetLength] = useState<Length>(settings_length);
     const [fontSize, SetFontSize] = useState<number>(settings_fontSize);
     const [format, SetFormat] = useState<Format>(settings_format)
     const [saved, SetSaved] = useState(false);
-
     const [isOpen, setIsOpen] = useState(false);
 
     const menuRef = useRef<HTMLDivElement>(null);
-
-    const UpdateLang = useSettingsStore((state) => state.UpdateLanguage);
-    const UpdateLength = useSettingsStore((state) => state.UpdateLength);
-    const UpdateFontSize = useSettingsStore((state) => state.UpdateFontSize);
-    const UpdateFormat = useSettingsStore((state) => state.UpdateFormat);
+;
 
     const onClickSettings = useCallback(() => {
         setIsOpen(prev => !prev);
@@ -79,7 +76,7 @@ export default function SettingsDropdown() {
                 {/* header */}
                 <div className="px-3.5 pt-3 pb-2 border-b border-gray-100 dark:border-[#2e2e2e]">
                     <span className="text-[10px] font-medium tracking-widest uppercase text-gray-400 dark:text-gray-500">
-                    Settings
+                        <strong>Settings</strong>
                     </span>
                 </div>
 
@@ -137,28 +134,3 @@ export default function SettingsDropdown() {
         </div>
     )
 }
-
-/*
-            <div className={`${displayStatus} w-40 absolute border-2 bg-white border-gray-200 dark:bg-gray-900 dark:border-gray-800 py-2 rounded-lg right-0`}>
-                
-                <div className="flex flex-row px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-600">
-                    <label htmlFor="lang">Language: </label>
-                    <Dropdown list={all_languages} onChangeDropdown={(e) => 
-                        onChangeDropdownLang(e.target.value as Language)
-                    } defaultValue={settings_lang} name='languages' id='lang'/>
-                </div>
-
-                <div className="flex flex-row px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-600">
-                    <label htmlFor="length">Length: </label>
-                    <Dropdown list={all_lengths} onChangeDropdown={(e) => 
-                        onChangeDropdownLength(e.target.value as Length)
-                    } defaultValue={settings_length} name='lengths' id='length'/>
-                </div>
-
-                <div className="flex flex-row px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-600">
-                    <label htmlFor="font-size">Font Size: </label>
-                    <input type="number" name="font-size" id="font-size"/>
-                </div>
-
-            </div>
-*/

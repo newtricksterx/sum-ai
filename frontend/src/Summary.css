@@ -1,115 +1,152 @@
-/* src/Summary.css */
-
 .summary-container {
-  padding: 0.5rem;
-  margin: 0.5rem;
-  border-radius: 1rem;
+  --summary-surface: linear-gradient(165deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.9));
+  --summary-border: rgba(203, 213, 225, 0.75);
+  --summary-text: #1f2937;
+  --summary-muted: #5b6677;
+  --summary-link: #0f766e;
+  --summary-link-hover: #115e59;
+  --summary-accent: #0ea5a4;
+
+  position: relative;
+  width: 100%;
   min-height: 210px;
-  /*background: rgba(30, 41, 59, 0.7);*/ /* Darker glass for dark mode */
-  backdrop-filter: blur(12px);
-  /*border: 1px solid rgba (255, 255, 255, 0.1); */
-  line-height: 1.6;
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--summary-border);
+  border-radius: 14px;
+  background: var(--summary-surface);
+  color: var(--summary-text);
+  line-height: 1.7;
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(8px);
+  animation: summary-pop-in 380ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+  will-change: transform, opacity;
 }
 
-/* AI Title Styling */
+.dark .summary-container {
+  --summary-surface: linear-gradient(165deg, rgba(32, 32, 32, 0.94), rgba(23, 23, 23, 0.9));
+  --summary-border: rgba(58, 58, 58, 0.9);
+  --summary-text: #e5e7eb;
+  --summary-muted: #9ca3af;
+  --summary-link: #5eead4;
+  --summary-link-hover: #99f6e4;
+  --summary-accent: #2dd4bf;
+
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.35);
+}
+
 .summary-container h1 {
+  margin: 0 0 0.8rem;
+  font-size: 1.05em;
+  line-height: 1.32;
   font-weight: 800;
-  margin-top: 0;
-  margin-bottom: 1rem;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
 }
 
-/* AI Subheader Styling */
 .summary-container h2 {
+  margin: 1.15rem 0 0.45rem;
+  font-size: 0.76em;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #94a3b8;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.09em;
+  color: var(--summary-muted);
 }
 
-/* List Styling */
+.summary-container p {
+  margin: 0 0 0.78rem;
+}
+
 .summary-container ul {
-  list-style-type: none;
+  list-style: none;
+  margin: 0.1rem 0 0.95rem;
   padding-left: 0;
-  margin-bottom: 1rem;
 }
 
 .summary-container li {
   position: relative;
-  padding-left: 1rem;
   margin-bottom: 0.5rem;
+  padding-left: 1rem;
 }
 
 .summary-container li::before {
-  list-style-type: circle;
+  content: "";
   position: absolute;
+  top: 0.7em;
   left: 0;
-  font-weight: bold;
-  content: "●"
+  width: 0.34em;
+  height: 0.34em;
+  border-radius: 999px;
+  transform: translateY(-50%);
+  background: color-mix(in srgb, var(--summary-accent) 85%, transparent);
 }
 
-/* Bold text highlight */
 .summary-container strong {
-  font-weight: 600;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--summary-text) 84%, var(--summary-accent));
 }
 
-/* Link Styling */
 .summary-container a {
-  color: #60a5fa;
+  color: var(--summary-link);
   text-decoration: underline;
-  text-underline-offset: 4px;
-  transition: opacity 0.2s;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+  transition: color 160ms ease, opacity 160ms ease;
 }
 
 .summary-container a:hover {
-  opacity: 0.8;
+  color: var(--summary-link-hover);
+  opacity: 0.95;
 }
 
-/* src/Summary.css */
+.summary-container > * {
+  animation: summary-line-in 450ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
 
-/* 1. Define the "Entrance" animation */
-@keyframes slideUpFade {
+.summary-container > *:nth-child(1) { animation-delay: 40ms; }
+.summary-container > *:nth-child(2) { animation-delay: 90ms; }
+.summary-container > *:nth-child(3) { animation-delay: 140ms; }
+.summary-container > *:nth-child(4) { animation-delay: 190ms; }
+.summary-container > *:nth-child(5) { animation-delay: 240ms; }
+.summary-container > *:nth-child(6) { animation-delay: 290ms; }
+
+@keyframes summary-pop-in {
   0% {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes summary-line-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(1px);
   }
   100% {
     opacity: 1;
     transform: translateY(0);
+    filter: blur(0);
   }
 }
 
-.summary-container {
-  /* ... your existing styles (padding, margins, etc.) ... */
-  
-  /* Add the animation here */
-  animation: slideUpFade 0.5s ease-out forwards;
-  
-  /* Ensure hardware acceleration for smooth 60fps */
-  will-change: transform, opacity;
-}
-
-/* 2. Style the internal elements to "Stagger" their appearance */
-.summary-container h1, 
-.summary-container p, 
-.summary-container ul {
-  animation: slideUpFade 0.6s ease-out both;
-}
-
-/* Delay child elements so they pop in one after another */
-.summary-container p { animation-delay: 0.1s; }
-.summary-container ul { animation-delay: 0.2s; }
-.summary-container h2 { animation-delay: 0.3s; }
-
-@keyframes pulseOpacity {
+@keyframes pulse-opacity {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50% { opacity: 0.45; }
 }
 
 .loading-skeleton {
-  animation: pulseOpacity 1.5s infinite ease-in-out;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  animation: pulse-opacity 1.5s infinite ease-in-out;
+  background: rgba(148, 163, 184, 0.18);
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .summary-container,
+  .summary-container > * {
+    animation: none !important;
+  }
 }

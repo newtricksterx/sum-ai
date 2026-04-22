@@ -20,6 +20,6 @@ export interface MenuBarProps {
     onClickReturn: React.MouseEventHandler;
     onClickForward: React.MouseEventHandler;
     onClickClose: React.MouseEventHandler;
-    onClickRefresh: React.MouseEventHandler;
+    onClickCopy: React.MouseEventHandler;
     onClickRegenerate: React.MouseEventHandler;
 }

@@ -150,8 +150,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
-    f"chrome-extension://{os.getenv("EXT_ID")}", 
-    "http://localhost:5173",
+    f"chrome-extension://{os.getenv("EXT_ID")}"
 ]
 
 REST_FRAMEWORK = {
@@ -159,6 +158,6 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.AnonRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '5/minute',
+        'anon': '1/day',
     }
 }

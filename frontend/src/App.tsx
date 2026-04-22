@@ -1,17 +1,20 @@
 import './App.css'
 import './Summary.css'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import MenuBar from './components/MenuBar'
 import { useSettingsStore } from './stores/settingsStore'
 import { GetPageFromStorage, GetSummaryFromStorage, UpdatePageStorage, UpdateSummaryStorage } from './utils/storage'
 import LoaderCircle from './components/LoaderCircle'
 import DOMPurify from 'dompurify'
 import FrontPage from './pages/FrontPage'
+import SummaryPage from './pages/SummaryPage'
 
 
 function App() {
   const [currentPage, SetCurrentPage] = useState(GetPageFromStorage());
   const [summarizedContent, SetSummarizedContent] = useState<string | null>(GetSummaryFromStorage());
+  const [showCopyNotice, setShowCopyNotice] = useState(false);
+  const copyNoticeTimeoutRef = useRef<number | null>(null);
 
   const language = useSettingsStore((state) => state.language)
   const length = useSettingsStore((state) => state.length)
@@ -19,7 +22,15 @@ function App() {
   const fontSize = useSettingsStore((state) => state.fontSize)
   const format = useSettingsStore((state) => state.format)
 
-  const UserInterface = () => {
+  useEffect(() => {
+    return () => {
+      if (copyNoticeTimeoutRef.current !== null) {
+        window.clearTimeout(copyNoticeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const renderUserInterface = () => {
     const cleanedContent = DOMPurify.sanitize(summarizedContent || "", 
       {
         ALLOWED_TAGS: ['h1', 'h2', 'p', 'ul', 'li', 'strong', 'em', 'a', 'br'],
@@ -30,23 +41,19 @@ function App() {
     // Display the loading circle
     if(currentPage === 1 && summarizedContent == null){
       return (
-        <div className="flex-1 flex relative justify-center items-center min-h-[210px] z-40">
+        <div className="flex-1 flex relative justify-center items-center min-h-[300px] z-40">
           <LoaderCircle />
-        </div>
+        </div>  
       )
     }
 
     // Display the summarized content
     if (currentPage === 1) {
       return (
-        <div 
-          style={{ fontSize: `${fontSize}px` }} 
-          /* Use the class name from your CSS file here */
-          className={`summary-container font-noto min-h-[210px] h-max flex-shrink-0`}
-          dangerouslySetInnerHTML={{ __html: cleanedContent!}}
-        />
+        <SummaryPage content={cleanedContent} fontSize={fontSize}/>
       );
-}
+    }
+
     // Display the front page content
     return (
       <FrontPage />
@@ -78,6 +85,7 @@ function App() {
       `;
       
       SetSummarizedContent(mockHtml);
+      UpdateSummaryStorage(mockHtml);
       return; // Exit function early
     }
 
@@ -134,27 +142,50 @@ function App() {
     await Summarize(true);
   }
 
-  const onClickRefresh = () => {
-    //chrome.runtime.reload();
-    window.location.reload();
+  const getPlainTextFromHtml = (html: string) => {
+    const parser = document.createElement('div');
+    parser.innerHTML = html;
+    return parser.textContent?.trim() ?? '';
+  }
+
+  const onClickCopy = async () => {
+    if (!summarizedContent) return;
+
+    try {
+      await navigator.clipboard.writeText(getPlainTextFromHtml(summarizedContent));
+      setShowCopyNotice(true);
+
+      if (copyNoticeTimeoutRef.current !== null) {
+        window.clearTimeout(copyNoticeTimeoutRef.current);
+      }
+
+      copyNoticeTimeoutRef.current = window.setTimeout(() => {
+        setShowCopyNotice(false);
+      }, 1800);
+    } catch (error) {
+      console.log("Copy Error:", error);
+    }
   }
 
   return (
     <section className={`${theme} flex flex-col w-[360px] max-h-[510px]`}>           
+      {showCopyNotice && (
+        <div className="pointer-events-none fixed bottom-3 left-3 z-50 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-700 shadow-sm dark:border-emerald-900/80 dark:bg-emerald-950/70 dark:text-emerald-300">
+          Copied successfully
+        </div>
+      )}
       <MenuBar 
         onClickReturn={onClickReturn} 
         onClickForward={onClickForward} 
         onClickClose={onClickClose}
         onClickRegenerate={onClickRegenerate} 
-        onClickRefresh={onClickRefresh}
+        onClickCopy={onClickCopy}
       />
       <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar min-h-0 h-auto">
-        <UserInterface />
+        {renderUserInterface()}
       </div>
     </section>
   )
 }
 
 export default App
-
-
