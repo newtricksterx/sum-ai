@@ -11,15 +11,14 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import os
 import environ
-import json
 from dotenv import load_dotenv
-
-load_dotenv()
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
 
 # Initialize environment variables
 env = environ.Env(
@@ -28,19 +27,24 @@ env = environ.Env(
 
 # environ.Env.read_env(os.path.join(BASE_DIR, '../.env'))
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = ['*']
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = env.str("SECRET_KEY", default="")
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = "django-insecure-dev-only-key"
+    else:
+        raise ImproperlyConfigured("SECRET_KEY must be set when DEBUG is False.")
+
+ALLOWED_HOSTS = env.list(
+    "ALLOWED_HOSTS",
+    default=["127.0.0.1", "localhost"] if DEBUG else []
+)
 
 
 # Application definition
@@ -103,10 +107,10 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "handlers": {"console": {"class": "logging.StreamHandler"}},
-    "loggers": {"": {"handlers": ["console"], "level": "DEBUG"}},
+    "loggers": {"": {"handlers": ["console"], "level": "DEBUG" if DEBUG else "INFO"}},
 }
 
-SECURE_PROXY_SSL_HEADER = {"HTTP_X_FORWARDED_PROTO", "https"}
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -149,9 +153,13 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOWED_ORIGINS = [
-    f"chrome-extension://{os.getenv("EXT_ID")}"
-]
+EXT_ID = env.str("EXT_ID", default="")
+_cors_allowed_origins = env.list("CORS_ALLOWED_ORIGINS", default=[])
+if EXT_ID:
+    _cors_allowed_origins.append(f"chrome-extension://{EXT_ID}")
+CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_cors_allowed_origins))
+
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES': [
