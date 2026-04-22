@@ -1,4 +1,3 @@
-
 services:
   backend:
     build: 
@@ -16,6 +15,12 @@ services:
     env_file: ./backend/.env
     # dev file uses runserver - development mode
     command: python manage.py runserver 0.0.0.0:8000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 8000)); s.close()"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
     networks:
       - app_network
 
@@ -25,8 +30,11 @@ services:
     restart: always
     ports:
       - "80:80"
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/conf.d/nginx.conf:ro
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - app_network
 

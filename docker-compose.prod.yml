@@ -6,15 +6,19 @@ services:
     environment:
       # This tells Python to use the system-wide certificate store
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./backend:/app  # This maps your local folder to the container's /app folder
+    expose:
+      - "8000"
     container_name: backend
     restart: always
     env_file: ./backend/.env.production
     # Use Gunicorn instead of runserver for AWS
     command: gunicorn --bind 0.0.0.0:8000 backend.wsgi:application
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 8000)); s.close()"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
     networks:
       - app_network
 
@@ -24,8 +28,13 @@ services:
     restart: always
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/certs/fullchain.pem:/etc/nginx/certs/fullchain.pem:ro
+      - ./nginx/certs/privkey.pem:/etc/nginx/certs/privkey.pem:ro
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - app_network
 

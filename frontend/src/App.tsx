@@ -69,7 +69,7 @@ function App() {
     if (!tab.id) return;
 
     // 1. MOCK CHECK: Short-circuit the API call if in development mode
-    if (import.meta.env.VITE_DEV) {
+    if (import.meta.env.VITE_DEV === 'true') {
       console.log("Dev Mode: Using Mock Summary");
       
       // Simulate a 1-second network delay
