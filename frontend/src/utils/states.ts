@@ -18,3 +18,10 @@ export const RegenerateState = () => {
 
     return pageNum == 1;
 }
+
+export const CopyState = () => {
+    const pageNum = GetPageFromStorage();
+    const summary = GetSummaryFromStorage();
+
+    return pageNum == 1 || summary === "";
+}

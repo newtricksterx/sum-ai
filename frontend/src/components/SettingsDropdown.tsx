@@ -67,10 +67,11 @@ export default function SettingsDropdown() {
             </Button>
             <div 
                 className={`
-                    absolute border-2 font-noto bg-[#eee] border-gray-200
-                    dark:bg-[#303030] dark:border-[#373737] shadow-xs rounded-lg right-0
+                    absolute top-full mt-2 border-2 font-noto bg-[#eee] border-gray-200
+                    dark:bg-[#303030] dark:border-[#373737] shadow-xs rounded-lg
                     grid transition-[grid-template-rows,opacity] duration-200 ease-out
-                    overflow-hidden w-[130px]
+                    overflow-hidden w-[310px] max-w-[calc(100vw-1.5rem)]
+                    right-[-4.5rem]
                     ${isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none border-transparent"}
                 `}>
                 {/* header */}
@@ -81,31 +82,40 @@ export default function SettingsDropdown() {
                 </div>
 
                 <form onSubmit={onSaveSettings} className="flex flex-col">
+                    <div className="px-3.5 py-3 border-b border-gray-100 dark:border-[#2e2e2e]">
+                        <div className="grid grid-cols-2 gap-2.5">
+                            {[
+                            { label: "Language", id: "lang", list: all_languages, value: language, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => { SetSaved(false); SetLanguage(e.target.value as Language); } },
+                            { label: "Summary Format", id: "format", list: all_formats, value: format, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => { SetSaved(false); SetFormat(e.target.value as Format); } },
+                            { label: "Summary Length", id: "length", list: all_lengths, value: length, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => { SetSaved(false); SetLength(e.target.value as Length); } },
+                            ].map(({ label, id, list, value, onChange }) => (
+                            <div key={id} className="flex flex-col gap-1.5 rounded-md border border-gray-200 dark:border-[#3a3a3a] bg-gray-50/70 dark:bg-[#2a2a2a] p-2.5">
+                                <label htmlFor={id} className="text-[11px] text-gray-500 dark:text-gray-400">{label}</label>
+                                <Dropdown
+                                    id={id}
+                                    list={list}
+                                    value={value}
+                                    onChangeDropdown={onChange}
+                                    name={id}
+                                    title={label}
+                                    className="w-full rounded-md border border-gray-200 dark:border-[#3a3a3a] bg-white dark:bg-[#232323] px-2 py-1 text-[12px]"
+                                />
+                            </div>
+                            ))}
 
-                    {/* each row */}
-                    {[
-                    { label: "Language", id: "lang", list: all_languages, value: language, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => { SetSaved(false); SetLanguage(e.target.value as Language); } },
-                    { label: "Summary Format", id: "format", list: all_formats, value: format, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => { SetSaved(false); SetFormat(e.target.value as Format); } },
-                    { label: "Summary Length", id: "length", list: all_lengths, value: length, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => { SetSaved(false); SetLength(e.target.value as Length); } },
-                    ].map(({ label, id, list, value, onChange }) => (
-                    <div key={id} className="flex flex-col gap-1 px-3.5 py-2.5 border-b border-gray-100 dark:border-[#2e2e2e]">
-                        <label htmlFor={id} className="text-[11px] text-gray-400 dark:text-gray-500">{label}</label>
-                        <Dropdown id={id} list={list} value={value} onChangeDropdown={onChange} name={id} title={label} />
-                    </div>
-                    ))}
-
-                    {/* font size */}
-                    <div className="flex flex-col gap-1 px-3.5 py-2.5 border-b border-gray-100 dark:border-[#2e2e2e]">
-                    <label htmlFor="font-size" className="text-[11px] text-gray-400 dark:text-gray-500">Font size</label>
-                    <div className="flex items-center gap-2">
-                        <input
-                        id="font-size" type="number" min={5} max={32}
-                        value={fontSize}
-                        onChange={(e) => { SetSaved(false); SetFontSize(Number(e.target.value)); }}
-                        className="w-14 text-center text-[13px] px-2 py-1 rounded-md border border-gray-200 dark:border-[#3a3a3a] bg-gray-50 dark:bg-[#2a2a2a]"
-                        />
-                        <span className="text-[11px] text-gray-400">px</span>
-                    </div>
+                            <div className="flex flex-col gap-1.5 rounded-md border border-gray-200 dark:border-[#3a3a3a] bg-gray-50/70 dark:bg-[#2a2a2a] p-2.5">
+                                <label htmlFor="font-size" className="text-[11px] text-gray-500 dark:text-gray-400">Font size</label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        id="font-size" type="number" min={5} max={32}
+                                        value={fontSize}
+                                        onChange={(e) => { SetSaved(false); SetFontSize(Number(e.target.value)); }}
+                                        className="w-16 text-center text-[13px] px-2 py-1 rounded-md border border-gray-200 dark:border-[#3a3a3a] bg-white dark:bg-[#232323]"
+                                    />
+                                    <span className="text-[11px] text-gray-500 dark:text-gray-400">px</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* footer */}
