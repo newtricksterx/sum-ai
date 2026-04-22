@@ -1,4 +1,4 @@
-import { Settings, Save, Check } from "lucide-react";
+import { Settings, Save, Check, Sun, Moon } from "lucide-react";
 import { all_formats, all_languages, all_lengths, MenuIconSize } from "../utils/constants";
 import Button from "./Button";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -12,10 +12,12 @@ export default function SettingsDropdown() {
     const settings_length = useSettingsStore((state) => state.length);
     const settings_fontSize = useSettingsStore((state) => state.fontSize);
     const settings_format = useSettingsStore((state) => state.format);
+    const theme = useSettingsStore((state) => state.theme);
     const UpdateLang = useSettingsStore((state) => state.UpdateLanguage);
     const UpdateLength = useSettingsStore((state) => state.UpdateLength);
     const UpdateFontSize = useSettingsStore((state) => state.UpdateFontSize);
     const UpdateFormat = useSettingsStore((state) => state.UpdateFormat);
+    const UpdateTheme = useSettingsStore((state) => state.UpdateTheme);
 
     const [language, SetLanguage] = useState<Language>(settings_lang);
     const [length, SetLength] = useState<Length>(settings_length);
@@ -25,7 +27,6 @@ export default function SettingsDropdown() {
     const [isOpen, setIsOpen] = useState(false);
 
     const menuRef = useRef<HTMLDivElement>(null);
-;
 
     const onClickSettings = useCallback(() => {
         setIsOpen(prev => !prev);
@@ -67,18 +68,26 @@ export default function SettingsDropdown() {
             </Button>
             <div 
                 className={`
-                    absolute top-full mt-2 border-2 font-noto bg-[#eee] border-gray-200
+                    fixed top-[3.1rem] left-1/2 -translate-x-1/2 border-2 font-noto bg-[#eee] border-gray-200
                     dark:bg-[#303030] dark:border-[#373737] shadow-xs rounded-lg
                     grid transition-[grid-template-rows,opacity] duration-200 ease-out
-                    overflow-hidden w-[310px] max-w-[calc(100vw-1.5rem)]
-                    right-[-4.5rem]
+                    overflow-hidden w-[310px] max-w-[calc(100vw-1rem)] origin-top
                     ${isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none border-transparent"}
                 `}>
                 {/* header */}
-                <div className="px-3.5 pt-3 pb-2 border-b border-gray-100 dark:border-[#2e2e2e]">
-                    <span className="text-[10px] font-medium tracking-widest uppercase text-gray-400 dark:text-gray-500">
+                <div className="px-3.5 pt-3 pb-2 border-b border-gray-100 dark:border-[#2e2e2e] flex items-center justify-between">
+                    <span className="text-[15px] font-semibold tracking-[0.18em] uppercase text-gray-400 dark:text-gray-500">
                         <strong>Settings</strong>
                     </span>
+                    <button
+                        type="button"
+                        onClick={UpdateTheme}
+                        title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+                        aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+                        className="inline-flex items-center justify-center rounded-md border border-gray-200 dark:border-[#3a3a3a] p-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
+                    >
+                        {theme === "light" ? <Sun size={16} /> : <Moon size={16} />}
+                    </button>
                 </div>
 
                 <form onSubmit={onSaveSettings} className="flex flex-col">
@@ -90,7 +99,7 @@ export default function SettingsDropdown() {
                             { label: "Summary Length", id: "length", list: all_lengths, value: length, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => { SetSaved(false); SetLength(e.target.value as Length); } },
                             ].map(({ label, id, list, value, onChange }) => (
                             <div key={id} className="flex flex-col gap-1.5 rounded-md border border-gray-200 dark:border-[#3a3a3a] bg-gray-50/70 dark:bg-[#2a2a2a] p-2.5">
-                                <label htmlFor={id} className="text-[11px] text-gray-500 dark:text-gray-400">{label}</label>
+                                <label htmlFor={id} className="text-[11px] font-medium tracking-wide text-gray-600 dark:text-gray-300">{label}</label>
                                 <Dropdown
                                     id={id}
                                     list={list}
@@ -98,21 +107,21 @@ export default function SettingsDropdown() {
                                     onChangeDropdown={onChange}
                                     name={id}
                                     title={label}
-                                    className="w-full rounded-md border border-gray-200 dark:border-[#3a3a3a] bg-white dark:bg-[#232323] px-2 py-1 text-[12px]"
+                                    className="text-[12px] font-medium text-gray-700 dark:text-gray-200"
                                 />
                             </div>
                             ))}
 
                             <div className="flex flex-col gap-1.5 rounded-md border border-gray-200 dark:border-[#3a3a3a] bg-gray-50/70 dark:bg-[#2a2a2a] p-2.5">
-                                <label htmlFor="font-size" className="text-[11px] text-gray-500 dark:text-gray-400">Font size</label>
+                                <label htmlFor="font-size" className="text-[11px] font-medium tracking-wide text-gray-600 dark:text-gray-300">Font size</label>
                                 <div className="flex items-center gap-2">
                                     <input
-                                        id="font-size" type="number" min={5} max={32}
+                                        id="font-size" type="number"
                                         value={fontSize}
                                         onChange={(e) => { SetSaved(false); SetFontSize(Number(e.target.value)); }}
-                                        className="w-16 text-center text-[13px] px-2 py-1 rounded-md border border-gray-200 dark:border-[#3a3a3a] bg-white dark:bg-[#232323]"
+                                        className="w-16 text-center text-[13px] font-medium text-gray-700 dark:text-gray-200 px-2 py-1 rounded-md border border-gray-200 dark:border-[#3a3a3a] bg-white dark:bg-[#232323]"
                                     />
-                                    <span className="text-[11px] text-gray-500 dark:text-gray-400">px</span>
+                                    <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">px</span>
                                 </div>
                             </div>
                         </div>

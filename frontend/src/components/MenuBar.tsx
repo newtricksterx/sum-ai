@@ -1,7 +1,7 @@
 import Button from "./Button";
 import { MenuBarProps } from "../utils/interfaces";
 import { MenuIconSize } from '../utils/constants'
-import { Sun, Moon, ArrowLeft, Copy, X, ArrowRight, Sparkles } from 'lucide-react';
+import { Sun, Moon, ArrowLeft, Copy, X, ArrowRight, WandSparkles } from 'lucide-react';
 import SettingsDropdown from "./SettingsDropdown";
 import { useSettingsStore } from "../stores/settingsStore";
 import { ForwardState, RegenerateState, ReturnState, CopyState } from "../utils/states";
@@ -19,7 +19,7 @@ function MenuBar({onClickReturn, onClickForward, onClickClose, onClickCopy, onCl
             <ArrowRight  size={MenuIconSize}/>
         </Button>
         <Button className={`p-2 rounded-3xl m-1 ${RegenerateState() ? "" : "opacity-50"}`} disabled={!RegenerateState()} onClick={onClickRegenerate} title="Generate summary">
-          <Sparkles size={MenuIconSize}/>
+          <WandSparkles size={MenuIconSize}/>
         </Button>
         <Button className={`p-2 rounded-3xl m-1 ${CopyState() ? "" : "opacity-50"}`} disabled={!CopyState()} onClick={onClickCopy} title="Copy summary">
           <Copy size={MenuIconSize}/>

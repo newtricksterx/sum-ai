@@ -22,4 +22,4 @@ const SummaryPage: React.FC<SummaryPageProps> = ({ content, fontSize }) => {
     );
 };
 
-export default SummaryPage;
+export default React.memo(SummaryPage);

@@ -4,7 +4,14 @@ export type Length = "short" | "medium" | "long";
 
 export type Language = "english" | "french" | "spanish";
 
-export type Format = "bullet-point" | "paragraph"
+export type Format =
+    | "bullet-point"
+    | "paragraph"
+    | "tl-dr-bullets"
+    | "key-takeaways"
+    | "action-items"
+    | "q-and-a"
+    | "pros-cons"
 
 export type ButtonDisplyStatus = "block" | "hidden";
 

@@ -1,15 +1,15 @@
 import React from 'react';
-import { Sparkles, Globe, FileText } from 'lucide-react';
+import { Sparkles, Globe, FileText, WandSparkles } from 'lucide-react';
 import '../FrontPage.css';
 
-const FrontPage: React.FC = () => {
+interface FrontPageProps {
+  onClickGenerate: () => void;
+}
+
+const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate }) => {
   return (
     <section className="front-page-shell relative flex-1 min-h-[300px] p-3 overflow-hidden">
       <div className="relative z-10 front-page-card rounded-2xl border border-gray-200/80 dark:border-[#393939] p-4 font-noto">
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-teal-700 dark:border-teal-900/80 dark:bg-teal-950/50 dark:text-teal-300">
-          <Sparkles size={12} />
-          SUM-AI
-        </div>
 
         <h1 className="mt-3 mb-2 text-center text-[20px] leading-tight font-bold text-slate-900 dark:text-slate-100">
           Turn any page into a clear summary
@@ -18,6 +18,15 @@ const FrontPage: React.FC = () => {
         <p className="pb-4 text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">
           Choose your format in Settings, then generate concise notes designed for quick reading.
         </p>
+
+        <button
+          type="button"
+          onClick={onClickGenerate}
+          className="w-full mb-4 inline-flex items-center justify-center gap-2 rounded-xl border border-teal-300 dark:border-teal-900/80 bg-teal-500 dark:bg-teal-600 text-white text-[13px] font-semibold px-3 py-2.5 hover:bg-teal-600 dark:hover:bg-teal-500 transition-colors cursor-pointer"
+        >
+          <WandSparkles size={14} />
+          Generate Summary
+        </button>
 
         <div className="grid gap-2.5">
           <div className="front-step-row">

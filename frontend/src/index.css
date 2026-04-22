@@ -77,16 +77,77 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
+.settings-select {
+  border: 1px solid rgb(229, 231, 235);
+  border-radius: 0.45rem;
+  background: linear-gradient(180deg, #ffffff, #f9fafb);
+  padding: 0.34rem 1.7rem 0.34rem 0.55rem;
+  font-size: 12px;
+  line-height: 1.2;
+  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+.settings-select:hover {
+  border-color: rgb(203, 213, 225);
+}
+
+.settings-select:focus {
+  outline: none;
+  border-color: rgb(56, 189, 248);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.18);
+}
+
+.settings-option {
+  font-weight: 500;
+  background: #ffffff;
+  color: #1f2937;
+}
+
+.dark .settings-select {
+  border-color: #3a3a3a;
+  background: linear-gradient(180deg, #262626, #222);
+  color: #e5e7eb;
+}
+
+.dark .settings-select:hover {
+  border-color: #4a4a4a;
+}
+
+.dark .settings-select:focus {
+  border-color: #2dd4bf;
+  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2);
+}
+
+.dark .settings-option {
+  background: #1f1f1f;
+  color: #e5e7eb;
+}
+
+.loader-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 #loader {
   height: 1.25rem; /* Using rem for better scaling than em in menus */
   width: 1.25rem;
   border: 2px solid rgb(208, 213, 217); /* Thinner border looks more "pro" in small sizes */
   border-top-color: rgb(78, 78, 78);
-  position: absolute;
-  margin: auto;
-  inset: 0; /* Shorthand for top/bottom/left/right: 0 */
   border-radius: 50%;
   animation: spin 1s linear infinite; /* Added 'linear' for smooth rotation */
+}
+
+.loader-text {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgb(78, 78, 78);
+}
+
+.dark .loader-text {
+  color: rgb(208, 213, 217);
 }
 
 @keyframes spin {

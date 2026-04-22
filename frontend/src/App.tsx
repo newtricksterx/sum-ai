@@ -1,6 +1,6 @@
 import './App.css'
 import './Summary.css'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import MenuBar from './components/MenuBar'
 import { useSettingsStore } from './stores/settingsStore'
 import { GetPageFromStorage, GetSummaryFromStorage, UpdatePageStorage, UpdateSummaryStorage } from './utils/storage'
@@ -22,6 +22,15 @@ function App() {
   const fontSize = useSettingsStore((state) => state.fontSize)
   const format = useSettingsStore((state) => state.format)
 
+  const cleanedContent = useMemo(() => {
+    return DOMPurify.sanitize(summarizedContent || "",
+      {
+        ALLOWED_TAGS: ['h1', 'h2', 'p', 'ul', 'li', 'strong', 'em', 'a', 'br'],
+        ALLOWED_ATTR: ['href', 'target', 'rel']
+      }
+    );
+  }, [summarizedContent]);
+
   useEffect(() => {
     return () => {
       if (copyNoticeTimeoutRef.current !== null) {
@@ -31,13 +40,6 @@ function App() {
   }, []);
 
   const renderUserInterface = () => {
-    const cleanedContent = DOMPurify.sanitize(summarizedContent || "", 
-      {
-        ALLOWED_TAGS: ['h1', 'h2', 'p', 'ul', 'li', 'strong', 'em', 'a', 'br'],
-        ALLOWED_ATTR: ['href', 'target', 'rel'] 
-      }
-    )
-
     // Display the loading circle
     if(currentPage === 1 && summarizedContent == null){
       return (
@@ -56,7 +58,7 @@ function App() {
 
     // Display the front page content
     return (
-      <FrontPage />
+      <FrontPage onClickGenerate={onClickStartGenerate} />
     )
   }
 
@@ -134,12 +136,20 @@ function App() {
   }
 
   const onClickClose = () => {
+    SetCurrentPage(0);
+    UpdatePageStorage(0);
     window.close();
   }
 
   const onClickRegenerate = async () => {
     //console.log("regenerate")
     await Summarize(true);
+  }
+
+  const onClickStartGenerate = async () => {
+    SetCurrentPage(1);
+    UpdatePageStorage(1);
+    await Summarize(false);
   }
 
   const getPlainTextFromHtml = (html: string) => {
@@ -168,7 +178,7 @@ function App() {
   }
 
   return (
-    <section className={`${theme} flex flex-col w-[360px] max-h-[510px]`}>           
+    <section className={`${theme} flex flex-col w-[360px] min-h-[330px] max-h-[510px]`}>           
       {showCopyNotice && (
         <div className="pointer-events-none fixed bottom-3 left-3 z-50 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-700 shadow-sm dark:border-emerald-900/80 dark:bg-emerald-950/70 dark:text-emerald-300">
           Copied successfully

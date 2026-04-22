@@ -15,6 +15,11 @@ export const all_lengths: Length[] = [
 export const all_formats: Format[] = [
     "bullet-point",
     "paragraph",
+    "tl-dr-bullets",
+    "key-takeaways",
+    "action-items",
+    "q-and-a",
+    "pros-cons",
 ]
 
 export const MenuIconSize = 20;
