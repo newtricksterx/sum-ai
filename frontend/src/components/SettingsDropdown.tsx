@@ -76,7 +76,7 @@ export default function SettingsDropdown() {
                 `}>
                 {/* header */}
                 <div className="px-3.5 pt-3 pb-2 border-b border-gray-100 dark:border-[#2e2e2e] flex items-center justify-between">
-                    <span className="text-[15px] font-semibold tracking-[0.18em] uppercase text-gray-400 dark:text-gray-500">
+                    <span className="text-[12px] font-semibold tracking-[0.18em] uppercase text-gray-400 dark:text-gray-500">
                         <strong>Settings</strong>
                     </span>
                     <button
