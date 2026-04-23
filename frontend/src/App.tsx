@@ -10,6 +10,8 @@ import FrontPage from './pages/FrontPage'
 import SummaryPage from './pages/SummaryPage'
 import { summarizeActiveTab } from './services/summarizeService'
 import { getPlainTextFromHtml } from './utils/html'
+import HistoryPage from './pages/HistoryPage'
+import { useHistoryStore } from './stores/historyStore'
 
 
 function App() {
@@ -23,6 +25,7 @@ function App() {
   const theme = useSettingsStore((state) => state.theme)
   const fontSize = useSettingsStore((state) => state.fontSize)
   const format = useSettingsStore((state) => state.format)
+  const addSummaryToHistory = useHistoryStore((state) => state.addSummary)
 
   const cleanedContent = useMemo(() => {
     return DOMPurify.sanitize(summarizedContent || "",
@@ -58,6 +61,13 @@ function App() {
       );
     }
 
+    // display history content
+    if (currentPage === 2){
+      return (
+        <HistoryPage onSelectHistory={onSelectHistory} />
+      );
+    }
+
     // Display the front page content
     return (
       <FrontPage onClickGenerate={onClickStartGenerate} />
@@ -67,7 +77,7 @@ function App() {
   const Summarize = async (regenerateBool: boolean) => {
     SetSummarizedContent(null);
 
-    const summaryHtml = await summarizeActiveTab({
+    const result = await summarizeActiveTab({
       baseUrl: import.meta.env.VITE_BASE_URL,
       length,
       regenerate: regenerateBool,
@@ -75,8 +85,15 @@ function App() {
       language,
     });
 
-    SetSummarizedContent(summaryHtml);
-    UpdateSummaryStorage(summaryHtml);
+    SetSummarizedContent(result.html);
+    UpdateSummaryStorage(result.html);
+
+    if (!result.isError && result.sourceUrl) {
+      addSummaryToHistory({
+        url: result.sourceUrl,
+        content: result.html,
+      });
+    }
   };
 
   const onClickReturn = () => {
@@ -93,6 +110,11 @@ function App() {
     SetCurrentPage(0);
     UpdatePageStorage(0);
     window.close();
+  }  
+  
+  const onClickHistory = () => {
+    SetCurrentPage(2);
+    UpdatePageStorage(2);
   }
 
   const onClickRegenerate = async () => {
@@ -105,6 +127,15 @@ function App() {
     UpdatePageStorage(1);
     await Summarize(false);
   }
+
+  const onSelectHistory = (historyContent: string) => {
+    SetSummarizedContent(historyContent);
+    UpdateSummaryStorage(historyContent);
+    SetCurrentPage(1);
+    UpdatePageStorage(1);
+  }
+
+
 
   const onClickCopy = async () => {
     if (!summarizedContent) return;
@@ -138,6 +169,7 @@ function App() {
         onClickClose={onClickClose}
         onClickRegenerate={onClickRegenerate} 
         onClickCopy={onClickCopy}
+        onClickHistory={onClickHistory}
       />
       <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar min-h-0 h-auto">
         {renderUserInterface()}

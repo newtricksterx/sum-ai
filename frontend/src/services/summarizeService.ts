@@ -9,6 +9,12 @@ type SummarizeServiceParams = {
   language: Language;
 };
 
+export type SummarizeResult = {
+  html: string;
+  sourceUrl?: string;
+  isError: boolean;
+};
+
 type SummarizeErrorPayload = {
   message?: string;
   summaries_limit?: number;
@@ -65,21 +71,31 @@ export const summarizeActiveTab = async ({
   regenerate,
   format,
   language,
-}: SummarizeServiceParams): Promise<string> => {
+}: SummarizeServiceParams): Promise<SummarizeResult> => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id) {
-    return buildErrorSummaryHtml("No active tab", "Could not find an active browser tab to summarize.");
+    return {
+      html: buildErrorSummaryHtml("No active tab", "Could not find an active browser tab to summarize."),
+      isError: true,
+    };
   }
 
   if (isRestrictedPage(tab.url)) {
-    return buildErrorSummaryHtml(
-      "Page not supported",
-      "Chrome internal pages (like chrome://settings) cannot be summarized. Open a normal website tab and try again."
-    );
+    return {
+      html: buildErrorSummaryHtml(
+        "Page not supported",
+        "Chrome internal pages (like chrome://settings) cannot be summarized. Open a normal website tab and try again."
+      ),
+      isError: true,
+    };
   }
 
   if (import.meta.env.VITE_DEV === "true") {
-    return MOCK_SUMMARY_HTML;
+    return {
+      html: MOCK_SUMMARY_HTML,
+      sourceUrl: tab.url,
+      isError: false,
+    };
   }
 
   let pageText = "";
@@ -87,14 +103,20 @@ export const summarizeActiveTab = async ({
     pageText = await extractTabText(tab.id);
   } catch (error) {
     console.log("Script Injection Error:", error);
-    return buildErrorSummaryHtml(
-      "Cannot summarize this page",
-      "This page blocks extension script access. Try another site tab and try again."
-    );
+    return {
+      html: buildErrorSummaryHtml(
+        "Cannot summarize this page",
+        "This page blocks extension script access. Try another site tab and try again."
+      ),
+      isError: true,
+    };
   }
 
   if (!pageText) {
-    return buildErrorSummaryHtml("No readable content", "Could not extract readable text from this page.");
+    return {
+      html: buildErrorSummaryHtml("No readable content", "Could not extract readable text from this page."),
+      isError: true,
+    };
   }
 
   try {
@@ -114,21 +136,37 @@ export const summarizeActiveTab = async ({
       const errorPayload = await getErrorPayload(response);
 
       if (response.status === 429) {
-        return buildErrorSummaryHtml("Rate limit reached", buildThrottleMessage(errorPayload ?? {}));
+        return {
+          html: buildErrorSummaryHtml("Rate limit reached", buildThrottleMessage(errorPayload ?? {})),
+          isError: true,
+        };
       }
 
       const fallbackMessage = errorPayload?.message || "Could not generate a summary right now. Please try again.";
-      return buildErrorSummaryHtml("Request failed", fallbackMessage);
+      return {
+        html: buildErrorSummaryHtml("Request failed", fallbackMessage),
+        isError: true,
+      };
     }
 
     const result = await response.json();
     if (!result?.data) {
-      return buildErrorSummaryHtml("Empty response", "The server returned an empty summary.");
+      return {
+        html: buildErrorSummaryHtml("Empty response", "The server returned an empty summary."),
+        isError: true,
+      };
     }
 
-    return result.data;
+    return {
+      html: result.data,
+      sourceUrl: tab.url,
+      isError: false,
+    };
   } catch (error) {
     console.log("Fetch Error:", error);
-    return buildErrorSummaryHtml("Network error", "Could not contact the backend. Please try again.");
+    return {
+      html: buildErrorSummaryHtml("Network error", "Could not contact the backend. Please try again."),
+      isError: true,
+    };
   }
 };

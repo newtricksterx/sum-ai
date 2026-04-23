@@ -15,11 +15,3 @@ export interface DropdownProps {
     name?: string;
     id?: string;
 }
-
-export interface MenuBarProps {
-    onClickReturn: React.MouseEventHandler;
-    onClickForward: React.MouseEventHandler;
-    onClickClose: React.MouseEventHandler;
-    onClickCopy: React.MouseEventHandler;
-    onClickRegenerate: React.MouseEventHandler;
-}
