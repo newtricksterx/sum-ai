@@ -31,10 +31,10 @@ env = environ.Env(
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool("DEBUG", default=False)
+DEBUG = env.bool("DEBUG", default=False) # type: ignore
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env.str("SECRET_KEY", default="")
+SECRET_KEY = env.str("SECRET_KEY", default="") # type: ignore
 if not SECRET_KEY:
     if DEBUG:
         SECRET_KEY = "django-insecure-dev-only-key"
@@ -43,7 +43,7 @@ if not SECRET_KEY:
 
 ALLOWED_HOSTS = env.list(
     "ALLOWED_HOSTS",
-    default=["127.0.0.1", "localhost"] if DEBUG else []
+    default=["127.0.0.1", "localhost"] if DEBUG else [] # type: ignore
 )
 
 
@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
 ]
+
+AUTH_USER_MODEL = 'api.User'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -153,16 +155,16 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EXT_ID = env.str("EXT_ID", default="")
-_cors_allowed_origins = env.list("CORS_ALLOWED_ORIGINS", default=[])
+EXT_ID = env.str("EXT_ID", default="") # type: ignore
+_cors_allowed_origins = env.list("CORS_ALLOWED_ORIGINS", default=[]) # type: ignore
 if EXT_ID:
-    _cors_allowed_origins.append(f"chrome-extension://{EXT_ID}")
-CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_cors_allowed_origins))
+    _cors_allowed_origins.append(f"chrome-extension://{EXT_ID}") # type: ignore
+CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_cors_allowed_origins)) # type: ignore
 
-CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[]) # type: ignore
 
-THROTTLE_SUMMARIES_COUNT = env.int("THROTTLE_SUMMARIES_COUNT", default=1)
-THROTTLE_SUMMARIES_PERIOD = env.str("THROTTLE_SUMMARIES_PERIOD", default="day").lower()
+THROTTLE_SUMMARIES_COUNT = env.int("THROTTLE_SUMMARIES_COUNT", default=1) # type: ignore
+THROTTLE_SUMMARIES_PERIOD = env.str("THROTTLE_SUMMARIES_PERIOD", default="day").lower() # type: ignore
 if THROTTLE_SUMMARIES_PERIOD not in {"sec", "min", "hour", "day"}:
     THROTTLE_SUMMARIES_PERIOD = "day"
 
