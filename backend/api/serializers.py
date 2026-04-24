@@ -4,7 +4,6 @@ from rest_framework import serializers
 
 User = get_user_model()
 
-
 class UserReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -20,20 +19,11 @@ class UserReadSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
+class BaseUserWriteSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, trim_whitespace=False)
 
-    class Meta:
-        model = User
-        fields = (
-            "id",
-            "email",
-            "username",
-            "password",
-            "first_name",
-            "last_name",
-        )
-        read_only_fields = ("id",)
+    def validate_email(self, value):
+        return value.strip().lower()
 
     def validate_password(self, value):
         validate_password(value)
@@ -45,6 +35,44 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class RegisterSerializer(BaseUserWriteSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "email",
+            "username",
+            "password",
+        )
+        read_only_fields = ("id",)
+
+class LoginSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = User
+        fields = (
+            "email",
+            "password",
+        )
+
+
+class UserCreateSerializer(BaseUserWriteSerializer):
+    is_active = serializers.BooleanField(required=False, default=True)
+    is_staff = serializers.BooleanField(required=False, default=False)
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "email",
+            "username",
+            "password",
+            "is_active",
+            "is_staff",
+        )
+        read_only_fields = ("id",)
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):

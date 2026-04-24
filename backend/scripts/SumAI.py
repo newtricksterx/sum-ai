@@ -55,7 +55,7 @@ def _extract_link_string(page_content):
 
     soup = BeautifulSoup(page_content, "html.parser")
     links = soup.find_all("a", href=True)
-    return ", ".join(link["href"] for link in links[:15])
+    return ", ".join(link["href"] for link in links[:15]) # type: ignore
 
 
 def _clean_ai_output(result):
@@ -121,7 +121,7 @@ def QueryAI(query):
 
     try:
         response = client.models.generate_content(
-            model=model_name,
+            model=model_name, # type: ignore
             contents=query
         )
         if not getattr(response, "text", None):
