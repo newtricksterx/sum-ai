@@ -2,6 +2,7 @@ import './App.css'
 import './Summary.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import MenuBar from './components/MenuBar'
+import ToolBar from './components/ToolBar'
 import { useSettingsStore } from './stores/settingsStore'
 import { GetPageFromStorage, GetSummaryFromStorage, UpdatePageStorage, UpdateSummaryStorage } from './utils/storage'
 import LoaderCircle from './components/LoaderCircle'
@@ -12,6 +13,7 @@ import { summarizeActiveTab } from './services/summarizeService'
 import { getPlainTextFromHtml } from './utils/html'
 import HistoryPage from './pages/HistoryPage'
 import { useHistoryStore } from './stores/historyStore'
+import ProfilePage from './pages/ProfilePage'
 
 
 function App() {
@@ -68,6 +70,12 @@ function App() {
       );
     }
 
+    if (currentPage === 3){
+      return (
+        <ProfilePage />
+      );
+    }
+
     // Display the front page content
     return (
       <FrontPage onClickGenerate={onClickStartGenerate} />
@@ -115,6 +123,11 @@ function App() {
   const onClickHistory = () => {
     SetCurrentPage(2);
     UpdatePageStorage(2);
+  }
+
+  const onClickProfile = () => {
+    SetCurrentPage(3);
+    UpdatePageStorage(3);
   }
 
   const onClickRegenerate = async () => {
@@ -168,12 +181,13 @@ function App() {
         onClickForward={onClickForward} 
         onClickClose={onClickClose}
         onClickRegenerate={onClickRegenerate} 
-        onClickCopy={onClickCopy}
+        onClickProfile={onClickProfile}
         onClickHistory={onClickHistory}
       />
       <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar min-h-0 h-auto">
         {renderUserInterface()}
       </div>
+      {currentPage === 1 && <ToolBar onClickCopy={onClickCopy} />}
     </section>
   )
 }
