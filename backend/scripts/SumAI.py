@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 if DEBUG_MODE:
     os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
-    os.environ['SSL_CERT_FILE'] = certifi.where()
+    os.environ['SSL_CERT_FILE'] = certifi.where()  
 
 
 def _get_gemini_config():
