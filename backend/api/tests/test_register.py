@@ -6,6 +6,7 @@ from django.test import TestCase, Client
 
 from django.urls import reverse
 
+
 User = get_user_model()
 
 class RegisterTest(TestCase):
@@ -43,7 +44,6 @@ class RegisterTest(TestCase):
         self.assertTrue(created_user.check_password("StrongPassword123!"))
         self.assertFalse(created_user.is_staff)
         self.assertTrue(created_user.is_active)
-
     
     def test_register_rejects_duplicate_email(self):
         payload = {
@@ -132,5 +132,3 @@ class RegisterTest(TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertIn("password", response.json())
-
-
