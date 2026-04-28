@@ -18,9 +18,8 @@ class TestMe(TestCase):
 
         User.objects.create_user(
             email="test@example.com",
-            username="test-user",
             password="StrongPassword123!",
-        )
+        ) # type: ignore
 
     def test_found_user(self):
         payload = {

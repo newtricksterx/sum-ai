@@ -22,9 +22,8 @@ class RefreshTest(TestCase):
 
         User.objects.create_user(
             email="test@example.com",
-            username="test-user",
             password="StrongPassword123!",
-        )
+        ) # type: ignore
 
         login_response = self.client.post(
             self.login_url,

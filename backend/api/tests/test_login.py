@@ -16,9 +16,8 @@ class LoginTest(TestCase):
 
         User.objects.create_user(
             email="test@example.com",
-            username="test-user",
             password="StrongPassword123!",
-        )
+        ) # type: ignore
 
     def test_login_pass(self):
         payload = {
@@ -95,10 +94,9 @@ class LoginTest(TestCase):
     def test_login_rejects_inactive_user(self):
         User.objects.create_user(
             email="inactive@example.com",
-            username="inactive-user",
             password="StrongPassword123!",
             is_active=False,
-        )
+        ) # type: ignore
 
         payload = {
             "email": "inactive@example.com",

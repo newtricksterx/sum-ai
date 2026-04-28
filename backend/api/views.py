@@ -159,7 +159,7 @@ class LoginUserView(APIView):
         email = request.data.get("email")
         password = request.data.get("password")
 
-        user = authenticate(username=email, password=password)
+        user = authenticate(request=request, email=email, password=password)
         if user is None:
             raise AuthenticationFailed("Invalid email or password.")
         if not user.is_active:

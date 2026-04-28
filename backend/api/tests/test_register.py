@@ -16,9 +16,8 @@ class RegisterTest(TestCase):
 
         User.objects.create_user(
             email="test@example.com",
-            username="test-user",
             password="StrongPassword123!",
-        )
+        ) # type: ignore
 
      
     def test_register_creates_user(self):

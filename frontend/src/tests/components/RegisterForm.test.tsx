@@ -9,7 +9,7 @@ afterEach(() => {
 });
 
 describe("RegisterForm", () => {
-  it("submits trimmed username and email when passwords match", async () => {
+  it("submits normalized email when passwords match", async () => {
     const onRegister = vi.fn().mockResolvedValue(undefined);
 
     render(
@@ -20,9 +20,6 @@ describe("RegisterForm", () => {
       />
     );
 
-    fireEvent.change(screen.getByLabelText("Username"), {
-      target: { value: "   user_name   " },
-    });
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "   user@example.com   " },
     });
@@ -37,7 +34,6 @@ describe("RegisterForm", () => {
     await waitFor(() => {
       expect(onRegister).toHaveBeenCalledWith({
         email: "user@example.com",
-        username: "user_name",
         password: "abc12345",
       });
     });
@@ -83,7 +79,7 @@ describe("RegisterForm", () => {
 
     expect(screen.getByText("Email already exists")).not.toBeNull();
     expect(screen.getByRole("button", { name: "Creating Account..." })).not.toBeNull();
-    expect((screen.getByLabelText("Username") as HTMLInputElement).disabled).toBe(true);
+    expect((screen.getByLabelText("Email") as HTMLInputElement).disabled).toBe(true);
 
     fireEvent.click(screen.getByRole("button", { name: "Login" }));
     expect(onSwitchToLogin).toHaveBeenCalledTimes(1);
