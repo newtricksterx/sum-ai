@@ -20,6 +20,15 @@ class SubscriptionTest(TestCase):
         self.assertEqual(subscription.summary_limit, 2)
         self.assertEqual(subscription.history_limit, 1)
 
+    def set_subscription_standard(self):
+        Subscription.objects.update_or_create(user=self.user_test, defaults={"plan_slug" : "standard"})
+
+        subscription = Subscription.objects.get(user=self.user_test)
+        self.assertEqual(subscription.plan_slug, "standard")
+        self.assertEqual(subscription.summary_limit, 300)
+        self.assertEqual(subscription.history_limit, 5)
+        
+
     def set_subscription_pro(self):
         Subscription.objects.update_or_create(user=self.user_test, defaults={"plan_slug" : "pro"})
 
