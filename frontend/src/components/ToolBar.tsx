@@ -1,6 +1,7 @@
 import Button from "./Button";
-import { Copy, Download } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { CopyState } from "../utils/states";
+import { GoCopy } from "react-icons/go";
 
 
 export interface ToolBarProps {
@@ -15,7 +16,7 @@ function ToolBar({ onClickCopy } : ToolBarProps) {
           <Download size={12}/>
         </Button> 
         <Button className={`p-2 rounded-md ${CopyState() ? "" : "opacity-50"}`} disabled={!CopyState()} onClick={onClickCopy} title="Copy summary">
-          <Copy size={12}/>
+          <GoCopy size={12}/>
         </Button> 
     </nav>
   )

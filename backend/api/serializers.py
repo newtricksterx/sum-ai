@@ -2,18 +2,63 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
+from .models.subscription import Subscription
+from .plans import PLANS
+
 User = get_user_model()
 
+
+class SubscriptionReadSerializer(serializers.ModelSerializer):
+    plan_name = serializers.SerializerMethodField()
+    summary_limit = serializers.IntegerField(read_only=True, allow_null=True)
+    history_limit = serializers.IntegerField(read_only=True, allow_null=True)
+
+    def get_plan_name(self, obj: Subscription) -> str:
+        return obj.plan["name"]
+
+    class Meta:
+        model = Subscription
+        fields = (
+            "plan_slug",
+            "plan_name",
+            "summary_limit",
+            "history_limit",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = fields
+
+
 class UserReadSerializer(serializers.ModelSerializer):
+    subscription = serializers.SerializerMethodField()
+
+    def get_subscription(self, obj):
+        subscription, _ = Subscription.objects.get_or_create(
+            user=obj,
+            defaults={"plan_slug": "free"},
+        )
+        return SubscriptionReadSerializer(subscription).data
+
     class Meta:
         model = User
         fields = (
             "id",
             "email",
+            "subscription",
             "created_at",
             "updated_at",
         )
         read_only_fields = fields
+
+
+class SubscriptionPlanUpdateSerializer(serializers.ModelSerializer):
+    plan_slug = serializers.ChoiceField(
+        choices=tuple((slug, slug) for slug in PLANS.keys()),
+    )
+
+    class Meta:
+        model = Subscription
+        fields = ("plan_slug",)
 
 
 class BaseUserWriteSerializer(serializers.ModelSerializer):

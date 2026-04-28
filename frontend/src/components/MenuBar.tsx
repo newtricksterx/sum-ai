@@ -1,8 +1,12 @@
 import Button from "./Button";
 import { MenuIconSize } from '../utils/constants'
-import { House, X, NotebookText, WandSparkles, History, User } from 'lucide-react';
+import { X } from 'lucide-react';
 import SettingsDropdown from "./SettingsDropdown";
 import { RegenerateState } from "../utils/states";
+import { GoHistory } from "react-icons/go";
+import { VscHome, VscAccount, VscOutput, VscEditSparkle } from "react-icons/vsc";
+
+
 
 export interface MenuBarProps {
     onClickReturn: React.MouseEventHandler;
@@ -18,19 +22,19 @@ function MenuBar({onClickReturn, onClickForward, onClickClose, onClickProfile, o
   return (
     <nav className="flex flex-row gap-1 justify-between items-center border-b-[1px] border-b-gray-400 w-full">
         <Button onClick={onClickReturn} className={`p-2 rounded-3xl m-1`}  title="Go to home page">
-            <House  size={MenuIconSize}/>
+            <VscHome size={MenuIconSize}/>
         </Button>
         <Button onClick={onClickForward} className={`p-2 rounded-3xl m-1`} title="Go to summary page">
-            <NotebookText  size={MenuIconSize}/>
+            <VscOutput  size={MenuIconSize}/>
         </Button>
         <Button className={`p-2 rounded-3xl m-1 ${RegenerateState() ? "" : "opacity-50"}`} disabled={!RegenerateState()} onClick={onClickRegenerate} title="Generate summary">
-          <WandSparkles size={MenuIconSize}/>
+          <VscEditSparkle size={MenuIconSize}/>
         </Button>
         <Button onClick={onClickHistory} className="p-2 rounded-3xl m-1" title="View history">
-          <History size={MenuIconSize}/>
+          <GoHistory size={MenuIconSize}/>
         </Button>
         <Button className={`p-2 rounded-3xl m-1`} onClick={onClickProfile} title="Profile page">
-          <User size={MenuIconSize}/>
+          <VscAccount size={MenuIconSize}/>
         </Button>
         <SettingsDropdown />
         <Button onClick={onClickClose} className="p-2 hover:bg-red-500 dark:hover:bg-red-500" title="Close extension">

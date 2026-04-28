@@ -1,10 +1,11 @@
-import { Settings, Save, Check, Sun, Moon } from "lucide-react";
+import { Save, Check, Sun, Moon } from "lucide-react";
 import { all_formats, all_languages, all_lengths, MenuIconSize } from "../utils/constants";
 import Button from "./Button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Format, Language, Length } from "../utils/types";
 import Dropdown from "./Dropdown";
 import { useSettingsStore } from "../stores/settingsStore";
+import { VscGear } from "react-icons/vsc";
 
 
 export default function SettingsDropdown() {
@@ -64,7 +65,7 @@ export default function SettingsDropdown() {
     return (
         <div className="relative z-50" ref={menuRef}>
             <Button onClick={onClickSettings} className={`${backgroundActive()} p-2 rounded-3xl`} title="Settings">
-                <Settings size={MenuIconSize}/>
+                <VscGear size={MenuIconSize}/>
             </Button>
             <div 
                 className={`

@@ -7,6 +7,8 @@ from datetime import timedelta
 from rest_framework_simplejwt.tokens import RefreshToken
 import json
 
+from api.models import Subscription
+
 User = get_user_model()
 
 class TestMe(TestCase):
@@ -40,11 +42,68 @@ class TestMe(TestCase):
         self.assertEqual(login_response.status_code, 200)
         self.assertEqual(me_response.status_code, 200)
         self.assertEqual(me_response.json()["email"], "test@example.com")
+        self.assertEqual(me_response.json()["subscription"]["plan_slug"], "free")
 
     def test_me_requires_authentication(self):
         response = self.client.get(self.me_url)
         self.assertEqual(response.status_code, 401)
         self.assertIn("detail", response.json())
+
+    def test_me_patch_requires_authentication(self):
+        response = self.client.patch(
+            self.me_url,
+            data=json.dumps({"plan_slug": "pro"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 401)
+        self.assertIn("detail", response.json())
+
+    def test_me_patch_updates_subscription_plan(self):
+        payload = {
+            "email": "test@example.com",
+            "password": "StrongPassword123!",
+        }
+
+        login_response = self.client.post(
+            self.login_url,
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(login_response.status_code, 200)
+
+        patch_response = self.client.patch(
+            self.me_url,
+            data=json.dumps({"plan_slug": "pro"}),
+            content_type="application/json",
+        )
+        self.assertEqual(patch_response.status_code, 200)
+        self.assertEqual(patch_response.json()["subscription"]["plan_slug"], "pro")
+        self.assertIsNone(patch_response.json()["subscription"]["summary_limit"])
+        self.assertEqual(patch_response.json()["subscription"]["history_limit"], 10)
+
+        user = User.objects.get(email="test@example.com")
+        self.assertEqual(Subscription.objects.get(user=user).plan_slug, "pro")
+
+    def test_me_patch_rejects_invalid_plan_slug(self):
+        payload = {
+            "email": "test@example.com",
+            "password": "StrongPassword123!",
+        }
+
+        login_response = self.client.post(
+            self.login_url,
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(login_response.status_code, 200)
+
+        patch_response = self.client.patch(
+            self.me_url,
+            data=json.dumps({"plan_slug": "Pro"}),
+            content_type="application/json",
+        )
+        self.assertEqual(patch_response.status_code, 400)
+        self.assertIn("plan_slug", patch_response.json())
 
     def test_found_user_then_deleted_user_not_found(self):
         payload = {

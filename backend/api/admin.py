@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
+from .models.subscription import Subscription
 from .models.user import User
 
 
@@ -37,3 +38,10 @@ class UserAdmin(DjangoUserAdmin):
             },
         ),
     )
+
+
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ("user", "plan_slug", "created_at", "updated_at")
+    search_fields = ("user__email", "plan_slug")
+    list_filter = ("plan_slug",)

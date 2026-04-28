@@ -1,9 +1,10 @@
-from rest_framework import permissions
+from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
-from api.serializers import UserReadSerializer
+from api.models.subscription import Subscription
+from api.serializers import SubscriptionPlanUpdateSerializer, UserReadSerializer
 
 
 class ApiRootView(APIView):
@@ -28,3 +29,22 @@ class MeView(APIView):
 
     def get(self, request):
         return Response(UserReadSerializer(request.user).data)
+
+    def patch(self, request):
+        subscription, _ = Subscription.objects.get_or_create(
+            user=request.user,
+            defaults={"plan_slug": "free"},
+        )
+
+        serializer = SubscriptionPlanUpdateSerializer(
+            instance=subscription,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            UserReadSerializer(request.user).data,
+            status=status.HTTP_200_OK,
+        )
