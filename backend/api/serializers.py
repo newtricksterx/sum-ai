@@ -10,9 +10,6 @@ class UserReadSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "email",
-            "username",
-            "first_name",
-            "last_name",
             "created_at",
             "updated_at",
         )
@@ -23,7 +20,17 @@ class BaseUserWriteSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, trim_whitespace=False)
 
     def validate_email(self, value):
-        return value.strip().lower()
+        normalized_email = value.strip().lower()
+        instance = getattr(self, "instance", None)
+
+        duplicate_email_exists = User.objects.filter(email__iexact=normalized_email)
+        if instance is not None:
+            duplicate_email_exists = duplicate_email_exists.exclude(pk=instance.pk)
+
+        if duplicate_email_exists.exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+
+        return normalized_email
 
     def validate_password(self, value):
         validate_password(value)
@@ -43,7 +50,6 @@ class RegisterSerializer(BaseUserWriteSerializer):
         fields = (
             "id",
             "email",
-            "username",
             "password",
         )
         read_only_fields = ("id",)
@@ -67,7 +73,6 @@ class UserCreateSerializer(BaseUserWriteSerializer):
         fields = (
             "id",
             "email",
-            "username",
             "password",
             "is_active",
             "is_staff",

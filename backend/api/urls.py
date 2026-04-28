@@ -1,10 +1,5 @@
 from django.urls import path
 
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
-
 from api.views import (
     ApiRootView,
     CreateUserView,
@@ -12,6 +7,7 @@ from api.views import (
     SummarizeText,
     LoginUserView,
     LogoutUserView,
+    CookieTokenRefreshView,
     MeView,
 )
 
@@ -21,7 +17,7 @@ urlpatterns = [
     path("register", RegisterUserView.as_view(), name="register-user"),
     path("login", LoginUserView.as_view(), name="login-user"),
     path("logout", LogoutUserView.as_view(), name="logout-user"),
-    path("token/refresh", TokenRefreshView.as_view(), name="token-refresh"),
+    path("token/refresh", CookieTokenRefreshView.as_view(), name="token-refresh"),
     path("users/me", MeView.as_view(), name="me"),
     path("users/create", CreateUserView.as_view(), name="create-user"),
 ]

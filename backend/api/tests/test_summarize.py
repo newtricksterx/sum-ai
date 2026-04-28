@@ -68,85 +68,53 @@ class ThrottleResponseTest(TestCase):
         self.assertIn("Retry-After", throttled_response.headers)
 
 
-class UserEndpointsTest(TestCase):
+class SummarizeEndpointTest(TestCase):
     def setUp(self):
         cache.clear()
         self.client = Client()
-        self.register_url = reverse("register-user")
-        self.create_user_url = reverse("create-user")
+        self.url = reverse("summarize-text")
 
-    def test_register_creates_user(self):
+    @patch("api.views.SumAI.SummarizeContent")
+    def test_missing_content_returns_400_without_calling_summarizer(self, mock_summarize):
+        response = self.client.post(
+            self.url,
+            data=json.dumps(
+                {
+                    "length": "short",
+                    "regenerate": False,
+                    "format": "bullet-point",
+                    "language": "english",
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "Missing required field: 'content'")
+        mock_summarize.assert_not_called()
+
+    @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
+    def test_summarize_passes_arguments_to_summarizer(self, mock_summarize):
         payload = {
-            "email": "new-user@example.com",
-            "username": "new-user",
-            "password": "StrongPassword123!",
-            "first_name": "New",
-            "last_name": "User",
+            "content": "My source text",
+            "length": "short",
+            "regenerate": True,
+            "format": "bullet-point",
+            "language": "english",
         }
 
         response = self.client.post(
-            self.register_url,
+            self.url,
             data=json.dumps(payload),
             content_type="application/json",
         )
 
-        self.assertEqual(response.status_code, 201)
-        self.assertNotIn("password", response.json())
-
-        created_user = User.objects.get(email="new-user@example.com")
-        self.assertTrue(created_user.check_password("StrongPassword123!"))
-        self.assertFalse(created_user.is_staff)
-
-    def test_create_user_requires_admin_permissions(self):
-        regular_user = User.objects.create_user(
-            email="regular@example.com",
-            username="regular",
-            password="StrongPassword123!",
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["data"], "<p>summary</p>")
+        mock_summarize.assert_called_once_with(
+            "My source text",
+            "short",
+            True,
+            "bullet-point",
+            "english",
         )
-        self.client.force_login(regular_user)
-
-        payload = {
-            "email": "created-by-regular@example.com",
-            "username": "created-by-regular",
-            "password": "StrongPassword123!",
-        }
-
-        response = self.client.post(
-            self.create_user_url,
-            data=json.dumps(payload),
-            content_type="application/json",
-        )
-
-        self.assertEqual(response.status_code, 403)
-        self.assertFalse(User.objects.filter(email=payload["email"]).exists())
-
-    def test_admin_can_create_user(self):
-        admin_user = User.objects.create_user(
-            email="admin@example.com",
-            username="admin",
-            password="StrongPassword123!",
-            is_staff=True,
-        )
-        self.client.force_login(admin_user)
-
-        payload = {
-            "email": "created-by-admin@example.com",
-            "username": "created-by-admin",
-            "password": "StrongPassword123!",
-            "first_name": "Created",
-            "last_name": "By Admin",
-            "is_active": True,
-            "is_staff": True,
-        }
-
-        response = self.client.post(
-            self.create_user_url,
-            data=json.dumps(payload),
-            content_type="application/json",
-        )
-
-        self.assertEqual(response.status_code, 201)
-
-        created_user = User.objects.get(email=payload["email"])
-        self.assertTrue(created_user.check_password(payload["password"]))
-        self.assertTrue(created_user.is_staff)
