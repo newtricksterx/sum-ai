@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from google import genai
 
 DEBUG_MODE = os.getenv("DEBUG", "False").lower() == "true"
+ECHO_PROMPT_MODE = os.getenv("GEMINI_ECHO_PROMPT", "False").lower() == "true"
 MAX_INPUT_CHARS = 10000
 
 logger = logging.getLogger(__name__)
@@ -103,7 +104,9 @@ def CreateQuery(page_content, length, regenerate, format, language):
         (write a 1 sentence introduction of the contents here)
         <h2>Summary</h2>
         (Output based on Format goes here)
-        <strong>(any key points)</strong>
+
+        # ALSO ADD:
+        <strong>[INSERT ANY KEY POINT]</strong>
         """
 
     return query
@@ -137,7 +140,8 @@ def SummarizeContent(content, length, regenerate, format, language):
 
     try:
         query = CreateQuery(content, length, regenerate, format, language)
-        result = query if DEBUG_MODE else QueryAI(query=query)
+        # Keep DEBUG for local diagnostics, but only echo prompts when explicitly requested.
+        result = query if ECHO_PROMPT_MODE else QueryAI(query=query)
         return _clean_ai_output(result)
     except Exception:
         logger.exception("Failed to generate summary output.")

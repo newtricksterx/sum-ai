@@ -9,14 +9,21 @@ import {
 import LoginForm, { LoginPayload } from "../components/LoginForm";
 import RegisterForm, { RegisterPayload } from "../components/RegisterForm";
 import { authInstance, setAuthLogoutHandler } from "../services/axiosService";
+import { useHistoryStore } from "../stores/historyStore";
 
 type AuthMode = "login" | "register";
 
 type UserProfile = {
   id: number;
   email: string;
-  first_name: string;
-  last_name: string;
+  first_name?: string;
+  last_name?: string;
+  subscription?: {
+    plan_slug: string;
+    plan_name: string;
+    summary_limit: number | null;
+    history_limit: number | null;
+  };
   created_at: string;
   updated_at: string;
 };
@@ -76,6 +83,18 @@ const formatDate = (rawDate: string) => {
   }).format(parsedDate);
 };
 
+const formatLimit = (value: number | null | undefined) => {
+  if (value === null) {
+    return "Unlimited";
+  }
+
+  if (typeof value === "number") {
+    return value.toLocaleString();
+  }
+
+  return "Unavailable";
+};
+
 const ProfilePage = () => {
   const [mode, setMode] = useState<AuthMode>("login");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -83,6 +102,7 @@ const ProfilePage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
+  const setHistoryOwner = useHistoryStore((state) => state.setHistoryOwner);
 
   useEffect(() => {
     const hydrateProfile = async () => {
@@ -91,18 +111,23 @@ const ProfilePage = () => {
       try {
         const response = await authInstance.get<UserProfile>("/api/users/me");
         setUserProfile(response.data);
+        setHistoryOwner(
+          `user:${response.data.id}`,
+          response.data.subscription?.history_limit ?? 1,
+        );
       } catch (error) {
         if (!(axios.isAxiosError(error) && error.response?.status === 401)) {
           setErrorMessage(parseApiErrorMessage(error));
         }
         setUserProfile(null);
+        setHistoryOwner("anonymous", 1);
       } finally {
         setIsInitializing(false);
       }
     };
 
     void hydrateProfile();
-  }, []);
+  }, [setHistoryOwner]);
 
   useEffect(() => {
     setAuthLogoutHandler(() => {
@@ -110,12 +135,13 @@ const ProfilePage = () => {
       setMode("login");
       setInfoMessage(null);
       setErrorMessage("Your session has expired. Please login again.");
+      setHistoryOwner("anonymous", 1);
     });
 
     return () => {
       setAuthLogoutHandler(null);
     };
-  }, []);
+  }, [setHistoryOwner]);
 
   const displayName = useMemo(() => {
     if (!userProfile) {
@@ -142,9 +168,17 @@ const ProfilePage = () => {
 
       if (responseUser) {
         setUserProfile(responseUser);
+        setHistoryOwner(
+          `user:${responseUser.id}`,
+          responseUser.subscription?.history_limit ?? 1,
+        );
       } else {
         const meResponse = await authInstance.get<UserProfile>("/api/users/me");
         setUserProfile(meResponse.data);
+        setHistoryOwner(
+          `user:${meResponse.data.id}`,
+          meResponse.data.subscription?.history_limit ?? 1,
+        );
       }
 
       setInfoMessage(response.data.detail ?? "Login successful.");
@@ -183,6 +217,7 @@ const ProfilePage = () => {
       setErrorMessage(parseApiErrorMessage(error));
     } finally {
       setUserProfile(null);
+      setHistoryOwner("anonymous", 1);
       setMode("login");
       setIsSubmitting(false);
     }
@@ -265,6 +300,26 @@ const ProfilePage = () => {
             </div>
 
             <div className="space-y-2">
+              <div className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 dark:border-[#3a3a3a] dark:bg-[#2a2a2a]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">
+                  Subscription
+                </p>
+                <div className="mt-1 space-y-1 text-[12px] text-gray-700 dark:text-gray-200">
+                  <p>
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">Plan:</span>{" "}
+                    {userProfile.subscription?.plan_name ?? "Unavailable"}
+                  </p>
+                  <p>
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">Summary Limit:</span>{" "}
+                    {formatLimit(userProfile.subscription?.summary_limit)}
+                  </p>
+                  <p>
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">History Limit:</span>{" "}
+                    {formatLimit(userProfile.subscription?.history_limit)}
+                  </p>
+                </div>
+              </div>
+
               <div className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 dark:border-[#3a3a3a] dark:bg-[#2a2a2a]">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">
                   Member Since

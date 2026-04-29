@@ -8,7 +8,7 @@ const { regenerateStateMock } = vi.hoisted(() => ({
 }));
 
 vi.mock("../../utils/states", () => ({
-  RegenerateState: () => regenerateStateMock(),
+  RegenerateState: (isSummarizing: boolean) => regenerateStateMock(isSummarizing),
 }));
 
 vi.mock("../../components/SettingsDropdown", () => ({
@@ -44,6 +44,7 @@ describe("MenuBar", () => {
         onClickProfile={onClickProfile}
         onClickRegenerate={onClickRegenerate}
         onClickHistory={onClickHistory}
+        isSummarizing={false}
       />
     );
 
@@ -75,6 +76,27 @@ describe("MenuBar", () => {
         onClickProfile={vi.fn()}
         onClickRegenerate={vi.fn()}
         onClickHistory={vi.fn()}
+        isSummarizing={false}
+      />
+    );
+
+    const regenerateButton = screen.getByTitle("Generate summary");
+    expect((regenerateButton as HTMLButtonElement).disabled).toBe(true);
+    expect(regenerateButton.className).toContain("opacity-50");
+  });
+
+  it("disables regenerate button while summarizing", () => {
+    regenerateStateMock.mockImplementation((isSummarizing: boolean) => !isSummarizing);
+
+    render(
+      <MenuBar
+        onClickReturn={vi.fn()}
+        onClickForward={vi.fn()}
+        onClickClose={vi.fn()}
+        onClickProfile={vi.fn()}
+        onClickRegenerate={vi.fn()}
+        onClickHistory={vi.fn()}
+        isSummarizing={true}
       />
     );
 

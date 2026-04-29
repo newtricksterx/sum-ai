@@ -166,10 +166,10 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[]) # type: ignore
 
-THROTTLE_SUMMARIES_COUNT = env.int("THROTTLE_SUMMARIES_COUNT", default=1) # type: ignore
-THROTTLE_SUMMARIES_PERIOD = env.str("THROTTLE_SUMMARIES_PERIOD", default="day").lower() # type: ignore
-if THROTTLE_SUMMARIES_PERIOD not in {"sec", "min", "hour", "day"}:
-    THROTTLE_SUMMARIES_PERIOD = "day"
+ANON_THROTTLE_SUMMARIES_COUNT = env.int("THROTTLE_SUMMARIES_COUNT", default=1) # type: ignore
+ANON_THROTTLE_SUMMARIES_PERIOD = env.str("THROTTLE_SUMMARIES_PERIOD", default="day").lower() # type: ignore
+if ANON_THROTTLE_SUMMARIES_PERIOD not in {"sec", "min", "hour", "day"}:
+    ANON_THROTTLE_SUMMARIES_PERIOD = "day"
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'api.exception_handlers.custom_exception_handler',
@@ -177,7 +177,7 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.AnonRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': f'{THROTTLE_SUMMARIES_COUNT}/{THROTTLE_SUMMARIES_PERIOD}',
+        'anon': f'{ANON_THROTTLE_SUMMARIES_COUNT}/{ANON_THROTTLE_SUMMARIES_PERIOD}',
     },
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'api.authentication.CookieJWTAuthentication',

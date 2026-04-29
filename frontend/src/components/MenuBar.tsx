@@ -15,10 +15,10 @@ export interface MenuBarProps {
     onClickProfile: React.MouseEventHandler;
     onClickRegenerate: React.MouseEventHandler;
     onClickHistory: React.MouseEventHandler;
+    isSummarizing: boolean;
 }
 
-function MenuBar({onClickReturn, onClickForward, onClickClose, onClickProfile, onClickRegenerate, onClickHistory} : MenuBarProps) {
-  
+function MenuBar({onClickReturn, onClickForward, onClickClose, onClickProfile, onClickRegenerate, onClickHistory, isSummarizing } : MenuBarProps) {
   return (
     <nav className="flex flex-row gap-1 justify-between items-center border-b-[1px] border-b-gray-400 w-full">
         <Button onClick={onClickReturn} className={`p-2 rounded-3xl m-1`}  title="Go to home page">
@@ -27,7 +27,7 @@ function MenuBar({onClickReturn, onClickForward, onClickClose, onClickProfile, o
         <Button onClick={onClickForward} className={`p-2 rounded-3xl m-1`} title="Go to summary page">
             <VscOutput  size={MenuIconSize}/>
         </Button>
-        <Button className={`p-2 rounded-3xl m-1 ${RegenerateState() ? "" : "opacity-50"}`} disabled={!RegenerateState()} onClick={onClickRegenerate} title="Generate summary">
+        <Button className={`p-2 rounded-3xl m-1 ${RegenerateState(isSummarizing) ? "" : "opacity-50"}`} disabled={!RegenerateState(isSummarizing)} onClick={onClickRegenerate} title="Generate summary">
           <VscEditSparkle size={MenuIconSize}/>
         </Button>
         <Button onClick={onClickHistory} className="p-2 rounded-3xl m-1" title="View history">

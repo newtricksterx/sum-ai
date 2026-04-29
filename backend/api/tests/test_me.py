@@ -17,6 +17,8 @@ class TestMe(TestCase):
         self.client = Client()
         self.me_url = reverse("me")
         self.login_url = reverse("login-user")
+        self.access_cookie_name = settings.SIMPLE_JWT["AUTH_COOKIE"]
+        self.refresh_cookie_name = settings.SIMPLE_JWT["AUTH_REFRESH_COOKIE"]
 
         User.objects.create_user(
             email="test@example.com",
@@ -55,6 +57,11 @@ class TestMe(TestCase):
             data=json.dumps({"plan_slug": "pro"}),
             content_type="application/json",
         )
+        self.assertEqual(response.status_code, 401)
+        self.assertIn("detail", response.json())
+
+    def test_me_delete_requires_authentication(self):
+        response = self.client.delete(self.me_url)
         self.assertEqual(response.status_code, 401)
         self.assertIn("detail", response.json())
 
@@ -105,6 +112,39 @@ class TestMe(TestCase):
         self.assertEqual(patch_response.status_code, 400)
         self.assertIn("plan_slug", patch_response.json())
 
+    def test_me_delete_user_and_clears_session(self):
+        payload = {
+            "email": "test@example.com",
+            "password": "StrongPassword123!",
+        }
+
+        login_response = self.client.post(
+            self.login_url,
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(login_response.status_code, 200)
+
+        delete_response = self.client.delete(self.me_url)
+        self.assertEqual(delete_response.status_code, 204)
+        self.assertFalse(User.objects.filter(email="test@example.com").exists())
+
+        me_response = self.client.get(self.me_url)
+        self.assertEqual(me_response.status_code, 401)
+        self.assertIn("detail", me_response.json())
+
+        self.assertIn(self.access_cookie_name, delete_response.cookies)
+        self.assertIn(self.refresh_cookie_name, delete_response.cookies)
+        self.assertEqual(delete_response.cookies[self.access_cookie_name].value, "")
+        self.assertEqual(delete_response.cookies[self.refresh_cookie_name].value, "")
+
+        client_access_cookie = self.client.cookies.get(self.access_cookie_name)
+        client_refresh_cookie = self.client.cookies.get(self.refresh_cookie_name)
+        self.assertIsNotNone(client_access_cookie)
+        self.assertIsNotNone(client_refresh_cookie)
+        self.assertEqual(client_access_cookie.value, "") # type: ignore
+        self.assertEqual(client_refresh_cookie.value, "") # type: ignore
+
     def test_found_user_then_deleted_user_not_found(self):
         payload = {
             "email": "test@example.com",
@@ -130,20 +170,18 @@ class TestMe(TestCase):
 
     def test_expired_access_token_cannot_access_user(self):
         user = User.objects.get(email="test@example.com")
-        access_cookie_name = settings.SIMPLE_JWT["AUTH_COOKIE"]
 
         expired_access_token = RefreshToken.for_user(user).access_token
         expired_access_token.set_exp(lifetime=timedelta(minutes=-1))
 
-        self.client.cookies[access_cookie_name] = str(expired_access_token)
+        self.client.cookies[self.access_cookie_name] = str(expired_access_token)
 
         response = self.client.get(self.me_url)
         self.assertEqual(response.status_code, 401)
         self.assertIn("detail", response.json())
 
     def test_invalid_access_token_cannot_access_user(self):
-        access_cookie_name = settings.SIMPLE_JWT["AUTH_COOKIE"]
-        self.client.cookies[access_cookie_name] = "not-a-valid-jwt"
+        self.client.cookies[self.access_cookie_name] = "not-a-valid-jwt"
 
         response = self.client.get(self.me_url)
         self.assertEqual(response.status_code, 401)

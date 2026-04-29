@@ -13,10 +13,10 @@ export const ForwardState = () => {
     return pageNum == 0 && summary !== "";
 }
 
-export const RegenerateState = () => {
+export const RegenerateState = (isSummarizing : boolean) => {
     const pageNum = GetPageFromStorage();
 
-    return pageNum == 1;
+    return pageNum == 1 && !isSummarizing;
 }
 
 export const CopyState = () => {

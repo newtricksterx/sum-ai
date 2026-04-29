@@ -14,6 +14,14 @@ import { getPlainTextFromHtml } from './utils/html'
 import HistoryPage from './pages/HistoryPage'
 import { useHistoryStore } from './stores/historyStore'
 import ProfilePage from './pages/ProfilePage'
+import { authInstance } from './services/axiosService'
+
+type MeResponse = {
+  id: number;
+  subscription?: {
+    history_limit: number | null;
+  };
+};
 
 
 function App() {
@@ -28,6 +36,7 @@ function App() {
   const fontSize = useSettingsStore((state) => state.fontSize)
   const format = useSettingsStore((state) => state.format)
   const addSummaryToHistory = useHistoryStore((state) => state.addSummary)
+  const setHistoryOwner = useHistoryStore((state) => state.setHistoryOwner)
 
   const cleanedContent = useMemo(() => {
     return DOMPurify.sanitize(summarizedContent || "",
@@ -45,6 +54,33 @@ function App() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const syncHistoryLimit = async () => {
+      try {
+        const response = await authInstance.get<MeResponse>("/api/users/me");
+        if (!isMounted) {
+          return;
+        }
+        setHistoryOwner(
+          `user:${response.data.id}`,
+          response.data.subscription?.history_limit ?? 1,
+        );
+      } catch {
+        if (isMounted) {
+          setHistoryOwner("anonymous", 1);
+        }
+      }
+    };
+
+    void syncHistoryLimit();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [setHistoryOwner]);
 
   const renderUserInterface = () => {
     // Display the loading circle
@@ -130,6 +166,48 @@ function App() {
     UpdatePageStorage(3);
   }
 
+  const onClickDownload = async () => {
+    if (!cleanedContent.trim()) return;
+
+    try {
+      const { jsPDF } = await import("jspdf");
+      const pdf = new jsPDF({
+        unit: "pt",
+        format: "a4",
+      });
+
+      const printableHtml = `
+        <div class="pdf-export-root" style="font-family: Arial, Helvetica, sans-serif; color: #1f2937; line-height: 1.65; font-size: 12px;">
+          <style>
+            .pdf-export-root h1 { font-size: 20px; line-height: 1.35; margin: 0 0 12px; font-weight: 700; color: #111827; }
+            .pdf-export-root h2 { font-size: 13px; line-height: 1.35; margin: 14px 0 8px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.05em; }
+            .pdf-export-root p { margin: 0 0 10px; }
+            .pdf-export-root ul { margin: 0 0 12px 18px; padding: 0; list-style-type: disc; }
+            .pdf-export-root li { margin: 0 0 6px; }
+            .pdf-export-root strong { font-weight: 700; color: #111827; }
+            .pdf-export-root a { color: #0f766e; text-decoration: underline; }
+          </style>
+          ${cleanedContent}
+        </div>
+      `;
+
+      await pdf.html(printableHtml, {
+        margin: [28, 28, 28, 28],
+        autoPaging: "text",
+        width: 539,
+        windowWidth: 539,
+        html2canvas: {
+          backgroundColor: "#ffffff",
+          scale: 1,
+        },
+      });
+
+      pdf.save("summary.pdf");
+    } catch (error) {
+      console.log("PDF export error:", error);
+    }
+  }
+
   const onClickRegenerate = async () => {
     //console.log("regenerate")
     await Summarize(true);
@@ -148,7 +226,7 @@ function App() {
     UpdatePageStorage(1);
   }
 
-
+  const isSummarizing = currentPage === 1 && summarizedContent == null
 
   const onClickCopy = async () => {
     if (!summarizedContent) return;
@@ -183,11 +261,12 @@ function App() {
         onClickRegenerate={onClickRegenerate} 
         onClickProfile={onClickProfile}
         onClickHistory={onClickHistory}
+        isSummarizing={isSummarizing}
       />
       <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar min-h-0 h-auto">
         {renderUserInterface()}
       </div>
-      {currentPage === 1 && <ToolBar onClickCopy={onClickCopy} />}
+      {currentPage === 1 && <ToolBar onClickCopy={onClickCopy} onClickDownload={onClickDownload}/>}
     </section>
   )
 }
