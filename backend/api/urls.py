@@ -1,6 +1,7 @@
 from django.urls import path
 
 from api.views import (
+    AdminUserSubscriptionView,
     ApiRootView,
     CreateUserView,
     RegisterUserView,
@@ -20,4 +21,9 @@ urlpatterns = [
     path("token/refresh", CookieTokenRefreshView.as_view(), name="token-refresh"),
     path("users/me", MeView.as_view(), name="me"),
     path("users/create", CreateUserView.as_view(), name="create-user"),
+    path(
+        "admin/users/<int:user_id>/subscription",
+        AdminUserSubscriptionView.as_view(),
+        name="admin-user-subscription",
+    ),
 ]

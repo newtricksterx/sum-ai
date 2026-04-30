@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import {
+  AlertTriangle,
   CalendarClock,
   LogOut,
   ShieldCheck,
+  Trash2,
   UserRound,
 } from "lucide-react";
 import LoginForm, { LoginPayload } from "../components/LoginForm";
@@ -22,6 +24,7 @@ type UserProfile = {
     plan_slug: string;
     plan_name: string;
     summary_limit: number | null;
+    summaries_used?: number;
     history_limit: number | null;
   };
   created_at: string;
@@ -95,11 +98,29 @@ const formatLimit = (value: number | null | undefined) => {
   return "Unavailable";
 };
 
+const formatSummariesLeft = (
+  summaryLimit: number | null | undefined,
+  summariesUsed: number | undefined,
+) => {
+  if (summaryLimit === null) {
+    return "Unlimited";
+  }
+
+  if (typeof summaryLimit === "number") {
+    const used = typeof summariesUsed === "number" ? summariesUsed : 0;
+    return Math.max(summaryLimit - used, 0).toLocaleString();
+  }
+
+  return "Unavailable";
+};
+
 const ProfilePage = () => {
   const [mode, setMode] = useState<AuthMode>("login");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const setHistoryOwner = useHistoryStore((state) => state.setHistoryOwner);
@@ -133,6 +154,7 @@ const ProfilePage = () => {
     setAuthLogoutHandler(() => {
       setUserProfile(null);
       setMode("login");
+      setIsDeleteConfirmOpen(false);
       setInfoMessage(null);
       setErrorMessage("Your session has expired. Please login again.");
       setHistoryOwner("anonymous", 1);
@@ -223,6 +245,42 @@ const ProfilePage = () => {
     }
   };
 
+  const openDeleteConfirmation = () => {
+    setErrorMessage(null);
+    setInfoMessage(null);
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const closeDeleteConfirmation = () => {
+    if (isDeletingAccount) {
+      return;
+    }
+    setIsDeleteConfirmOpen(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!userProfile) {
+      return;
+    }
+
+    setIsDeletingAccount(true);
+    setErrorMessage(null);
+    setInfoMessage(null);
+
+    try {
+      await authInstance.delete("/api/users/me");
+      setUserProfile(null);
+      setHistoryOwner("anonymous", 1);
+      setMode("login");
+      setIsDeleteConfirmOpen(false);
+      setInfoMessage("Your account has been deleted and you are now logged out.");
+    } catch (error) {
+      setErrorMessage(parseApiErrorMessage(error));
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
+
   const switchToLogin = () => {
     setMode("login");
     setErrorMessage(null);
@@ -310,8 +368,11 @@ const ProfilePage = () => {
                     {userProfile.subscription?.plan_name ?? "Unavailable"}
                   </p>
                   <p>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100">Summary Limit:</span>{" "}
-                    {formatLimit(userProfile.subscription?.summary_limit)}
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">Summaries Left:</span>{" "}
+                    {formatSummariesLeft(
+                      userProfile.subscription?.summary_limit,
+                      userProfile.subscription?.summaries_used,
+                    )}
                   </p>
                   <p>
                     <span className="font-semibold text-gray-900 dark:text-gray-100">History Limit:</span>{" "}
@@ -343,11 +404,21 @@ const ProfilePage = () => {
             <button
               type="button"
               onClick={handleLogout}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isDeletingAccount}
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-3 py-2 text-[12px] font-semibold text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#3a3a3a] dark:bg-[#2a2a2a] dark:text-gray-200 dark:hover:bg-[#343434]"
             >
               <LogOut size={14} />
               {isSubmitting ? "Signing Out..." : "Logout"}
+            </button>
+
+            <button
+              type="button"
+              onClick={openDeleteConfirmation}
+              disabled={isSubmitting || isDeletingAccount}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-rose-300 bg-rose-50 px-3 py-2 text-[12px] font-semibold text-rose-700 transition-colors hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-900/70 dark:bg-rose-950/35 dark:text-rose-300 dark:hover:bg-rose-950/55"
+            >
+              <Trash2 size={14} />
+              Delete Account
             </button>
           </div>
         ) : (
@@ -413,6 +484,46 @@ const ProfilePage = () => {
           </div>
         )}
       </section>
+
+      {isDeleteConfirmOpen && userProfile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4">
+          <div className="w-full max-w-[320px] rounded-2xl border border-rose-200 bg-white p-4 shadow-xl dark:border-rose-900/70 dark:bg-[#1f1f1f]">
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
+                <AlertTriangle size={15} />
+              </span>
+              <div>
+                <h2 className="text-[14px] font-semibold text-gray-900 dark:text-gray-100">
+                  Delete account?
+                </h2>
+                <p className="mt-1 text-[12px] leading-relaxed text-gray-600 dark:text-gray-300">
+                  This action is permanent. Your account and subscription data will be removed.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeDeleteConfirmation}
+                disabled={isDeletingAccount}
+                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-[12px] font-semibold text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#3a3a3a] dark:bg-[#2a2a2a] dark:text-gray-200 dark:hover:bg-[#343434]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={isDeletingAccount}
+                className="inline-flex items-center gap-1 rounded-lg border border-rose-300 bg-rose-600 px-3 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-800/80"
+              >
+                <Trash2 size={12} />
+                {isDeletingAccount ? "Deleting..." : "Yes, Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };

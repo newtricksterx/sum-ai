@@ -122,6 +122,7 @@ export const summarizeActiveTab = async ({
   try {
     const response = await fetch(`${baseUrl}/api/summarize`, {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         content: pageText,

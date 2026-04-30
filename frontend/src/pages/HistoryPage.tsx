@@ -68,7 +68,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
       ) : (
         <div className="flex flex-col gap-2">
           {cache.map((item) => (
-            <article key={item.url} className="rounded-lg border border-slate-200 dark:border-slate-700 p-2">
+            <article key={item.url} className="relative rounded-lg border border-slate-200 dark:border-slate-700 p-2">
               <p className="text-[11px] font-medium text-teal-700 dark:text-teal-300 mb-1">
                 {truncateText(getHostName(item.url), 40)}
               </p>
@@ -91,51 +91,51 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
                   Remove
                 </button>
               </div>
+
+              {pendingRemoval?.url === item.url && (
+                <div
+                  className="absolute inset-0 z-30 flex items-center justify-center rounded-lg bg-black/30 p-2 backdrop-blur-[1px]"
+                  onClick={onCancelRemoval}
+                >
+                  <div
+                    className="w-full rounded-xl border border-[#373737] bg-[#303030] p-3 shadow-lg"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <h2 className="text-[14px] font-semibold text-slate-100">
+                      Remove From History?
+                    </h2>
+                    <p className="mt-1 text-[12px] text-slate-300">
+                      This summary will be permanently removed from your local history.
+                    </p>
+                    <div className="mt-2 rounded-md border border-[#3a3a3a] bg-[#2a2a2a] px-2 py-1.5">
+                      <p className="text-[11px] font-medium text-teal-300">
+                        {truncateText(getHostName(item.url), 48)}
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-slate-300">
+                        {truncateText(getPlainTextFromHtml(item.content), 90)}
+                      </p>
+                    </div>
+                    <div className="mt-3 flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={onCancelRemoval}
+                        className="text-[11px] px-2.5 py-1 rounded-md border border-[#3a3a3a] text-slate-200 hover:bg-[#2a2a2a]"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={onConfirmRemoval}
+                        className="text-[11px] px-2.5 py-1 rounded-md border border-red-800 bg-red-900/30 text-red-300 hover:bg-red-900/50"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </article>
           ))}
-        </div>
-      )}
-
-      {pendingRemoval && (
-        <div
-          className="absolute inset-0 z-30 flex items-center justify-center rounded-xl bg-black/20 px-3 backdrop-blur-[1px]"
-          onClick={onCancelRemoval}
-        >
-          <div
-            className="w-full max-w-[320px] rounded-xl border border-[#373737] bg-[#303030] p-3 shadow-lg"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <h2 className="text-[14px] font-semibold text-slate-100">
-              Remove From History?
-            </h2>
-            <p className="mt-1 text-[12px] text-slate-300">
-              This summary will be permanently removed from your local history.
-            </p>
-            <div className="mt-2 rounded-md border border-[#3a3a3a] bg-[#2a2a2a] px-2 py-1.5">
-              <p className="text-[11px] font-medium text-teal-300">
-                {truncateText(getHostName(pendingRemoval.url), 48)}
-              </p>
-              <p className="mt-0.5 text-[11px] text-slate-300">
-                {truncateText(getPlainTextFromHtml(pendingRemoval.content), 90)}
-              </p>
-            </div>
-            <div className="mt-3 flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={onCancelRemoval}
-                className="text-[11px] px-2.5 py-1 rounded-md border border-[#3a3a3a] text-slate-200 hover:bg-[#2a2a2a]"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={onConfirmRemoval}
-                className="text-[11px] px-2.5 py-1 rounded-md border border-red-800 bg-red-900/30 text-red-300 hover:bg-red-900/50"
-              >
-                Remove
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>

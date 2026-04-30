@@ -12,6 +12,9 @@ class SubscriptionReadSerializer(serializers.ModelSerializer):
     plan_name = serializers.SerializerMethodField()
     summary_limit = serializers.IntegerField(read_only=True, allow_null=True)
     history_limit = serializers.IntegerField(read_only=True, allow_null=True)
+    summaries_used = serializers.IntegerField(read_only=True)
+    current_period_start = serializers.DateTimeField(read_only=True)
+    current_period_end = serializers.DateTimeField(read_only=True, allow_null=True)
 
     def get_plan_name(self, obj: Subscription) -> str:
         return obj.plan["name"]
@@ -23,6 +26,9 @@ class SubscriptionReadSerializer(serializers.ModelSerializer):
             "plan_name",
             "summary_limit",
             "history_limit",
+            "summaries_used",
+            "current_period_start",
+            "current_period_end",
             "created_at",
             "updated_at",
         )

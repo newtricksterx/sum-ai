@@ -5,13 +5,14 @@ from .auth import (
     LogoutUserView,
     RegisterUserView,
 )
-from .core import ApiRootView, MeView
+from .core import AdminUserSubscriptionView, ApiRootView, MeView
 from .summarize import SummarizeText, SumAI
 
 __all__ = [
     "ApiRootView",
     "CookieTokenRefreshView",
     "CreateUserView",
+    "AdminUserSubscriptionView",
     "LoginUserView",
     "LogoutUserView",
     "MeView",

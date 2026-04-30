@@ -1,11 +1,14 @@
 import json
+from datetime import timedelta
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import TestCase, Client, override_settings
-
 from django.urls import reverse
+from django.utils import timezone
+
+from api.models import Subscription
 
 User = get_user_model()
 
@@ -118,3 +121,90 @@ class SummarizeEndpointTest(TestCase):
             "bullet-point",
             "english",
         )
+
+
+class AuthenticatedSummaryLimitTest(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+        self.url = reverse("summarize-text")
+        self.login_url = reverse("login-user")
+        self.email = "summary-user@example.com"
+        self.password = "StrongPassword123!"
+
+        self.user = User.objects.create_user(  # type: ignore
+            email=self.email,
+            password=self.password,
+        )
+        self.subscription = Subscription.objects.get(user=self.user)
+
+    def _login(self):
+        response = self.client.post(
+            self.login_url,
+            data=json.dumps(
+                {
+                    "email": self.email,
+                    "password": self.password,
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+
+    @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
+    def test_authenticated_summary_increments_usage_counter(self, _mock_summarize):
+        self._login()
+
+        response = self.client.post(
+            self.url,
+            data=json.dumps({"content": "My source text"}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.subscription.refresh_from_db()
+        self.assertEqual(self.subscription.summaries_used, 1)
+
+    @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
+    def test_authenticated_summary_is_blocked_when_limit_reached(self, mock_summarize):
+        self._login()
+        self.subscription.summaries_used = self.subscription.summary_limit  # type: ignore
+        self.subscription.save(update_fields=["summaries_used", "updated_at"])
+
+        response = self.client.post(
+            self.url,
+            data=json.dumps({"content": "My source text"}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 403)
+        body = response.json()
+        self.assertEqual(body["error"], "summary_limit_reached")
+        self.assertEqual(body["code"], "summary_limit_reached")
+        self.assertEqual(body["summary_limit"], 2)
+        self.assertEqual(body["summaries_used"], 2)
+
+        mock_summarize.assert_not_called()
+        self.subscription.refresh_from_db()
+        self.assertEqual(self.subscription.summaries_used, 2)
+
+    @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
+    def test_authenticated_summary_resets_usage_after_period_rollover(self, _mock_summarize):
+        self._login()
+        expired_period_start = timezone.now() - timedelta(days=31)
+        self.subscription.summaries_used = 2
+        self.subscription.current_period_start = expired_period_start
+        self.subscription.save(
+            update_fields=["summaries_used", "current_period_start", "updated_at"]
+        )
+
+        response = self.client.post(
+            self.url,
+            data=json.dumps({"content": "My source text"}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.subscription.refresh_from_db()
+        self.assertEqual(self.subscription.summaries_used, 1)
+        self.assertGreater(self.subscription.current_period_start, expired_period_start)
