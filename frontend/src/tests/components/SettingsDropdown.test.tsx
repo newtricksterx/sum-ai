@@ -60,8 +60,21 @@ describe("SettingsDropdown", () => {
     fireEvent.click(settingsButton);
     expect(panel.className).toContain("grid-rows-[1fr]");
 
-    fireEvent.mouseDown(document.body);
+    fireEvent.pointerDown(document.body);
     expect(panel.className).toContain("grid-rows-[0fr]");
+  });
+
+  it("keeps settings open on first outside click when a selector menu is open", () => {
+    render(<SettingsDropdown />);
+
+    const settingsButton = screen.getByTitle("Settings");
+    const panel = document.querySelector("div.fixed") as HTMLDivElement;
+
+    fireEvent.click(settingsButton);
+    fireEvent.pointerDown(screen.getByRole("button", { name: /Language/i }));
+
+    fireEvent.pointerDown(document.body);
+    expect(panel.className).toContain("grid-rows-[1fr]");
   });
 
   it("calls store update actions with selected values when saved", () => {
@@ -69,15 +82,15 @@ describe("SettingsDropdown", () => {
 
     fireEvent.click(screen.getByTitle("Settings"));
 
-    fireEvent.change(screen.getByLabelText("Language"), {
-      target: { value: "french" },
-    });
-    fireEvent.change(screen.getByLabelText("Summary Format"), {
-      target: { value: "action-items" },
-    });
-    fireEvent.change(screen.getByLabelText("Summary Length"), {
-      target: { value: "long" },
-    });
+    fireEvent.pointerDown(screen.getByRole("button", { name: /Language/i }));
+    fireEvent.click(screen.getByRole("menuitemradio", { name: "French" }));
+
+    fireEvent.pointerDown(screen.getByRole("button", { name: /Summary Format/i }));
+    fireEvent.click(screen.getByRole("menuitemradio", { name: "Action items" }));
+
+    fireEvent.pointerDown(screen.getByRole("button", { name: /Summary Length/i }));
+    fireEvent.click(screen.getByRole("menuitemradio", { name: "Long" }));
+
     fireEvent.change(screen.getByLabelText("Font size"), {
       target: { value: "18" },
     });
