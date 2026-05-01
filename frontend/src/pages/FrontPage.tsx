@@ -1,54 +1,102 @@
 import React from 'react';
 import { Sparkles, Globe, FileText, WandSparkles } from 'lucide-react';
+import { Badge, Button, Card, Flex, Heading, Separator, Text, Theme } from '@radix-ui/themes';
+import PageCard from '../components/PageCard';
+import { useSettingsStore } from '../stores/settingsStore';
 import '../FrontPage.css';
 
 interface FrontPageProps {
   onClickGenerate: () => void;
 }
 
+const QUICK_STEPS = [
+  {
+    icon: Globe,
+    text: 'Open a page you want to summarize.',
+  },
+  {
+    icon: Sparkles,
+    text: 'Press generate in the top menu.',
+  },
+  {
+    icon: FileText,
+    text: 'Read, adjust style, and copy your result.',
+  },
+];
+
 const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate }) => {
+  const theme = useSettingsStore((state) => state.theme);
+
   return (
     <section className="front-page-shell relative flex-1 min-h-[300px] p-3 overflow-hidden">
-      <div className="relative z-10 front-page-card rounded-2xl border border-gray-200/80 dark:border-[#393939] p-4 font-noto">
+      <Theme
+        appearance={theme === 'dark' ? 'dark' : 'light'}
+        accentColor="teal"
+        grayColor="slate"
+        radius="large"
+        hasBackground={false}
+      >
+        <PageCard as="div" className="relative z-10 p-4 font-noto">
+          <Flex direction="column" gap="3">
+            <Flex justify="center">
+              <Badge color="teal" radius="full" variant="soft" className="front-badge">
+                Quick Start
+              </Badge>
+            </Flex>
 
-        <h1 className="mt-3 mb-2 text-center text-[20px] leading-tight font-bold text-slate-900 dark:text-slate-100">
-          Turn any page into a clear summary
-        </h1>
+            <Heading
+              as="h1"
+              size="6"
+              align="center"
+              wrap="balance"
+              weight="bold"
+              className="front-heading"
+            >
+              Turn any page into a clear summary
+            </Heading>
 
-        <p className="pb-4 text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">
-          Choose your format in Settings, then generate concise notes designed for quick reading.
-        </p>
+            <Text
+              as="p"
+              size="2"
+              color="gray"
+              align="center"
+              className="front-description"
+            >
+              Choose your format in Settings, then generate concise notes designed for quick reading.
+            </Text>
 
-        <button
-          type="button"
-          onClick={onClickGenerate}
-          className="w-full mb-4 inline-flex items-center justify-center gap-2 rounded-xl border border-teal-300 dark:border-teal-900/80 bg-teal-500 dark:bg-teal-600 text-white text-[13px] font-semibold px-3 py-2.5 hover:bg-teal-600 dark:hover:bg-teal-500 transition-colors cursor-pointer"
-        >
-          <WandSparkles size={14} />
-          Generate Summary
-        </button>
+            <Button
+              type="button"
+              onClick={onClickGenerate}
+              size="3"
+              variant="solid"
+              color="teal"
+              highContrast
+              className="front-generate-btn"
+            >
+              <WandSparkles size={14} />
+              Generate Summary
+            </Button>
 
-        <div className="grid gap-2.5">
-          <div className="front-step-row">
-            <span className="front-step-icon">
-              <Globe size={13} />
-            </span>
-            <p>Open a page you want to summarize.</p>
-          </div>
-          <div className="front-step-row">
-            <span className="front-step-icon">
-              <Sparkles size={13} />
-            </span>
-            <p>Press generate in the top menu.</p>
-          </div>
-          <div className="front-step-row">
-            <span className="front-step-icon">
-              <FileText size={13} />
-            </span>
-            <p>Read, adjust style, and copy your result.</p>
-          </div>
-        </div>
-      </div>
+            <Separator size="4" className="front-divider" />
+
+            <Flex direction="column" gap="2" className="front-steps">
+              {QUICK_STEPS.map(({ icon: Icon, text }) => (
+                <Card key={text} size="1" className="front-step-row">
+                  <Flex align="center" gap="2">
+                    <span className="front-step-icon">
+                      <Icon size={13} />
+                    </span>
+                    <Text as="p" size="1" className="front-step-text">
+                      {text}
+                    </Text>
+                  </Flex>
+                </Card>
+              ))}
+            </Flex>
+          </Flex>
+        </PageCard>
+      </Theme>
     </section>
   );
 };

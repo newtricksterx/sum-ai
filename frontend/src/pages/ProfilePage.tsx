@@ -9,6 +9,7 @@ import {
   UserRound,
 } from "lucide-react";
 import LoginForm, { LoginPayload } from "../components/LoginForm";
+import PageCard from "../components/PageCard";
 import RegisterForm, { RegisterPayload } from "../components/RegisterForm";
 import { authInstance, setAuthLogoutHandler } from "../services/axiosService";
 import { useHistoryStore } from "../stores/historyStore";
@@ -295,7 +296,7 @@ const ProfilePage = () => {
   if (isInitializing) {
     return (
       <main className="h-full overflow-y-auto custom-scrollbar px-3 py-3 font-noto">
-        <section className="rounded-2xl border border-gray-200 bg-[#eee] p-4 shadow-sm dark:border-[#373737] dark:bg-[#303030]">
+        <PageCard as="section" className="p-4">
           <div className="animate-pulse space-y-3">
             <div className="h-3 w-20 rounded bg-gray-300 dark:bg-[#3a3a3a]" />
             <div className="h-4 w-40 rounded bg-gray-300 dark:bg-[#3a3a3a]" />
@@ -303,14 +304,14 @@ const ProfilePage = () => {
             <div className="h-9 w-full rounded-xl bg-white/80 dark:bg-[#2a2a2a]" />
             <div className="h-9 w-full rounded-xl bg-white/80 dark:bg-[#2a2a2a]" />
           </div>
-        </section>
+        </PageCard>
       </main>
     );
   }
 
   return (
     <main className="h-full overflow-y-auto custom-scrollbar px-3 py-3 font-noto">
-      <section className="rounded-2xl border border-gray-200 bg-[#eee] p-4 shadow-sm dark:border-[#373737] dark:bg-[#303030]">
+      <PageCard as="section" className="p-4">
         <header className="mb-4">
           <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400">
             Account
@@ -483,7 +484,7 @@ const ProfilePage = () => {
             </div>
           </div>
         )}
-      </section>
+      </PageCard>
 
       {isDeleteConfirmOpen && userProfile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4">
