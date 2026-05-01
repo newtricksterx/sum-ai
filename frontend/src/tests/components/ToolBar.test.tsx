@@ -35,6 +35,19 @@ describe("ToolBar", () => {
     expect(copyButton.className).toContain("opacity-50");
   });
 
+  it("disables download and copy buttons while summarizing", () => {
+    copyStateMock.mockReturnValue(true);
+
+    render(<ToolBar onClickCopy={vi.fn()} onClickDownload={vi.fn()} isSummarizing={true} />);
+
+    const downloadButton = screen.getByTitle("Download summary as PDF");
+    const copyButton = screen.getByTitle("Copy summary");
+    expect((downloadButton as HTMLButtonElement).disabled).toBe(true);
+    expect((copyButton as HTMLButtonElement).disabled).toBe(true);
+    expect(downloadButton.className).toContain("opacity-50");
+    expect(copyButton.className).toContain("opacity-50");
+  });
+
   it("calls download and copy handlers when enabled", () => {
     copyStateMock.mockReturnValue(true);
     const onClickCopy = vi.fn();

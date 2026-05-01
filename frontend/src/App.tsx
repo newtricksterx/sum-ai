@@ -266,7 +266,13 @@ function App() {
       <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar min-h-0 h-auto">
         {renderUserInterface()}
       </div>
-      {currentPage === 1 && <ToolBar onClickCopy={onClickCopy} onClickDownload={onClickDownload}/>}
+      {currentPage === 1 && (
+        <ToolBar
+          onClickCopy={onClickCopy}
+          onClickDownload={onClickDownload}
+          isSummarizing={isSummarizing}
+        />
+      )}
     </section>
   )
 }

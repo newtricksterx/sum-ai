@@ -19,7 +19,7 @@ PLANS = {
     },
     "pro": {
         "name": "Pro",
-        "price": 999,
+        "price": 499,
         "currency": "usd",
         "billing_interval": "monthly",
         "summary_limit": None,
@@ -30,7 +30,7 @@ PLANS = {
 
 def get_plan(slug: str) -> dict:
     if slug not in PLANS:
-        raise ValueError(f"Unknown plan: {slug}")
+        raise ValueError(f"Unknown plan: {slug}1")
     return PLANS[slug]
 
 def get_summary_limit(slug: str) -> int | None:

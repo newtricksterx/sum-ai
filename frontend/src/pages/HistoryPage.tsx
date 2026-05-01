@@ -24,6 +24,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
   const clearHistory = useHistoryStore((state) => state.clearHistory);
   const removeSummary = useHistoryStore((state) => state.removeSummary);
   const [pendingRemoval, setPendingRemoval] = useState<HistorySummary | null>(null);
+  const [isClearAllConfirmOpen, setIsClearAllConfirmOpen] = useState(false);
 
   const onClickOpen = (item: HistorySummary) => {
     onSelectHistory(item.content);
@@ -43,13 +44,28 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
     setPendingRemoval(null);
   };
 
+  const onOpenClearAllConfirm = () => {
+    if (cache.length === 0) return;
+    setPendingRemoval(null);
+    setIsClearAllConfirmOpen(true);
+  };
+
+  const onCancelClearAll = () => {
+    setIsClearAllConfirmOpen(false);
+  };
+
+  const onConfirmClearAll = () => {
+    clearHistory();
+    setIsClearAllConfirmOpen(false);
+  };
+
   return (
     <div className="relative px-3 py-3 font-noto">
       <div className="flex items-center justify-between mb-3">
         <h1 className="text-[16px] font-semibold text-slate-900 dark:text-slate-100 !mb-0">Summary History</h1>
         <button
           type="button"
-          onClick={clearHistory}
+          onClick={onOpenClearAllConfirm}
           disabled={cache.length === 0}
           className={`text-[11px] px-2 py-1 rounded-md border ${
             cache.length === 0
@@ -136,6 +152,44 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
               )}
             </article>
           ))}
+        </div>
+      )}
+
+      {isClearAllConfirmOpen && (
+        <div
+          className="absolute inset-0 z-40 flex items-center justify-center rounded-xl bg-black/30 px-3 backdrop-blur-[1px]"
+          onClick={onCancelClearAll}
+        >
+          <div
+            className="w-full max-w-[320px] rounded-xl border border-[#373737] bg-[#303030] p-3 shadow-lg"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 className="text-[14px] font-semibold text-slate-100">
+              Clear All History?
+            </h2>
+            <p className="mt-1 text-[12px] text-slate-300">
+              Are you sure you want to permanently remove all saved summaries?
+            </p>
+            <p className="mt-2 text-[11px] text-slate-400">
+              {cache.length} {cache.length === 1 ? "summary" : "summaries"} will be deleted.
+            </p>
+            <div className="mt-3 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={onCancelClearAll}
+                className="text-[11px] px-2.5 py-1 rounded-md border border-[#3a3a3a] text-slate-200 hover:bg-[#2a2a2a]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={onConfirmClearAll}
+                className="text-[11px] px-2.5 py-1 rounded-md border border-red-800 bg-red-900/30 text-red-300 hover:bg-red-900/50"
+              >
+                Clear All
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
