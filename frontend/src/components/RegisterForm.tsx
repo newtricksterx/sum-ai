@@ -1,5 +1,6 @@
 import { FormEvent, useMemo, useState } from "react";
 import { UserPlus } from "lucide-react";
+import PasswordField from "./PasswordField/PasswordField";
 
 export interface RegisterPayload {
   email: string;
@@ -84,16 +85,15 @@ const RegisterForm = ({
         >
           Password
         </label>
-        <input
+        <PasswordField
           id="profile-register-password"
-          type="password"
-          autoComplete="new-password"
+          name="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
+          autoComplete="new-password"
           disabled={isSubmitting}
           required
           placeholder="Create a strong password"
-          className="w-full rounded-xl border border-slate-300/90 bg-white/90 px-3 py-2 text-[12px] text-slate-900 placeholder:text-slate-400 focus:border-sky-500 focus:outline-none dark:border-[#454545] dark:bg-[#111417] dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-sky-400"
         />
       </div>
 
@@ -104,16 +104,15 @@ const RegisterForm = ({
         >
           Confirm Password
         </label>
-        <input
+        <PasswordField
           id="profile-register-confirm-password"
-          type="password"
-          autoComplete="new-password"
+          name="confirmPassword"
           value={confirmPassword}
           onChange={(event) => setConfirmPassword(event.target.value)}
+          autoComplete="new-password"
           disabled={isSubmitting}
           required
           placeholder="Re-enter password"
-          className="w-full rounded-xl border border-slate-300/90 bg-white/90 px-3 py-2 text-[12px] text-slate-900 placeholder:text-slate-400 focus:border-sky-500 focus:outline-none dark:border-[#454545] dark:bg-[#111417] dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-sky-400"
         />
       </div>
 

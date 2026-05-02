@@ -311,7 +311,7 @@ export default function SettingsDropdown() {
                         {saved ? (
                             <button
                             className="flex items-center gap-1.5 text-[12px] font-medium px-3.5 py-1 rounded-full border
-                             border-gray-200 dark:border-[#3a3a3a] hover:bg-gray-100 dark:hover:bg-[#2a2a2a] 
+                             cursor-pointer border-gray-200 dark:border-[#3a3a3a] hover:bg-gray-100 dark:hover:bg-[#2a2a2a] 
                              transition-colors"
                             >
                             <Check size={12} className="text-green-500" /> Saved
@@ -320,7 +320,7 @@ export default function SettingsDropdown() {
                             <button
                             type="submit"
                             className="flex items-center gap-1.5 text-[12px] 
-                            font-medium px-3.5 py-1 rounded-full border 
+                            font-medium px-3.5 py-1 rounded-full border cursor-pointer
                             border-gray-200 dark:border-[#3a3a3a] hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
                             >
                             <Save size={12} /> Save

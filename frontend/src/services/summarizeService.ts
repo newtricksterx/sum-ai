@@ -33,6 +33,8 @@ const MOCK_SUMMARY_HTML = `
   <p>Check out <a href="https://google.com" target="_blank" rel="noopener">this test link</a> to see if your link styles work.</p>
 `;
 
+const MOCK_SOURCE_URL_PREFIX = "mock://dev-summary";
+
 const isRestrictedPage = (url?: string) => {
   if (!url) return true;
   return (
@@ -42,6 +44,33 @@ const isRestrictedPage = (url?: string) => {
     url.startsWith("view-source:") ||
     url.startsWith("chrome-extension://")
   );
+};
+
+const isMockModeEnabled = () =>
+  import.meta.env.DEV ||
+  import.meta.env.VITE_DEV === "true" ||
+  import.meta.env.VITE_USE_MOCK_SUMMARY === "true";
+
+const getActiveTabUrlIfAvailable = async () => {
+  if (typeof chrome === "undefined" || !chrome.tabs?.query) {
+    return null;
+  }
+
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    return tab?.url ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const getMockSourceUrl = async () => {
+  const tabUrl = await getActiveTabUrlIfAvailable();
+  if (tabUrl && !isRestrictedPage(tabUrl)) {
+    return tabUrl;
+  }
+
+  return `${MOCK_SOURCE_URL_PREFIX}/${Date.now()}`;
 };
 
 const extractTabText = async (tabId: number) => {
@@ -72,6 +101,14 @@ export const summarizeActiveTab = async ({
   format,
   language,
 }: SummarizeServiceParams): Promise<SummarizeResult> => {
+  if (isMockModeEnabled()) {
+    return {
+      html: MOCK_SUMMARY_HTML,
+      sourceUrl: await getMockSourceUrl(),
+      isError: false,
+    };
+  }
+
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id) {
     return {
@@ -87,14 +124,6 @@ export const summarizeActiveTab = async ({
         "Chrome internal pages (like chrome://settings) cannot be summarized. Open a normal website tab and try again."
       ),
       isError: true,
-    };
-  }
-
-  if (import.meta.env.VITE_DEV === "true") {
-    return {
-      html: MOCK_SUMMARY_HTML,
-      sourceUrl: tab.url,
-      isError: false,
     };
   }
 

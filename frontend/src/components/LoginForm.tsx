@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { LogIn } from "lucide-react";
+import PasswordField from "./PasswordField/PasswordField";
 
 export interface LoginPayload {
   email: string;
@@ -81,16 +82,15 @@ const LoginForm = ({
         >
           Password
         </label>
-        <input
+        <PasswordField
           id="profile-login-password"
-          type="password"
-          autoComplete="current-password"
+          name="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
+          autoComplete="current-password"
           disabled={isSubmitting}
           required
           placeholder="Enter your password"
-          className="w-full rounded-xl border border-slate-300/90 bg-white/90 px-3 py-2 text-[12px] text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none dark:border-[#454545] dark:bg-[#111417] dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-teal-400"
         />
       </div>
 

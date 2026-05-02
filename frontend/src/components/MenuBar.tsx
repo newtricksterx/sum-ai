@@ -2,9 +2,8 @@ import Button from "./Button";
 import { MenuIconSize } from '../utils/constants'
 import { X } from 'lucide-react';
 import SettingsDropdown from "./SettingsDropdown";
-import { RegenerateState } from "../utils/states";
 import { GoHistory } from "react-icons/go";
-import { VscHome, VscAccount, VscOutput, VscEditSparkle } from "react-icons/vsc";
+import { VscHome, VscAccount, VscOutput } from "react-icons/vsc";
 
 
 
@@ -13,12 +12,10 @@ export interface MenuBarProps {
     onClickForward: React.MouseEventHandler;
     onClickClose: React.MouseEventHandler;
     onClickProfile: React.MouseEventHandler;
-    onClickRegenerate: React.MouseEventHandler;
     onClickHistory: React.MouseEventHandler;
-    isSummarizing: boolean;
 }
 
-function MenuBar({onClickReturn, onClickForward, onClickClose, onClickProfile, onClickRegenerate, onClickHistory, isSummarizing } : MenuBarProps) {
+function MenuBar({onClickReturn, onClickForward, onClickClose, onClickProfile, onClickHistory } : MenuBarProps) {
   return (
     <nav className="flex flex-row gap-1 justify-between items-center border-b-[1px] border-b-gray-400 w-full">
         <Button onClick={onClickReturn} className={`p-2 rounded-3xl m-1`}  title="Go to home page">
@@ -26,9 +23,6 @@ function MenuBar({onClickReturn, onClickForward, onClickClose, onClickProfile, o
         </Button>
         <Button onClick={onClickForward} className={`p-2 rounded-3xl m-1`} title="Go to summary page">
             <VscOutput  size={MenuIconSize}/>
-        </Button>
-        <Button className={`p-2 rounded-3xl m-1 ${RegenerateState(isSummarizing) ? "" : "opacity-50"}`} disabled={!RegenerateState(isSummarizing)} onClick={onClickRegenerate} title="Generate summary">
-          <VscEditSparkle size={MenuIconSize}/>
         </Button>
         <Button onClick={onClickHistory} className="p-2 rounded-3xl m-1" title="View history">
           <GoHistory size={MenuIconSize}/>

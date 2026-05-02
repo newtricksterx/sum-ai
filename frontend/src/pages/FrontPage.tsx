@@ -1,7 +1,7 @@
 import React from 'react';
 import { Sparkles, Globe, FileText, WandSparkles } from 'lucide-react';
 import { Badge, Button, Card, Flex, Heading, Separator, Text, Theme } from '@radix-ui/themes';
-import PageCard from '../components/PageCard';
+import PageCard from '../components/PageCard/PageCard';
 import { useSettingsStore } from '../stores/settingsStore';
 import '../FrontPage.css';
 
@@ -28,19 +28,20 @@ const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate }) => {
   const theme = useSettingsStore((state) => state.theme);
 
   return (
-    <section className="front-page-shell relative flex-1 min-h-[300px] p-3 overflow-hidden">
+    <section className="front-page-shell relative flex-1 min-h-0 h-full p-3 overflow-hidden">
       <Theme
         appearance={theme === 'dark' ? 'dark' : 'light'}
         accentColor="teal"
         grayColor="slate"
         radius="large"
         hasBackground={false}
+        className="front-page-theme h-full"
       >
-        <PageCard as="div" className="relative z-10 p-4 font-noto">
-          <Flex direction="column" gap="3">
-            <Flex justify="center">
+        <PageCard id="front-page-card" as="div" className="relative z-10 h-full p-4 font-noto">
+          <Flex id="front-page-content" direction="column" gap="3">
+            <Flex id="front-page-badge-row" justify="center">
               <Badge color="teal" radius="full" variant="soft" className="front-badge">
-                Quick Start
+                Welcome Back
               </Badge>
             </Flex>
 
@@ -80,14 +81,14 @@ const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate }) => {
 
             <Separator size="4" className="front-divider" />
 
-            <Flex direction="column" gap="2" className="front-steps">
-              {QUICK_STEPS.map(({ icon: Icon, text }) => (
-                <Card key={text} size="1" className="front-step-row">
-                  <Flex align="center" gap="2">
-                    <span className="front-step-icon">
+            <Flex id="front-page-steps" direction="column" gap="2" className="front-steps">
+              {QUICK_STEPS.map(({ icon: Icon, text }, index) => (
+                <Card id={`front-step-card-${index}`} key={text} size="1" className="front-step-row">
+                  <Flex id={`front-step-row-${index}`} align="center" gap="2">
+                    <span id={`front-step-icon-${index}`} className="front-step-icon">
                       <Icon size={13} />
                     </span>
-                    <Text as="p" size="1" className="front-step-text">
+                    <Text id={`front-step-text-${index}`} as="p" size="1" className="front-step-text">
                       {text}
                     </Text>
                   </Flex>

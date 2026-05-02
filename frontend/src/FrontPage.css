@@ -2,6 +2,11 @@
   background: transparent;
 }
 
+.front-page-theme[data-is-root-theme='true'] {
+  min-height: 0;
+  height: 100%;
+}
+
 .dark .front-page-shell {
   background: transparent;
 }

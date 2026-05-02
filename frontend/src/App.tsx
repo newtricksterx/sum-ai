@@ -27,8 +27,8 @@ type MeResponse = {
 function App() {
   const [currentPage, SetCurrentPage] = useState(GetPageFromStorage());
   const [summarizedContent, SetSummarizedContent] = useState<string | null>(GetSummaryFromStorage());
-  const [showCopyNotice, setShowCopyNotice] = useState(false);
-  const copyNoticeTimeoutRef = useRef<number | null>(null);
+  const [isCopySuccess, setIsCopySuccess] = useState(false);
+  const copySuccessTimeoutRef = useRef<number | null>(null);
 
   const language = useSettingsStore((state) => state.language)
   const length = useSettingsStore((state) => state.length)
@@ -49,8 +49,8 @@ function App() {
 
   useEffect(() => {
     return () => {
-      if (copyNoticeTimeoutRef.current !== null) {
-        window.clearTimeout(copyNoticeTimeoutRef.current);
+      if (copySuccessTimeoutRef.current !== null) {
+        window.clearTimeout(copySuccessTimeoutRef.current);
       }
     };
   }, []);
@@ -208,7 +208,7 @@ function App() {
     }
   }
 
-  const onClickRegenerate = async () => {
+  const onClickGenerate = async () => {
     //console.log("regenerate")
     await Summarize(true);
   }
@@ -233,37 +233,31 @@ function App() {
 
     try {
       await navigator.clipboard.writeText(getPlainTextFromHtml(summarizedContent));
-      setShowCopyNotice(true);
+      setIsCopySuccess(true);
 
-      if (copyNoticeTimeoutRef.current !== null) {
-        window.clearTimeout(copyNoticeTimeoutRef.current);
+      if (copySuccessTimeoutRef.current !== null) {
+        window.clearTimeout(copySuccessTimeoutRef.current);
       }
 
-      copyNoticeTimeoutRef.current = window.setTimeout(() => {
-        setShowCopyNotice(false);
+      copySuccessTimeoutRef.current = window.setTimeout(() => {
+        setIsCopySuccess(false);
       }, 1800);
     } catch (error) {
       console.log("Copy Error:", error);
+      setIsCopySuccess(false);
     }
   }
 
   return (
-    <section className={`${theme} flex flex-col w-[360px] min-h-[330px] max-h-[510px]`}>           
-      {showCopyNotice && (
-        <div className="pointer-events-none fixed bottom-3 left-3 z-50 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-700 shadow-sm dark:border-emerald-900/80 dark:bg-emerald-950/70 dark:text-emerald-300">
-          Copied successfully
-        </div>
-      )}
+    <section className={`${theme} flex flex-col w-[360px] max-h-[550px]`}>           
       <MenuBar 
         onClickReturn={onClickReturn} 
         onClickForward={onClickForward} 
         onClickClose={onClickClose}
-        onClickRegenerate={onClickRegenerate} 
         onClickProfile={onClickProfile}
         onClickHistory={onClickHistory}
-        isSummarizing={isSummarizing}
       />
-      <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar min-h-0 h-auto">
+      <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar">
         {renderUserInterface()}
       </div>
       {currentPage === 1 && (
@@ -271,6 +265,8 @@ function App() {
           onClickCopy={onClickCopy}
           onClickDownload={onClickDownload}
           isSummarizing={isSummarizing}
+          onClickGenerate={onClickGenerate}
+          isCopySuccess={isCopySuccess}
         />
       )}
     </section>

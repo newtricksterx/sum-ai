@@ -101,7 +101,7 @@ def CreateQuery(page_content, length, regenerate, format, language):
         # OUTPUT TEMPLATE
         <h1>Title of the Summary</h1>
         <h2>Introduction</h2>
-        (write a 1 sentence introduction of the contents here)
+        <p id="introduction">(write a 1 sentence introduction of the contents here)</p>
         <h2>Summary</h2>
         (Output based on Format goes here)
 
