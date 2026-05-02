@@ -3,8 +3,7 @@ import { MenuIconSize } from '../utils/constants'
 import { X } from 'lucide-react';
 import SettingsDropdown from "./SettingsDropdown";
 import { GoHistory } from "react-icons/go";
-import { VscHome, VscAccount, VscOutput } from "react-icons/vsc";
-
+import { ReaderIcon, HomeIcon, PersonIcon } from "@radix-ui/react-icons";
 
 
 export interface MenuBarProps {
@@ -19,16 +18,16 @@ function MenuBar({onClickReturn, onClickForward, onClickClose, onClickProfile, o
   return (
     <nav className="flex flex-row gap-1 justify-between items-center border-b-[1px] border-b-gray-400 w-full">
         <Button onClick={onClickReturn} className={`p-2 rounded-3xl m-1`}  title="Go to home page">
-            <VscHome size={MenuIconSize}/>
+            <HomeIcon width={MenuIconSize} height={MenuIconSize}/>
         </Button>
         <Button onClick={onClickForward} className={`p-2 rounded-3xl m-1`} title="Go to summary page">
-            <VscOutput  size={MenuIconSize}/>
+            <ReaderIcon width={MenuIconSize} height={MenuIconSize}/>
         </Button>
         <Button onClick={onClickHistory} className="p-2 rounded-3xl m-1" title="View history">
           <GoHistory size={MenuIconSize}/>
         </Button>
         <Button className={`p-2 rounded-3xl m-1`} onClick={onClickProfile} title="Profile page">
-          <VscAccount size={MenuIconSize}/>
+          <PersonIcon width={MenuIconSize} height={MenuIconSize}/>
         </Button>
         <SettingsDropdown />
         <Button onClick={onClickClose} className="p-2 hover:bg-red-500 dark:hover:bg-red-500" title="Close extension">

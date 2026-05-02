@@ -1,6 +1,5 @@
 import React from 'react';
-import { Sparkles, Globe, FileText, WandSparkles } from 'lucide-react';
-import { Badge, Button, Card, Flex, Heading, Separator, Text, Theme } from '@radix-ui/themes';
+import { Globe, Sparkles, Type, WandSparkles } from 'lucide-react';
 import PageCard from '../components/PageCard/PageCard';
 import { useSettingsStore } from '../stores/settingsStore';
 import '../FrontPage.css';
@@ -11,94 +10,118 @@ interface FrontPageProps {
 
 const QUICK_STEPS = [
   {
-    icon: Globe,
-    text: 'Open a page you want to summarize.',
+    title: 'Open any article or page',
+    text: 'Choose the tab you want to condense before launching the flow.',
   },
   {
-    icon: Sparkles,
-    text: 'Press generate in the top menu.',
+    title: 'Generate in one click',
+    text: 'Run Generate Summary to convert long content into a scan-first result.',
   },
   {
-    icon: FileText,
-    text: 'Read, adjust style, and copy your result.',
+    title: 'Review, tune, and reuse',
+    text: 'Adjust preset options, then copy or export the summary output.',
   },
 ];
 
+const SETTING_LABELS: Record<string, string> = {
+  english: 'English',
+  french: 'French',
+  spanish: 'Spanish',
+  short: 'Short',
+  medium: 'Medium',
+  long: 'Long',
+  paragraph: 'Paragraph',
+  'bullet-point': 'Bullet Points',
+  'tl-dr-bullets': 'TL;DR + Bullets',
+  'key-takeaways': 'Key Takeaways',
+  'action-items': 'Action Items',
+  'q-and-a': 'Q&A',
+  'pros-cons': 'Pros & Cons',
+};
+
+const getSettingLabel = (value: string) => {
+  if (SETTING_LABELS[value]) {
+    return SETTING_LABELS[value];
+  }
+
+  return value.replace(/-/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+};
+
 const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate }) => {
-  const theme = useSettingsStore((state) => state.theme);
+  const language = useSettingsStore((state) => state.language);
+  const length = useSettingsStore((state) => state.length);
+  const format = useSettingsStore((state) => state.format);
 
   return (
-    <section className="front-page-shell relative flex-1 min-h-0 h-full p-3 overflow-hidden">
-      <Theme
-        appearance={theme === 'dark' ? 'dark' : 'light'}
-        accentColor="teal"
-        grayColor="slate"
-        radius="large"
-        hasBackground={false}
-        className="front-page-theme h-full"
-      >
-        <PageCard id="front-page-card" as="div" className="relative z-10 h-full p-4 font-noto">
-          <Flex id="front-page-content" direction="column" gap="3">
-            <Flex id="front-page-badge-row" justify="center">
-              <Badge color="teal" radius="full" variant="soft" className="front-badge">
-                Welcome Back
-              </Badge>
-            </Flex>
+    <main className="front-page-shell h-full overflow-y-auto custom-scrollbar px-3 py-3 font-noto">
+      <PageCard as="section" className="front-page-card p-4">
+        <header className="front-page-header">
+          <div className="front-kicker-row">
+            <p className="front-kicker">OneClick Summary</p>
+            <span className="front-status-pill">
+              <Sparkles size={11} />
+              3-step flow
+            </span>
+          </div>
 
-            <Heading
-              as="h1"
-              size="6"
-              align="center"
-              wrap="balance"
-              weight="bold"
-              className="front-heading"
-            >
-              Turn any page into a clear summary
-            </Heading>
+          <h1 className="front-title">Generate a summary from your active tab</h1>
+        </header>
 
-            <Text
-              as="p"
-              size="2"
-              color="gray"
-              align="center"
-              className="front-description"
-            >
-              Choose your format in Settings, then generate concise notes designed for quick reading.
-            </Text>
+        <section className="front-action-section" aria-label="Generate summary">
+          <button type="button" onClick={onClickGenerate} className="front-generate-btn">
+            <WandSparkles size={14} />
+            Generate Summary
+          </button>
+        </section>
 
-            <Button
-              type="button"
-              onClick={onClickGenerate}
-              size="3"
-              variant="solid"
-              color="teal"
-              highContrast
-              className="front-generate-btn"
-            >
-              <WandSparkles size={14} />
-              Generate Summary
-            </Button>
+        <section className="front-preset-panel" aria-label="Current summary preset">
+          <div className="front-section-head">
+            <p className="front-section-label">Preset Snapshot</p>
+            <p className="front-section-meta">Edit in Settings</p>
+          </div>
+          <ul className="front-preset-grid">
+            <li className="front-preset-item">
+              <span className="front-preset-key">
+                <Globe size={12} />
+                Language
+              </span>
+              <p className="front-preset-value">{getSettingLabel(language)}</p>
+            </li>
 
-            <Separator size="4" className="front-divider" />
+            <li className="front-preset-item">
+              <span className="front-preset-key">
+                <Type size={12} />
+                Length
+              </span>
+              <p className="front-preset-value">{getSettingLabel(length)}</p>
+            </li>
 
-            <Flex id="front-page-steps" direction="column" gap="2" className="front-steps">
-              {QUICK_STEPS.map(({ icon: Icon, text }, index) => (
-                <Card id={`front-step-card-${index}`} key={text} size="1" className="front-step-row">
-                  <Flex id={`front-step-row-${index}`} align="center" gap="2">
-                    <span id={`front-step-icon-${index}`} className="front-step-icon">
-                      <Icon size={13} />
-                    </span>
-                    <Text id={`front-step-text-${index}`} as="p" size="1" className="front-step-text">
-                      {text}
-                    </Text>
-                  </Flex>
-                </Card>
-              ))}
-            </Flex>
-          </Flex>
-        </PageCard>
-      </Theme>
-    </section>
+            <li className="front-preset-item">
+              <span className="front-preset-key">
+                <Sparkles size={12} />
+                Format
+              </span>
+              <p className="front-preset-value">{getSettingLabel(format)}</p>
+            </li>
+          </ul>
+        </section>
+
+        <section className="front-flow" aria-label="How summary generation works">
+          <p className="front-section-label">Process</p>
+          <ol className="front-flow-list">
+            {QUICK_STEPS.map(({ title, text }, index) => (
+              <li key={title} className="front-flow-row">
+                <span className="front-flow-index">{index + 1}</span>
+                <div className="front-flow-copy">
+                  <p className="front-flow-title">{title}</p>
+                  <p className="front-flow-text">{text}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </PageCard>
+    </main>
   );
 };
 

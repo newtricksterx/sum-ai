@@ -1,3 +1,6 @@
 # Ignore .env files in any folder
 .env
 .env.*
+
+# Ignore local impeccable product context
+/PRODUCT.md
