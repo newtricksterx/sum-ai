@@ -46,6 +46,24 @@ class TestMe(TestCase):
         self.assertEqual(me_response.json()["email"], "test@example.com")
         self.assertEqual(me_response.json()["subscription"]["plan_slug"], "free")
 
+    def test_me_does_not_expose_user_id(self):
+        payload = {
+            "email": "test@example.com",
+            "password": "StrongPassword123!",
+        }
+
+        login_response = self.client.post(
+            self.login_url,
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        me_response = self.client.get(self.me_url)
+
+        self.assertEqual(login_response.status_code, 200)
+        self.assertEqual(me_response.status_code, 200)
+        self.assertNotIn("id", me_response.json())
+
     def test_me_requires_authentication(self):
         response = self.client.get(self.me_url)
         self.assertEqual(response.status_code, 401)

@@ -48,7 +48,6 @@ class UserReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "id",
             "email",
             "subscription",
             "created_at",

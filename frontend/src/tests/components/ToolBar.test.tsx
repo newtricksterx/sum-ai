@@ -11,7 +11,7 @@ vi.mock("../../utils/states", () => ({
   CopyState: () => copyStateMock(),
 }));
 
-import ToolBar from "../../components/ToolBar";
+import ToolBar from "../../components/ToolBar/ToolBar";
 
 describe("ToolBar", () => {
   beforeEach(() => {

@@ -2,25 +2,34 @@
 import './Summary.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import MenuBar from './components/MenuBar'
-import ToolBar from './components/ToolBar'
+import ToolBar from './components/ToolBar/ToolBar'
 import { useSettingsStore } from './stores/settingsStore'
 import { GetPageFromStorage, GetSummaryFromStorage, UpdatePageStorage, UpdateSummaryStorage } from './utils/storage'
 import LoaderCircle from './components/LoaderCircle'
 import DOMPurify from 'dompurify'
-import FrontPage from './pages/FrontPage'
+import FrontPage from './pages/FrontPage/FrontPage'
 import SummaryPage from './pages/SummaryPage'
 import { summarizeActiveTab } from './services/summarizeService'
 import { getPlainTextFromHtml } from './utils/html'
 import HistoryPage from './pages/HistoryPage'
 import { useHistoryStore, type HistorySummary } from './stores/historyStore'
-import ProfilePage from './pages/ProfilePage'
+import ProfilePage from './pages/ProfilePage/ProfilePage'
 import { authInstance } from './services/axiosService'
 
 type MeResponse = {
-  id: number;
+  email?: string;
   subscription?: {
     history_limit: number | null;
   };
+};
+
+const getHistoryOwnerKeyFromEmail = (email: string | null | undefined) => {
+  if (typeof email !== "string") {
+    return "anonymous";
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  return normalizedEmail.length > 0 ? `user:${normalizedEmail}` : "anonymous";
 };
 
 
@@ -65,7 +74,7 @@ function App() {
           return;
         }
         setHistoryOwner(
-          `user:${response.data.id}`,
+          getHistoryOwnerKeyFromEmail(response.data.email),
           response.data.subscription?.history_limit ?? 1,
         );
       } catch {

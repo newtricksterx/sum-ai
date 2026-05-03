@@ -1,8 +1,8 @@
 import React from 'react';
 import { Globe, Sparkles, Type, WandSparkles } from 'lucide-react';
-import PageCard from '../components/PageCard/PageCard';
-import { useSettingsStore } from '../stores/settingsStore';
-import '../FrontPage.css';
+import PageCard from '../../components/PageCard/PageCard';
+import { useSettingsStore } from '../../stores/settingsStore';
+import './FrontPage.css';
 
 interface FrontPageProps {
   onClickGenerate: () => void;

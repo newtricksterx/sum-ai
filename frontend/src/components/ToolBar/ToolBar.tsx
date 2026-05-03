@@ -1,6 +1,6 @@
-import Button from "./Button";
+import Button from "../Button";
 import { Check, Download } from 'lucide-react';
-import { CopyState } from "../utils/states";
+import { CopyState } from "../../utils/states";
 import { GoCopy } from "react-icons/go";
 import "./ToolBar.css";
 
