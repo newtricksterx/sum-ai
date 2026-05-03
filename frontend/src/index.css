@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
 @font-face {
@@ -24,6 +24,21 @@
   line-height: 1.5;
   font-weight: 400;
   height: auto;
+  --color-bg: #f7f7f8;
+  --color-bg-elev: #efeff1;
+  --color-card: #ffffff;
+  --color-card-elev: #f4f4f5;
+  --color-text-primary: #1f1f1f;
+  --color-text-secondary: #5f5f5f;
+  --color-border: #cfcfcf;
+  --color-accent: #6f6f6f;
+  --color-accent-strong: #575757;
+  --color-action-bg: #EFBF04;
+  --color-action-bg-hover: #EFBF04;
+  --color-action-border: #EFBF04;
+  --color-action-text: #091417;
+  --color-focus-ring: color-mix(in srgb, var(--color-action-bg) 42%, transparent);
+  --color-ghost-hover: color-mix(in srgb, var(--color-accent) 18%, transparent);
   /*
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
@@ -36,6 +51,24 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.dark {
+  --color-bg: #181818;
+  --color-bg-elev: #1c1c1c;
+  --color-card: #1d1d1d;
+  --color-card-elev: #242424;
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #b0b0b0;
+  --color-border: #444444;
+  --color-accent: #888888;
+  --color-accent-strong: #9b9b9b;
+  --color-action-bg: #EFBF04;
+  --color-action-bg-hover: #EFBF04;
+  --color-action-border: #EFBF04;
+  --color-action-text: #0b1215;
+  --color-focus-ring: color-mix(in srgb, var(--color-action-bg) 46%, transparent);
+  --color-ghost-hover: color-mix(in srgb, var(--color-accent) 26%, transparent);
+}
+
 body {
   margin: 0;
   display: flex;
@@ -43,6 +76,8 @@ body {
   align-items: flex-start; 
   min-width: 360px;
   height: auto;
+  color: var(--color-text-primary);
+  background: var(--color-bg);
 }
 
 ul {
@@ -51,7 +86,7 @@ ul {
 }
 
 a {
-  color: aqua;
+  color: var(--color-accent);
 }
 
 a:hover {
@@ -59,7 +94,7 @@ a:hover {
 }
 
 a:active {
-  color: blue;
+  color: var(--color-accent-strong);
 }
 
 h1 {
@@ -78,9 +113,10 @@ input::-webkit-inner-spin-button {
 }
 
 .settings-select {
-  border: 1px solid rgb(229, 231, 235);
+  border: 1px solid var(--color-border);
   border-radius: 0.45rem;
-  background: linear-gradient(180deg, #ffffff, #f9fafb);
+  background: linear-gradient(180deg, var(--color-card), var(--color-card-elev));
+  color: var(--color-text-primary);
   padding: 0.34rem 1.7rem 0.34rem 0.55rem;
   font-size: 12px;
   line-height: 1.2;
@@ -88,39 +124,19 @@ input::-webkit-inner-spin-button {
 }
 
 .settings-select:hover {
-  border-color: rgb(203, 213, 225);
+  border-color: var(--color-accent);
 }
 
 .settings-select:focus {
   outline: none;
-  border-color: rgb(56, 189, 248);
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.18);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
 }
 
 .settings-option {
   font-weight: 500;
-  background: #ffffff;
-  color: #1f2937;
-}
-
-.dark .settings-select {
-  border-color: #3a3a3a;
-  background: linear-gradient(180deg, #262626, #222);
-  color: #e5e7eb;
-}
-
-.dark .settings-select:hover {
-  border-color: #4a4a4a;
-}
-
-.dark .settings-select:focus {
-  border-color: #2dd4bf;
-  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2);
-}
-
-.dark .settings-option {
-  background: #1f1f1f;
-  color: #e5e7eb;
+  background: var(--color-card);
+  color: var(--color-text-primary);
 }
 
 .loader-shell {
@@ -133,8 +149,8 @@ input::-webkit-inner-spin-button {
 #loader {
   height: 1.25rem; /* Using rem for better scaling than em in menus */
   width: 1.25rem;
-  border: 2px solid rgb(208, 213, 217); /* Thinner border looks more "pro" in small sizes */
-  border-top-color: rgb(78, 78, 78);
+  border: 2px solid color-mix(in srgb, var(--color-border) 88%, transparent); /* Thinner border looks more "pro" in small sizes */
+  border-top-color: var(--color-accent);
   border-radius: 50%;
   animation: spin 1s linear infinite; /* Added 'linear' for smooth rotation */
 }
@@ -143,11 +159,20 @@ input::-webkit-inner-spin-button {
   margin: 0;
   font-size: 12px;
   font-weight: 600;
-  color: rgb(78, 78, 78);
+  color: var(--color-text-secondary);
 }
 
-.dark .loader-text {
-  color: rgb(208, 213, 217);
+.ui-ghost-interactive {
+  transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.ui-ghost-interactive:hover {
+  background: var(--color-ghost-hover);
+}
+
+.ui-ghost-interactive:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
 }
 
 @keyframes spin {
@@ -155,3 +180,4 @@ input::-webkit-inner-spin-button {
     transform:rotate(360deg);
   }
 }
+

@@ -71,7 +71,7 @@ const LoginForm = ({
           disabled={isSubmitting}
           required
           placeholder="you@example.com"
-          className="w-full rounded-xl border border-slate-300/90 bg-white/90 px-3 py-2 text-[12px] text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none dark:border-[#454545] dark:bg-[#111417] dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-teal-400"
+          className="w-full rounded-xl border border-slate-300/90 bg-white/90 px-3 py-2 text-[12px] text-slate-900 placeholder:text-slate-400 focus:border-[var(--color-accent-strong)] focus:outline-none dark:border-[#454545] dark:bg-[#111417] dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-[var(--color-accent-strong)]"
         />
       </div>
 
@@ -97,7 +97,7 @@ const LoginForm = ({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-teal-400/70 bg-teal-500 px-3 py-2 text-[12px] font-semibold text-white transition-colors hover:bg-teal-600 disabled:cursor-not-allowed disabled:opacity-60 dark:border-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-action-border)] bg-[var(--color-action-bg)] px-3 py-2 text-[12px] font-semibold text-[var(--color-action-text)] transition-colors hover:bg-[var(--color-action-bg-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] disabled:cursor-not-allowed disabled:opacity-60"
       >
         <LogIn size={14} />
         {isSubmitting ? "Signing In..." : "Login"}
@@ -108,7 +108,7 @@ const LoginForm = ({
         <button
           type="button"
           onClick={onSwitchToRegister}
-          className="font-semibold text-teal-700 hover:underline dark:text-teal-300"
+          className="font-semibold text-[var(--color-accent-strong)] hover:underline"
         >
           Register
         </button>

@@ -203,11 +203,6 @@ export default function SettingsDropdown() {
 
     }, [isOpen, menuRef])
 
-    function backgroundActive() {
-        return isOpen ? "bg-gray-100 dark:bg-[#373737]" : "bg-[#eee] dark:bg-[#303030]";
-    }
-
-
     function onSaveSettings(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         UpdateLang(language);
@@ -219,7 +214,7 @@ export default function SettingsDropdown() {
 
     return (
         <div className="relative z-50" ref={menuRef}>
-            <Button onClick={onClickSettings} className={`${backgroundActive()} p-2 rounded-3xl`} title="Settings">
+            <Button onClick={onClickSettings} className="p-2 rounded-3xl m-1" title="Settings">
                 <GearIcon width={MenuIconSize} height={MenuIconSize}/>
             </Button>
             <div 

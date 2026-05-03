@@ -9,7 +9,7 @@ interface PageCardProps extends HTMLAttributes<HTMLElement> {
 }
 
 const BASE_CARD_CLASS =
-  "app-card-shell rounded-2xl border border-gray-200/80 dark:border-[#393939]";
+  "app-card-shell rounded-2xl border";
 
 export default function PageCard({
   as = "section",

@@ -1,4 +1,4 @@
-import './App.css'
+﻿import './App.css'
 import './Summary.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import MenuBar from './components/MenuBar'
@@ -12,7 +12,7 @@ import SummaryPage from './pages/SummaryPage'
 import { summarizeActiveTab } from './services/summarizeService'
 import { getPlainTextFromHtml } from './utils/html'
 import HistoryPage from './pages/HistoryPage'
-import { useHistoryStore } from './stores/historyStore'
+import { useHistoryStore, type HistorySummary } from './stores/historyStore'
 import ProfilePage from './pages/ProfilePage'
 import { authInstance } from './services/axiosService'
 
@@ -185,7 +185,7 @@ function App() {
             .pdf-export-root ul { margin: 0 0 12px 18px; padding: 0; list-style-type: disc; }
             .pdf-export-root li { margin: 0 0 6px; }
             .pdf-export-root strong { font-weight: 700; color: #111827; }
-            .pdf-export-root a { color: #0f766e; text-decoration: underline; }
+            .pdf-export-root a { color: #EFBF04; text-decoration: underline; }
           </style>
           ${cleanedContent}
         </div>
@@ -219,9 +219,9 @@ function App() {
     await Summarize(false);
   }
 
-  const onSelectHistory = (historyContent: string) => {
-    SetSummarizedContent(historyContent);
-    UpdateSummaryStorage(historyContent);
+  const onSelectHistory = (historyItem: HistorySummary) => {
+    SetSummarizedContent(historyItem.content);
+    UpdateSummaryStorage(historyItem.content);
     SetCurrentPage(1);
     UpdatePageStorage(1);
   }
@@ -249,7 +249,7 @@ function App() {
   }
 
   return (
-    <section className={`${theme} flex flex-col w-[360px] max-h-[550px]`}>           
+    <section className={`${theme} app-shell flex flex-col w-[360px] max-h-[550px]`}>
       <MenuBar 
         onClickReturn={onClickReturn} 
         onClickForward={onClickForward} 
@@ -274,3 +274,4 @@ function App() {
 }
 
 export default App
+

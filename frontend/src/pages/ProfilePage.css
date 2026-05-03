@@ -1,4 +1,4 @@
-.test-profile-page {
+﻿.test-profile-page {
   min-height: 100%;
 }
 
@@ -80,7 +80,7 @@
 
 .TabsTrigger:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.35);
+  box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.35);
 }
 
 .TabsContent {
@@ -143,8 +143,8 @@
 
 .Input:focus {
   outline: none;
-  border-color: rgba(45, 212, 191, 0.85);
-  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.22);
+  border-color: rgba(0, 240, 255, 0.85);
+  box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.22);
 }
 
 .ActionRow {
@@ -157,7 +157,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(45, 212, 191, 0.72);
+  border: 1px solid rgba(0, 240, 255, 0.72);
   border-radius: 0.75rem;
   padding: 0.5rem 0.85rem;
   min-height: 32px;
@@ -167,12 +167,12 @@
   letter-spacing: 0.01em;
   transition: background-color 140ms ease, border-color 140ms ease, transform 120ms ease, box-shadow 140ms ease;
   color: #ffffff;
-  background: #14b8a6;
+  background: #EFBF04;
   cursor: pointer;
 }
 
 .ActionSubmitButton:hover {
-  background: #0d9488;
+  background: #EFBF04;
 }
 
 .ActionSubmitButton:active {
@@ -181,7 +181,7 @@
 
 .ActionSubmitButton:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.24);
+  box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.24);
 }
 
 .dark .test-profile-kicker {
@@ -243,17 +243,91 @@
 }
 
 .dark .Input:focus {
-  border-color: rgba(45, 212, 191, 0.9);
-  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.25);
+  border-color: rgba(0, 240, 255, 0.9);
+  box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.25);
 }
 
 .dark .ActionSubmitButton {
   border-color: rgba(19, 78, 74, 0.95);
-  background: #0f766e;
+  background: #EFBF04;
 }
 
 .dark .ActionSubmitButton:hover {
-  background: #14b8a6;
+  background: #EFBF04;
+}
+
+/* Theme token overrides for consistent light/dark palette behavior. */
+.test-profile-kicker,
+.Label {
+  color: var(--color-text-secondary);
+}
+
+.test-profile-title,
+.TabsTrigger[data-state="active"],
+.Input,
+.ActionSubmitButton {
+  color: var(--color-text-primary);
+}
+
+.test-profile-subtitle,
+.Text,
+.TabsTrigger {
+  color: var(--color-text-secondary);
+}
+
+.TabsList,
+.TabsContent,
+.Input {
+  border-color: var(--color-border);
+}
+
+.TabsList {
+  background: color-mix(in srgb, var(--color-card-elev) 88%, transparent);
+}
+
+.TabsTrigger:hover {
+  color: var(--color-text-primary);
+}
+
+.TabsTrigger[data-state="active"] {
+  background: var(--color-card);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.16);
+}
+
+.TabsContent {
+  background: color-mix(in srgb, var(--color-card) 92%, transparent);
+}
+
+.Input {
+  background: color-mix(in srgb, var(--color-card) 94%, transparent);
+}
+
+.Input::placeholder {
+  color: color-mix(in srgb, var(--color-text-secondary) 70%, transparent);
+}
+
+.Input:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 70%, var(--color-border));
+}
+
+.Input:focus {
+  border-color: var(--color-accent-strong);
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+.TabsTrigger:focus-visible,
+.ActionSubmitButton:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+.ActionSubmitButton {
+  border-color: var(--color-action-border);
+  background: var(--color-action-bg);
+  color: var(--color-action-text);
+}
+
+.ActionSubmitButton:hover {
+  background: var(--color-action-bg-hover);
 }
 
 @media (max-width: 390px) {
@@ -261,3 +335,4 @@
     padding: 0.62rem;
   }
 }
+

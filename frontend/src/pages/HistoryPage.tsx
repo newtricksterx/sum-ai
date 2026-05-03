@@ -5,7 +5,7 @@ import HistoryCard from '../components/HistoryCard/HistoryCard';
 import AlertPopup from '../components/AlertPopup/AlertPopup';
 
 interface HistoryPageProps {
-  onSelectHistory: (historyContent: string) => void;
+  onSelectHistory: (historyItem: HistorySummary) => void;
 }
 
 const truncateText = (text: string, maxLength: number) => {
@@ -27,7 +27,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
   const removeSummary = useHistoryStore((state) => state.removeSummary);
 
   const onClickOpen = (item: HistorySummary) => {
-    onSelectHistory(item.content);
+    onSelectHistory(item);
   };
 
   const onClickRemove = (item: HistorySummary) => {

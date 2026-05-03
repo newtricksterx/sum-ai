@@ -1,4 +1,4 @@
-import { DropdownProps } from "../utils/interfaces";
+﻿import { DropdownProps } from "../utils/interfaces";
 import { ChevronDown } from "lucide-react";
 
 const OPTION_LABELS: Record<string, string> = {
@@ -36,11 +36,11 @@ function Dropdown({list, onChangeDropdown, title, className, value, name, id}:Dr
                     shadow-[0_1px_0_rgba(0,0,0,0.02)]
                     transition-[border-color,box-shadow,transform,background-color] duration-200 ease-out
                     motion-reduce:transition-none
-                    hover:border-gray-300 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200/80
-                    focus:-translate-y-[1px] focus:shadow-[0_3px_10px_rgba(14,165,233,0.12)]
+                    hover:border-gray-300 focus:border-[#EFBF04] focus:outline-none focus:ring-2 focus:ring-[#EFBF04]/35
+                    focus:-translate-y-[1px] focus:shadow-[0_3px_10px_rgba(0,240,255,0.18)]
                     dark:border-[#3a3a3a] dark:bg-[#232323] dark:text-gray-200 dark:hover:border-[#4a4a4a]
-                    dark:focus:border-teal-400 dark:focus:ring-teal-500/25
-                    dark:focus:shadow-[0_3px_10px_rgba(45,212,191,0.12)]
+                    dark:focus:border-[#EFBF04] dark:focus:ring-[#EFBF04]/30
+                    dark:focus:shadow-[0_3px_10px_rgba(0,240,255,0.2)]
                     ${className ?? ""}
                 `}
                 title={title}
@@ -64,8 +64,8 @@ function Dropdown({list, onChangeDropdown, title, className, value, name, id}:Dr
                 className="
                     pointer-events-none absolute right-2 top-1/2 -translate-y-1/2
                     text-gray-500 transition-[transform,color] duration-200 ease-out
-                    group-hover:text-gray-600 group-focus-within:rotate-180 group-focus-within:text-sky-500
-                    dark:text-gray-400 dark:group-hover:text-gray-300 dark:group-focus-within:text-teal-300
+                    group-hover:text-gray-600 group-focus-within:rotate-180 group-focus-within:text-[#EFBF04]
+                    dark:text-gray-400 dark:group-hover:text-gray-300 dark:group-focus-within:text-[#EFBF04]
                     motion-reduce:transition-none
                 "
             />
@@ -74,3 +74,4 @@ function Dropdown({list, onChangeDropdown, title, className, value, name, id}:Dr
 }
 
 export default Dropdown;
+

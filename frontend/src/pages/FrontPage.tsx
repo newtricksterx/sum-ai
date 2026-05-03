@@ -13,13 +13,13 @@ const QUICK_STEPS = [
     title: 'Open any article or page',
     text: 'Choose the tab you want to condense before launching the flow.',
   },
+    {
+    title: 'Customize output',
+    text: 'Set preset options to customize formats by clicking the Settings icon in the navigation bar.',
+  },
   {
     title: 'Generate in one click',
     text: 'Run Generate Summary to convert long content into a scan-first result.',
-  },
-  {
-    title: 'Review, tune, and reuse',
-    text: 'Adjust preset options, then copy or export the summary output.',
   },
 ];
 
@@ -58,21 +58,10 @@ const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate }) => {
         <header className="front-page-header">
           <div className="front-kicker-row">
             <p className="front-kicker">OneClick Summary</p>
-            <span className="front-status-pill">
-              <Sparkles size={11} />
-              3-step flow
-            </span>
           </div>
 
           <h1 className="front-title">Generate a summary from your active tab</h1>
         </header>
-
-        <section className="front-action-section" aria-label="Generate summary">
-          <button type="button" onClick={onClickGenerate} className="front-generate-btn">
-            <WandSparkles size={14} />
-            Generate Summary
-          </button>
-        </section>
 
         <section className="front-preset-panel" aria-label="Current summary preset">
           <div className="front-section-head">
@@ -106,8 +95,14 @@ const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate }) => {
           </ul>
         </section>
 
+        <section className="front-action-section" aria-label="Generate summary">
+          <button type="button" onClick={onClickGenerate} className="front-generate-btn">
+            <WandSparkles size={14} />
+            Generate Summary
+          </button>
+        </section>
+
         <section className="front-flow" aria-label="How summary generation works">
-          <p className="front-section-label">Process</p>
           <ol className="front-flow-list">
             {QUICK_STEPS.map(({ title, text }, index) => (
               <li key={title} className="front-flow-row">

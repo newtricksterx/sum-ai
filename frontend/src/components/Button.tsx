@@ -9,7 +9,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         type="button"
         ref={ref} // Assign the forwarded ref here
         className={`${className} ${
-          disabled ? "" : "hover:bg-gray-200 dark:hover:bg-[#373737] cursor-pointer"
+          disabled ? "" : "ui-ghost-interactive cursor-pointer"
         }`}
         onClick={onClick}
         title={title}

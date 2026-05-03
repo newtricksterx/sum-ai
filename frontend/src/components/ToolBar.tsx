@@ -23,7 +23,7 @@ function ToolBar({
   const canUseSummaryActions = CopyState() && !isSummarizing;
   
   return (
-    <nav className="m-1 flex w-full flex-row items-center justify-between">
+    <nav className="m-1 flex flex-row items-center justify-between">
         <span className={`toolbar-generate-shell ${isSummarizing ? "is-disabled" : ""}`}>
         <button
           type="button"
@@ -32,8 +32,8 @@ function ToolBar({
           title="Generate a new summary for the current tab"
           className={`toolbar-generate-btn inline-flex items-center justify-center gap-1 rounded-xl border px-2.5 py-1.5 text-[11px] font-semibold tracking-[0.01em] transition-colors ${
             isSummarizing
-              ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 opacity-80 dark:border-[#343434] dark:bg-[#242424] dark:text-gray-500"
-              : "cursor-pointer border-gray-300 bg-white text-gray-700 hover:bg-gray-100 dark:border-[#3a3a3a] dark:bg-[#2a2a2a] dark:text-gray-200 dark:hover:bg-[#343434]"
+              ? "toolbar-generate-btn-disabled cursor-not-allowed opacity-80"
+              : "toolbar-generate-btn-active cursor-pointer"
           }`}
         >
           Generate Summary

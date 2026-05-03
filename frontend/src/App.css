@@ -7,17 +7,27 @@
   height: auto;
 }
 
+.app-shell {
+  background: linear-gradient(
+    180deg,
+    var(--color-bg) 0%,
+    var(--color-bg-elev) 52%,
+    var(--color-bg) 100%
+  );
+  color: var(--color-text-primary);
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #888; 
+  background: var(--color-accent); 
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--color-accent-strong);
 }
 
 /*

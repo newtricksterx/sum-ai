@@ -1,4 +1,4 @@
-.alert-popup-overlay {
+﻿.alert-popup-overlay {
   position: fixed;
   inset: 0;
   z-index: 80;
@@ -47,7 +47,7 @@
   margin: 0;
   font-size: 10px;
   font-weight: 700;
-  color: #0f766e;
+  color: #EFBF04;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -99,13 +99,13 @@
 }
 
 .alert-popup-btn-confirm-primary {
-  border-color: rgba(13, 148, 136, 0.78);
-  background: #0d9488;
-  color: #ffffff;
+  border-color: var(--color-action-border);
+  background: var(--color-action-bg);
+  color: var(--color-action-text);
 }
 
 .alert-popup-btn-confirm-primary:hover {
-  background: #0f766e;
+  background: var(--color-action-bg-hover);
 }
 
 .alert-popup-overlay[data-state="open"] {
@@ -144,7 +144,7 @@
 }
 
 .dark .alert-popup-preview-title {
-  color: #5eead4;
+  color: #EFBF04;
 }
 
 .dark .alert-popup-preview-text {
@@ -171,12 +171,12 @@
 }
 
 .dark .alert-popup-btn-confirm-primary {
-  border-color: rgba(15, 118, 110, 0.95);
-  background: #0f766e;
+  border-color: var(--color-action-border);
+  background: var(--color-action-bg);
 }
 
 .dark .alert-popup-btn-confirm-primary:hover {
-  background: #14b8a6;
+  background: var(--color-action-bg-hover);
 }
 
 @keyframes alert-popup-fade-in {
@@ -218,3 +218,4 @@
     transform: translate(-50%, -48%) scale(0.98);
   }
 }
+

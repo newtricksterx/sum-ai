@@ -1,4 +1,4 @@
-.toolbar-generate-shell {
+﻿.toolbar-generate-shell {
   position: relative;
   display: inline-flex;
   border-radius: 0.9rem;
@@ -13,18 +13,12 @@
   border-radius: inherit;
   background: linear-gradient(
     110deg,
-    #ef4444,
-    #f59e0b,
-    #eab308,
-    #22c55e,
-    #06b6d4,
-    #3b82f6,
-    #8b5cf6,
-    #ec4899,
-    #ef4444
+    #EFBF04,
+    #EFBF04,
+    #EFBF04
   );
   background-size: 260% 260%;
-  animation: toolbar-rainbow-flow 2.2s ease-in-out infinite;
+  animation: toolbar-accent-flow 2.2s ease-in-out infinite;
   animation-play-state: paused;
   opacity: 0;
   transition: opacity 160ms ease;
@@ -66,7 +60,28 @@
   z-index: 1;
 }
 
-@keyframes toolbar-rainbow-flow {
+.toolbar-generate-btn-active {
+  border-color: var(--color-action-border);
+  background: var(--color-action-bg);
+  color: var(--color-action-text);
+}
+
+.toolbar-generate-btn-active:hover {
+  background: var(--color-action-bg-hover);
+}
+
+.toolbar-generate-btn-active:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+.toolbar-generate-btn-disabled {
+  border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+  background: color-mix(in srgb, var(--color-card-elev) 84%, transparent);
+  color: color-mix(in srgb, var(--color-text-secondary) 72%, transparent);
+}
+
+@keyframes toolbar-accent-flow {
   0% {
     background-position: 0% 50%;
   }
@@ -84,3 +99,4 @@
     animation: none;
   }
 }
+

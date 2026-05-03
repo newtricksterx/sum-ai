@@ -73,17 +73,33 @@ const getMockSourceUrl = async () => {
   return `${MOCK_SOURCE_URL_PREFIX}/${Date.now()}`;
 };
 
-const extractTabText = async (tabId: number) => {
+type TabContentPayload = {
+  text: string;
+};
+
+const emptyTabContent = (): TabContentPayload => ({ text: "" });
+
+const extractTabContent = async (tabId: number): Promise<TabContentPayload> => {
   const injectionResults = await chrome.scripting.executeScript({
     target: { tabId },
     func: () => {
-      const article = document.querySelector("article") || document.querySelector("main");
-      const text = article ? article.innerText : document.body.innerText;
-      return text.replace(/\s\s+/g, " ").trim().slice(0, 10000);
+      const rootElement = (document.querySelector("article, main") || document.body) as HTMLElement;
+      const normalizeText = (value: string) => value.replace(/\s\s+/g, " ").trim();
+
+      const text = normalizeText(rootElement?.innerText || document.body.innerText || "").slice(0, 10000);
+
+      return {
+        text,
+      };
     },
   });
 
-  return injectionResults?.[0]?.result ?? "";
+  const payload = injectionResults?.[0]?.result as { text?: unknown } | undefined;
+  if (!payload || typeof payload.text !== "string") {
+    return emptyTabContent();
+  }
+
+  return { text: payload.text };
 };
 
 const getErrorPayload = async (response: Response): Promise<SummarizeErrorPayload | null> => {
@@ -127,9 +143,9 @@ export const summarizeActiveTab = async ({
     };
   }
 
-  let pageText = "";
+  let tabContent = emptyTabContent();
   try {
-    pageText = await extractTabText(tab.id);
+    tabContent = await extractTabContent(tab.id);
   } catch (error) {
     console.log("Script Injection Error:", error);
     return {
@@ -141,7 +157,7 @@ export const summarizeActiveTab = async ({
     };
   }
 
-  if (!pageText) {
+  if (!tabContent.text) {
     return {
       html: buildErrorSummaryHtml("No readable content", "Could not extract readable text from this page."),
       isError: true,
@@ -154,7 +170,7 @@ export const summarizeActiveTab = async ({
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        content: pageText,
+        content: tabContent.text,
         length,
         regenerate,
         format,
