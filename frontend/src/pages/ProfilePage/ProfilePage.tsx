@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import axios from "axios";
-import { CalendarClock, Clock3, LogOut, Mail, ShieldCheck, Sparkles, UserRound } from "lucide-react";
+import { CalendarClock, Clock3, LogOut, ShieldCheck } from "lucide-react";
 import PageCard from '../../components/PageCard/PageCard';
 import * as Tabs from "@radix-ui/react-tabs";
 import "./ProfilePage.css";
@@ -21,6 +21,7 @@ type UserProfile = {
     summary_limit: number | null;
     summaries_used?: number;
     history_limit: number | null;
+    character_limit: number | null;
   };
   created_at: string;
   updated_at: string;
@@ -100,17 +101,17 @@ const formatLimit = (value: number | null | undefined) => {
   return "Unavailable";
 };
 
-const formatSummariesLeft = (
-  summaryLimit: number | null | undefined,
-  summariesUsed: number | undefined,
-) => {
-  if (summaryLimit === null) {
-    return "Unlimited";
+const formatWordLimit = (characterLimit: number | null | undefined) => {
+  if (characterLimit === null) {
+    return "Unlimited words";
   }
 
-  if (typeof summaryLimit === "number") {
-    const used = typeof summariesUsed === "number" ? summariesUsed : 0;
-    return Math.max(summaryLimit - used, 0).toLocaleString();
+  if (characterLimit === 10000) {
+    return "1,500 words";
+  }
+
+  if (characterLimit === 30000) {
+    return "5,000 words";
   }
 
   return "Unavailable";
@@ -360,10 +361,7 @@ const ProfilePage: React.FC = () => {
       userProfile.subscription?.summaries_used,
     );
     const planName = userProfile.subscription?.plan_name ?? "Unavailable";
-    const summariesLeft = formatSummariesLeft(
-      userProfile.subscription?.summary_limit,
-      userProfile.subscription?.summaries_used,
-    );
+    const wordLimit = formatWordLimit(userProfile.subscription?.character_limit);
     const historyLimit = formatLimit(userProfile.subscription?.history_limit);
     const memberSince = formatDate(userProfile.created_at);
     const updatedAt = formatDate(userProfile.updated_at);
@@ -375,7 +373,7 @@ const ProfilePage: React.FC = () => {
             <p className="profile-account-kicker">Account</p>
             <h1 className="profile-account-title">Profile Overview</h1>
             <p className="profile-account-subtitle">
-              Key status, limits, and activity for your Summary.AI account.
+              Key status, limits, and activity for your account.
             </p>
           </header>
 
@@ -396,7 +394,6 @@ const ProfilePage: React.FC = () => {
               <div className="profile-identity-top">
                 <div className="profile-identity-main">
                   <span className="profile-avatar-badge" aria-hidden="true">
-                    <UserRound size={14} />
                     <span>{profileInitial}</span>
                   </span>
 
@@ -414,10 +411,6 @@ const ProfilePage: React.FC = () => {
 
               <div className="profile-identity-meta">
                 <span className="profile-identity-meta-item">
-                  <Mail size={12} />
-                  Verified contact email
-                </span>
-                <span className="profile-identity-meta-item">
                   <Clock3 size={12} />
                   Updated {updatedAt}
                 </span>
@@ -432,9 +425,9 @@ const ProfilePage: React.FC = () => {
               </article>
 
               <article className="profile-metric-card">
-                <p className="profile-metric-label">Summaries Left</p>
-                <p className="profile-metric-value">{summariesLeft}</p>
-                <p className="profile-metric-meta">Available this cycle</p>
+                <p className="profile-metric-label">Up To</p>
+                <p className="profile-metric-value">{wordLimit}</p>
+                <p className="profile-metric-meta">Extracted Per Request</p>
               </article>
 
               <article className="profile-metric-card">
@@ -466,11 +459,6 @@ const ProfilePage: React.FC = () => {
               )}
 
               <p className="profile-usage-copy">{usage.detail}</p>
-
-              <div className="profile-usage-footnote">
-                <Sparkles size={12} />
-                <span>Usage is refreshed after each completed summary request.</span>
-              </div>
             </section>
 
             <div className="profile-action-row">

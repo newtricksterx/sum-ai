@@ -171,6 +171,7 @@ export const summarizeActiveTab = async ({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         content: tabContent.text,
+        source_url: tab.url ?? null,
         length,
         regenerate,
         format,

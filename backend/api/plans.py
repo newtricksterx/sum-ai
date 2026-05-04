@@ -5,7 +5,8 @@ PLANS = {
         "currency": "usd",
         "billing_interval": "monthly",
         "summary_limit": 2,
-        "history_limit": 3
+        "history_limit": 3,
+        "character_limit": 10000,
 
     },
     "standard": {
@@ -14,16 +15,18 @@ PLANS = {
         "currency": "usd",
         "billing_interval": "monthly",
         "summary_limit": 300,
-        "history_limit": 5
+        "history_limit": 5,
+        "character_limit": 30000,
 
     },
     "pro": {
         "name": "Pro",
-        "price": 499,
+        "price": 999,
         "currency": "usd",
         "billing_interval": "monthly",
         "summary_limit": None,
-        "history_limit": 10
+        "history_limit": 10,
+        "character_limit": None
 
     },
 }
@@ -38,6 +41,9 @@ def get_summary_limit(slug: str) -> int | None:
 
 def get_history_limit(slug: str) -> int | None:
     return get_plan(slug)["history_limit"]
+
+def get_character_limit(slug: str) -> int | None:
+    return get_plan(slug)["character_limit"]
 
 def get_billing_interval(slug: str) -> str:
     return get_plan(slug)["billing_interval"]

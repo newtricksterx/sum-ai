@@ -7,9 +7,12 @@ import time
 from bs4 import BeautifulSoup
 from google import genai
 
+from api.plans import get_character_limit
+
 DEBUG_MODE = os.getenv("DEBUG", "False").lower() == "true"
 ECHO_PROMPT_MODE = os.getenv("GEMINI_ECHO_PROMPT", "False").lower() == "true"
-MAX_INPUT_CHARS = 10000
+# Default for anonymous requests and fallbacks (Free plan).
+MAX_INPUT_CHARS = get_character_limit("free") or 10000
 
 logger = logging.getLogger(__name__)
 
@@ -71,8 +74,11 @@ def _clean_ai_output(result):
     cleaned = re.sub(r"^\* (.*)$", r"<li>\1</li>", cleaned, flags=re.M)
     return cleaned
 
-def CreateQuery(page_content, length, regenerate, format, language):
-    text = _to_text(page_content)[:MAX_INPUT_CHARS]
+def CreateQuery(page_content, length, regenerate, format, language, max_input_chars=MAX_INPUT_CHARS):
+    text = _to_text(page_content)
+    if isinstance(max_input_chars, int) and max_input_chars > 0:
+        text = text[:max_input_chars]
+
     if not text:
         raise ValueError("Cannot summarize empty content.")
 
@@ -135,11 +141,18 @@ def QueryAI(query):
         raise RuntimeError("Gemini summary request failed.") from exc
 
    
-def SummarizeContent(content, length, regenerate, format, language):
+def SummarizeContent(content, length, regenerate, format, language, max_input_chars=MAX_INPUT_CHARS):
     logger.debug("SummarizeContent request received at %s", time.time())
 
     try:
-        query = CreateQuery(content, length, regenerate, format, language)
+        query = CreateQuery(
+            content,
+            length,
+            regenerate,
+            format,
+            language,
+            max_input_chars=max_input_chars,
+        )
         # Keep DEBUG for local diagnostics, but only echo prompts when explicitly requested.
         result = query if ECHO_PROMPT_MODE else QueryAI(query=query)
         return _clean_ai_output(result)

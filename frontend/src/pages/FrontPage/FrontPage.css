@@ -10,23 +10,6 @@
   overflow: hidden;
 }
 
-.front-page-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(
-      120px 120px at 92% -6%,
-      color-mix(in srgb, var(--color-accent) 22%, transparent),
-      transparent 74%
-    ),
-    radial-gradient(
-      110px 110px at -8% 102%,
-      color-mix(in srgb, var(--color-accent) 14%, transparent),
-      transparent 72%
-    );
-  pointer-events: none;
-}
 
 .front-page-header {
   margin: 0;
@@ -278,20 +261,6 @@
   font-size: 11px;
   line-height: 1.4;
   color: #4b5563;
-}
-
-.dark .front-page-card::before {
-  background:
-    radial-gradient(
-      120px 120px at 92% -6%,
-      color-mix(in srgb, var(--color-accent) 26%, transparent),
-      transparent 74%
-    ),
-    radial-gradient(
-      110px 110px at -8% 102%,
-      color-mix(in srgb, var(--color-accent) 18%, transparent),
-      transparent 72%
-    );
 }
 
 .dark .front-kicker {

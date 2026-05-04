@@ -39,6 +39,7 @@ class ThrottleResponseTest(TestCase):
     def test_throttle_returns_structured_response(self, _mock_summarize):
         payload = {
             "content": "some page content",
+            "source_url": "https://example.com/article",
             "length": "short",
             "regenerate": False,
             "format": "bullet-point",
@@ -83,6 +84,7 @@ class SummarizeEndpointTest(TestCase):
             self.url,
             data=json.dumps(
                 {
+                    "source_url": "https://example.com/article",
                     "length": "short",
                     "regenerate": False,
                     "format": "bullet-point",
@@ -100,6 +102,7 @@ class SummarizeEndpointTest(TestCase):
     def test_summarize_passes_arguments_to_summarizer(self, mock_summarize):
         payload = {
             "content": "My source text",
+            "source_url": "https://example.com/article",
             "length": "short",
             "regenerate": True,
             "format": "bullet-point",
@@ -120,6 +123,7 @@ class SummarizeEndpointTest(TestCase):
             True,
             "bullet-point",
             "english",
+            max_input_chars=10000,
         )
 
 
@@ -157,7 +161,12 @@ class AuthenticatedSummaryLimitTest(TestCase):
 
         response = self.client.post(
             self.url,
-            data=json.dumps({"content": "My source text"}),
+            data=json.dumps(
+                {
+                    "content": "My source text",
+                    "source_url": "https://example.com/article",
+                }
+            ),
             content_type="application/json",
         )
 
@@ -173,7 +182,12 @@ class AuthenticatedSummaryLimitTest(TestCase):
 
         response = self.client.post(
             self.url,
-            data=json.dumps({"content": "My source text"}),
+            data=json.dumps(
+                {
+                    "content": "My source text",
+                    "source_url": "https://example.com/article",
+                }
+            ),
             content_type="application/json",
         )
 
@@ -200,7 +214,12 @@ class AuthenticatedSummaryLimitTest(TestCase):
 
         response = self.client.post(
             self.url,
-            data=json.dumps({"content": "My source text"}),
+            data=json.dumps(
+                {
+                    "content": "My source text",
+                    "source_url": "https://example.com/article",
+                }
+            ),
             content_type="application/json",
         )
 
@@ -208,3 +227,43 @@ class AuthenticatedSummaryLimitTest(TestCase):
         self.subscription.refresh_from_db()
         self.assertEqual(self.subscription.summaries_used, 1)
         self.assertGreater(self.subscription.current_period_start, expired_period_start)
+
+    @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
+    def test_authenticated_summary_uses_standard_plan_character_limit(self, mock_summarize):
+        self._login()
+        self.subscription.plan_slug = "standard"
+        self.subscription.save(update_fields=["plan_slug", "updated_at"])
+
+        response = self.client.post(
+            self.url,
+            data=json.dumps(
+                {
+                    "content": "My source text",
+                    "source_url": "https://example.com/article",
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(mock_summarize.call_args.kwargs["max_input_chars"], 30000)
+
+    @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
+    def test_authenticated_summary_uses_unlimited_character_limit_for_pro(self, mock_summarize):
+        self._login()
+        self.subscription.plan_slug = "pro"
+        self.subscription.save(update_fields=["plan_slug", "updated_at"])
+
+        response = self.client.post(
+            self.url,
+            data=json.dumps(
+                {
+                    "content": "My source text",
+                    "source_url": "https://example.com/article",
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(mock_summarize.call_args.kwargs["max_input_chars"])

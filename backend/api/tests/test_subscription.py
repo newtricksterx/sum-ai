@@ -21,6 +21,7 @@ class SubscriptionTest(TestCase):
         self.assertEqual(subscription.plan_slug, "free")
         self.assertEqual(subscription.summary_limit, 2)
         self.assertEqual(subscription.history_limit, 3)
+        self.assertEqual(subscription.character_limit, 10000)
         self.assertEqual(subscription.summaries_used, 0)
         self.assertLessEqual(subscription.current_period_start, timezone.now())
         self.assertIsNone(subscription.current_period_end)
@@ -39,6 +40,7 @@ class SubscriptionTest(TestCase):
         self.assertEqual(subscription.plan_slug, "standard")
         self.assertEqual(subscription.summary_limit, 300)
         self.assertEqual(subscription.history_limit, 5)
+        self.assertEqual(subscription.character_limit, 30000)
         
 
     def test_set_subscription_pro(self):
@@ -48,5 +50,5 @@ class SubscriptionTest(TestCase):
         self.assertEqual(subscription.plan_slug, "pro")
         self.assertEqual(subscription.summary_limit, None)
         self.assertEqual(subscription.history_limit, 10)
+        self.assertIsNone(subscription.character_limit)
         
-

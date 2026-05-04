@@ -8,6 +8,7 @@ from django.utils import timezone
 from api.plans import (
     PLANS,
     get_billing_interval,
+    get_character_limit,
     get_history_limit,
     get_plan,
     get_summary_limit,
@@ -55,6 +56,10 @@ class Subscription(models.Model):
     @property
     def history_limit(self) -> int | None:
         return get_history_limit(self.plan_slug)
+
+    @property
+    def character_limit(self) -> int | None:
+        return get_character_limit(self.plan_slug)
 
     @property
     def billing_interval(self) -> str:

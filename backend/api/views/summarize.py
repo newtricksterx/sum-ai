@@ -6,11 +6,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.models.subscription import Subscription
+from api.plans import get_character_limit
 from scripts import SumAI
-
+from scripts.YouTubeTools import isYouTubeURL, getTranscript
 
 class SummarizeText(APIView):
-    def _reserve_summary_slot(self, user) -> tuple[int | None, Response | None]:
+    def _reserve_summary_slot(self, user) -> tuple[int | None, int | None, Response | None]:
         now = timezone.now()
 
         with transaction.atomic():
@@ -37,6 +38,7 @@ class SummarizeText(APIView):
             if summary_limit is not None and subscription.summaries_used >= summary_limit:
                 return (
                     None,
+                    None,
                     Response(
                         {
                             "error": "summary_limit_reached",
@@ -54,7 +56,7 @@ class SummarizeText(APIView):
                 summaries_used=F("summaries_used") + 1
             )
 
-        return subscription.pk, None
+        return subscription.pk, subscription.character_limit, None
 
     def _release_summary_slot(self, subscription_id: int) -> None:
         Subscription.objects.filter(
@@ -63,27 +65,51 @@ class SummarizeText(APIView):
         ).update(summaries_used=F("summaries_used") - 1)
 
     def post(self, request):
-        content = request.data.get("content")
+        source_url = request.data.get("source_url")
+        if not source_url:
+            return Response(
+                {"error": "Missing required field: 'source_url'"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        if not content:
+        content = request.data.get("content")
+        content_for_summary = content
+
+        if isYouTubeURL(source_url):
+            try:
+                content_for_summary = getTranscript(source_url)
+            except Exception:
+                return Response(
+                    {
+                        "error": "youtube_transcript_unavailable",
+                        "message": "Could not fetch a transcript for this YouTube video.",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        if not content_for_summary:
             return Response(
                 {"error": "Missing required field: 'content'"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        character_limit = get_character_limit("free")
         reserved_subscription_id = None
         if request.user.is_authenticated:
-            reserved_subscription_id, limit_error = self._reserve_summary_slot(request.user)
+            reserved_subscription_id, character_limit, limit_error = self._reserve_summary_slot(
+                request.user
+            )
             if limit_error is not None:
                 return limit_error
 
         try:
             summary = SumAI.SummarizeContent(
-                request.data.get("content"),
+                content_for_summary,
                 request.data.get("length"),
                 request.data.get("regenerate"),
                 request.data.get("format"),
                 request.data.get("language"),
+                max_input_chars=character_limit, # type: ignore
             )
         except Exception:
             if reserved_subscription_id is not None:
