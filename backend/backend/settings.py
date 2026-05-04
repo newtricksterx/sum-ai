@@ -174,10 +174,11 @@ if ANON_THROTTLE_SUMMARIES_PERIOD not in {"sec", "min", "hour", "day"}:
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'api.exception_handlers.custom_exception_handler',
     'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': f'{ANON_THROTTLE_SUMMARIES_COUNT}/{ANON_THROTTLE_SUMMARIES_PERIOD}',
+        'auth': '1/sec'
     },
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'api.authentication.CookieJWTAuthentication',
@@ -196,4 +197,3 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_PATH': '/',        # The path of the auth cookie.
     'AUTH_COOKIE_SAMESITE': 'None',  # Whether to set the flag restricting cookie leaks on cross-site requests.
 }
-

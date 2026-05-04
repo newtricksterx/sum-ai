@@ -3,6 +3,7 @@ from django.db.models import F
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 
 from api.models.subscription import Subscription
@@ -11,6 +12,9 @@ from scripts import SumAI
 from scripts.YouTubeTools import isYouTubeURL, getTranscript
 
 class SummarizeText(APIView):
+    # Limit only anonymous requests; authenticated users continue using subscription-based limits.
+    throttle_classes = [AnonRateThrottle]
+
     def _reserve_summary_slot(self, user) -> tuple[int | None, int | None, Response | None]:
         now = timezone.now()
 

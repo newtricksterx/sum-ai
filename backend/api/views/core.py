@@ -32,6 +32,7 @@ class ApiRootView(APIView):
 
 class MeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_scope = 'auth'
 
     def get(self, request):
         return Response(UserReadSerializer(request.user).data)

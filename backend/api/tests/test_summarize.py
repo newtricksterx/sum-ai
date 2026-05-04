@@ -267,3 +267,29 @@ class AuthenticatedSummaryLimitTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIsNone(mock_summarize.call_args.kwargs["max_input_chars"])
+
+    @patch.dict("rest_framework.throttling.AnonRateThrottle.THROTTLE_RATES", {"anon": "1/min"})
+    @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
+    def test_authenticated_summary_is_not_limited_by_anon_throttle(self, _mock_summarize):
+        self._login()
+        self.subscription.plan_slug = "pro"
+        self.subscription.save(update_fields=["plan_slug", "updated_at"])
+
+        payload = {
+            "content": "My source text",
+            "source_url": "https://example.com/article",
+        }
+
+        first_response = self.client.post(
+            self.url,
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        second_response = self.client.post(
+            self.url,
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        self.assertEqual(first_response.status_code, 200)
+        self.assertEqual(second_response.status_code, 200)

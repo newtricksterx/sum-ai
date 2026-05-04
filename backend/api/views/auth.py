@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.throttling import ScopedRateThrottle
 
 from api.jwt_tokens import _get_tokens_for_user
 from api.serializers import (
@@ -21,12 +22,13 @@ User = get_user_model()
 class RegisterUserView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_scope = 'auth'
 
 
 class LogoutUserView(APIView):
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
-    throttle_classes = []
+    throttle_scope = 'auth'
 
     def post(self, request):
         access_cookie_name = settings.SIMPLE_JWT["AUTH_COOKIE"]
@@ -63,7 +65,8 @@ class LogoutUserView(APIView):
 class CookieTokenRefreshView(APIView):
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
-    throttle_classes = []
+    throttle_scope = 'auth'
+
 
     def post(self, request):
         refresh_cookie_name = settings.SIMPLE_JWT["AUTH_REFRESH_COOKIE"]
@@ -123,6 +126,7 @@ class CookieTokenRefreshView(APIView):
 class LoginUserView(APIView):
     serializer_class = LoginSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_scope = 'auth'
 
     def post(self, request):
         email = request.data.get("email")
