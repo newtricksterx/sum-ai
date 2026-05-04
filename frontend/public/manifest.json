@@ -9,7 +9,10 @@
     },
     "version": "1.0.1",
     "action": {
-        "default_popup": "index.html"
+        "default_title": "Open Super Simple Summarizer"
+    },
+    "background": {
+        "service_worker": "background.js"
     },
     "permissions": [
         "activeTab",

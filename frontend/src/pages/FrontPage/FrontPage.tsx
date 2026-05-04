@@ -53,7 +53,7 @@ const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate }) => {
   const format = useSettingsStore((state) => state.format);
 
   return (
-    <main className="front-page-shell h-full overflow-y-auto custom-scrollbar px-3 py-3 font-noto">
+    <main className="front-page-shell h-full overflow-y-auto custom-scrollbar px-2 py-2 font-noto">
       <PageCard as="section" className="front-page-card p-4">
         <header className="front-page-header">
           <div className="front-kicker-row">

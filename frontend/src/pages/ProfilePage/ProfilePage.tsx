@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import axios from "axios";
-import { CalendarClock, Clock3, LogOut, ShieldCheck } from "lucide-react";
 import PageCard from '../../components/PageCard/PageCard';
 import * as Tabs from "@radix-ui/react-tabs";
 import "./ProfilePage.css";
@@ -25,13 +24,6 @@ type UserProfile = {
   };
   created_at: string;
   updated_at: string;
-};
-
-type UsageDetails = {
-  isTracked: boolean;
-  percentage: number | null;
-  detail: string;
-  meterLabel: string;
 };
 
 const DEFAULT_REQUEST_ERROR = "We could not complete that request. Please try again.";
@@ -101,63 +93,33 @@ const formatLimit = (value: number | null | undefined) => {
   return "Unavailable";
 };
 
-const formatWordLimit = (characterLimit: number | null | undefined) => {
+const deriveWordLimit = (characterLimit: number | null | undefined) => {
   if (characterLimit === null) {
-    return "Unlimited words";
+    return "Unlimited";
   }
 
-  if (characterLimit === 10000) {
+  if (typeof characterLimit !== "number") {
+    return "Unavailable";
+  }
+
+  if (characterLimit <= 10000) {
     return "1,500 words";
   }
 
-  if (characterLimit === 30000) {
+  if (characterLimit <= 30000) {
     return "5,000 words";
   }
 
-  return "Unavailable";
+  return `${Math.round(characterLimit / 6.5).toLocaleString()} words`;
 };
 
-const getUsageDetails = (
-  summaryLimit: number | null | undefined,
-  summariesUsed: number | undefined,
-): UsageDetails => {
-  if (typeof summaryLimit === "number") {
-    if (summaryLimit <= 0) {
-      return {
-        isTracked: true,
-        percentage: 0,
-        detail: "No summary quota is currently available for this cycle.",
-        meterLabel: "0 / 0",
-      };
-    }
-
-    const usedRaw = typeof summariesUsed === "number" ? summariesUsed : 0;
-    const used = Math.max(0, Math.min(usedRaw, summaryLimit));
-    const percentage = Math.round((used / summaryLimit) * 100);
-
-    return {
-      isTracked: true,
-      percentage,
-      detail: `${used.toLocaleString()} of ${summaryLimit.toLocaleString()} summaries used in this billing cycle.`,
-      meterLabel: `${used.toLocaleString()} / ${summaryLimit.toLocaleString()}`,
-    };
-  }
-
-  if (summaryLimit === null) {
-    return {
-      isTracked: false,
-      percentage: null,
-      detail: "Unlimited plan active, summary usage is not capped.",
-      meterLabel: "Unlimited",
-    };
-  }
-
-  return {
-    isTracked: false,
-    percentage: null,
-    detail: "Usage details are currently unavailable.",
-    meterLabel: "Unavailable",
-  };
+const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
 };
 
 const getHistoryOwnerKeyFromEmail = (email: string | null | undefined) => {
@@ -230,14 +192,6 @@ const ProfilePage: React.FC = () => {
     const emailLocalPart = userProfile.email.split("@")[0]?.trim();
     return emailLocalPart && emailLocalPart.length > 0 ? emailLocalPart : userProfile.email;
   }, [userProfile]);
-
-  const profileInitial = useMemo(() => {
-    if (displayName.length === 0) {
-      return "U";
-    }
-
-    return displayName.charAt(0).toUpperCase();
-  }, [displayName]);
 
   const setAuthenticatedUser = (profile: UserProfile) => {
     setUserProfile(profile);
@@ -341,7 +295,7 @@ const ProfilePage: React.FC = () => {
 
   if (isInitializing) {
     return (
-      <main className="h-full overflow-y-auto custom-scrollbar px-3 py-3 font-noto">
+      <main className="h-full overflow-y-auto custom-scrollbar px-2 py-2 font-noto">
         <PageCard as="section" className="p-4">
           <div className="animate-pulse space-y-3">
             <div className="h-3 w-20 rounded bg-gray-300 dark:bg-[#3a3a3a]" />
@@ -356,28 +310,38 @@ const ProfilePage: React.FC = () => {
   }
 
   if (userProfile) {
-    const usage = getUsageDetails(
-      userProfile.subscription?.summary_limit,
-      userProfile.subscription?.summaries_used,
-    );
     const planName = userProfile.subscription?.plan_name ?? "Unavailable";
-    const wordLimit = formatWordLimit(userProfile.subscription?.character_limit);
-    const historyLimit = formatLimit(userProfile.subscription?.history_limit);
+    const wordLimit = deriveWordLimit(userProfile.subscription?.character_limit);
+    const historyLimitRaw = userProfile.subscription?.history_limit;
+    const historyLimit =
+      typeof historyLimitRaw === "number"
+        ? `${historyLimitRaw.toLocaleString()} items`
+        : formatLimit(historyLimitRaw);
+
+    const summaryLimit = userProfile.subscription?.summary_limit;
+    const summariesUsed = Math.max(0, userProfile.subscription?.summaries_used ?? 0);
+    const isUnlimitedUsage = summaryLimit === null;
+    const boundedSummaryLimit =
+      typeof summaryLimit === "number" ? Math.max(0, summaryLimit) : null;
+    const usagePercentage =
+      boundedSummaryLimit && boundedSummaryLimit > 0
+        ? Math.min(100, (Math.min(summariesUsed, boundedSummaryLimit) / boundedSummaryLimit) * 100)
+        : 0;
+    const usageClass =
+      usagePercentage >= 80
+        ? " pp-bar-fill--high"
+        : usagePercentage >= 50
+          ? " pp-bar-fill--mid"
+          : "";
+
     const memberSince = formatDate(userProfile.created_at);
     const updatedAt = formatDate(userProfile.updated_at);
+    const initials = getInitials(displayName || "User") || "U";
 
     return (
-      <main className="profile-page-shell h-full overflow-y-auto custom-scrollbar px-3 py-3 font-noto">
-        <PageCard as="section" className="profile-account-card p-4">
-          <header className="profile-account-header">
-            <p className="profile-account-kicker">Account</p>
-            <h1 className="profile-account-title">Profile Overview</h1>
-            <p className="profile-account-subtitle">
-              Key status, limits, and activity for your account.
-            </p>
-          </header>
-
-          <div className="profile-account-content">
+      <main className="profile-page-shell h-full overflow-y-auto custom-scrollbar px-2 py-2 font-noto">
+        <PageCard as="section" className="profile-account-card p-3">
+          <div className="pp-root">
             {infoMessage && (
               <p className="profile-status-message profile-status-message--success">
                 {infoMessage}
@@ -390,86 +354,99 @@ const ProfilePage: React.FC = () => {
               </p>
             )}
 
-            <section className="profile-identity-panel" aria-label="Account identity">
-              <div className="profile-identity-top">
-                <div className="profile-identity-main">
-                  <span className="profile-avatar-badge" aria-hidden="true">
-                    <span>{profileInitial}</span>
-                  </span>
+            <div className="pp-card pp-identity" aria-label="Account identity">
+              <div className="pp-avatar" aria-hidden="true">
+                {initials}
+              </div>
 
-                  <div className="profile-identity-text">
-                    <p className="profile-identity-name">{displayName}</p>
-                    <p className="profile-identity-email">{userProfile.email}</p>
-                  </div>
-                </div>
-
-                <span className="profile-active-pill">
-                  <ShieldCheck size={12} />
+              <div className="pp-identity-info">
+                <div className="pp-display-name">{displayName}</div>
+                <div className="pp-email">{userProfile.email}</div>
+                <span className="pp-status pp-status--active">
+                  <span className="pp-status-dot" />
                   Active
                 </span>
               </div>
+            </div>
 
-              <div className="profile-identity-meta">
-                <span className="profile-identity-meta-item">
-                  <Clock3 size={12} />
-                  Updated {updatedAt}
+            <section className="pp-card pp-section" aria-label="Plan and limits">
+              <p className="pp-section-title">Plan &amp; Limits</p>
+              <div className="pp-stat-row">
+                <span className="pp-stat-label">Plan</span>
+                <span className="pp-stat-value">
+                  <span className="pp-plan-badge">{planName}</span>
                 </span>
               </div>
-            </section>
 
-            <section className="profile-metrics-grid" aria-label="Subscription metrics">
-              <article className="profile-metric-card">
-                <p className="profile-metric-label">Plan</p>
-                <p className="profile-metric-value">{planName}</p>
-                <p className="profile-metric-meta">Current subscription tier</p>
-              </article>
-
-              <article className="profile-metric-card">
-                <p className="profile-metric-label">Up To</p>
-                <p className="profile-metric-value">{wordLimit}</p>
-                <p className="profile-metric-meta">Extracted Per Request</p>
-              </article>
-
-              <article className="profile-metric-card">
-                <p className="profile-metric-label">History Capacity</p>
-                <p className="profile-metric-value">{historyLimit}</p>
-                <p className="profile-metric-meta">Saved summary slots</p>
-              </article>
-
-              <article className="profile-metric-card">
-                <p className="profile-metric-label">Member Since</p>
-                <p className="profile-metric-value profile-metric-value--icon">
-                  <CalendarClock size={12} />
-                  {memberSince}
-                </p>
-                <p className="profile-metric-meta">Account creation date</p>
-              </article>
-            </section>
-
-            <section className="profile-usage-panel" aria-label="Summary usage details">
-              <div className="profile-usage-head">
-                <p className="profile-usage-title">Summary Usage</p>
-                <span className="profile-usage-meter">{usage.meterLabel}</span>
+              <div className="pp-stat-row">
+                <span className="pp-stat-label">Word limit</span>
+                <span className="pp-stat-value">{wordLimit}</span>
               </div>
 
-              {usage.isTracked && usage.percentage !== null && (
-                <div className="profile-usage-track" role="img" aria-label={`Summary usage ${usage.percentage}%`}>
-                  <div className="profile-usage-fill" style={{ width: `${usage.percentage}%` }} />
-                </div>
-              )}
-
-              <p className="profile-usage-copy">{usage.detail}</p>
+              <div className="pp-stat-row">
+                <span className="pp-stat-label">History capacity</span>
+                <span className="pp-stat-value">{historyLimit}</span>
+              </div>
             </section>
 
-            <div className="profile-action-row">
+            <section className="pp-card pp-section" aria-label="Usage this cycle">
+              <div className="pp-usage">
+                <div className="pp-usage-header">
+                  <span className="pp-stat-label">Usage this cycle</span>
+                  <span className={`pp-usage-count${usagePercentage >= 80 ? " pp-usage-count--high" : ""}`}>
+                    {isUnlimitedUsage ? (
+                      <>
+                        {summariesUsed.toLocaleString()}
+                        <span className="pp-usage-cap">uncapped</span>
+                      </>
+                    ) : (
+                      <>
+                        {Math.min(summariesUsed, boundedSummaryLimit ?? summariesUsed).toLocaleString()}
+                        <span className="pp-usage-sep">/</span>
+                        {(boundedSummaryLimit ?? 0).toLocaleString()}
+                      </>
+                    )}
+                  </span>
+                </div>
+
+                {isUnlimitedUsage ? (
+                  <div className="pp-bar-track pp-bar-track--unlimited">
+                    <div className="pp-bar-fill pp-bar-fill--unlimited" />
+                  </div>
+                ) : (
+                  <div
+                    className="pp-bar-track"
+                    role="progressbar"
+                    aria-valuenow={usagePercentage}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  >
+                    <div className={`pp-bar-fill${usageClass}`} style={{ width: `${usagePercentage}%` }} />
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="pp-card pp-section pp-section--dates" aria-label="Account dates">
+              <div className="pp-stat-row">
+                <span className="pp-stat-label">Member since</span>
+                <span className="pp-stat-value">{memberSince}</span>
+              </div>
+
+              <div className="pp-stat-row">
+                <span className="pp-stat-label">Last updated</span>
+                <span className="pp-stat-value">{updatedAt}</span>
+              </div>
+            </section>
+
+            <div className="pp-actions">
               <button
                 type="button"
                 onClick={handleLogout}
                 disabled={isSubmitting}
-                className="profile-logout-button"
+                className="pp-logout-btn"
               >
-                <LogOut size={14} />
-                {isSubmitting ? "Signing Out..." : "Logout"}
+                {isSubmitting ? "Signing out..." : "Log out"}
               </button>
             </div>
           </div>
@@ -479,7 +456,7 @@ const ProfilePage: React.FC = () => {
   }
 
   return (
-    <main className="test-profile-page px-3 py-3 font-noto">
+    <main className="test-profile-page px-2 py-2 font-noto">
       <PageCard className="test-profile-card p-4">
         <header className="test-profile-header">
           <p className="test-profile-kicker">Account</p>

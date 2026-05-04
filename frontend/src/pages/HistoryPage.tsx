@@ -39,7 +39,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
   };
 
   return (
-    <div className="relative px-3 py-3 font-noto">
+    <div className="relative px-2 py-2 font-noto">
       <div className="flex items-center justify-between mb-3">
         <h1 className="text-[16px] font-semibold text-slate-900 dark:text-slate-100 !mb-0">Summary History</h1>
         <AlertPopup

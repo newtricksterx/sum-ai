@@ -51,17 +51,43 @@ const isMockModeEnabled = () =>
   import.meta.env.VITE_DEV === "true" ||
   import.meta.env.VITE_USE_MOCK_SUMMARY === "true";
 
-const getActiveTabUrlIfAvailable = async () => {
+const queryTabsSafe = async (
+  queryInfo: chrome.tabs.QueryInfo,
+): Promise<chrome.tabs.Tab[]> => {
+  try {
+    return await chrome.tabs.query(queryInfo);
+  } catch {
+    return [];
+  }
+};
+
+const resolveTargetTab = async (): Promise<chrome.tabs.Tab | null> => {
   if (typeof chrome === "undefined" || !chrome.tabs?.query) {
     return null;
   }
 
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    return tab?.url ?? null;
-  } catch {
-    return null;
+  const normalWindowQueries: chrome.tabs.QueryInfo[] = [
+    { active: true, currentWindow: true, windowType: "normal" },
+    { active: true, lastFocusedWindow: true, windowType: "normal" },
+    { active: true, windowType: "normal" },
+  ];
+
+  for (const queryInfo of normalWindowQueries) {
+    const tabs = await queryTabsSafe(queryInfo);
+    const supportedTab = tabs.find((tab) => tab.id && !isRestrictedPage(tab.url));
+    if (supportedTab) {
+      return supportedTab;
+    }
   }
+
+  // Fallback: current popup tab (so we can still return a clear "unsupported page" error).
+  const [currentTab] = await queryTabsSafe({ active: true, currentWindow: true });
+  return currentTab ?? null;
+};
+
+const getActiveTabUrlIfAvailable = async () => {
+  const tab = await resolveTargetTab();
+  return tab?.url ?? null;
 };
 
 const getMockSourceUrl = async () => {
@@ -125,7 +151,7 @@ export const summarizeActiveTab = async ({
     };
   }
 
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const tab = await resolveTargetTab();
   if (!tab?.id) {
     return {
       html: buildErrorSummaryHtml("No active tab", "Could not find an active browser tab to summarize."),

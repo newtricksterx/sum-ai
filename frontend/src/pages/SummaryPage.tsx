@@ -8,7 +8,7 @@ interface SummaryPageProps {
 
 const SummaryPage: React.FC<SummaryPageProps> = ({ content, fontSize }) => {
     return (
-        <div className="px-3 py-3">
+        <div className="px-2 py-2">
             <div className="relative">
                 <PageCard
                     as="div"
