@@ -165,9 +165,17 @@
 }
 
 .pp-stat-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
   font-size: 11px;
   color: var(--color-text-secondary);
   white-space: nowrap;
+}
+
+.pp-stat-tooltip-trigger {
+  width: 1rem;
+  height: 1rem;
 }
 
 .pp-stat-value {

@@ -1,7 +1,7 @@
 ﻿import './App.css'
 import './Summary.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import MenuBar from './components/MenuBar'
+import MenuBar from './components/MenuBar/MenuBar'
 import ToolBar from './components/ToolBar/ToolBar'
 import { useSettingsStore } from './stores/settingsStore'
 import { GetPageFromStorage, GetSummaryFromStorage, UpdatePageStorage, UpdateSummaryStorage } from './utils/storage'
@@ -158,12 +158,6 @@ function App() {
     SetCurrentPage(1);
     UpdatePageStorage(1);
   }
-
-  const onClickClose = () => {
-    SetCurrentPage(0);
-    UpdatePageStorage(0);
-    window.close();
-  }  
   
   const onClickHistory = () => {
     SetCurrentPage(2);
@@ -262,7 +256,6 @@ function App() {
       <MenuBar 
         onClickReturn={onClickReturn} 
         onClickForward={onClickForward} 
-        onClickClose={onClickClose}
         onClickProfile={onClickProfile}
         onClickHistory={onClickHistory}
       />

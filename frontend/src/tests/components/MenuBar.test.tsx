@@ -7,7 +7,7 @@ vi.mock("../../components/SettingsDropdown", () => ({
   default: () => <div data-testid="settings-dropdown">SettingsDropdown</div>,
 }));
 
-import MenuBar from "../../components/MenuBar";
+import MenuBar from "../../components/MenuBar/MenuBar";
 
 describe("MenuBar", () => {
   afterEach(() => {
@@ -17,7 +17,6 @@ describe("MenuBar", () => {
   it("renders menu buttons and calls provided handlers", () => {
     const onClickReturn = vi.fn();
     const onClickForward = vi.fn();
-    const onClickClose = vi.fn();
     const onClickProfile = vi.fn();
     const onClickHistory = vi.fn();
 
@@ -25,7 +24,6 @@ describe("MenuBar", () => {
       <MenuBar
         onClickReturn={onClickReturn}
         onClickForward={onClickForward}
-        onClickClose={onClickClose}
         onClickProfile={onClickProfile}
         onClickHistory={onClickHistory}
       />
@@ -43,6 +41,5 @@ describe("MenuBar", () => {
     expect(onClickForward).toHaveBeenCalledTimes(1);
     expect(onClickHistory).toHaveBeenCalledTimes(1);
     expect(onClickProfile).toHaveBeenCalledTimes(1);
-    expect(onClickClose).toHaveBeenCalledTimes(1);
   });
 });

@@ -4,6 +4,7 @@ import PageCard from '../../components/PageCard/PageCard';
 import * as Tabs from "@radix-ui/react-tabs";
 import "./ProfilePage.css";
 import AlertPopup from '../../components/AlertPopup/AlertPopup';
+import TooltipComponent from '../../components/Tooltip/TooltipComponent';
 import LoginForm, { LoginPayload } from '../../components/LoginForm';
 import RegisterForm, { RegisterPayload } from '../../components/RegisterForm';
 import { authInstance, setAuthLogoutHandler } from "../../services/axiosService";
@@ -28,6 +29,9 @@ type UserProfile = {
 };
 
 const DEFAULT_REQUEST_ERROR = "We could not complete that request. Please try again.";
+const PLAN_TOOLTIP = "Your current subscription tier. It controls usage limits and available features.";
+const WORD_LIMIT_TOOLTIP = "The approximate maximum amount of text you can summarize in one request.";
+const HISTORY_CAPACITY_TOOLTIP = "The number of summaries this account can keep in saved history.";
 
 const parseApiErrorMessage = (error: unknown) => {
   if (axios.isAxiosError(error)) {
@@ -395,19 +399,43 @@ const ProfilePage: React.FC = () => {
             <section className="pp-card pp-section" aria-label="Plan and limits">
               <p className="pp-section-title">Plan &amp; Limits</p>
               <div className="pp-stat-row">
-                <span className="pp-stat-label">Plan</span>
+                <span className="pp-stat-label">
+                  Plan
+                  <TooltipComponent
+                    content={PLAN_TOOLTIP}
+                    side="top"
+                    triggerClassName="pp-stat-tooltip-trigger"
+                    ariaLabel="What does plan mean?"
+                  />
+                </span>
                 <span className="pp-stat-value">
                   <span className="pp-plan-badge">{planName}</span>
                 </span>
               </div>
 
               <div className="pp-stat-row">
-                <span className="pp-stat-label">Word limit</span>
+                <span className="pp-stat-label">
+                  Word limit
+                  <TooltipComponent
+                    content={WORD_LIMIT_TOOLTIP}
+                    side="top"
+                    triggerClassName="pp-stat-tooltip-trigger"
+                    ariaLabel="What does word limit mean?"
+                  />
+                </span>
                 <span className="pp-stat-value">{wordLimit}</span>
               </div>
 
               <div className="pp-stat-row">
-                <span className="pp-stat-label">History capacity</span>
+                <span className="pp-stat-label">
+                  History capacity
+                  <TooltipComponent
+                    content={HISTORY_CAPACITY_TOOLTIP}
+                    side="top"
+                    triggerClassName="pp-stat-tooltip-trigger"
+                    ariaLabel="What does history capacity mean?"
+                  />
+                </span>
                 <span className="pp-stat-value">{historyLimit}</span>
               </div>
             </section>
