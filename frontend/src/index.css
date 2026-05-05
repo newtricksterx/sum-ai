@@ -96,7 +96,6 @@ a:hover {
 a:active {
   color: var(--color-accent-strong);
 }
-
 button:not(:disabled):not([aria-disabled="true"]) {
   cursor: pointer;
 }
@@ -105,7 +104,6 @@ button:disabled,
 button[aria-disabled="true"] {
   cursor: not-allowed;
 }
-
 h1 {
   font-size: initial;
   font-weight: bold;
