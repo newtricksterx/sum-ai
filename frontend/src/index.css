@@ -20,14 +20,18 @@
 }
 
 :root {
+  color-scheme: light;
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   height: auto;
-  --color-bg: #f7f7f8;
-  --color-bg-elev: #efeff1;
+  --color-bg: light-dark(rgba(245, 244, 237, 1), rgba(38, 38, 36, 1));
+  --color-secondary: var(--color-bg);
+  --color-page-card-backdrop: var(--color-secondary);
+  --color-bg-elev: var(--color-secondary);
   --color-card: #ffffff;
-  --color-card-elev: #f4f4f5;
+  --color-tertiary: light-dark(rgba(250, 249, 245, 1), rgba(20, 20, 19, 1));
+  --color-card-elev: var(--color-tertiary);
   --color-text-primary: #1f1f1f;
   --color-text-secondary: #5f5f5f;
   --color-border: #cfcfcf;
@@ -51,11 +55,15 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.light {
+  color-scheme: light;
+}
+
 .dark {
-  --color-bg: #181818;
-  --color-bg-elev: #1c1c1c;
+  color-scheme: dark;
+  --color-bg-elev: var(--color-secondary);
   --color-card: #1d1d1d;
-  --color-card-elev: #242424;
+  --color-card-elev: var(--color-tertiary);
   --color-text-primary: #e0e0e0;
   --color-text-secondary: #b0b0b0;
   --color-border: #444444;
@@ -187,4 +195,3 @@ input::-webkit-inner-spin-button {
     transform:rotate(360deg);
   }
 }
-

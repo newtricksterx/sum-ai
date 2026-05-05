@@ -1,4 +1,8 @@
-﻿.toolbar-generate-shell {
+.toolbar-shell {
+  background: var(--color-page-card-backdrop);
+}
+
+.toolbar-generate-shell {
   position: relative;
   display: inline-flex;
   border-radius: 0.9rem;

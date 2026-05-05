@@ -23,7 +23,7 @@ function ToolBar({
   const canUseSummaryActions = CopyState() && !isSummarizing;
   
   return (
-    <nav className="m-1 flex flex-row items-center justify-between">
+    <nav className="toolbar-shell m-1 flex flex-row items-center justify-between">
         <span className={`toolbar-generate-shell ${isSummarizing ? "is-disabled" : ""}`}>
         <button
           type="button"

@@ -5,6 +5,7 @@ import SettingsDropdown from "./SettingsDropdown";
 import { GoHistory, GoHome  } from "react-icons/go";
 import { ReaderIcon, PersonIcon } from "@radix-ui/react-icons";
 import MenuBarButton from "./MenuBarButton";
+import "./MenuBar.css";
 
 
 export interface MenuBarProps {
@@ -17,7 +18,7 @@ export interface MenuBarProps {
 
 function MenuBar({onClickReturn, onClickForward, onClickClose, onClickProfile, onClickHistory } : MenuBarProps) {
   return (
-    <nav className="flex flex-row gap-1 justify-between items-center">
+    <nav className="menu-bar-shell flex flex-row gap-1 justify-between items-center">
         <MenuBarButton onClick={onClickReturn}  title="Go to home page">
             <GoHome size={MenuIconSize}/>
         </MenuBarButton>

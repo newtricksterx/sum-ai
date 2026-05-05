@@ -8,12 +8,7 @@
 }
 
 .app-shell {
-  background: linear-gradient(
-    180deg,
-    var(--color-bg) 0%,
-    var(--color-bg-elev) 52%,
-    var(--color-bg) 100%
-  );
+  background: var(--color-bg);
   color: var(--color-text-primary);
 }
 
