@@ -278,9 +278,13 @@
 
 .pp-actions {
   padding-top: 0.08rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
 }
 
-.pp-logout-btn {
+.pp-logout-btn,
+.pp-delete-btn {
   width: 100%;
   min-height: 34px;
   border-radius: var(--pp-radius);
@@ -295,17 +299,29 @@
 }
 
 .pp-logout-btn:hover {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-card-elev) 72%, transparent);
+}
+
+.pp-delete-btn {
+  color: #b42318;
+}
+
+.pp-delete-btn:hover {
   border-color: #d15849;
   color: #d15849;
   background: color-mix(in srgb, #d15849 10%, transparent);
 }
 
-.pp-logout-btn:focus-visible {
+.pp-logout-btn:focus-visible,
+.pp-delete-btn:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--pp-accent) 82%, transparent);
   outline-offset: 2px;
 }
 
-.pp-logout-btn:disabled {
+.pp-logout-btn:disabled,
+.pp-delete-btn:disabled {
   cursor: not-allowed;
   opacity: 0.62;
 }
@@ -407,6 +423,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .pp-logout-btn,
+  .pp-delete-btn,
   .TabsTrigger,
   .pp-bar-fill {
     transition: none !important;

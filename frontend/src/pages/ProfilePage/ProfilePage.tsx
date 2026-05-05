@@ -3,6 +3,7 @@ import axios from "axios";
 import PageCard from '../../components/PageCard/PageCard';
 import * as Tabs from "@radix-ui/react-tabs";
 import "./ProfilePage.css";
+import AlertPopup from '../../components/AlertPopup/AlertPopup';
 import LoginForm, { LoginPayload } from '../../components/LoginForm';
 import RegisterForm, { RegisterPayload } from '../../components/RegisterForm';
 import { authInstance, setAuthLogoutHandler } from "../../services/axiosService";
@@ -136,9 +137,11 @@ const ProfilePage: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const setHistoryOwner = useHistoryStore((state) => state.setHistoryOwner);
+  const clearHistory = useHistoryStore((state) => state.clearHistory);
 
   useEffect(() => {
     const hydrateProfile = async () => {
@@ -293,6 +296,25 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    setIsDeletingAccount(true);
+    setErrorMessage(null);
+    setInfoMessage(null);
+
+    try {
+      await authInstance.delete("/api/users/me");
+      clearHistory();
+      setUserProfile(null);
+      setHistoryOwner("anonymous", 1);
+      setMode("login");
+      setInfoMessage("Your account has been deleted.");
+    } catch (error) {
+      setErrorMessage(parseApiErrorMessage(error));
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
+
   if (isInitializing) {
     return (
       <main className="h-full overflow-y-auto custom-scrollbar px-2 py-2 font-noto">
@@ -337,6 +359,7 @@ const ProfilePage: React.FC = () => {
     const memberSince = formatDate(userProfile.created_at);
     const updatedAt = formatDate(userProfile.updated_at);
     const initials = getInitials(displayName || "User") || "U";
+    const isAccountActionPending = isSubmitting || isDeletingAccount;
 
     return (
       <main className="profile-page-shell h-full overflow-y-auto custom-scrollbar px-2 py-2 font-noto">
@@ -443,11 +466,30 @@ const ProfilePage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleLogout}
-                disabled={isSubmitting}
+                disabled={isAccountActionPending}
                 className="pp-logout-btn"
               >
                 {isSubmitting ? "Signing out..." : "Log out"}
               </button>
+              <AlertPopup
+                trigger={
+                  <button
+                    type="button"
+                    disabled={isAccountActionPending}
+                    className="pp-delete-btn"
+                  >
+                    {isDeletingAccount ? "Deleting account..." : "Delete account"}
+                  </button>
+                }
+                title="WARNING"
+                description="This permanently deletes your account and signs you out of this browser."
+                previewTitle={userProfile.email}
+                previewText="Your current local summary history for this account will also be cleared."
+                confirmLabel="Delete account"
+                cancelLabel="Cancel"
+                confirmTone="danger"
+                onConfirm={() => void handleDeleteAccount()}
+              />
             </div>
           </div>
         </PageCard>
