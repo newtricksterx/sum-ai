@@ -124,6 +124,7 @@ class SummarizeEndpointTest(TestCase):
             "bullet-point",
             "english",
             max_input_chars=10000,
+            source_url="https://example.com/article",
         )
 
 

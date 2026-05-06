@@ -29,7 +29,7 @@ function App() {
   const cleanedContent = useMemo(() => {
     return DOMPurify.sanitize(summarizedContent || "",
       {
-        ALLOWED_TAGS: ['h1', 'h2', 'p', 'ul', 'li', 'strong', 'em', 'a', 'br'],
+        ALLOWED_TAGS: ['h1', 'h2', 'h3', 'p', 'ul', 'ol', 'li', 'strong', 'b', 'em', 'a', 'br'],
         ALLOWED_ATTR: ['href', 'target', 'rel']
       }
     );

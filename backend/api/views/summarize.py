@@ -114,6 +114,7 @@ class SummarizeText(APIView):
                 request.data.get("format"),
                 request.data.get("language"),
                 max_input_chars=character_limit, # type: ignore
+                source_url=source_url,
             )
         except Exception:
             if reserved_subscription_id is not None:

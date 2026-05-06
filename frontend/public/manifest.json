@@ -14,8 +14,7 @@
     },
     "permissions": [
         "activeTab",
-        "scripting",
-        "tabs"
+        "scripting"
     ],
     "host_permissions": [
         "https://super-summarizer.ddns.net/*"

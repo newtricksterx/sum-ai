@@ -15,7 +15,7 @@ export interface MenuBarProps {
 
 function MenuBar({onClickReturn, onClickForward, onClickProfile, onClickHistory } : MenuBarProps) {
   return (
-    <nav className="menu-bar-shell flex flex-row gap-1 justify-between items-center border-b-[0.25px]">
+    <nav className="menu-bar-shell flex flex-row gap-1 justify-between items-center border-b-gray-500 border-b-[0.25px]">
         <MenuBarButton onClick={onClickReturn}  title="Go to home page">
             <GoHome size={MenuIconSize}/>
         </MenuBarButton>

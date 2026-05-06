@@ -4,64 +4,118 @@
   --summary-link: var(--color-accent);
   --summary-link-hover: var(--color-accent-strong);
   --summary-accent: var(--color-accent);
+  --summary-body: color-mix(in srgb, var(--summary-text) 94%, transparent);
+  --summary-rule: color-mix(in srgb, var(--color-border) 78%, transparent);
+  --summary-intro-bg: color-mix(in srgb, var(--color-card-elev) 75%, transparent);
 
   position: relative;
   width: 100%;
   min-height: 210px;
   margin: 0;
-  padding: 0.9rem 1rem;
+  padding: 0.95rem 1rem 1.05rem;
   color: var(--summary-text);
-  line-height: 1.7;
+  font-size: 0.95rem;
+  line-height: 1.72;
+  letter-spacing: 0.002em;
   will-change: transform, opacity;
 }
 
+.summary-container > * {
+  max-width: 62ch;
+}
+
 .summary-container h1 {
-  margin: 0 0 0.8rem;
-  font-size: 1.05em;
-  line-height: 1.32;
+  margin: 0 0 0.9rem;
+  font-size: 1.08em;
+  line-height: 1.3;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.018em;
+  color: var(--summary-text);
 }
 
 .summary-container h2 {
-  margin: 1.15rem 0 0.45rem;
-  font-size: 0.76em;
+  margin: 1.22rem 0 0.48rem;
+  font-size: 0.74em;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.1em;
   color: var(--summary-muted);
 }
 
+.summary-container h3 {
+  margin: 0.9rem 0 0.38rem;
+  font-size: 0.87em;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--summary-text) 86%, var(--summary-accent));
+}
+
+.summary-container p,
+.summary-container li {
+  color: var(--summary-body);
+}
+
 .summary-container p {
-  margin: 0 0 0.78rem;
+  margin: 0 0 0.82rem;
+}
+
+.summary-container p#introduction {
+  margin: 0 0 0.96rem;
+  padding: 0.56rem 0.68rem;
+  border: 1px solid var(--summary-rule);
+  border-left: 3px solid color-mix(in srgb, var(--summary-accent) 70%, transparent);
+  border-radius: 0.55rem;
+  background: var(--summary-intro-bg);
+  color: color-mix(in srgb, var(--summary-body) 90%, var(--summary-muted));
 }
 
 .summary-container ul {
   list-style: none;
-  margin: 0.1rem 0 0.95rem;
+  margin: 0.15rem 0 1.02rem;
   padding-left: 0;
+}
+
+.summary-container ol {
+  list-style: none;
+  margin: 0.15rem 0 1.02rem;
+  padding-left: 0;
+  counter-reset: summary-steps;
 }
 
 .summary-container li {
   position: relative;
-  margin-bottom: 0.5rem;
-  padding-left: 1rem;
+  margin-bottom: 0.56rem;
+  padding-left: 1.08rem;
 }
 
-.summary-container li::before {
+.summary-container ul > li::before {
   content: "";
   position: absolute;
-  top: 0.7em;
+  top: 0.68em;
   left: 0;
   width: 0.34em;
   height: 0.34em;
   border-radius: 999px;
   transform: translateY(-50%);
-  background: color-mix(in srgb, var(--summary-accent) 85%, transparent);
+  background: color-mix(in srgb, var(--summary-accent) 82%, transparent);
+}
+
+.summary-container ol > li {
+  position: relative;
+  padding-left: 1.66rem;
+}
+
+.summary-container ol > li::before {
+  counter-increment: summary-steps;
+  content: counter(summary-steps) ".";
+  position: absolute;
+  top: 0.02em;
+  left: 0;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--summary-text) 84%, var(--summary-accent));
 }
 
 .summary-container strong {
-  font-weight: 700;
+  font-weight: 800;
   color: color-mix(in srgb, var(--summary-text) 88%, var(--summary-accent));
 }
 
@@ -70,12 +124,13 @@
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1.5px;
-  transition: color 160ms ease, opacity 160ms ease;
+  transition: color 160ms ease, opacity 160ms ease, text-decoration-color 160ms ease;
 }
 
 .summary-container a:hover {
   color: var(--summary-link-hover);
   opacity: 0.95;
+  text-decoration-color: color-mix(in srgb, var(--summary-link-hover) 75%, transparent);
 }
 
 .summary-container > * {
