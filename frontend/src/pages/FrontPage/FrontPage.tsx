@@ -1,71 +1,41 @@
-import React from 'react';
-import { Globe, Sparkles, Type, WandSparkles } from 'lucide-react';
+import type React from 'react';
+import { FileText, Globe, Sparkles, Type, WandSparkles } from 'lucide-react';
 import PageCard from '../../components/PageCard/PageCard';
 import { useSettingsStore } from '../../stores/settingsStore';
+import { useTabChange } from '../../hooks/useTabChange';
+import { QUICK_STEPS, getSettingLabel } from './frontpage.helpers';
 import './FrontPage.css';
 
 interface FrontPageProps {
   onClickGenerate: () => void;
 }
 
-const QUICK_STEPS = [
-  {
-    title: 'Open any article or page',
-    text: 'Choose the tab you want to condense before launching the flow.',
-  },
-    {
-    title: 'Customize output',
-    text: 'Set preset options to customize formats by clicking the Settings icon in the navigation bar.',
-  },
-  {
-    title: 'Generate in one click',
-    text: 'Run Generate Summary to convert long content into a scan-first result.',
-  },
-];
-
-const SETTING_LABELS: Record<string, string> = {
-  english: 'English',
-  french: 'French',
-  spanish: 'Spanish',
-  short: 'Short',
-  medium: 'Medium',
-  long: 'Long',
-  paragraph: 'Paragraph',
-  'bullet-point': 'Bullet Points',
-  'tl-dr-bullets': 'TL;DR + Bullets',
-  'key-takeaways': 'Key Takeaways',
-  'action-items': 'Action Items',
-  'q-and-a': 'Q&A',
-  'pros-cons': 'Pros & Cons',
-};
-
-const getSettingLabel = (value: string) => {
-  if (SETTING_LABELS[value]) {
-    return SETTING_LABELS[value];
-  }
-
-  return value.replace(/-/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
-};
-
 const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate }) => {
   const language = useSettingsStore((state) => state.language);
   const length = useSettingsStore((state) => state.length);
   const format = useSettingsStore((state) => state.format);
+  const activeTabMeta = useTabChange();
 
   return (
-    <main className="front-page-shell h-full overflow-y-auto custom-scrollbar px-2 py-2 font-noto">
+    <main className="front-page-shell overflow-y-auto custom-scrollbar px-2 py-2 font-noto">
       <PageCard as="section" className="front-page-card p-4">
-        <header className="front-page-header">
-          <div className="front-kicker-row">
-            <p className="front-kicker">OneClick Summary</p>
-          </div>
+        <h1 className="sr-only">Generate a summary from your active tab</h1>
 
-          <h1 className="front-title">Generate a summary from your active tab</h1>
-        </header>
+        <section className="front-tab-chip" aria-label="Active tab">
+          <span className="front-tab-icon" aria-hidden="true">
+            <FileText size={12} />
+          </span>
+          <div className="front-tab-meta">
+            <p className="front-tab-label">Active tab</p>
+            <p className="front-tab-title" title={activeTabMeta.title}>{activeTabMeta.title}</p>
+            <p className="front-tab-domain" title={activeTabMeta.domain}>{activeTabMeta.domain}</p>
+            <p className="front-tab-time">{activeTabMeta.readTime}</p>
+          </div>
+        </section>
 
         <section className="front-preset-panel" aria-label="Current summary preset">
           <div className="front-section-head">
-            <p className="front-section-label">Preset Snapshot</p>
+            <p className="front-section-label">Summary preferences</p>
             <p className="front-section-meta">Edit in Settings</p>
           </div>
           <ul className="front-preset-grid">
@@ -95,25 +65,29 @@ const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate }) => {
           </ul>
         </section>
 
-        <section className="front-action-section" aria-label="Generate summary">
-          <button type="button" onClick={onClickGenerate} className="front-generate-btn">
-            <WandSparkles size={14} />
-            Generate Summary
-          </button>
-        </section>
-
         <section className="front-flow" aria-label="How summary generation works">
+          <p className="front-section-label">How it works</p>
           <ol className="front-flow-list">
-            {QUICK_STEPS.map(({ title, text }, index) => (
-              <li key={title} className="front-flow-row">
+            {QUICK_STEPS.map(({ text }, index) => (
+              <li key={text} className="front-flow-row">
                 <span className="front-flow-index">{index + 1}</span>
                 <div className="front-flow-copy">
-                  <p className="front-flow-title">{title}</p>
                   <p className="front-flow-text">{text}</p>
                 </div>
               </li>
             ))}
           </ol>
+        </section>
+
+        <section className="front-action-section" aria-label="Generate summary">
+          <button type="button" onClick={onClickGenerate} className="front-generate-btn">
+            <WandSparkles size={15} />
+            Summarize this tab
+          </button>
+          <div className="front-footer-row" aria-label="Generation status">
+            <span>Uses your saved settings</span>
+            <span>Ready</span>
+          </div>
         </section>
       </PageCard>
     </main>

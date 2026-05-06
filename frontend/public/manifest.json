@@ -9,14 +9,13 @@
     },
     "version": "1.0.1",
     "action": {
-        "default_title": "Open Super Simple Summarizer"
-    },
-    "background": {
-        "service_worker": "background.js"
+        "default_title": "Open Super Simple Summarizer",
+        "default_popup": "index.html"
     },
     "permissions": [
         "activeTab",
-        "scripting"
+        "scripting",
+        "tabs"
     ],
     "host_permissions": [
         "https://super-summarizer.ddns.net/*"

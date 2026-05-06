@@ -1,5 +1,5 @@
 import React, { ReactNode, isValidElement } from "react";
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+import { Tooltip as TooltipPrimitive } from "radix-ui";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import "./TooltipComponent.css";
 

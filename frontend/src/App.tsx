@@ -1,51 +1,30 @@
 ﻿import './App.css'
 import './Summary.css'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import MenuBar from './components/MenuBar/MenuBar'
 import ToolBar from './components/ToolBar/ToolBar'
 import { useSettingsStore } from './stores/settingsStore'
-import { GetPageFromStorage, GetSummaryFromStorage, UpdatePageStorage, UpdateSummaryStorage } from './utils/storage'
+import { GetPageFromStorage, UpdatePageStorage } from './utils/storage'
 import LoaderCircle from './components/LoaderCircle'
 import DOMPurify from 'dompurify'
 import FrontPage from './pages/FrontPage/FrontPage'
 import SummaryPage from './pages/SummaryPage'
-import { summarizeActiveTab } from './services/summarizeService'
 import { getPlainTextFromHtml } from './utils/html'
 import HistoryPage from './pages/HistoryPage'
-import { useHistoryStore, type HistorySummary } from './stores/historyStore'
+import { type HistorySummary } from './stores/historyStore'
 import ProfilePage from './pages/ProfilePage/ProfilePage'
-import { authInstance } from './services/axiosService'
-
-type MeResponse = {
-  email?: string;
-  subscription?: {
-    history_limit: number | null;
-  };
-};
-
-const getHistoryOwnerKeyFromEmail = (email: string | null | undefined) => {
-  if (typeof email !== "string") {
-    return "anonymous";
-  }
-
-  const normalizedEmail = email.trim().toLowerCase();
-  return normalizedEmail.length > 0 ? `user:${normalizedEmail}` : "anonymous";
-};
+import { useCopySuccessTimer } from './hooks/useCopySuccessTimer'
+import { useHistoryOwnerSync } from './hooks/useHistoryOwnerSync'
+import { useSummarizeActiveTab } from './hooks/useSummarizeActiveTab'
 
 
 function App() {
   const [currentPage, SetCurrentPage] = useState(GetPageFromStorage());
-  const [summarizedContent, SetSummarizedContent] = useState<string | null>(GetSummaryFromStorage());
-  const [isCopySuccess, setIsCopySuccess] = useState(false);
-  const copySuccessTimeoutRef = useRef<number | null>(null);
+  const { summarizedContent, summarize, setSummaryFromHistory } = useSummarizeActiveTab();
+  const { isCopySuccess, showCopySuccess, resetCopySuccess } = useCopySuccessTimer();
 
-  const language = useSettingsStore((state) => state.language)
-  const length = useSettingsStore((state) => state.length)
   const theme = useSettingsStore((state) => state.theme)
   const fontSize = useSettingsStore((state) => state.fontSize)
-  const format = useSettingsStore((state) => state.format)
-  const addSummaryToHistory = useHistoryStore((state) => state.addSummary)
-  const setHistoryOwner = useHistoryStore((state) => state.setHistoryOwner)
 
   const cleanedContent = useMemo(() => {
     return DOMPurify.sanitize(summarizedContent || "",
@@ -56,40 +35,7 @@ function App() {
     );
   }, [summarizedContent]);
 
-  useEffect(() => {
-    return () => {
-      if (copySuccessTimeoutRef.current !== null) {
-        window.clearTimeout(copySuccessTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const syncHistoryLimit = async () => {
-      try {
-        const response = await authInstance.get<MeResponse>("/api/users/me");
-        if (!isMounted) {
-          return;
-        }
-        setHistoryOwner(
-          getHistoryOwnerKeyFromEmail(response.data.email),
-          response.data.subscription?.history_limit ?? 1,
-        );
-      } catch {
-        if (isMounted) {
-          setHistoryOwner("anonymous", 1);
-        }
-      }
-    };
-
-    void syncHistoryLimit();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [setHistoryOwner]);
+  useHistoryOwnerSync();
 
   const renderUserInterface = () => {
     // Display the loading circle
@@ -128,25 +74,7 @@ function App() {
   }
 
   const Summarize = async (regenerateBool: boolean) => {
-    SetSummarizedContent(null);
-
-    const result = await summarizeActiveTab({
-      baseUrl: import.meta.env.VITE_BASE_URL,
-      length,
-      regenerate: regenerateBool,
-      format,
-      language,
-    });
-
-    SetSummarizedContent(result.html);
-    UpdateSummaryStorage(result.html);
-
-    if (!result.isError && result.sourceUrl) {
-      addSummaryToHistory({
-        url: result.sourceUrl,
-        content: result.html,
-      });
-    }
+    await summarize(regenerateBool);
   };
 
   const onClickReturn = () => {
@@ -223,8 +151,7 @@ function App() {
   }
 
   const onSelectHistory = (historyItem: HistorySummary) => {
-    SetSummarizedContent(historyItem.content);
-    UpdateSummaryStorage(historyItem.content);
+    setSummaryFromHistory(historyItem);
     SetCurrentPage(1);
     UpdatePageStorage(1);
   }
@@ -236,18 +163,10 @@ function App() {
 
     try {
       await navigator.clipboard.writeText(getPlainTextFromHtml(summarizedContent));
-      setIsCopySuccess(true);
-
-      if (copySuccessTimeoutRef.current !== null) {
-        window.clearTimeout(copySuccessTimeoutRef.current);
-      }
-
-      copySuccessTimeoutRef.current = window.setTimeout(() => {
-        setIsCopySuccess(false);
-      }, 1800);
+      showCopySuccess();
     } catch (error) {
       console.log("Copy Error:", error);
-      setIsCopySuccess(false);
+      resetCopySuccess();
     }
   }
 

@@ -1,190 +1,33 @@
-import { useEffect, useMemo, useState } from 'react';
-import axios from "axios";
+import { useMemo } from 'react';
 import PageCard from '../../components/PageCard/PageCard';
 import * as Tabs from "@radix-ui/react-tabs";
 import "./ProfilePage.css";
 import AlertPopup from '../../components/AlertPopup/AlertPopup';
 import TooltipComponent from '../../components/Tooltip/TooltipComponent';
-import LoginForm, { LoginPayload } from '../../components/LoginForm';
-import RegisterForm, { RegisterPayload } from '../../components/RegisterForm';
-import { authInstance, setAuthLogoutHandler } from "../../services/axiosService";
-import { useHistoryStore } from "../../stores/historyStore";
-
-type AuthMode = "login" | "register";
-
-type UserProfile = {
-  id: number;
-  email: string;
-  first_name?: string;
-  last_name?: string;
-  subscription?: {
-    plan_name: string;
-    summary_limit: number | null;
-    summaries_used?: number;
-    history_limit: number | null;
-    character_limit: number | null;
-  };
-  created_at: string;
-  updated_at: string;
-};
-
-const DEFAULT_REQUEST_ERROR = "We could not complete that request. Please try again.";
-const PLAN_TOOLTIP = "Your current subscription tier. It controls usage limits and available features.";
-const WORD_LIMIT_TOOLTIP = "The approximate maximum amount of text you can summarize in one request.";
-const HISTORY_CAPACITY_TOOLTIP = "The number of summaries this account can keep in saved history.";
-
-const parseApiErrorMessage = (error: unknown) => {
-  if (axios.isAxiosError(error)) {
-    const responseData = error.response?.data;
-
-    if (typeof responseData === "string") {
-      return responseData;
-    }
-
-    if (responseData && typeof responseData === "object") {
-      const data = responseData as Record<string, unknown>;
-      const detail = data.detail;
-      if (typeof detail === "string" && detail.trim().length > 0) {
-        return detail;
-      }
-
-      const messages: string[] = [];
-      Object.values(data).forEach((value) => {
-        if (Array.isArray(value)) {
-          value.forEach((item) => {
-            if (typeof item === "string" && item.trim().length > 0) {
-              messages.push(item);
-            }
-          });
-          return;
-        }
-
-        if (typeof value === "string" && value.trim().length > 0) {
-          messages.push(value);
-        }
-      });
-
-      if (messages.length > 0) {
-        return messages.join(" ");
-      }
-    }
-  }
-
-  return DEFAULT_REQUEST_ERROR;
-};
-
-const formatDate = (rawDate: string) => {
-  const parsedDate = new Date(rawDate);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return "Unavailable";
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(parsedDate);
-};
-
-const formatLimit = (value: number | null | undefined) => {
-  if (value === null) {
-    return "Unlimited";
-  }
-
-  if (typeof value === "number") {
-    return value.toLocaleString();
-  }
-
-  return "Unavailable";
-};
-
-const deriveWordLimit = (characterLimit: number | null | undefined) => {
-  if (characterLimit === null) {
-    return "Unlimited";
-  }
-
-  if (typeof characterLimit !== "number") {
-    return "Unavailable";
-  }
-
-  if (characterLimit <= 10000) {
-    return "1,500 words";
-  }
-
-  if (characterLimit <= 30000) {
-    return "5,000 words";
-  }
-
-  return `${Math.round(characterLimit / 6.5).toLocaleString()} words`;
-};
-
-const getInitials = (name: string) => {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
-};
-
-const getHistoryOwnerKeyFromEmail = (email: string | null | undefined) => {
-  if (typeof email !== "string") {
-    return "anonymous";
-  }
-
-  const normalizedEmail = email.trim().toLowerCase();
-  return normalizedEmail.length > 0 ? `user:${normalizedEmail}` : "anonymous";
-};
+import LoginForm from '../../components/LoginForm';
+import RegisterForm from '../../components/RegisterForm';
+import { useProfileAccount } from "../../hooks/useProfileAccount";
+import { deriveWordLimit, formatLimit, formatDate, getInitials, 
+  PLAN_TOOLTIP, WORD_LIMIT_TOOLTIP, 
+  HISTORY_CAPACITY_TOOLTIP } from './profilepage.helpers';
 
 const ProfilePage: React.FC = () => {
-  const [mode, setMode] = useState<AuthMode>("login");
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [infoMessage, setInfoMessage] = useState<string | null>(null);
-  const setHistoryOwner = useHistoryStore((state) => state.setHistoryOwner);
-  const clearHistory = useHistoryStore((state) => state.clearHistory);
-
-  useEffect(() => {
-    const hydrateProfile = async () => {
-      setIsInitializing(true);
-
-      try {
-        const response = await authInstance.get<UserProfile>("/api/users/me");
-        setUserProfile(response.data);
-        setHistoryOwner(
-          getHistoryOwnerKeyFromEmail(response.data.email),
-          response.data.subscription?.history_limit ?? 1,
-        );
-      } catch (error) {
-        if (!(axios.isAxiosError(error) && error.response?.status === 401)) {
-          setErrorMessage(parseApiErrorMessage(error));
-        }
-        setUserProfile(null);
-        setHistoryOwner("anonymous", 1);
-      } finally {
-        setIsInitializing(false);
-      }
-    };
-
-    void hydrateProfile();
-  }, [setHistoryOwner]);
-
-  useEffect(() => {
-    setAuthLogoutHandler(() => {
-      setUserProfile(null);
-      setMode("login");
-      setInfoMessage(null);
-      setErrorMessage("Your session has expired. Please login again.");
-      setHistoryOwner("anonymous", 1);
-    });
-
-    return () => {
-      setAuthLogoutHandler(null);
-    };
-  }, [setHistoryOwner]);
+  const {
+    mode,
+    userProfile,
+    isInitializing,
+    isSubmitting,
+    isDeletingAccount,
+    errorMessage,
+    infoMessage,
+    switchToLogin,
+    switchToRegister,
+    onModeChange,
+    handleLogin,
+    handleRegister,
+    handleLogout,
+    handleDeleteAccount,
+  } = useProfileAccount();
 
   const displayName = useMemo(() => {
     if (!userProfile) {
@@ -199,125 +42,6 @@ const ProfilePage: React.FC = () => {
     const emailLocalPart = userProfile.email.split("@")[0]?.trim();
     return emailLocalPart && emailLocalPart.length > 0 ? emailLocalPart : userProfile.email;
   }, [userProfile]);
-
-  const setAuthenticatedUser = (profile: UserProfile) => {
-    setUserProfile(profile);
-    setHistoryOwner(
-      getHistoryOwnerKeyFromEmail(profile.email),
-      profile.subscription?.history_limit ?? 1,
-    );
-  };
-
-  const fetchCurrentUser = async () => {
-    const meResponse = await authInstance.get<UserProfile>("/api/users/me");
-    setAuthenticatedUser(meResponse.data);
-    return meResponse.data;
-  };
-
-  const switchToLogin = () => {
-    setMode("login");
-    setErrorMessage(null);
-  };
-
-  const switchToRegister = () => {
-    setMode("register");
-    setErrorMessage(null);
-    setInfoMessage(null);
-  };
-
-  const onModeChange = (nextValue: string) => {
-    if (nextValue === "register") {
-      switchToRegister();
-      return;
-    }
-    switchToLogin();
-  };
-
-  const handleLogin = async (payload: LoginPayload) => {
-    setIsSubmitting(true);
-    setErrorMessage(null);
-    setInfoMessage(null);
-
-    try {
-      const response = await authInstance.post<{ detail?: string; user?: UserProfile }>("/api/login", payload);
-      const responseUser = response.data.user;
-
-      if (responseUser) {
-        setAuthenticatedUser(responseUser);
-      } else {
-        await fetchCurrentUser();
-      }
-
-      setInfoMessage(response.data.detail ?? "Login successful.");
-    } catch (error) {
-      setErrorMessage(parseApiErrorMessage(error));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleRegister = async (payload: RegisterPayload) => {
-    setIsSubmitting(true);
-    setErrorMessage(null);
-    setInfoMessage(null);
-
-    try {
-      await authInstance.post("/api/register", payload);
-      try {
-        await fetchCurrentUser();
-      } catch {
-        const loginResponse = await authInstance.post<{ user?: UserProfile }>("/api/login", payload);
-        if (loginResponse.data.user) {
-          setAuthenticatedUser(loginResponse.data.user);
-        } else {
-          await fetchCurrentUser();
-        }
-      }
-      setMode("login");
-      setInfoMessage("Account created. You are now signed in.");
-    } catch (error) {
-      setErrorMessage(parseApiErrorMessage(error));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    setIsSubmitting(true);
-    setErrorMessage(null);
-    setInfoMessage(null);
-
-    try {
-      await authInstance.post("/api/logout");
-      setInfoMessage("You have been logged out.");
-    } catch (error) {
-      setErrorMessage(parseApiErrorMessage(error));
-    } finally {
-      setUserProfile(null);
-      setHistoryOwner("anonymous", 1);
-      setMode("login");
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    setIsDeletingAccount(true);
-    setErrorMessage(null);
-    setInfoMessage(null);
-
-    try {
-      await authInstance.delete("/api/users/me");
-      clearHistory();
-      setUserProfile(null);
-      setHistoryOwner("anonymous", 1);
-      setMode("login");
-      setInfoMessage("Your account has been deleted.");
-    } catch (error) {
-      setErrorMessage(parseApiErrorMessage(error));
-    } finally {
-      setIsDeletingAccount(false);
-    }
-  };
 
   if (isInitializing) {
     return (

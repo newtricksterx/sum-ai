@@ -1,7 +1,11 @@
+import { useCallback, useState } from "react";
+import { buildErrorSummaryHtml, buildThrottleMessage } from "../services/summaryMessages";
+import { useHistoryStore, type HistorySummary } from "../stores/historyStore";
+import { useSettingsStore } from "../stores/settingsStore";
+import { GetSummaryFromStorage, UpdateSummaryStorage } from "../utils/storage";
 import { Format, Language, Length } from "../utils/types";
-import { buildErrorSummaryHtml, buildThrottleMessage } from "./summaryMessages";
 
-type SummarizeServiceParams = {
+type SummarizeRequestParams = {
   baseUrl: string;
   length: Length;
   regenerate: boolean;
@@ -80,7 +84,6 @@ const resolveTargetTab = async (): Promise<chrome.tabs.Tab | null> => {
     }
   }
 
-  // Fallback: current popup tab (so we can still return a clear "unsupported page" error).
   const [currentTab] = await queryTabsSafe({ active: true, currentWindow: true });
   return currentTab ?? null;
 };
@@ -136,13 +139,13 @@ const getErrorPayload = async (response: Response): Promise<SummarizeErrorPayloa
   }
 };
 
-export const summarizeActiveTab = async ({
+const requestActiveTabSummary = async ({
   baseUrl,
   length,
   regenerate,
   format,
   language,
-}: SummarizeServiceParams): Promise<SummarizeResult> => {
+}: SummarizeRequestParams): Promise<SummarizeResult> => {
   if (isMockModeEnabled()) {
     return {
       html: MOCK_SUMMARY_HTML,
@@ -163,7 +166,7 @@ export const summarizeActiveTab = async ({
     return {
       html: buildErrorSummaryHtml(
         "Page not supported",
-        "Chrome internal pages (like chrome://settings) cannot be summarized. Open a normal website tab and try again."
+        "Chrome internal pages (like chrome://settings) cannot be summarized. Open a normal website tab and try again.",
       ),
       isError: true,
     };
@@ -177,7 +180,7 @@ export const summarizeActiveTab = async ({
     return {
       html: buildErrorSummaryHtml(
         "Cannot summarize this page",
-        "This page blocks extension script access. Try another site tab and try again."
+        "This page blocks extension script access. Try another site tab and try again.",
       ),
       isError: true,
     };
@@ -242,4 +245,50 @@ export const summarizeActiveTab = async ({
       isError: true,
     };
   }
+};
+
+export const useSummarizeActiveTab = () => {
+  const [summarizedContent, setSummarizedContent] = useState<string | null>(GetSummaryFromStorage());
+  const language = useSettingsStore((state) => state.language);
+  const length = useSettingsStore((state) => state.length);
+  const format = useSettingsStore((state) => state.format);
+  const addSummaryToHistory = useHistoryStore((state) => state.addSummary);
+
+  const summarize = useCallback(
+    async (regenerate: boolean) => {
+      setSummarizedContent(null);
+
+      const result = await requestActiveTabSummary({
+        baseUrl: import.meta.env.VITE_BASE_URL,
+        length,
+        regenerate,
+        format,
+        language,
+      });
+
+      setSummarizedContent(result.html);
+      UpdateSummaryStorage(result.html);
+
+      if (!result.isError && result.sourceUrl) {
+        addSummaryToHistory({
+          url: result.sourceUrl,
+          content: result.html,
+        });
+      }
+
+      return result;
+    },
+    [addSummaryToHistory, format, language, length],
+  );
+
+  const setSummaryFromHistory = useCallback((historyItem: HistorySummary) => {
+    setSummarizedContent(historyItem.content);
+    UpdateSummaryStorage(historyItem.content);
+  }, []);
+
+  return {
+    summarizedContent,
+    summarize,
+    setSummaryFromHistory,
+  };
 };
