@@ -1,15 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { LoginPayload } from "../components/LoginForm";
-import { RegisterPayload } from "../components/RegisterForm";
 import { authInstance, setAuthLogoutHandler } from "../services/axiosService";
 import { useHistoryStore } from "../stores/historyStore";
 
-export type AuthMode = "login" | "register";
-
 export type UserProfile = {
   id: number;
+  username?: string | null;
   email: string;
+  avatar_url?: string | null;
   first_name?: string;
   last_name?: string;
   subscription?: {
@@ -75,15 +73,12 @@ const getHistoryOwnerKeyFromEmail = (email: string | null | undefined) => {
 };
 
 export const useProfileAccount = () => {
-  const [mode, setMode] = useState<AuthMode>("login");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const setHistoryOwner = useHistoryStore((state) => state.setHistoryOwner);
-  const clearHistory = useHistoryStore((state) => state.clearHistory);
 
   const resetHistoryOwner = useCallback(() => {
     setHistoryOwner("anonymous", 1);
@@ -99,12 +94,6 @@ export const useProfileAccount = () => {
     },
     [setHistoryOwner],
   );
-
-  const fetchCurrentUser = useCallback(async () => {
-    const meResponse = await authInstance.get<UserProfile>("/api/users/me");
-    setAuthenticatedUser(meResponse.data);
-    return meResponse.data;
-  }, [setAuthenticatedUser]);
 
   useEffect(() => {
     let isMounted = true;
@@ -146,95 +135,21 @@ export const useProfileAccount = () => {
 
   useEffect(() => {
     setAuthLogoutHandler(() => {
+      const wasAuthenticated = userProfile !== null;
       setUserProfile(null);
-      setMode("login");
       setInfoMessage(null);
-      setErrorMessage("Your session has expired. Please login again.");
+      if (wasAuthenticated) {
+        setErrorMessage("Your session has expired. Please sign in with Google again.");
+      } else {
+        setErrorMessage(null);
+      }
       resetHistoryOwner();
     });
 
     return () => {
       setAuthLogoutHandler(null);
     };
-  }, [resetHistoryOwner]);
-
-  const switchToLogin = useCallback(() => {
-    setMode("login");
-    setErrorMessage(null);
-  }, []);
-
-  const switchToRegister = useCallback(() => {
-    setMode("register");
-    setErrorMessage(null);
-    setInfoMessage(null);
-  }, []);
-
-  const onModeChange = useCallback(
-    (nextValue: string) => {
-      if (nextValue === "register") {
-        switchToRegister();
-        return;
-      }
-
-      switchToLogin();
-    },
-    [switchToLogin, switchToRegister],
-  );
-
-  const handleLogin = useCallback(
-    async (payload: LoginPayload) => {
-      setIsSubmitting(true);
-      setErrorMessage(null);
-      setInfoMessage(null);
-
-      try {
-        const response = await authInstance.post<{ detail?: string; user?: UserProfile }>("/api/login", payload);
-        const responseUser = response.data.user;
-
-        if (responseUser) {
-          setAuthenticatedUser(responseUser);
-        } else {
-          await fetchCurrentUser();
-        }
-
-        setInfoMessage(response.data.detail ?? "Login successful.");
-      } catch (error) {
-        setErrorMessage(parseApiErrorMessage(error));
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [fetchCurrentUser, setAuthenticatedUser],
-  );
-
-  const handleRegister = useCallback(
-    async (payload: RegisterPayload) => {
-      setIsSubmitting(true);
-      setErrorMessage(null);
-      setInfoMessage(null);
-
-      try {
-        await authInstance.post("/api/register", payload);
-        try {
-          await fetchCurrentUser();
-        } catch {
-          const loginResponse = await authInstance.post<{ user?: UserProfile }>("/api/login", payload);
-          if (loginResponse.data.user) {
-            setAuthenticatedUser(loginResponse.data.user);
-          } else {
-            await fetchCurrentUser();
-          }
-        }
-        setMode("login");
-        setInfoMessage("Account created. You are now signed in.");
-      } catch (error) {
-        setErrorMessage(parseApiErrorMessage(error));
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [fetchCurrentUser, setAuthenticatedUser],
-  );
+  }, [resetHistoryOwner, userProfile]);
 
   const handleLogout = useCallback(async () => {
     setIsSubmitting(true);
@@ -249,44 +164,16 @@ export const useProfileAccount = () => {
     } finally {
       setUserProfile(null);
       resetHistoryOwner();
-      setMode("login");
       setIsSubmitting(false);
     }
   }, [resetHistoryOwner]);
 
-  const handleDeleteAccount = useCallback(async () => {
-    setIsDeletingAccount(true);
-    setErrorMessage(null);
-    setInfoMessage(null);
-
-    try {
-      await authInstance.delete("/api/users/me");
-      clearHistory();
-      setUserProfile(null);
-      resetHistoryOwner();
-      setMode("login");
-      setInfoMessage("Your account has been deleted.");
-    } catch (error) {
-      setErrorMessage(parseApiErrorMessage(error));
-    } finally {
-      setIsDeletingAccount(false);
-    }
-  }, [clearHistory, resetHistoryOwner]);
-
   return {
-    mode,
     userProfile,
     isInitializing,
     isSubmitting,
-    isDeletingAccount,
     errorMessage,
     infoMessage,
-    switchToLogin,
-    switchToRegister,
-    onModeChange,
-    handleLogin,
-    handleRegister,
     handleLogout,
-    handleDeleteAccount,
   };
 };

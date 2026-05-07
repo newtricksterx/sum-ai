@@ -1,9 +1,9 @@
 from .auth import (
     CookieTokenRefreshView,
     CreateUserView,
-    LoginUserView,
     LogoutUserView,
-    RegisterUserView,
+    SocialAuthCompleteView,
+    SocialJWTBridgeView,
 )
 from .core import AdminUserSubscriptionView, ApiRootView, MeView
 from .summarize import SummarizeText, SumAI
@@ -13,10 +13,10 @@ __all__ = [
     "CookieTokenRefreshView",
     "CreateUserView",
     "AdminUserSubscriptionView",
-    "LoginUserView",
     "LogoutUserView",
     "MeView",
-    "RegisterUserView",
+    "SocialAuthCompleteView",
+    "SocialJWTBridgeView",
     "SummarizeText",
     "SumAI",
 ]

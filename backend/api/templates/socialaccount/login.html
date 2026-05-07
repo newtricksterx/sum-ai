@@ -1,0 +1,154 @@
+{% load i18n %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% trans "Continue with Google" %}</title>
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --bg-accent: #f9f2cf;
+        --surface: #ffffff;
+        --text: #1f2328;
+        --muted: #5f6773;
+        --border: #d7dbe1;
+        --shadow: rgba(17, 24, 39, 0.12);
+        --action: #efbf04;
+        --action-hover: #d9ad04;
+        --action-text: #2b2200;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 12% 14%, var(--bg-accent) 0%, transparent 34%),
+          radial-gradient(circle at 92% 88%, #e8edf5 0%, transparent 44%),
+          var(--bg);
+        display: grid;
+        place-items: center;
+        padding: 20px;
+      }
+
+      .auth-shell {
+        width: min(520px, 100%);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+        box-shadow:
+          0 18px 40px var(--shadow),
+          inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        overflow: hidden;
+      }
+
+      .auth-header {
+        padding: 24px 24px 14px;
+      }
+
+      .auth-kicker {
+        margin: 0;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .auth-title {
+        margin: 8px 0 0;
+        font-size: clamp(24px, 3.8vw, 31px);
+        line-height: 1.16;
+        font-weight: 800;
+        color: #15181d;
+      }
+
+      .auth-body {
+        padding: 8px 24px 24px;
+        border-top: 1px solid #eef1f5;
+      }
+
+      .auth-copy {
+        margin: 0 0 18px;
+        font-size: 14px;
+        line-height: 1.52;
+        color: var(--muted);
+      }
+
+      .auth-form {
+        display: grid;
+        gap: 10px;
+      }
+
+      .auth-button {
+        width: 100%;
+        border: 1px solid #c39b03;
+        background: linear-gradient(180deg, #f6c90e 0%, var(--action) 100%);
+        color: var(--action-text);
+        border-radius: 12px;
+        min-height: 44px;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 0.01em;
+        cursor: pointer;
+        transition: background-color 0.16s ease, transform 0.16s ease;
+      }
+
+      .auth-button:hover {
+        background: linear-gradient(180deg, #f2c50d 0%, var(--action-hover) 100%);
+      }
+
+      .auth-button:active {
+        transform: translateY(1px);
+      }
+
+      .auth-footnote {
+        margin: 10px 0 0;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .auth-button {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="auth-shell" role="main" aria-label="{% trans "Social login confirmation" %}">
+      <header class="auth-header">
+        <p class="auth-kicker">{% trans "Summary.AI Account" %}</p>
+        {% if process == "connect" %}
+          <h1 class="auth-title">{% blocktrans with provider.name as provider %}Connect {{ provider }}{% endblocktrans %}</h1>
+        {% else %}
+          <h1 class="auth-title">{% blocktrans with provider.name as provider %}Sign in with {{ provider }}{% endblocktrans %}</h1>
+        {% endif %}
+      </header>
+
+      <section class="auth-body">
+        {% if process == "connect" %}
+          <p class="auth-copy">
+            {% blocktrans with provider.name as provider %}You are about to connect your {{ provider }} account to Summary.AI.{% endblocktrans %}
+          </p>
+        {% else %}
+          <p class="auth-copy">
+            {% blocktrans with provider.name as provider %}Continue to {{ provider }} and confirm access to complete sign in.{% endblocktrans %}
+          </p>
+        {% endif %}
+
+        <form class="auth-form" method="post">
+          {% csrf_token %}
+          <button class="auth-button" type="submit">{% trans "Continue" %}</button>
+        </form>
+        <p class="auth-footnote">{% trans "This page is secure and used only to start authentication." %}</p>
+      </section>
+    </main>
+  </body>
+</html>

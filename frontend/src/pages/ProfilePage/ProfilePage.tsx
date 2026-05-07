@@ -1,42 +1,62 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import PageCard from '../../components/PageCard/PageCard';
-import * as Tabs from "@radix-ui/react-tabs";
 import "./ProfilePage.css";
 import AlertPopup from '../../components/AlertPopup/AlertPopup';
 import TooltipComponent from '../../components/Tooltip/TooltipComponent';
-import LoginForm from '../../components/LoginForm';
-import RegisterForm from '../../components/RegisterForm';
 import { useProfileAccount } from "../../hooks/useProfileAccount";
 import { deriveWordLimit, formatLimit, formatDate, getInitials, 
   PLAN_TOOLTIP, WORD_LIMIT_TOOLTIP, 
   HISTORY_CAPACITY_TOOLTIP } from './profilepage.helpers';
+import { FcGoogle } from "react-icons/fc";
+import { MenuIconSize } from '../../utils/constants';
 
 const ProfilePage: React.FC = () => {
   const {
-    mode,
     userProfile,
     isInitializing,
     isSubmitting,
-    isDeletingAccount,
     errorMessage,
     infoMessage,
-    switchToLogin,
-    switchToRegister,
-    onModeChange,
-    handleLogin,
-    handleRegister,
     handleLogout,
-    handleDeleteAccount,
   } = useProfileAccount();
+
+  const googleSignInUrl = useMemo(() => {
+    const configuredBaseUrl = (import.meta.env.VITE_BASE_URL ?? "").toString().trim();
+    const defaultBaseUrl =
+      typeof window !== "undefined" && window.location.protocol === "chrome-extension:"
+        ? "http://localhost:8000"
+        : typeof window !== "undefined"
+          ? window.location.origin
+          : "http://localhost:8000";
+
+    const baseUrl = configuredBaseUrl.length > 0 ? configuredBaseUrl : defaultBaseUrl;
+
+    try {
+      return new URL("/accounts/google/login/?process=login", baseUrl).toString();
+    } catch {
+      return "http://localhost:8000/accounts/google/login/?process=login";
+    }
+  }, []);
+
+  const handleGoogleSignIn = useCallback(() => {
+    const chromeApi = globalThis.chrome;
+
+    if (chromeApi?.tabs?.create) {
+      chromeApi.tabs.create({ url: googleSignInUrl });
+      return;
+    }
+
+    window.open(googleSignInUrl, "_blank", "noopener,noreferrer");
+  }, [googleSignInUrl]);
 
   const displayName = useMemo(() => {
     if (!userProfile) {
       return "";
     }
 
-    const fullName = `${userProfile.first_name ?? ""} ${userProfile.last_name ?? ""}`.trim();
-    if (fullName.length > 0) {
-      return fullName;
+    const username = userProfile.username?.trim();
+    if (username && username.length > 0) {
+      return username;
     }
 
     const emailLocalPart = userProfile.email.split("@")[0]?.trim();
@@ -87,7 +107,7 @@ const ProfilePage: React.FC = () => {
     const memberSince = formatDate(userProfile.created_at);
     const updatedAt = formatDate(userProfile.updated_at);
     const initials = getInitials(displayName || "User") || "U";
-    const isAccountActionPending = isSubmitting || isDeletingAccount;
+    const isAccountActionPending = isSubmitting
 
     return (
       <main className="profile-page-shell h-full overflow-y-auto custom-scrollbar px-2 py-2 font-noto">
@@ -107,7 +127,17 @@ const ProfilePage: React.FC = () => {
 
             <div className="pp-card pp-identity" aria-label="Account identity">
               <div className="pp-avatar" aria-hidden="true">
-                {initials}
+                {userProfile.avatar_url ? (
+                  <img
+                    src={userProfile.avatar_url}
+                    alt=""
+                    className="pp-avatar-image"
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  initials
+                )}
               </div>
 
               <div className="pp-identity-info">
@@ -215,32 +245,23 @@ const ProfilePage: React.FC = () => {
             </section>
 
             <div className="pp-actions">
-              <button
-                type="button"
-                onClick={handleLogout}
-                disabled={isAccountActionPending}
-                className="pp-logout-btn"
-              >
-                {isSubmitting ? "Signing out..." : "Log out"}
-              </button>
               <AlertPopup
                 trigger={
                   <button
                     type="button"
                     disabled={isAccountActionPending}
-                    className="pp-delete-btn"
+                    className="pp-logout-btn"
                   >
-                    {isDeletingAccount ? "Deleting account..." : "Delete account"}
+                    {isSubmitting ? "Signing out..." : "Log out"}
                   </button>
                 }
-                title="WARNING"
-                description="This permanently deletes your account and signs you out of this browser."
+                title="Log out?"
+                description="Are you sure you want to log out of this browser session?"
                 previewTitle={userProfile.email}
-                previewText="Your current local summary history for this account will also be cleared."
-                confirmLabel="Delete account"
+                confirmLabel="Log out"
                 cancelLabel="Cancel"
-                confirmTone="danger"
-                onConfirm={() => void handleDeleteAccount()}
+                confirmTone="primary"
+                onConfirm={() => void handleLogout()}
               />
             </div>
           </div>
@@ -258,33 +279,28 @@ const ProfilePage: React.FC = () => {
           <p className="test-profile-subtitle">Sign in to view subscription limits, usage, and account status.</p>
         </header>
 
-        <Tabs.Root className="TabsRoot" value={mode} onValueChange={onModeChange}>
-          <Tabs.List className="TabsList" aria-label="Manage your account">
-            <Tabs.Trigger className="TabsTrigger" value="login">
-              Login
-            </Tabs.Trigger>
-            <Tabs.Trigger className="TabsTrigger" value="register">
-              Register
-            </Tabs.Trigger>
-          </Tabs.List>
-          <Tabs.Content className="TabsContent" value="login">
-            <LoginForm
-              onSubmit={handleLogin}
-              onSwitchToRegister={switchToRegister}
-              isSubmitting={isSubmitting}
-              errorMessage={mode === "login" ? errorMessage : null}
-              infoMessage={mode === "login" ? infoMessage : null}
-            />
-          </Tabs.Content>
-          <Tabs.Content className="TabsContent" value="register">
-            <RegisterForm
-              onSubmit={handleRegister}
-              onSwitchToLogin={switchToLogin}
-              isSubmitting={isSubmitting}
-              errorMessage={mode === "register" ? errorMessage : null}
-            />
-          </Tabs.Content>
-        </Tabs.Root>
+        {infoMessage && (
+          <p className="profile-status-message profile-status-message--success">
+            {infoMessage}
+          </p>
+        )}
+
+        {errorMessage && (
+          <p className="profile-status-message profile-status-message--error">
+            {errorMessage}
+          </p>
+        )}
+
+        <section className="TabsContent" aria-label="Sign in with Google">
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            className="profile-google-btn"
+          >
+            <FcGoogle size={MenuIconSize}/>
+            Sign in to Google
+          </button>
+        </section>
       </PageCard>
     </main>
   );

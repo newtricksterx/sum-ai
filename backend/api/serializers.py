@@ -39,6 +39,7 @@ class SubscriptionReadSerializer(serializers.ModelSerializer):
 
 class UserReadSerializer(serializers.ModelSerializer):
     subscription = serializers.SerializerMethodField()
+    avatar_url = serializers.SerializerMethodField()
 
     def get_subscription(self, obj):
         subscription, _ = Subscription.objects.get_or_create(
@@ -47,10 +48,40 @@ class UserReadSerializer(serializers.ModelSerializer):
         )
         return SubscriptionReadSerializer(subscription).data
 
+    def get_avatar_url(self, obj):
+        social_accounts = getattr(obj, "socialaccount_set", None)
+        if social_accounts is None:
+            return None
+
+        social_account = social_accounts.filter(provider="google").first()
+        if social_account is None:
+            social_account = social_accounts.first()
+
+        if social_account is None:
+            return None
+
+        extra_data = getattr(social_account, "extra_data", None)
+        if isinstance(extra_data, dict):
+            for key in ("picture", "avatar_url", "avatar", "profile_image_url"):
+                avatar_url = extra_data.get(key)
+                if isinstance(avatar_url, str) and avatar_url.strip():
+                    return avatar_url
+
+        try:
+            avatar_url = social_account.get_avatar_url()
+        except Exception:
+            return None
+
+        if isinstance(avatar_url, str) and avatar_url.strip():
+            return avatar_url
+        return None
+
     class Meta:
         model = User
         fields = (
+            "username",
             "email",
+            "avatar_url",
             "subscription",
             "created_at",
             "updated_at",
@@ -71,6 +102,24 @@ class SubscriptionPlanUpdateSerializer(serializers.ModelSerializer):
 class BaseUserWriteSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, trim_whitespace=False)
 
+    def validate_username(self, value):
+        if value is None:
+            return None
+
+        normalized_username = value.strip()
+        if not normalized_username:
+            return None
+
+        instance = getattr(self, "instance", None)
+        duplicate_username_exists = User.objects.filter(username__iexact=normalized_username)
+        if instance is not None:
+            duplicate_username_exists = duplicate_username_exists.exclude(pk=instance.pk)
+
+        if duplicate_username_exists.exists():
+            raise serializers.ValidationError("A user with this username already exists.")
+
+        return normalized_username
+
     def validate_email(self, value):
         normalized_email = value.strip().lower()
         instance = getattr(self, "instance", None)
@@ -90,30 +139,7 @@ class BaseUserWriteSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop("password")
-        user = User(**validated_data)
-        user.set_password(password)
-        user.save()
-        return user
-
-
-class RegisterSerializer(BaseUserWriteSerializer):
-    class Meta:
-        model = User
-        fields = (
-            "id",
-            "email",
-            "password",
-        )
-        read_only_fields = ("id",)
-
-class LoginSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = User
-        fields = (
-            "email",
-            "password",
-        )
+        return User.objects.create_user(password=password, **validated_data)
 
 
 class UserCreateSerializer(BaseUserWriteSerializer):
@@ -124,6 +150,7 @@ class UserCreateSerializer(BaseUserWriteSerializer):
         model = User
         fields = (
             "id",
+            "username",
             "email",
             "password",
             "is_active",

@@ -1,4 +1,5 @@
 import json
+import time
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
@@ -8,6 +9,9 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from api.tests.helpers import authenticate_client_with_jwt
+
+
 User = get_user_model()
 
 
@@ -15,28 +19,15 @@ class RefreshTest(TestCase):
     def setUp(self):
         cache.clear()
         self.client = Client()
-        self.login_url = reverse("login-user")
         self.refresh_url = reverse("token-refresh")
         self.access_cookie_name = settings.SIMPLE_JWT["AUTH_COOKIE"]
         self.refresh_cookie_name = settings.SIMPLE_JWT["AUTH_REFRESH_COOKIE"]
 
-        User.objects.create_user(
+        self.user = User.objects.create_user(  # type: ignore
             email="test@example.com",
             password="StrongPassword123!",
-        ) # type: ignore
-
-        login_response = self.client.post(
-            self.login_url,
-            data=json.dumps(
-                {
-                    "email": "test@example.com",
-                    "password": "StrongPassword123!",
-                }
-            ),
-            content_type="application/json",
-            secure=True,
         )
-        self.assertEqual(login_response.status_code, 200)
+        authenticate_client_with_jwt(self.client, self.user)
 
     def test_refresh_rotates_access_and_refresh_cookies(self):
         old_refresh = self.client.cookies[self.refresh_cookie_name].value
@@ -55,7 +46,7 @@ class RefreshTest(TestCase):
 
         new_refresh = response.cookies[self.refresh_cookie_name].value
         new_access = response.cookies[self.access_cookie_name].value
-        
+
         self.assertNotEqual(new_refresh, old_refresh)
         self.assertNotEqual(new_access, old_access)
 
@@ -70,8 +61,10 @@ class RefreshTest(TestCase):
         )
         self.assertEqual(first_refresh.status_code, 200)
 
-        # Reuse the old refresh token on purpose; it should now be blacklisted.
         self.client.cookies[self.refresh_cookie_name] = used_refresh
+
+        # Token refresh endpoint uses auth throttling (1/sec by default).
+        time.sleep(1.1)
 
         second_refresh = self.client.post(
             self.refresh_url,
@@ -84,8 +77,7 @@ class RefreshTest(TestCase):
         self.assertEqual(second_refresh.json()["detail"], "Refresh token is invalid or expired.")
 
     def test_expired_refresh_token_cannot_be_used(self):
-        user = User.objects.get(email="test@example.com")
-        expired_refresh_token = RefreshToken.for_user(user)
+        expired_refresh_token = RefreshToken.for_user(self.user)
         expired_refresh_token.set_exp(lifetime=timedelta(days=-1))
 
         self.client.cookies[self.refresh_cookie_name] = str(expired_refresh_token)
@@ -127,9 +119,8 @@ class RefreshTest(TestCase):
         self.assertEqual(response.json()["detail"], "Refresh token is invalid or expired.")
 
     def test_refresh_token_for_deleted_user_cannot_be_used(self):
-        user = User.objects.get(email="test@example.com")
-        refresh_token_for_deleted_user = str(RefreshToken.for_user(user))
-        user.delete()
+        refresh_token_for_deleted_user = str(RefreshToken.for_user(self.user))
+        self.user.delete()
 
         self.client.cookies[self.refresh_cookie_name] = refresh_token_for_deleted_user
 

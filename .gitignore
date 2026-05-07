@@ -4,3 +4,6 @@
 
 # Ignore local impeccable product context
 /PRODUCT.md
+
+# Ignore local private keys
+private_key.pem

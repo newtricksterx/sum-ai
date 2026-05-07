@@ -78,6 +78,14 @@
   letter-spacing: 0.02em;
   flex: 0 0 auto;
   user-select: none;
+  overflow: hidden;
+}
+
+.pp-avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .dark .pp-avatar {
@@ -423,6 +431,38 @@
   outline: none;
 }
 
+.profile-google-btn {
+  width: 100%;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.48rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-card-elev) 72%, transparent);
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease, background-color 140ms ease;
+}
+
+.profile-google-btn:hover {
+  border-color: var(--color-text-secondary);
+  background: color-mix(in srgb, var(--color-card-elev) 88%, transparent);
+}
+
+.profile-google-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.profile-google-btn:active {
+  transform: translateY(0.5px);
+}
+
 @media (max-width: 390px) {
   .TabsContent {
     padding: 0.62rem;
@@ -433,7 +473,8 @@
   .pp-logout-btn,
   .pp-delete-btn,
   .TabsTrigger,
-  .pp-bar-fill {
+  .pp-bar-fill,
+  .profile-google-btn {
     transition: none !important;
   }
 }

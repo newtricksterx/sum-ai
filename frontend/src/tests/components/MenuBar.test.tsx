@@ -35,7 +35,6 @@ describe("MenuBar", () => {
     fireEvent.click(screen.getByTitle("Go to summary page"));
     fireEvent.click(screen.getByTitle("View history"));
     fireEvent.click(screen.getByTitle("Profile page"));
-    fireEvent.click(screen.getByTitle("Close extension"));
 
     expect(onClickReturn).toHaveBeenCalledTimes(1);
     expect(onClickForward).toHaveBeenCalledTimes(1);

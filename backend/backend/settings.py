@@ -61,10 +61,19 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
-    'oauth2_provider',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+
 ]
 
 AUTH_USER_MODEL = 'api.User'
+
+# allauth config for custom User model
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
+ACCOUNT_LOGIN_METHODS = {"email", "username"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "username", "password1*", "password2*"]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -75,9 +84,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
+LOGIN_REDIRECT_URL = env.str("LOGIN_REDIRECT_URL", default="/api/auth/social/jwt") # type: ignore
+LOGOUT_REDIRECT_URL = env.str("LOGOUT_REDIRECT_URL", default="/api/") # type: ignore
+SOCIAL_AUTH_SUCCESS_REDIRECT_URL = env.str("SOCIAL_AUTH_SUCCESS_REDIRECT_URL", default="/api/auth/social/complete") # type: ignore
 
 TEMPLATES = [
     {
@@ -186,6 +199,7 @@ REST_FRAMEWORK = {
     ],
 }
 
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
@@ -197,4 +211,13 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_HTTP_ONLY' : True, # Http only cookie flag.It's not fetch by javascript.
     'AUTH_COOKIE_PATH': '/',        # The path of the auth cookie.
     'AUTH_COOKIE_SAMESITE': 'None',  # Whether to set the flag restricting cookie leaks on cross-site requests.
+}
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+    }
 }

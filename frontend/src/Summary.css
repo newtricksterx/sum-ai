@@ -1,10 +1,11 @@
 .summary-container {
   --summary-text: var(--color-text-primary);
   --summary-muted: var(--color-text-secondary);
-  --summary-link: var(--color-accent);
-  --summary-link-hover: var(--color-accent-strong);
+  --summary-link: #60a5fa;
+  --summary-link-hover: #3b82f6;
+  --summary-link-visited: #818cf8;
   --summary-accent: var(--color-accent);
-  --summary-body: color-mix(in srgb, var(--summary-text) 94%, transparent);
+  --summary-body: color-mix(in srgb, var(--summary-text) 98%, var(--summary-muted));
   --summary-rule: color-mix(in srgb, var(--color-border) 78%, transparent);
   --summary-intro-bg: color-mix(in srgb, var(--color-card-elev) 75%, transparent);
 
@@ -39,7 +40,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--summary-muted);
+  color: color-mix(in srgb, var(--summary-text) 74%, var(--summary-muted));
 }
 
 .summary-container h3 {
@@ -52,6 +53,7 @@
 .summary-container p,
 .summary-container li {
   color: var(--summary-body);
+  font-weight: 500;
 }
 
 .summary-container p {
@@ -131,6 +133,16 @@
   color: var(--summary-link-hover);
   opacity: 0.95;
   text-decoration-color: color-mix(in srgb, var(--summary-link-hover) 75%, transparent);
+}
+
+.summary-container a:visited {
+  color: var(--summary-link-visited);
+}
+
+.summary-container a:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--summary-link) 75%, white 25%);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .summary-container > * {

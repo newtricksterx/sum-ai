@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from api.models import Subscription
+from api.tests.helpers import authenticate_client_with_jwt
 
 User = get_user_model()
 
@@ -133,7 +134,6 @@ class AuthenticatedSummaryLimitTest(TestCase):
         cache.clear()
         self.client = Client()
         self.url = reverse("summarize-text")
-        self.login_url = reverse("login-user")
         self.email = "summary-user@example.com"
         self.password = "StrongPassword123!"
 
@@ -143,22 +143,12 @@ class AuthenticatedSummaryLimitTest(TestCase):
         )
         self.subscription = Subscription.objects.get(user=self.user)
 
-    def _login(self):
-        response = self.client.post(
-            self.login_url,
-            data=json.dumps(
-                {
-                    "email": self.email,
-                    "password": self.password,
-                }
-            ),
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 200)
+    def _authenticate(self):
+        authenticate_client_with_jwt(self.client, self.user)
 
     @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
     def test_authenticated_summary_increments_usage_counter(self, _mock_summarize):
-        self._login()
+        self._authenticate()
 
         response = self.client.post(
             self.url,
@@ -177,7 +167,7 @@ class AuthenticatedSummaryLimitTest(TestCase):
 
     @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
     def test_authenticated_summary_is_blocked_when_limit_reached(self, mock_summarize):
-        self._login()
+        self._authenticate()
         self.subscription.summaries_used = self.subscription.summary_limit  # type: ignore
         self.subscription.save(update_fields=["summaries_used", "updated_at"])
 
@@ -205,7 +195,7 @@ class AuthenticatedSummaryLimitTest(TestCase):
 
     @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
     def test_authenticated_summary_resets_usage_after_period_rollover(self, _mock_summarize):
-        self._login()
+        self._authenticate()
         expired_period_start = timezone.now() - timedelta(days=31)
         self.subscription.summaries_used = 2
         self.subscription.current_period_start = expired_period_start
@@ -231,7 +221,7 @@ class AuthenticatedSummaryLimitTest(TestCase):
 
     @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
     def test_authenticated_summary_uses_standard_plan_character_limit(self, mock_summarize):
-        self._login()
+        self._authenticate()
         self.subscription.plan_slug = "standard"
         self.subscription.save(update_fields=["plan_slug", "updated_at"])
 
@@ -251,7 +241,7 @@ class AuthenticatedSummaryLimitTest(TestCase):
 
     @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
     def test_authenticated_summary_uses_unlimited_character_limit_for_pro(self, mock_summarize):
-        self._login()
+        self._authenticate()
         self.subscription.plan_slug = "pro"
         self.subscription.save(update_fields=["plan_slug", "updated_at"])
 
@@ -272,7 +262,7 @@ class AuthenticatedSummaryLimitTest(TestCase):
     @patch.dict("rest_framework.throttling.AnonRateThrottle.THROTTLE_RATES", {"anon": "1/min"})
     @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
     def test_authenticated_summary_is_not_limited_by_anon_throttle(self, _mock_summarize):
-        self._login()
+        self._authenticate()
         self.subscription.plan_slug = "pro"
         self.subscription.save(update_fields=["plan_slug", "updated_at"])
 
