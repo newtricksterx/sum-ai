@@ -1,8 +1,8 @@
 import React from 'react';
-import { useHistoryStore, type HistorySummary } from '../stores/historyStore';
-import { getSummaryIntroFromHtml } from '../utils/html';
-import HistoryCard from '../components/HistoryCard/HistoryCard';
-import AlertPopup from '../components/AlertPopup/AlertPopup';
+import { useHistoryStore, type HistorySummary } from '../../stores/historyStore';
+import { getSummaryIntroFromHtml } from '../../utils/html';
+import HistoryCard from '../../components/HistoryCard/HistoryCard';
+import AlertPopup from '../../components/AlertPopup/AlertPopup';
 
 interface HistoryPageProps {
   onSelectHistory: (historyItem: HistorySummary) => void;

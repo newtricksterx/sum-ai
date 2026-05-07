@@ -1,5 +1,5 @@
 import React from 'react';
-import PageCard from '../components/PageCard/PageCard';
+import PageCard from '../../components/PageCard/PageCard';
 
 interface SummaryPageProps {
   content: string;

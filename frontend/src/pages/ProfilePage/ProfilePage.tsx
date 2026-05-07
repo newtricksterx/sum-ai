@@ -3,7 +3,7 @@ import PageCard from '../../components/PageCard/PageCard';
 import "./ProfilePage.css";
 import AlertPopup from '../../components/AlertPopup/AlertPopup';
 import TooltipComponent from '../../components/Tooltip/TooltipComponent';
-import { useProfileAccount } from "../../hooks/useProfileAccount";
+import { useProfileAccount } from "./useProfileAccount";
 import { deriveWordLimit, formatLimit, formatDate, getInitials, 
   PLAN_TOOLTIP, WORD_LIMIT_TOOLTIP, 
   HISTORY_CAPACITY_TOOLTIP } from './profilepage.helpers';

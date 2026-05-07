@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { authInstance, setAuthLogoutHandler } from "../services/axiosService";
-import { useHistoryStore } from "../stores/historyStore";
+import { authInstance, setAuthLogoutHandler } from "../../services/axiosService";
+import { useHistoryStore } from "../../stores/historyStore";
 
 export type UserProfile = {
   id: number;

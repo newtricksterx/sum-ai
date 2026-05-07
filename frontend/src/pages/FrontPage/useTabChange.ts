@@ -7,7 +7,7 @@ import {
   getTabWordCount,
   isRestrictedPage,
   resolveCurrentTab,
-} from "../pages/FrontPage/frontpage.helpers";
+} from "./frontpage.helpers";
 
 export const useTabChange = () => {
   const [activeTabMeta, setActiveTabMeta] = useState<ActiveTabMeta>(FALLBACK_TAB_META);

@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
-import { buildErrorSummaryHtml, buildThrottleMessage } from "../services/summaryMessages";
-import { useHistoryStore, type HistorySummary } from "../stores/historyStore";
-import { useSettingsStore } from "../stores/settingsStore";
-import { GetSummaryFromStorage, UpdateSummaryStorage } from "../utils/storage";
-import { Format, Language, Length } from "../utils/types";
+import { buildErrorSummaryHtml, buildThrottleMessage } from "./summaryMessages";
+import { useHistoryStore, type HistorySummary } from "../../stores/historyStore";
+import { useSettingsStore } from "../../stores/settingsStore";
+import { GetSummaryFromStorage, UpdateSummaryStorage } from "../../utils/storage";
+import { Format, Language, Length } from "../../utils/types";
 
 type SummarizeRequestParams = {
   baseUrl: string;

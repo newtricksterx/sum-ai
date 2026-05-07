@@ -2,7 +2,7 @@ import type React from 'react';
 import { FileText, Globe, Sparkles, Type, WandSparkles } from 'lucide-react';
 import PageCard from '../../components/PageCard/PageCard';
 import { useSettingsStore } from '../../stores/settingsStore';
-import { useTabChange } from '../../hooks/useTabChange';
+import { useTabChange } from './useTabChange';
 import { QUICK_STEPS, getSettingLabel } from './frontpage.helpers';
 import './FrontPage.css';
 
