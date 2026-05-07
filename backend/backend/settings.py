@@ -19,12 +19,16 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-load_dotenv(BASE_DIR / ".env")
-
 # Initialize environment variables
 env = environ.Env(
-    DEBUG=(bool, False)
+    DEBUG=(bool, False),
+    DJANGO_ENV=(str, "dev"),
 )
+
+django_env = env("DJANGO_ENV").lower() # type: ignore
+
+env_file = BASE_DIR / (".env.prod" if django_env == "prod" else ".env.dev")
+load_dotenv(env_file, override=True)
 
 # environ.Env.read_env(os.path.join(BASE_DIR, '../.env'))
 
@@ -33,6 +37,8 @@ env = environ.Env(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", default=False) # type: ignore
+IS_PRODUCTION = not DEBUG
+STRICT_SECURITY_VALIDATION = env.bool("STRICT_SECURITY_VALIDATION", default=IS_PRODUCTION) # type: ignore
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env.str("SECRET_KEY", default="") # type: ignore
@@ -46,6 +52,11 @@ ALLOWED_HOSTS = env.list(
     "ALLOWED_HOSTS",
     default=["127.0.0.1", "localhost"] if DEBUG else [] # type: ignore
 )
+if IS_PRODUCTION and STRICT_SECURITY_VALIDATION:
+    if not ALLOWED_HOSTS:
+        raise ImproperlyConfigured("ALLOWED_HOSTS must be configured when DEBUG is False.")
+    if "*" in ALLOWED_HOSTS: # type: ignore
+        raise ImproperlyConfigured("ALLOWED_HOSTS cannot contain '*' when DEBUG is False.")
 
 
 # Application definition
@@ -129,6 +140,15 @@ LOGGING = {
 }
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=IS_PRODUCTION) # type: ignore
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = env.str("SECURE_REFERRER_POLICY", default="same-origin") # type: ignore
+SECURE_CROSS_ORIGIN_OPENER_POLICY = env.str("SECURE_CROSS_ORIGIN_OPENER_POLICY", default="same-origin") # type: ignore
+
+_hsts_default_seconds = 31536000 if IS_PRODUCTION else 0
+SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=_hsts_default_seconds) # type: ignore
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False) # type: ignore
+SECURE_HSTS_PRELOAD = env.bool("SECURE_HSTS_PRELOAD", default=False) # type: ignore
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -179,6 +199,13 @@ CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_cors_allowed_origins)) # type: ignore
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[]) # type: ignore
+if IS_PRODUCTION and STRICT_SECURITY_VALIDATION:
+    if not CORS_ALLOWED_ORIGINS:
+        raise ImproperlyConfigured(
+            "CORS_ALLOWED_ORIGINS must be set when DEBUG is False and credentials are enabled."
+        )
+    if not CSRF_TRUSTED_ORIGINS:
+        raise ImproperlyConfigured("CSRF_TRUSTED_ORIGINS must be set when DEBUG is False.")
 
 ANON_THROTTLE_SUMMARIES_COUNT = env.int("THROTTLE_SUMMARIES_COUNT", default=1) # type: ignore
 ANON_THROTTLE_SUMMARIES_PERIOD = env.str("THROTTLE_SUMMARIES_PERIOD", default="day").lower() # type: ignore
@@ -199,7 +226,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
@@ -207,11 +233,28 @@ SIMPLE_JWT = {
     'AUTH_COOKIE': 'access_token',  # Cookie name. Enables cookies if value is set.
     "AUTH_REFRESH_COOKIE": 'refresh_token',
     'AUTH_COOKIE_DOMAIN': None,     # A string like "example.com", or None for standard domain cookie.
-    'AUTH_COOKIE_SECURE': True,    # Whether the auth cookies should be secure (https:// only).
+    'AUTH_COOKIE_SECURE': env.bool("AUTH_COOKIE_SECURE", default=IS_PRODUCTION),    # Whether the auth cookies should be secure (https:// only). # type: ignore
     'AUTH_COOKIE_HTTP_ONLY' : True, # Http only cookie flag.It's not fetch by javascript.
     'AUTH_COOKIE_PATH': '/',        # The path of the auth cookie.
+    'AUTH_REFRESH_COOKIE_PATH': '/api/token/refresh', # Narrow refresh-token cookie scope.
     'AUTH_COOKIE_SAMESITE': 'None',  # Whether to set the flag restricting cookie leaks on cross-site requests.
 }
+
+if IS_PRODUCTION and SIMPLE_JWT["AUTH_COOKIE_SAMESITE"] == "None" and not SIMPLE_JWT["AUTH_COOKIE_SECURE"]:
+    raise ImproperlyConfigured(
+        "AUTH_COOKIE_SECURE must be True when AUTH_COOKIE_SAMESITE is 'None' in production."
+    )
+
+# CSRF Permissions
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = IS_PRODUCTION
+CSRF_COOKIE_SAMESITE = env.str("CSRF_COOKIE_SAMESITE", default="Lax") # type: ignore
+
+# Django session/CSRF cookie hardening for production HTTPS deployments.
+SESSION_COOKIE_SECURE = IS_PRODUCTION
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = env.str("SESSION_COOKIE_SAMESITE", default="Lax") # type: ignore
+
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {

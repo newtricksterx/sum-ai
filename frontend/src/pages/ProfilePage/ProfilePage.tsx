@@ -9,6 +9,7 @@ import { FcGoogle } from "react-icons/fc";
 import { MenuIconSize } from '../../utils/constants';
 import { useTranslation } from 'react-i18next';
 import '../../i18n';
+import { markLoginPending } from '../../services/authSignals';
 
 const ProfilePage: React.FC = () => {
   const { t } = useTranslation();
@@ -40,6 +41,7 @@ const ProfilePage: React.FC = () => {
   }, []);
 
   const handleGoogleSignIn = useCallback(() => {
+    markLoginPending();
     const chromeApi = globalThis.chrome;
 
     if (chromeApi?.tabs?.create) {

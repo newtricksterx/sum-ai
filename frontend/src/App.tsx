@@ -17,6 +17,10 @@ import ProfilePage from './pages/ProfilePage/ProfilePage'
 import { useCopySuccessTimer } from './components/ToolBar/useCopySuccessTimer'
 import { useHistoryOwnerSync } from './pages/HistoryPage/useHistoryOwnerSync'
 import { useSummarizeActiveTab } from './pages/SummaryPage/useSummarizeActiveTab'
+import { useAuthProfileStore } from './stores/authProfileStore'
+import { setAuthLogoutHandler } from './services/axiosService'
+import { useHistoryStore } from './stores/historyStore'
+import { clearLoginPending, isLoginPending } from './services/authSignals'
 
 
 function App() {
@@ -27,12 +31,67 @@ function App() {
   const theme = useSettingsStore((state) => state.theme)
   const fontSize = useSettingsStore((state) => state.fontSize)
   const language = useSettingsStore((state) => state.language)
+  const hydrateProfile = useAuthProfileStore((state) => state.hydrateProfile)
+  const clearProfile = useAuthProfileStore((state) => state.clearProfile)
+  const setHistoryOwner = useHistoryStore((state) => state.setHistoryOwner)
 
   useEffect(() => {
     const nextLanguage = APP_LANGUAGE_TO_I18N[language] ?? "en";
     void i18n.changeLanguage(nextLanguage);
     document.documentElement.lang = nextLanguage;
   }, [language]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const hydrateAfterLoginIfNeeded = async () => {
+      if (!isLoginPending()) {
+        return;
+      }
+
+      try {
+        await hydrateProfile(true);
+      } catch {
+        // If login is incomplete/failed, the store will remain unauthenticated.
+      } finally {
+        if (isMounted) {
+          clearLoginPending();
+        }
+      }
+    };
+
+    void hydrateAfterLoginIfNeeded();
+
+    const handleWindowFocus = () => {
+      void hydrateAfterLoginIfNeeded();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void hydrateAfterLoginIfNeeded();
+      }
+    };
+
+    window.addEventListener("focus", handleWindowFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener("focus", handleWindowFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [hydrateProfile]);
+
+  useEffect(() => {
+    setAuthLogoutHandler(() => {
+      clearProfile();
+      setHistoryOwner("anonymous", 1);
+    });
+
+    return () => {
+      setAuthLogoutHandler(null);
+    };
+  }, [clearProfile, setHistoryOwner]);
 
   const cleanedContent = useMemo(() => {
     return DOMPurify.sanitize(summarizedContent || "",

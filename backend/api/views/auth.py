@@ -1,7 +1,9 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.http import HttpResponse, HttpResponseRedirect
+from django.utils.crypto import constant_time_compare
 from django.utils.http import url_has_allowed_host_and_scheme
+import logging
 from rest_framework import generics, permissions, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import AuthenticationFailed
@@ -16,6 +18,7 @@ from api.serializers import (
 )
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 def _set_auth_cookies(response: Response | HttpResponseRedirect, access_token: str, refresh_token: str):
@@ -23,6 +26,7 @@ def _set_auth_cookies(response: Response | HttpResponseRedirect, access_token: s
     refresh_cookie_name = settings.SIMPLE_JWT["AUTH_REFRESH_COOKIE"]
     cookie_domain = settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"]
     cookie_path = settings.SIMPLE_JWT["AUTH_COOKIE_PATH"]
+    refresh_cookie_path = settings.SIMPLE_JWT.get("AUTH_REFRESH_COOKIE_PATH", cookie_path)
     cookie_secure = settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"]
     cookie_http_only = settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"]
     cookie_same_site = settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"]
@@ -44,7 +48,7 @@ def _set_auth_cookies(response: Response | HttpResponseRedirect, access_token: s
         secure=cookie_secure,
         httponly=cookie_http_only,
         samesite=cookie_same_site,
-        path=cookie_path,
+        path=refresh_cookie_path,
         domain=cookie_domain,
     )
 
@@ -58,6 +62,37 @@ def _clear_session_cookie(response: Response | HttpResponseRedirect):
     )
 
 
+def _is_trusted_cookie_request(request) -> bool:
+    """
+    Require a trusted Origin/Referer for sensitive cookie-auth endpoints.
+    This helps block cross-site POST abuse when cookies are present.
+    """
+    allowed_origins = set(getattr(settings, "CSRF_TRUSTED_ORIGINS", []))
+    allowed_origins.update(getattr(settings, "CORS_ALLOWED_ORIGINS", []))
+
+    origin = request.headers.get("Origin")
+    if settings.DEBUG and origin in {None, "", "null"}:
+        # In local dev, some extension/background requests may omit Origin or send "null".
+        # Keep production strict while avoiding false negatives for trusted local workflows.
+        logger.warning(
+            "DEBUG mode: accepting cookie-auth request with missing/null Origin for local workflow compatibility."
+        )
+        return True
+
+    if origin:
+        return origin in allowed_origins
+
+    referer = request.headers.get("Referer", "")
+    if referer:
+        return any(
+            referer.startswith(allowed_origin)
+            and constant_time_compare(referer[: len(allowed_origin)], allowed_origin)
+            for allowed_origin in allowed_origins
+        )
+
+    return False
+
+
 class LogoutUserView(APIView):
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
@@ -67,8 +102,15 @@ class LogoutUserView(APIView):
         access_cookie_name = settings.SIMPLE_JWT["AUTH_COOKIE"]
         refresh_cookie_name = settings.SIMPLE_JWT["AUTH_REFRESH_COOKIE"]
         cookie_path = settings.SIMPLE_JWT["AUTH_COOKIE_PATH"]
+        refresh_cookie_path = settings.SIMPLE_JWT.get("AUTH_REFRESH_COOKIE_PATH", cookie_path)
         cookie_domain = settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"]
         cookie_same_site = settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"]
+
+        if not _is_trusted_cookie_request(request):
+            return Response(
+                {"detail": "Untrusted cross-site request."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         refresh_token = request.COOKIES.get(refresh_cookie_name)
         if refresh_token:
@@ -88,7 +130,7 @@ class LogoutUserView(APIView):
         )
         response.delete_cookie(
             key=refresh_cookie_name,
-            path=cookie_path,
+            path=refresh_cookie_path,
             domain=cookie_domain,
             samesite=cookie_same_site,  # type: ignore
         )
@@ -102,8 +144,13 @@ class CookieTokenRefreshView(APIView):
 
 
     def post(self, request):
-        refresh_cookie_name = settings.SIMPLE_JWT["AUTH_REFRESH_COOKIE"]
+        if not _is_trusted_cookie_request(request):
+            return Response(
+                {"detail": "Untrusted cross-site request."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
+        refresh_cookie_name = settings.SIMPLE_JWT["AUTH_REFRESH_COOKIE"]
         refresh_token = request.COOKIES.get(refresh_cookie_name)
         if not refresh_token:
             return Response({"detail": "Refresh token missing."}, status=status.HTTP_401_UNAUTHORIZED)
@@ -170,6 +217,13 @@ class SocialJWTBridgeView(APIView):
 
         request.session.flush()
         _clear_session_cookie(response)
+        # Also clear any fallback auth session artifacts after JWT cookies are set.
+        response.delete_cookie(
+            key=settings.SESSION_COOKIE_NAME,
+            path=settings.SESSION_COOKIE_PATH,
+            domain=settings.SESSION_COOKIE_DOMAIN,
+            samesite=settings.SESSION_COOKIE_SAMESITE, # type: ignore
+        )
         return response
 
 

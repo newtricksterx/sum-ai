@@ -1,13 +1,6 @@
 import { useEffect } from "react";
-import { authInstance } from "../../services/axiosService";
 import { useHistoryStore } from "../../stores/historyStore"
-
-type MeResponse = {
-  email?: string;
-  subscription?: {
-    history_limit: number | null;
-  };
-};
+import { useAuthProfileStore } from "../../stores/authProfileStore";
 
 const getHistoryOwnerKeyFromEmail = (email: string | null | undefined) => {
   if (typeof email !== "string") {
@@ -20,32 +13,17 @@ const getHistoryOwnerKeyFromEmail = (email: string | null | undefined) => {
 
 export const useHistoryOwnerSync = () => {
   const setHistoryOwner = useHistoryStore((state) => state.setHistoryOwner);
+  const profile = useAuthProfileStore((state) => state.profile);
 
   useEffect(() => {
-    let isMounted = true;
+    if (!profile) {
+      setHistoryOwner("anonymous", 1);
+      return;
+    }
 
-    const syncHistoryLimit = async () => {
-      try {
-        const response = await authInstance.get<MeResponse>("/api/users/me");
-        if (!isMounted) {
-          return;
-        }
-
-        setHistoryOwner(
-          getHistoryOwnerKeyFromEmail(response.data.email),
-          response.data.subscription?.history_limit ?? 1,
-        );
-      } catch {
-        if (isMounted) {
-          setHistoryOwner("anonymous", 1);
-        }
-      }
-    };
-
-    void syncHistoryLimit();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [setHistoryOwner]);
+    setHistoryOwner(
+      getHistoryOwnerKeyFromEmail(profile.email),
+      profile.subscription?.history_limit ?? 1,
+    );
+  }, [profile, setHistoryOwner]);
 };

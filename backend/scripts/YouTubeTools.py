@@ -3,6 +3,16 @@ from urllib.parse import parse_qs, urlparse
 
 from youtube_transcript_api import YouTubeTranscriptApi
 
+YOUTUBE_SHORT_HOSTS = {"youtu.be", "www.youtu.be"}
+YOUTUBE_LONG_HOSTS = {
+    "youtube.com",
+    "www.youtube.com",
+    "m.youtube.com",
+    "music.youtube.com",
+    "youtube-nocookie.com",
+    "www.youtube-nocookie.com",
+}
+
 
 def isYouTubeURL(url):
     """
@@ -28,11 +38,11 @@ def isYouTubeURL(url):
     video_id = None
 
     # Short URL: https://youtu.be/<id>
-    if host in {"youtu.be", "www.youtu.be"}:
+    if host in YOUTUBE_SHORT_HOSTS:
         video_id = path_segments[0] if path_segments else None
 
     # Long URL forms from youtube.com
-    elif host.endswith("youtube.com") or host.endswith("youtube-nocookie.com"):
+    elif host in YOUTUBE_LONG_HOSTS:
         if parsed.path == "/watch":
             video_id = parse_qs(parsed.query).get("v", [None])[0]
         elif path_segments and path_segments[0] in {"shorts", "embed", "v", "live"}:
@@ -62,9 +72,9 @@ def getVideoID(value):
     path_segments = [segment for segment in parsed.path.split("/") if segment]
     video_id = None
 
-    if host in {"youtu.be", "www.youtu.be"}:
+    if host in YOUTUBE_SHORT_HOSTS:
         video_id = path_segments[0] if path_segments else None
-    elif host.endswith("youtube.com") or host.endswith("youtube-nocookie.com"):
+    elif host in YOUTUBE_LONG_HOSTS:
         if parsed.path == "/watch":
             video_id = parse_qs(parsed.query).get("v", [None])[0]
         elif path_segments and path_segments[0] in {"shorts", "embed", "v", "live"}:
