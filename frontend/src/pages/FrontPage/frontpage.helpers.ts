@@ -32,6 +32,8 @@ const SETTING_LABELS: Record<string, string> = {
   english: 'English',
   french: 'French',
   spanish: 'Spanish',
+  mandarin: 'Mandarin',
+  hindi: 'Hindi',
   short: 'Short',
   medium: 'Medium',
   long: 'Long',

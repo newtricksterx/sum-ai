@@ -3,6 +3,8 @@ import { useHistoryStore, type HistorySummary } from '../../stores/historyStore'
 import { getSummaryIntroFromHtml } from '../../utils/html';
 import HistoryCard from '../../components/HistoryCard/HistoryCard';
 import AlertPopup from '../../components/AlertPopup/AlertPopup';
+import { useTranslation } from 'react-i18next';
+import '../../i18n';
 
 interface HistoryPageProps {
   onSelectHistory: (historyItem: HistorySummary) => void;
@@ -22,6 +24,7 @@ const getHostName = (url: string) => {
 };
 
 const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
+  const { t } = useTranslation();
   const cache = useHistoryStore((state) => state.cache);
   const clearHistory = useHistoryStore((state) => state.clearHistory);
   const removeSummary = useHistoryStore((state) => state.removeSummary);
@@ -41,7 +44,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
   return (
     <div className="relative px-2 py-2 font-noto">
       <div className="flex items-center justify-between mb-3">
-        <h1 className="text-[16px] font-semibold text-slate-900 dark:text-slate-100 !mb-0">Summary History</h1>
+        <h1 className="text-[16px] font-semibold text-slate-900 dark:text-slate-100 !mb-0">{t("history.title")}</h1>
         <AlertPopup
           trigger={
             <button
@@ -53,14 +56,14 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
                   : "cursor-pointer border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
               }`}
             >
-              Clear All
+              {t("history.clearAll")}
             </button>
           }
-          title="Clear All History?"
-          description="Are you sure you want to permanently remove all saved summaries?"
-          previewText={`${cache.length} ${cache.length === 1 ? "summary" : "summaries"} will be deleted.`}
-          confirmLabel="Clear All"
-          cancelLabel="Cancel"
+          title={t("history.clearAllTitle")}
+          description={t("history.clearAllDescription")}
+          previewText={`${cache.length} ${cache.length === 1 ? t("history.summary") : t("history.summaries")} ${t("history.willBeDeleted")}`}
+          confirmLabel={t("history.clearAll")}
+          cancelLabel={t("profile.cancel", "Cancel")}
           confirmTone="danger"
           onConfirm={onConfirmClearAll}
         />
@@ -68,7 +71,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
 
       {cache.length === 0 ? (
         <p className="text-[13px] text-slate-600 dark:text-slate-300">
-          No summaries yet. Generate one and it will appear here.
+          {t("history.empty")}
         </p>
       ) : (
         <div className="flex flex-col gap-2">

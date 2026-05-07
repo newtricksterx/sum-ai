@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import "../../i18n";
 import {
   type ActiveTabMeta,
   FALLBACK_TAB_META,
-  formatReadTime,
   getDomainFromUrl,
   getTabWordCount,
   isRestrictedPage,
@@ -10,7 +11,20 @@ import {
 } from "./frontpage.helpers";
 
 export const useTabChange = () => {
+  const { t, i18n } = useTranslation();
   const [activeTabMeta, setActiveTabMeta] = useState<ActiveTabMeta>(FALLBACK_TAB_META);
+  const wordsPerMinute = 225;
+
+  const getReadTimeUnavailable = () => t("frontpage.readTimeUnavailable");
+  const getEstimatingLabel = () => t("frontpage.estimating");
+  const formatReadTimeLabel = (wordCount: number) => {
+    if (wordCount <= 0) {
+      return getReadTimeUnavailable();
+    }
+
+    const minutes = Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+    return `${minutes} ${t("frontpage.minRead")}`;
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -25,14 +39,17 @@ export const useTabChange = () => {
       }
 
       if (!tab) {
-        setActiveTabMeta(FALLBACK_TAB_META);
+        setActiveTabMeta({
+          ...FALLBACK_TAB_META,
+          readTime: getReadTimeUnavailable(),
+        });
         return;
       }
 
       const nextMeta: ActiveTabMeta = {
         title: tab.title?.trim() || FALLBACK_TAB_META.title,
         domain: getDomainFromUrl(tab.url),
-        readTime: isRestrictedPage(tab.url) ? FALLBACK_TAB_META.readTime : "Estimating...",
+        readTime: isRestrictedPage(tab.url) ? getReadTimeUnavailable() : getEstimatingLabel(),
       };
 
       setActiveTabMeta(nextMeta);
@@ -46,14 +63,14 @@ export const useTabChange = () => {
         if (isMounted && requestId === latestMetaRequestId) {
           setActiveTabMeta((currentMeta) => ({
             ...currentMeta,
-            readTime: formatReadTime(wordCount),
+            readTime: formatReadTimeLabel(wordCount),
           }));
         }
       } catch {
         if (isMounted && requestId === latestMetaRequestId) {
           setActiveTabMeta((currentMeta) => ({
             ...currentMeta,
-            readTime: FALLBACK_TAB_META.readTime,
+            readTime: getReadTimeUnavailable(),
           }));
         }
       }
@@ -104,7 +121,7 @@ export const useTabChange = () => {
         chrome.windows?.onFocusChanged?.removeListener(handleWindowFocusChanged);
       }
     };
-  }, []);
+  }, [i18n.language, t]);
 
   return activeTabMeta;
 };

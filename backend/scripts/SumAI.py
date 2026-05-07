@@ -224,6 +224,8 @@ _LANGUAGE_DISPLAY = {
     "english": "English",
     "french": "French",
     "spanish": "Spanish",
+    "mandarin": "Mandarin Chinese",
+    "hindi": "Hindi",
 }
 
 

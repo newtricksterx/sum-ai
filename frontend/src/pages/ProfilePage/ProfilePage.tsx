@@ -4,13 +4,14 @@ import "./ProfilePage.css";
 import AlertPopup from '../../components/AlertPopup/AlertPopup';
 import TooltipComponent from '../../components/Tooltip/TooltipComponent';
 import { useProfileAccount } from "./useProfileAccount";
-import { deriveWordLimit, formatLimit, formatDate, getInitials, 
-  PLAN_TOOLTIP, WORD_LIMIT_TOOLTIP, 
-  HISTORY_CAPACITY_TOOLTIP } from './profilepage.helpers';
+import { deriveWordLimit, formatLimit, formatDate, getInitials } from './profilepage.helpers';
 import { FcGoogle } from "react-icons/fc";
 import { MenuIconSize } from '../../utils/constants';
+import { useTranslation } from 'react-i18next';
+import '../../i18n';
 
 const ProfilePage: React.FC = () => {
+  const { t } = useTranslation();
   const {
     userProfile,
     isInitializing,
@@ -80,7 +81,7 @@ const ProfilePage: React.FC = () => {
   }
 
   if (userProfile) {
-    const planName = userProfile.subscription?.plan_name ?? "Unavailable";
+    const planName = userProfile.subscription?.plan_name ?? t("profile.unavailable", "Unavailable");
     const wordLimit = deriveWordLimit(userProfile.subscription?.character_limit);
     const historyLimitRaw = userProfile.subscription?.history_limit;
     const historyLimit =
@@ -145,21 +146,21 @@ const ProfilePage: React.FC = () => {
                 <div className="pp-email">{userProfile.email}</div>
                 <span className="pp-status pp-status--active">
                   <span className="pp-status-dot" />
-                  Active
+                  {t("profile.active")}
                 </span>
               </div>
             </div>
 
             <section className="pp-card pp-section" aria-label="Plan and limits">
-              <p className="pp-section-title">Plan &amp; Limits</p>
+              <p className="pp-section-title">{t("profile.planAndLimits")}</p>
               <div className="pp-stat-row">
                 <span className="pp-stat-label">
-                  Plan
+                  {t("profile.plan")}
                   <TooltipComponent
-                    content={PLAN_TOOLTIP}
+                    content={t("profile.planTooltip")}
                     side="top"
                     triggerClassName="pp-stat-tooltip-trigger"
-                    ariaLabel="What does plan mean?"
+                    ariaLabel={t("profile.planTooltipAria")}
                   />
                 </span>
                 <span className="pp-stat-value">
@@ -169,12 +170,12 @@ const ProfilePage: React.FC = () => {
 
               <div className="pp-stat-row">
                 <span className="pp-stat-label">
-                  Word limit
+                  {t("profile.wordLimit")}
                   <TooltipComponent
-                    content={WORD_LIMIT_TOOLTIP}
+                    content={t("profile.wordLimitTooltip")}
                     side="top"
                     triggerClassName="pp-stat-tooltip-trigger"
-                    ariaLabel="What does word limit mean?"
+                    ariaLabel={t("profile.wordLimitTooltipAria")}
                   />
                 </span>
                 <span className="pp-stat-value">{wordLimit}</span>
@@ -182,12 +183,12 @@ const ProfilePage: React.FC = () => {
 
               <div className="pp-stat-row">
                 <span className="pp-stat-label">
-                  History capacity
+                  {t("profile.historyCapacity")}
                   <TooltipComponent
-                    content={HISTORY_CAPACITY_TOOLTIP}
+                    content={t("profile.historyCapacityTooltip")}
                     side="top"
                     triggerClassName="pp-stat-tooltip-trigger"
-                    ariaLabel="What does history capacity mean?"
+                    ariaLabel={t("profile.historyCapacityTooltipAria")}
                   />
                 </span>
                 <span className="pp-stat-value">{historyLimit}</span>
@@ -197,12 +198,12 @@ const ProfilePage: React.FC = () => {
             <section className="pp-card pp-section" aria-label="Usage this cycle">
               <div className="pp-usage">
                 <div className="pp-usage-header">
-                  <span className="pp-stat-label">Usage this cycle</span>
+                  <span className="pp-stat-label">{t("profile.usageCycle")}</span>
                   <span className={`pp-usage-count${usagePercentage >= 80 ? " pp-usage-count--high" : ""}`}>
                     {isUnlimitedUsage ? (
                       <>
                         {summariesUsed.toLocaleString()}
-                        <span className="pp-usage-cap">uncapped</span>
+                        <span className="pp-usage-cap">{t("profile.uncapped")}</span>
                       </>
                     ) : (
                       <>
@@ -234,12 +235,12 @@ const ProfilePage: React.FC = () => {
 
             <section className="pp-card pp-section pp-section--dates" aria-label="Account dates">
               <div className="pp-stat-row">
-                <span className="pp-stat-label">Member since</span>
+                <span className="pp-stat-label">{t("profile.memberSince")}</span>
                 <span className="pp-stat-value">{memberSince}</span>
               </div>
 
               <div className="pp-stat-row">
-                <span className="pp-stat-label">Last updated</span>
+                <span className="pp-stat-label">{t("profile.lastUpdated")}</span>
                 <span className="pp-stat-value">{updatedAt}</span>
               </div>
             </section>
@@ -252,14 +253,14 @@ const ProfilePage: React.FC = () => {
                     disabled={isAccountActionPending}
                     className="pp-logout-btn"
                   >
-                    {isSubmitting ? "Signing out..." : "Log out"}
+                    {isSubmitting ? t("profile.signingOut") : t("profile.logout")}
                   </button>
                 }
-                title="Log out?"
-                description="Are you sure you want to log out of this browser session?"
+                title={t("profile.logoutTitle")}
+                description={t("profile.logoutDescription")}
                 previewTitle={userProfile.email}
-                confirmLabel="Log out"
-                cancelLabel="Cancel"
+                confirmLabel={t("profile.logout")}
+                cancelLabel={t("profile.cancel", "Cancel")}
                 confirmTone="primary"
                 onConfirm={() => void handleLogout()}
               />
@@ -274,9 +275,9 @@ const ProfilePage: React.FC = () => {
     <main className="test-profile-page px-2 py-2 font-noto">
       <PageCard className="test-profile-card p-4">
         <header className="test-profile-header">
-          <p className="test-profile-kicker">Account</p>
-          <h1 className="test-profile-title">Secure Account Access</h1>
-          <p className="test-profile-subtitle">Sign in to view subscription limits, usage, and account status.</p>
+          <p className="test-profile-kicker">{t("profile.account")}</p>
+          <h1 className="test-profile-title">{t("profile.secureAccess")}</h1>
+          <p className="test-profile-subtitle">{t("profile.signInDescription")}</p>
         </header>
 
         {infoMessage && (
@@ -298,7 +299,7 @@ const ProfilePage: React.FC = () => {
             className="profile-google-btn"
           >
             <FcGoogle size={MenuIconSize}/>
-            Sign in to Google
+            {t("profile.signInGoogle")}
           </button>
         </section>
       </PageCard>

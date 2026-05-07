@@ -4,6 +4,8 @@ export const all_languages: Language[] = [
     "english",
     "french",
     "spanish",
+    "mandarin",
+    "hindi",
 ]
 
 export const all_lengths: Length[] = [
@@ -23,10 +25,3 @@ export const all_formats: Format[] = [
 ]
 
 export const MenuIconSize = 20;
-
-export const BASE_URL = 'http://127.0.0.1:8000';
-
-export const test_result = `- The page is titled "Example Domain."
-- It is designated for illustrative purposes in documents.
-- Users can freely utilize this domain in their literature without needing permission or prior coordination.
-- A link for additional information is provided: "More information..." which directs to the IANA website.`

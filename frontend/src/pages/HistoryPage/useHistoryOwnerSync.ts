@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { authInstance } from "../services/axiosService";
-import { useHistoryStore } from "../stores/historyStore";
+import { authInstance } from "../../services/axiosService";
+import { useHistoryStore } from "../../stores/historyStore"
 
 type MeResponse = {
   email?: string;

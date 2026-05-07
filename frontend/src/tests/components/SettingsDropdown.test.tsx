@@ -83,7 +83,7 @@ describe("SettingsDropdown", () => {
     fireEvent.click(screen.getByTitle("Settings"));
 
     fireEvent.pointerDown(screen.getByRole("button", { name: /Language/i }));
-    fireEvent.click(screen.getByRole("menuitemradio", { name: "French" }));
+    fireEvent.click(screen.getByRole("menuitemradio", { name: "Français" }));
 
     fireEvent.pointerDown(screen.getByRole("button", { name: /Summary Format/i }));
     fireEvent.click(screen.getByRole("menuitemradio", { name: "Action items" }));

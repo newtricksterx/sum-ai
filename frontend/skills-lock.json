@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "enhanced-message-context": {
+      "source": "lingui/skills",
+      "sourceType": "github",
+      "skillPath": "enhanced-message-context/SKILL.md",
+      "computedHash": "83398ce523587d0a09f694ea93835cd9f80b53ab8e8333ec1278f44a688f756a"
+    },
+    "lingui-best-practices": {
+      "source": "lingui/skills",
+      "sourceType": "github",
+      "skillPath": "lingui-best-practices/SKILL.md",
+      "computedHash": "62195920ba8e7514e31e2a99a247bcd7ed3e91b301c4c699506847026f2f48be"
+    }
+  }
+}

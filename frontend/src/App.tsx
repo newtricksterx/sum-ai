@@ -1,9 +1,10 @@
 ﻿import './App.css'
 import './Summary.css'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import MenuBar from './components/MenuBar/MenuBar'
 import ToolBar from './components/ToolBar/ToolBar'
 import { useSettingsStore } from './stores/settingsStore'
+import i18n, { APP_LANGUAGE_TO_I18N } from './i18n'
 import { GetPageFromStorage, UpdatePageStorage } from './utils/storage'
 import LoaderCircle from './components/LoaderCircle'
 import DOMPurify from 'dompurify'
@@ -25,6 +26,13 @@ function App() {
 
   const theme = useSettingsStore((state) => state.theme)
   const fontSize = useSettingsStore((state) => state.fontSize)
+  const language = useSettingsStore((state) => state.language)
+
+  useEffect(() => {
+    const nextLanguage = APP_LANGUAGE_TO_I18N[language] ?? "en";
+    void i18n.changeLanguage(nextLanguage);
+    document.documentElement.lang = nextLanguage;
+  }, [language]);
 
   const cleanedContent = useMemo(() => {
     return DOMPurify.sanitize(summarizedContent || "",
@@ -41,7 +49,7 @@ function App() {
     // Display the loading circle
     if(currentPage === 1 && summarizedContent == null){
       return (
-        <div className="flex-1 flex relative justify-center items-center min-h-[300px] z-40">
+        <div className="flex-1 flex relative justify-center items-center min-h-75 z-40">
           <LoaderCircle />
         </div>  
       )
@@ -171,7 +179,7 @@ function App() {
   }
 
   return (
-    <section className={`${theme} app-shell flex flex-col w-[360px] max-h-[550px]`}>
+    <section className={`${theme} app-shell flex flex-col w-90 max-h-137.5`}>
       <MenuBar 
         onClickReturn={onClickReturn} 
         onClickForward={onClickForward} 

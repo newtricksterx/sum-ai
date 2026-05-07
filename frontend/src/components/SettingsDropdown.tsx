@@ -6,29 +6,8 @@ import { Format, Language, Length } from "../utils/types";
 import { useSettingsStore } from "../stores/settingsStore";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { GearIcon } from "@radix-ui/react-icons";
-
-const OPTION_LABELS: Record<string, string> = {
-    english: "English",
-    french: "French",
-    spanish: "Spanish",
-    short: "Short",
-    medium: "Medium",
-    long: "Long",
-    paragraph: "Paragraph",
-    "bullet-point": "Bullet Points",
-    "tl-dr-bullets": "TL;DR + Bullets",
-    "key-takeaways": "Key Takeaways",
-    "action-items": "Action items",
-    "q-and-a": "Q&A",
-    "pros-cons": "Pros & Cons",
-};
-
-function getOptionLabel(value: string) {
-    if (OPTION_LABELS[value]) return OPTION_LABELS[value];
-    return value
-        .replace(/-/g, " ")
-        .replace(/\b\w/g, (char) => char.toUpperCase());
-}
+import { useTranslation } from "react-i18next";
+import "../i18n";
 
 type SettingsMenuSelectorProps<T extends string> = {
     id: string;
@@ -37,6 +16,7 @@ type SettingsMenuSelectorProps<T extends string> = {
     value: T;
     onValueChange: (value: T) => void;
     onMenuOpenChange?: (isOpen: boolean) => void;
+    getOptionLabel: (value: string) => string;
 };
 
 function SettingsMenuSelector<T extends string>({
@@ -46,6 +26,7 @@ function SettingsMenuSelector<T extends string>({
     value,
     onValueChange,
     onMenuOpenChange,
+    getOptionLabel,
 }: SettingsMenuSelectorProps<T>) {
     const [open, setOpen] = useState(false);
 
@@ -140,6 +121,7 @@ function SettingsMenuSelector<T extends string>({
 
 
 export default function SettingsDropdown() {
+    const { t } = useTranslation();
     const settings_lang = useSettingsStore((state) => state.language);
     const settings_length = useSettingsStore((state) => state.length);
     const settings_fontSize = useSettingsStore((state) => state.fontSize);
@@ -161,6 +143,29 @@ export default function SettingsDropdown() {
     const menuRef = useRef<HTMLDivElement>(null);
     const openSelectorsRef = useRef<Record<string, boolean>>({});
     const hasOpenSelectorRef = useRef(false);
+    const languageOptionLabel: Record<Language, string> = {
+        english: "English",
+        french: "Français",
+        spanish: "Español",
+        mandarin: "普通话",
+        hindi: "हिन्दी",
+    };
+    const getOptionLabel = useCallback((value: string) => {
+        const translated = t(`settings.option.${value}`);
+        if (translated !== `settings.option.${value}`) {
+            return translated;
+        }
+
+        return value
+            .replace(/-/g, " ")
+            .replace(/\b\w/g, (char) => char.toUpperCase());
+    }, [t]);
+    const getLanguageOptionLabel = useCallback((value: string) => {
+        if (value in languageOptionLabel) {
+            return languageOptionLabel[value as Language];
+        }
+        return value;
+    }, []);
 
     const onClickSettings = useCallback(() => {
         setIsOpen((prev) => {
@@ -214,7 +219,7 @@ export default function SettingsDropdown() {
 
     return (
         <div className="relative z-50" ref={menuRef}>
-            <Button onClick={onClickSettings} className="p-2 rounded-3xl m-1" title="Settings">
+            <Button onClick={onClickSettings} className="p-2 rounded-3xl m-1" title={t("settings.buttonTitle")}>
                 <GearIcon width={MenuIconSize} height={MenuIconSize}/>
             </Button>
             <div 
@@ -228,13 +233,13 @@ export default function SettingsDropdown() {
                 {/* header */}
                 <div className="px-3.5 pt-3 pb-2 border-b border-gray-100 dark:border-[#2e2e2e] flex items-center justify-between">
                     <span className="text-[12px] font-semibold tracking-[0.18em] uppercase text-gray-400 dark:text-gray-500">
-                        <strong>Settings</strong>
+                        <strong>{t("settings.title")}</strong>
                     </span>
                     <button
                         type="button"
                         onClick={UpdateTheme}
-                        title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-                        aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+                        title={theme === "light" ? t("settings.switchToDark") : t("settings.switchToLight")}
+                        aria-label={theme === "light" ? t("settings.switchToDark") : t("settings.switchToLight")}
                         className="inline-flex items-center justify-center rounded-md border border-gray-200 dark:border-[#3a3a3a] p-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
                     >
                         {theme === "light" ? <Sun size={16} /> : <Moon size={16} />}
@@ -246,9 +251,10 @@ export default function SettingsDropdown() {
                         <div className="grid grid-cols-2 gap-2.5">
                             <SettingsMenuSelector
                                 id="lang"
-                                label="Language"
+                                label={t("settings.language")}
                                 list={all_languages}
                                 value={language}
+                                getOptionLabel={getLanguageOptionLabel}
                                 onMenuOpenChange={(nextOpen) => {
                                     onSelectorOpenChange("lang", nextOpen);
                                 }}
@@ -260,9 +266,10 @@ export default function SettingsDropdown() {
 
                             <SettingsMenuSelector
                                 id="format"
-                                label="Summary Format"
+                                label={t("settings.summaryFormat")}
                                 list={all_formats}
                                 value={format}
+                                getOptionLabel={getOptionLabel}
                                 onMenuOpenChange={(nextOpen) => {
                                     onSelectorOpenChange("format", nextOpen);
                                 }}
@@ -274,9 +281,10 @@ export default function SettingsDropdown() {
 
                             <SettingsMenuSelector
                                 id="length"
-                                label="Summary Length"
+                                label={t("settings.summaryLength")}
                                 list={all_lengths}
                                 value={length}
+                                getOptionLabel={getOptionLabel}
                                 onMenuOpenChange={(nextOpen) => {
                                     onSelectorOpenChange("length", nextOpen);
                                 }}
@@ -287,7 +295,7 @@ export default function SettingsDropdown() {
                             />
 
                             <div className="flex flex-col gap-1.5 rounded-md border border-gray-200 dark:border-[#3a3a3a] bg-gray-50/70 dark:bg-[#2a2a2a] p-2.5">
-                                <label htmlFor="font-size" className="text-[11px] font-medium tracking-wide text-gray-600 dark:text-gray-300">Font size</label>
+                                <label htmlFor="font-size" className="text-[11px] font-medium tracking-wide text-gray-600 dark:text-gray-300">{t("settings.fontSize")}</label>
                                 <div className="flex items-center gap-2">
                                     <input
                                         id="font-size" type="number"
@@ -309,7 +317,7 @@ export default function SettingsDropdown() {
                              cursor-pointer border-gray-200 dark:border-[#3a3a3a] hover:bg-gray-100 dark:hover:bg-[#2a2a2a] 
                              transition-colors"
                             >
-                            <Check size={12} className="text-green-500" /> Saved
+                            <Check size={12} className="text-green-500" /> {t("settings.saved")}
                             </button>
                         ) : (
                             <button
@@ -318,7 +326,7 @@ export default function SettingsDropdown() {
                             font-medium px-3.5 py-1 rounded-full border cursor-pointer
                             border-gray-200 dark:border-[#3a3a3a] hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
                             >
-                            <Save size={12} /> Save
+                            <Save size={12} /> {t("settings.save")}
                             </button>
                     )}
                     </div>
