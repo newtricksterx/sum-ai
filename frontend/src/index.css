@@ -15,13 +15,27 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: Noto-Sans-SC;
+  src: url("../src/assets/fonts/NotoSansSC-VariableFont_wght.ttf");
+  font-style: normal;
+  font-weight: 100 900;
+}
+
+@font-face {
+  font-family: Noto-Sans-Devanagari;
+  src: url("../src/assets/fonts/NotoSansDevanagari-VariableFont_wdth,wght.ttf");
+  font-style: normal;
+  font-weight: 100 900;
+}
+
 @theme {
-  --font-noto: Noto-Sans, Helvetica, Arial, sans-serif, Arial
+  --font-noto: Noto-Sans, Helvetica, Arial, sans-serif
 }
 
 :root {
   color-scheme: light;
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Noto-Sans, system-ui, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   height: auto;
@@ -86,6 +100,14 @@ body {
   height: auto;
   color: var(--color-text-primary);
   background: var(--color-bg);
+}
+
+:lang(zh) body {
+  font-family: Noto-Sans-SC, Noto-Sans, "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+:lang(hi) body {
+  font-family: Noto-Sans-Devanagari, Noto-Sans, "Mangal", sans-serif;
 }
 
 ul {

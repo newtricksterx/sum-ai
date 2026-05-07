@@ -1,4 +1,4 @@
-import { Save, Check, Sun, Moon, ChevronDown } from "lucide-react";
+﻿import { Save, Check, Sun, Moon, ChevronDown } from "lucide-react";
 import { all_formats, all_languages, all_lengths, MenuIconSize } from "../utils/constants";
 import Button from "./Button";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -150,6 +150,8 @@ export default function SettingsDropdown() {
         mandarin: "普通话",
         hindi: "हिन्दी",
     };
+    const isLanguageChanged = language !== settings_lang;
+
     const getOptionLabel = useCallback((value: string) => {
         const translated = t(`settings.option.${value}`);
         if (translated !== `settings.option.${value}`) {
@@ -222,12 +224,12 @@ export default function SettingsDropdown() {
             <Button onClick={onClickSettings} className="p-2 rounded-3xl m-1" title={t("settings.buttonTitle")}>
                 <GearIcon width={MenuIconSize} height={MenuIconSize}/>
             </Button>
-            <div 
+            <div
                 className={`
                     fixed top-[3.1rem] left-1/2 -translate-x-1/2 border-2 font-noto bg-[#eee] border-gray-200
                     dark:bg-[#303030] dark:border-[#373737] shadow-xs rounded-lg
                     grid transition-[grid-template-rows,opacity] duration-200 ease-out
-                    overflow-hidden w-[310px] max-w-[calc(100vw-1rem)] origin-top
+                    overflow-hidden w-[350px] max-w-[calc(100vw-1rem)] origin-top
                     ${isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none border-transparent"}
                 `}>
                 {/* header */}
@@ -311,10 +313,16 @@ export default function SettingsDropdown() {
 
                     {/* footer */}
                     <div className="px-3.5 py-2.5 flex justify-end">
+                        
+                        {isLanguageChanged ? (
+                            <p className="px-3.5 pb-2.5 text-[11px] text-gray-500 dark:text-gray-400">
+                                {t("settings.languageChangeHint")}
+                            </p>
+                        ) : null}
                         {saved ? (
                             <button
                             className="flex items-center gap-1.5 text-[12px] font-medium px-3.5 py-1 rounded-full border
-                             cursor-pointer border-gray-200 dark:border-[#3a3a3a] hover:bg-gray-100 dark:hover:bg-[#2a2a2a] 
+                             cursor-pointer border-gray-200 dark:border-[#3a3a3a] hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
                              transition-colors"
                             >
                             <Check size={12} className="text-green-500" /> {t("settings.saved")}
@@ -322,7 +330,7 @@ export default function SettingsDropdown() {
                         ) : (
                             <button
                             type="submit"
-                            className="flex items-center gap-1.5 text-[12px] 
+                            className="flex items-center gap-1.5 text-[12px]
                             font-medium px-3.5 py-1 rounded-full border cursor-pointer
                             border-gray-200 dark:border-[#3a3a3a] hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
                             >

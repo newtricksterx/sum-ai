@@ -1,4 +1,4 @@
-const fr = {
+﻿const fr = {
   translation: {
     menu: {
       home: "Aller a l'accueil",
@@ -86,6 +86,7 @@ const fr = {
       fontSize: "Taille de police",
       save: "Enregistrer",
       saved: "Enregistre",
+      languageChangeHint: "Regenerez le resume pour appliquer la langue.",
       option: {
         english: "Anglais",
         french: "Francais",
@@ -108,4 +109,5 @@ const fr = {
 } as const;
 
 export default fr;
+
 

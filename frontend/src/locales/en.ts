@@ -1,4 +1,4 @@
-const en = {
+﻿const en = {
   translation: {
     menu: {
       home: "Go to home page",
@@ -86,6 +86,7 @@ const en = {
       fontSize: "Font size",
       save: "Save",
       saved: "Saved",
+      languageChangeHint: "Regenerate summary to apply language.",
       option: {
         english: "English",
         french: "French",
@@ -108,4 +109,5 @@ const en = {
 } as const;
 
 export default en;
+
 
