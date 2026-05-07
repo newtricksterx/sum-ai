@@ -9,7 +9,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from api.tests.helpers import authenticate_client_with_jwt
+from api.tests.helpers import authenticate_client_with_jwt, get_csrf_headers
 
 
 User = get_user_model()
@@ -38,6 +38,7 @@ class RefreshTest(TestCase):
             data=json.dumps({}),
             content_type="application/json",
             secure=True,
+            **get_csrf_headers(self.client),
         )
 
         self.assertEqual(response.status_code, 200)
@@ -58,6 +59,7 @@ class RefreshTest(TestCase):
             data=json.dumps({}),
             content_type="application/json",
             secure=True,
+            **get_csrf_headers(self.client),
         )
         self.assertEqual(first_refresh.status_code, 200)
 
@@ -71,6 +73,7 @@ class RefreshTest(TestCase):
             data=json.dumps({}),
             content_type="application/json",
             secure=True,
+            **get_csrf_headers(self.client),
         )
 
         self.assertEqual(second_refresh.status_code, 401)
@@ -87,6 +90,7 @@ class RefreshTest(TestCase):
             data=json.dumps({}),
             content_type="application/json",
             secure=True,
+            **get_csrf_headers(self.client),
         )
 
         self.assertEqual(response.status_code, 401)
@@ -100,6 +104,7 @@ class RefreshTest(TestCase):
             data=json.dumps({}),
             content_type="application/json",
             secure=True,
+            **get_csrf_headers(self.client),
         )
 
         self.assertEqual(response.status_code, 401)
@@ -113,6 +118,7 @@ class RefreshTest(TestCase):
             data=json.dumps({}),
             content_type="application/json",
             secure=True,
+            **get_csrf_headers(self.client),
         )
 
         self.assertEqual(response.status_code, 401)
@@ -129,7 +135,19 @@ class RefreshTest(TestCase):
             data=json.dumps({}),
             content_type="application/json",
             secure=True,
+            **get_csrf_headers(self.client),
         )
 
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json()["detail"], "User not found.")
+
+    def test_missing_csrf_header_returns_403(self):
+        response = self.client.post(
+            self.refresh_url,
+            data=json.dumps({}),
+            content_type="application/json",
+            secure=True,
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["detail"], "CSRF token missing or invalid.")

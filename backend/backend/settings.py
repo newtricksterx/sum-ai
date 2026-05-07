@@ -191,10 +191,10 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EXT_ID = env.str("EXT_ID", default="") # type: ignore
+#EXT_ID = env.str("EXT_ID", default="") # type: ignore
 _cors_allowed_origins = env.list("CORS_ALLOWED_ORIGINS", default=[]) # type: ignore
-if EXT_ID:
-    _cors_allowed_origins.append(f"chrome-extension://{EXT_ID}") # type: ignore
+#if EXT_ID:
+#    _cors_allowed_origins.append(f"chrome-extension://{EXT_ID}") # type: ignore
 CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_cors_allowed_origins)) # type: ignore
 CORS_ALLOW_CREDENTIALS = True
 
@@ -247,8 +247,12 @@ if IS_PRODUCTION and SIMPLE_JWT["AUTH_COOKIE_SAMESITE"] == "None" and not SIMPLE
 
 # CSRF Permissions
 CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = IS_PRODUCTION
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=IS_PRODUCTION) # type: ignore
 CSRF_COOKIE_SAMESITE = env.str("CSRF_COOKIE_SAMESITE", default="Lax") # type: ignore
+if CSRF_COOKIE_SAMESITE == "None" and not CSRF_COOKIE_SECURE:
+    raise ImproperlyConfigured(
+        "CSRF_COOKIE_SECURE must be True when CSRF_COOKIE_SAMESITE is 'None'."
+    )
 
 # Django session/CSRF cookie hardening for production HTTPS deployments.
 SESSION_COOKIE_SECURE = IS_PRODUCTION

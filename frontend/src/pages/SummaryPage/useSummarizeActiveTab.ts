@@ -1,7 +1,8 @@
 import { useCallback, useState } from "react";
-import { buildErrorSummaryHtml, buildThrottleMessage } from "./summaryMessages";
+import { buildAnonymousThrottleMessage, buildErrorSummaryHtml, buildThrottleMessage } from "./summaryMessages";
 import { useHistoryStore, type HistorySummary } from "../../stores/historyStore";
 import { useSettingsStore } from "../../stores/settingsStore";
+import { useAuthProfileStore } from "../../stores/authProfileStore";
 import { GetSummaryFromStorage, UpdateSummaryStorage } from "../../utils/storage";
 import { Format, Language, Length } from "../../utils/types";
 
@@ -11,6 +12,7 @@ type SummarizeRequestParams = {
   regenerate: boolean;
   format: Format;
   language: Language;
+  isAuthenticated: boolean;
 };
 
 export type SummarizeResult = {
@@ -145,6 +147,7 @@ const requestActiveTabSummary = async ({
   regenerate,
   format,
   language,
+  isAuthenticated,
 }: SummarizeRequestParams): Promise<SummarizeResult> => {
   if (isMockModeEnabled()) {
     return {
@@ -212,8 +215,12 @@ const requestActiveTabSummary = async ({
       const errorPayload = await getErrorPayload(response);
 
       if (response.status === 429) {
+        const throttleMessage = isAuthenticated
+          ? buildThrottleMessage(errorPayload ?? {})
+          : buildAnonymousThrottleMessage(errorPayload ?? {});
+
         return {
-          html: buildErrorSummaryHtml("Rate limit reached", buildThrottleMessage(errorPayload ?? {})),
+          html: buildErrorSummaryHtml("Rate limit reached", throttleMessage),
           isError: true,
         };
       }
@@ -252,6 +259,7 @@ export const useSummarizeActiveTab = () => {
   const language = useSettingsStore((state) => state.language);
   const length = useSettingsStore((state) => state.length);
   const format = useSettingsStore((state) => state.format);
+  const userProfile = useAuthProfileStore((state) => state.profile);
   const addSummaryToHistory = useHistoryStore((state) => state.addSummary);
 
   const summarize = useCallback(
@@ -264,6 +272,7 @@ export const useSummarizeActiveTab = () => {
         regenerate,
         format,
         language,
+        isAuthenticated: Boolean(userProfile),
       });
 
       setSummarizedContent(result.html);
@@ -278,7 +287,7 @@ export const useSummarizeActiveTab = () => {
 
       return result;
     },
-    [addSummaryToHistory, format, language, length],
+    [addSummaryToHistory, format, language, length, userProfile],
   );
 
   const setSummaryFromHistory = useCallback((historyItem: HistorySummary) => {

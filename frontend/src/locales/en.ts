@@ -58,6 +58,7 @@
       plan: "Plan",
       wordLimit: "Word limit",
       historyCapacity: "History capacity",
+      billingInterval: "Billing interval",
       usageCycle: "Usage this cycle",
       uncapped: "uncapped",
       memberSince: "Member since",
@@ -71,9 +72,15 @@
       planTooltip: "Your current subscription tier. It controls usage limits and available features.",
       wordLimitTooltip: "The approximate maximum amount of text you can summarize in one request.",
       historyCapacityTooltip: "The number of summaries this account can keep in saved history.",
+      billingIntervalTooltip: "How often your usage limits reset for the current plan.",
       planTooltipAria: "What does plan mean?",
       wordLimitTooltipAria: "What does word limit mean?",
       historyCapacityTooltipAria: "What does history capacity mean?",
+      billingIntervalTooltipAria: "What does billing interval mean?",
+      billingIntervalDaily: "Daily",
+      billingIntervalWeekly: "Weekly",
+      billingIntervalMonthly: "Monthly",
+      billingIntervalYearly: "Yearly",
     },
     settings: {
       buttonTitle: "Settings",
@@ -109,5 +116,4 @@
 } as const;
 
 export default en;
-
 

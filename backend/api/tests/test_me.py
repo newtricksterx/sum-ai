@@ -37,6 +37,7 @@ class TestMe(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["email"], "test@example.com")
         self.assertEqual(response.json()["subscription"]["plan_slug"], "free")
+        self.assertEqual(response.json()["subscription"]["billing_interval"], "daily")
         self.assertIn("username", response.json())
         self.assertIn("avatar_url", response.json())
 

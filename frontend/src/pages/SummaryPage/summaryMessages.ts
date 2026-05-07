@@ -37,3 +37,8 @@ export const buildThrottleMessage = (payload: ThrottlePayload) => {
   const retryMessage = retryText ? ` Try again in about ${retryText}.` : "";
   return `${limitText}${retryMessage}`;
 };
+
+export const buildAnonymousThrottleMessage = (payload: ThrottlePayload) => {
+  const limitMessage = buildThrottleMessage(payload);
+  return `${limitMessage} Sign in to receive additional summaries.`;
+};

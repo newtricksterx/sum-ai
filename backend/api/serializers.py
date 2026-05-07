@@ -10,6 +10,7 @@ User = get_user_model()
 
 class SubscriptionReadSerializer(serializers.ModelSerializer):
     plan_name = serializers.SerializerMethodField()
+    billing_interval = serializers.CharField(read_only=True)
     summary_limit = serializers.IntegerField(read_only=True, allow_null=True)
     history_limit = serializers.IntegerField(read_only=True, allow_null=True)
     character_limit = serializers.IntegerField(read_only=True, allow_null=True)
@@ -25,6 +26,7 @@ class SubscriptionReadSerializer(serializers.ModelSerializer):
         fields = (
             "plan_slug",
             "plan_name",
+            "billing_interval",
             "summary_limit",
             "history_limit",
             "character_limit",

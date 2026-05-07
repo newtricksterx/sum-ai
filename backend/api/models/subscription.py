@@ -80,6 +80,11 @@ class Subscription(models.Model):
         return _add_months(period_start, 1)
 
     def usage_period_ends_at(self) -> datetime:
+        # Free plan usage is daily and should not be blocked by any stale
+        # persisted period-end value from previous plan logic.
+        if self.billing_interval == "daily":
+            return self._calculate_period_end_from_start(self.current_period_start)
+
         if self.current_period_end is not None:
             return self.current_period_end
         return self._calculate_period_end_from_start(self.current_period_start)
@@ -91,7 +96,10 @@ class Subscription(models.Model):
     def reset_usage_period(self, reference_time: datetime | None = None) -> None:
         self.summaries_used = 0
         self.current_period_start = reference_time or timezone.now()
-        if self.current_period_end is not None:
+        if self.billing_interval == "daily":
+            # Keep free plan rolling interval derived from current_period_start.
+            self.current_period_end = None
+        elif self.current_period_end is not None:
             self.current_period_end = self._calculate_period_end_from_start(
                 self.current_period_start
             )

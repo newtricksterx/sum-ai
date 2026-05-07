@@ -4,6 +4,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 from api.models import Subscription
+from api.plans import get_billing_interval, get_character_limit, get_history_limit, get_summary_limit
 
 
 User = get_user_model()
@@ -19,18 +20,28 @@ class SubscriptionTest(TestCase):
     def test_create_user_assigns_free_subscription(self):
         subscription = Subscription.objects.get(user=self.user_test)
         self.assertEqual(subscription.plan_slug, "free")
-        self.assertEqual(subscription.summary_limit, 2)
-        self.assertEqual(subscription.history_limit, 3)
-        self.assertEqual(subscription.character_limit, 10000)
+        self.assertEqual(subscription.summary_limit, get_summary_limit("free"))
+        self.assertEqual(subscription.history_limit, get_history_limit("free"))
+        self.assertEqual(subscription.character_limit, get_character_limit("free"))
+        self.assertEqual(subscription.billing_interval, get_billing_interval("free"))
         self.assertEqual(subscription.summaries_used, 0)
         self.assertLessEqual(subscription.current_period_start, timezone.now())
         self.assertIsNone(subscription.current_period_end)
 
     def test_usage_period_end_uses_current_period_end_when_set(self):
         subscription = Subscription.objects.get(user=self.user_test)
+        subscription.plan_slug = "standard"
         expected_end = timezone.now() + timedelta(days=40)
         subscription.current_period_end = expected_end
 
+        self.assertEqual(subscription.usage_period_ends_at(), expected_end)
+
+    def test_daily_free_plan_ignores_stale_current_period_end(self):
+        subscription = Subscription.objects.get(user=self.user_test)
+        subscription.current_period_start = timezone.now() - timedelta(days=2)
+        subscription.current_period_end = timezone.now() + timedelta(days=20)
+
+        expected_end = subscription.current_period_start + timedelta(days=1)
         self.assertEqual(subscription.usage_period_ends_at(), expected_end)
 
     def test_set_subscription_standard(self):

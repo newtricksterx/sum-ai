@@ -186,12 +186,13 @@ class AuthenticatedSummaryLimitTest(TestCase):
         body = response.json()
         self.assertEqual(body["error"], "summary_limit_reached")
         self.assertEqual(body["code"], "summary_limit_reached")
-        self.assertEqual(body["summary_limit"], 2)
-        self.assertEqual(body["summaries_used"], 2)
+        self.assertEqual(body["summary_limit"], self.subscription.summary_limit)
+        self.assertEqual(body["summaries_used"], self.subscription.summary_limit)
+        self.assertEqual(body["billing_interval"], self.subscription.billing_interval)
 
         mock_summarize.assert_not_called()
         self.subscription.refresh_from_db()
-        self.assertEqual(self.subscription.summaries_used, 2)
+        self.assertEqual(self.subscription.summaries_used, self.subscription.summary_limit)
 
     @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
     def test_authenticated_summary_resets_usage_after_period_rollover(self, _mock_summarize):

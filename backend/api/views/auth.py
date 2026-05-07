@@ -1,12 +1,11 @@
 from django.conf import settings
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import get_user_model
 from django.http import HttpResponse, HttpResponseRedirect
-from django.utils.crypto import constant_time_compare
+from django.middleware.csrf import CsrfViewMiddleware, get_token
 from django.utils.http import url_has_allowed_host_and_scheme
 import logging
 from rest_framework import generics, permissions, status
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
@@ -19,6 +18,11 @@ from api.serializers import (
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
+
+
+class _CSRFCheck(CsrfViewMiddleware):
+    def _reject(self, request, reason):  # type: ignore[override]
+        return reason
 
 
 def _set_auth_cookies(response: Response | HttpResponseRedirect, access_token: str, refresh_token: str):
@@ -62,35 +66,28 @@ def _clear_session_cookie(response: Response | HttpResponseRedirect):
     )
 
 
-def _is_trusted_cookie_request(request) -> bool:
-    """
-    Require a trusted Origin/Referer for sensitive cookie-auth endpoints.
-    This helps block cross-site POST abuse when cookies are present.
-    """
-    allowed_origins = set(getattr(settings, "CSRF_TRUSTED_ORIGINS", []))
-    allowed_origins.update(getattr(settings, "CORS_ALLOWED_ORIGINS", []))
+def _has_valid_csrf_token(request) -> bool:
+    check = _CSRFCheck(lambda req: None)
+    original_csrf_bypass = getattr(request, "_dont_enforce_csrf_checks", False)
+    request._dont_enforce_csrf_checks = False
+    try:
+        rejection_reason = check.process_view(request, None, (), {})
+    finally:
+        request._dont_enforce_csrf_checks = original_csrf_bypass
 
-    origin = request.headers.get("Origin")
-    if settings.DEBUG and origin in {None, "", "null"}:
-        # In local dev, some extension/background requests may omit Origin or send "null".
-        # Keep production strict while avoiding false negatives for trusted local workflows.
-        logger.warning(
-            "DEBUG mode: accepting cookie-auth request with missing/null Origin for local workflow compatibility."
-        )
+    if rejection_reason is None:
         return True
 
-    if origin:
-        return origin in allowed_origins
-
-    referer = request.headers.get("Referer", "")
-    if referer:
-        return any(
-            referer.startswith(allowed_origin)
-            and constant_time_compare(referer[: len(allowed_origin)], allowed_origin)
-            for allowed_origin in allowed_origins
-        )
-
+    logger.warning("CSRF validation failed for %s: %s", request.path, rejection_reason)
     return False
+
+
+class CSRFTokenView(APIView):
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+
+    def get(self, request):
+        return Response({"csrfToken": get_token(request)}, status=status.HTTP_200_OK)
 
 
 class LogoutUserView(APIView):
@@ -106,9 +103,9 @@ class LogoutUserView(APIView):
         cookie_domain = settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"]
         cookie_same_site = settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"]
 
-        if not _is_trusted_cookie_request(request):
+        if not _has_valid_csrf_token(request):
             return Response(
-                {"detail": "Untrusted cross-site request."},
+                {"detail": "CSRF token missing or invalid."},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -144,9 +141,9 @@ class CookieTokenRefreshView(APIView):
 
 
     def post(self, request):
-        if not _is_trusted_cookie_request(request):
+        if not _has_valid_csrf_token(request):
             return Response(
-                {"detail": "Untrusted cross-site request."},
+                {"detail": "CSRF token missing or invalid."},
                 status=status.HTTP_403_FORBIDDEN,
             )
 

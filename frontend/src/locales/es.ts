@@ -1,4 +1,4 @@
-﻿const es = {
+const es = {
   translation: {
     menu: {
       home: "Ir a inicio",
@@ -58,6 +58,7 @@
       plan: "Plan",
       wordLimit: "Limite de palabras",
       historyCapacity: "Capacidad de historial",
+      billingInterval: "Intervalo de facturacion",
       usageCycle: "Uso en este ciclo",
       uncapped: "sin limite",
       memberSince: "Miembro desde",
@@ -71,9 +72,15 @@
       planTooltip: "Tu nivel de suscripcion actual. Controla los limites de uso y las funciones disponibles.",
       wordLimitTooltip: "La cantidad maxima aproximada de texto que puedes resumir en una solicitud.",
       historyCapacityTooltip: "La cantidad de resumenes que esta cuenta puede guardar en el historial.",
+      billingIntervalTooltip: "Con que frecuencia se restablecen tus limites de uso para el plan actual.",
       planTooltipAria: "Que significa el plan?",
       wordLimitTooltipAria: "Que significa el limite de palabras?",
       historyCapacityTooltipAria: "Que significa la capacidad del historial?",
+      billingIntervalTooltipAria: "Que significa el intervalo de facturacion?",
+      billingIntervalDaily: "Diario",
+      billingIntervalWeekly: "Semanal",
+      billingIntervalMonthly: "Mensual",
+      billingIntervalYearly: "Anual",
     },
     settings: {
       buttonTitle: "Configuracion",

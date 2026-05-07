@@ -90,6 +90,19 @@ const ProfilePage: React.FC = () => {
       typeof historyLimitRaw === "number"
         ? `${historyLimitRaw.toLocaleString()} items`
         : formatLimit(historyLimitRaw);
+    const rawBillingInterval = userProfile.subscription?.billing_interval?.trim().toLowerCase();
+    const billingInterval =
+      rawBillingInterval === "daily"
+        ? t("profile.billingIntervalDaily", "Daily")
+        : rawBillingInterval === "weekly"
+          ? t("profile.billingIntervalWeekly", "Weekly")
+          : rawBillingInterval === "monthly"
+            ? t("profile.billingIntervalMonthly", "Monthly")
+            : rawBillingInterval === "yearly"
+              ? t("profile.billingIntervalYearly", "Yearly")
+              : rawBillingInterval && rawBillingInterval.length > 0
+                ? rawBillingInterval.charAt(0).toUpperCase() + rawBillingInterval.slice(1)
+                : t("profile.unavailable", "Unavailable");
 
     const summaryLimit = userProfile.subscription?.summary_limit;
     const summariesUsed = Math.max(0, userProfile.subscription?.summaries_used ?? 0);
@@ -194,6 +207,22 @@ const ProfilePage: React.FC = () => {
                   />
                 </span>
                 <span className="pp-stat-value">{historyLimit}</span>
+              </div>
+
+              <div className="pp-stat-row">
+                <span className="pp-stat-label">
+                  {t("profile.billingInterval", "Billing interval")}
+                  <TooltipComponent
+                    content={t(
+                      "profile.billingIntervalTooltip",
+                      "How often your usage limits reset for the current plan.",
+                    )}
+                    side="top"
+                    triggerClassName="pp-stat-tooltip-trigger"
+                    ariaLabel={t("profile.billingIntervalTooltipAria", "What does billing interval mean?")}
+                  />
+                </span>
+                <span className="pp-stat-value">{billingInterval}</span>
               </div>
             </section>
 

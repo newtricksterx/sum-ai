@@ -4,14 +4,12 @@ import axios from "axios";
 import { authInstance } from "../services/axiosService";
 
 export type UserProfile = {
-  id: number;
   username?: string | null;
   email: string;
   avatar_url?: string | null;
-  first_name?: string;
-  last_name?: string;
   subscription?: {
     plan_name: string;
+    billing_interval?: string | null;
     summary_limit: number | null;
     summaries_used?: number;
     history_limit: number | null;

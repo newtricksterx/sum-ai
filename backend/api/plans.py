@@ -3,8 +3,8 @@ PLANS = {
         "name": "Free",
         "price": 0,
         "currency": "usd",
-        "billing_interval": "monthly",
-        "summary_limit": 2,
+        "billing_interval": "daily",
+        "summary_limit": 3,
         "history_limit": 3,
         "character_limit": 10000,
 
@@ -30,6 +30,8 @@ PLANS = {
 
     },
 }
+
+# Note: slug is the tier plan "free, standard, pro"
 
 def get_plan(slug: str) -> dict:
     if slug not in PLANS:

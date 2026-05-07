@@ -315,7 +315,7 @@ export default function SettingsDropdown() {
                     <div className="px-3.5 py-2.5 flex justify-end">
                         
                         {isLanguageChanged ? (
-                            <p className="px-3.5 pb-2.5 text-[11px] text-gray-500 dark:text-gray-400">
+                            <p className="px-3.5 pb-2.5 text-[11px] text-gray-500 dark:text-gray-400 mb-0!">
                                 {t("settings.languageChangeHint")}
                             </p>
                         ) : null}

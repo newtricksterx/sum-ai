@@ -1,4 +1,4 @@
-﻿const fr = {
+const fr = {
   translation: {
     menu: {
       home: "Aller a l'accueil",
@@ -58,6 +58,7 @@
       plan: "Forfait",
       wordLimit: "Limite de mots",
       historyCapacity: "Capacite d'historique",
+      billingInterval: "Frequence de facturation",
       usageCycle: "Utilisation du cycle",
       uncapped: "illimite",
       memberSince: "Membre depuis",
@@ -71,9 +72,15 @@
       planTooltip: "Votre niveau d'abonnement actuel. Il controle les limites d'utilisation et les fonctionnalites disponibles.",
       wordLimitTooltip: "La quantite maximale approximative de texte que vous pouvez resumer en une requete.",
       historyCapacityTooltip: "Le nombre de resumes que ce compte peut conserver dans l'historique enregistre.",
+      billingIntervalTooltip: "A quelle frequence vos limites d'utilisation sont reinitialisees pour le forfait actuel.",
       planTooltipAria: "Que signifie le forfait ?",
       wordLimitTooltipAria: "Que signifie la limite de mots ?",
       historyCapacityTooltipAria: "Que signifie la capacite d'historique ?",
+      billingIntervalTooltipAria: "Que signifie la frequence de facturation ?",
+      billingIntervalDaily: "Quotidien",
+      billingIntervalWeekly: "Hebdomadaire",
+      billingIntervalMonthly: "Mensuel",
+      billingIntervalYearly: "Annuel",
     },
     settings: {
       buttonTitle: "Parametres",

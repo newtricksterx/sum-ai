@@ -18,6 +18,7 @@ class ApiRootView(APIView):
     def get(self, request):
         payload = {
             "summarize": reverse("summarize-text", request=request),
+            "csrf_token": reverse("csrf-token", request=request),
             "social_auth_complete": reverse("social-auth-complete", request=request),
         }
 
