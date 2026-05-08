@@ -1,0 +1,185 @@
+import os
+import certifi
+import logging
+import re
+import time
+from urllib.parse import urlparse
+
+from bs4 import BeautifulSoup
+from google import genai
+
+from api.plans import get_character_limit
+
+logger = logging.getLogger(__name__)
+_GEMINI_CLIENT = None
+_GEMINI_CLIENT_API_KEY = None
+
+
+def _get_gemini_config():
+    api_key = os.getenv("GEMINI_API_KEY")
+    model_name = os.getenv("GEMINI_API_MODEL")
+    missing = []
+    if not api_key:
+        missing.append("GEMINI_API_KEY")
+    if not model_name:
+        missing.append("GEMINI_API_MODEL")
+    return api_key, model_name, missing
+
+
+def _log_startup_config():
+    _, model_name, missing = _get_gemini_config()
+    if missing:
+        logger.error(
+            "Gemini is not fully configured. Missing env var(s): %s. "
+            "Add them to backend/.env before calling summarize.",
+            ", ".join(missing)
+        )
+    else:
+        logger.info("Gemini config loaded. Using model: %s", model_name)
+
+
+def _get_gemini_client(api_key):
+    global _GEMINI_CLIENT, _GEMINI_CLIENT_API_KEY
+    if _GEMINI_CLIENT is None or _GEMINI_CLIENT_API_KEY != api_key:
+        _GEMINI_CLIENT = genai.Client(api_key=api_key)
+        _GEMINI_CLIENT_API_KEY = api_key
+    return _GEMINI_CLIENT
+
+
+def _to_text(value):
+    if value is None:
+        return ""
+    return str(value).strip()
+
+
+def _normalize_http_url(value):
+    candidate = _to_text(value)
+    if not candidate:
+        return ""
+
+    parsed = urlparse(candidate)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return ""
+    return parsed.geturl()
+
+
+def _extract_links(page_content, source_url=None):
+    unique_links = []
+
+    # Parse anchors if HTML was provided.
+    if "<a" in page_content.lower():
+        soup = BeautifulSoup(page_content, "html.parser")
+        links = soup.find_all("a", href=True)
+        for link in links[:15]:
+            href = _normalize_http_url(link.get("href")) # type: ignore[arg-type]
+            if href and href not in unique_links:
+                unique_links.append(href)
+
+    # Also capture raw URLs in plain text.
+    raw_urls = re.findall(r"https?://[^\s<>()\"']+", page_content, flags=re.I)
+    for raw_url in raw_urls[:15]:
+        href = _normalize_http_url(raw_url.rstrip(".,;:!?"))
+        if href and href not in unique_links:
+            unique_links.append(href)
+
+    source_href = _normalize_http_url(source_url)
+    if source_href and source_href not in unique_links:
+        unique_links.insert(0, source_href)
+
+    return unique_links[:15]
+
+
+def _truncate_key_point(text, max_chars=180):
+    candidate = _to_text(text)
+    if len(candidate) <= max_chars:
+        return candidate
+    cut = candidate[:max_chars].rsplit(" ", 1)[0].strip()
+    if not cut:
+        cut = candidate[:max_chars].strip()
+    return f"{cut}..."
+
+
+def _ensure_required_markup(html, fallback_links):
+    soup = BeautifulSoup(html, "html.parser")
+
+    title_heading = soup.find("h1")
+    if title_heading is not None:
+        title_heading["class"] = ["summary-title"]  # type: ignore[index]
+
+    if soup.find("h2") is None:
+        default_h2 = soup.new_tag("h2")
+        default_h2.string = "Summary"
+        if title_heading is not None:
+            title_heading.insert_after(default_h2)
+        else:
+            soup.insert(0, default_h2)
+
+    anchors = soup.find_all("a", href=True)
+    for anchor in anchors:
+        anchor["target"] = "_blank" # type: ignore
+        anchor["rel"] = "noopener noreferrer" # type: ignore
+
+    if not anchors and fallback_links:
+        source_paragraph = soup.new_tag("p")
+        strong_label = soup.new_tag("strong")
+        strong_label.string = "Sources:"
+        source_paragraph.append(strong_label)
+        source_paragraph.append(" ")
+        for index, href in enumerate(fallback_links[:2]):
+            anchor = soup.new_tag("a", href=href)
+            anchor["target"] = "_blank"
+            anchor["rel"] = "noopener noreferrer"
+            anchor.string = f"Source {index + 1}"
+            source_paragraph.append(anchor)
+            if index < min(len(fallback_links), 2) - 1:
+                source_paragraph.append(" | ")
+        soup.append(source_paragraph)
+
+    has_key_point = any(
+        "key point" in strong.get_text(" ", strip=True).lower()
+        for strong in soup.find_all("strong")
+    )
+
+    if not has_key_point:
+        candidate_node = (
+            soup.find("li")
+            or soup.find("p", attrs={"id": "introduction"})
+            or soup.find("p")
+        )
+        candidate_text = candidate_node.get_text(" ", strip=True) if candidate_node else ""
+        plain_text = soup.get_text(" ", strip=True)
+        first_sentence = re.split(r"(?<=[.!?])\s+", candidate_text)[0] if candidate_text else ""
+        key_point_text = _truncate_key_point(first_sentence or candidate_text or plain_text or "Summary generated.")
+
+        key_point_paragraph = soup.new_tag("p")
+        key_point_strong = soup.new_tag("strong")
+        key_point_strong.string = f"Key point: {key_point_text}"
+        key_point_paragraph.append(key_point_strong)
+
+        summary_heading = None
+        for heading in soup.find_all("h2"):
+            if "summary" in heading.get_text(" ", strip=True).lower():
+                summary_heading = heading
+                break
+
+        if summary_heading is not None:
+            summary_heading.insert_after(key_point_paragraph)
+        else:
+            soup.append(key_point_paragraph)
+
+    return str(soup)
+
+
+def _clean_ai_output(result, fallback_links=None):
+    cleaned = re.sub(r"```html|```", "", result or "").strip()
+    if not cleaned:
+        return ""
+
+    # Convert common markdown fallbacks so frontend still gets HTML.
+    cleaned = re.sub(r"^### (.*)$", r"<h3>\1</h3>", cleaned, flags=re.M)
+    cleaned = re.sub(r"^## (.*)$", r"<h2>\1</h2>", cleaned, flags=re.M)
+    cleaned = re.sub(r"^# (.*)$", r"<h1>\1</h1>", cleaned, flags=re.M)
+    cleaned = re.sub(r"^\* (.*)$", r"<li>\1</li>", cleaned, flags=re.M)
+    cleaned = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", cleaned)
+    cleaned = re.sub(r"\[([^\]]+)\]\((https?://[^)]+)\)", r'<a href="\2">\1</a>', cleaned)
+    return _ensure_required_markup(cleaned, fallback_links or [])

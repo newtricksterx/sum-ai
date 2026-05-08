@@ -21,8 +21,8 @@
 
   color: var(--summary-text-primary);
   background: transparent;
-  padding: 0.5rem;
   font-family: inherit;
+  padding: 0.5rem;
 }
 
 .summary-shell.theme-dark {

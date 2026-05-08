@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 
 from api.models.subscription import Subscription
 from api.plans import get_character_limit
-from scripts import SumAI
+from backend.scripts.SumAI import SumAI
 from scripts.YouTubeTools import isYouTubeURL, getTranscript
 
 class SummarizeText(APIView):

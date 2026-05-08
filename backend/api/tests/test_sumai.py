@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from django.test import SimpleTestCase
 
-from scripts import SumAI
+from backend.scripts.SumAI import SumAI
 
 
 class SumAIScriptTest(SimpleTestCase):
@@ -19,7 +19,7 @@ class SumAIScriptTest(SimpleTestCase):
             <a href="https://example.com/a">A again</a>
             https://example.com/b
         """
-        links = SumAI._extract_links(content, source_url="https://example.com/source")
+        links = SumAI.utils._extract_links(content, source_url="https://example.com/source")
 
         self.assertEqual(links[0], "https://example.com/source")
         self.assertIn("https://example.com/a", links)
@@ -28,7 +28,7 @@ class SumAIScriptTest(SimpleTestCase):
 
     def test_clean_ai_output_injects_key_point_and_sources_when_missing(self):
         result = "<h1>Title</h1><h2>Summary</h2><ul><li>First item</li></ul>"
-        cleaned = SumAI._clean_ai_output(result, fallback_links=["https://example.com/source"])
+        cleaned = SumAI.utils._clean_ai_output(result, fallback_links=["https://example.com/source"])
 
         self.assertIn("<strong>Key point:", cleaned)
         self.assertIn('href="https://example.com/source"', cleaned)
@@ -78,9 +78,9 @@ class SumAIScriptTest(SimpleTestCase):
     def test_get_gemini_client_reuses_singleton_for_same_api_key(self, mock_client_ctor):
         mock_client_ctor.side_effect = [MagicMock(name="client_one"), MagicMock(name="client_two")]
 
-        first_client = SumAI._get_gemini_client("same-key")
-        second_client = SumAI._get_gemini_client("same-key")
-        third_client = SumAI._get_gemini_client("different-key")
+        first_client = SumAI.utils._get_gemini_client("same-key")
+        second_client = SumAI.utils._get_gemini_client("same-key")
+        third_client = SumAI.utils._get_gemini_client("different-key")
 
         self.assertIs(first_client, second_client)
         self.assertIsNot(first_client, third_client)
