@@ -4,10 +4,25 @@ const SUMMARY_ALLOWED_TAGS = [
   "h1",
   "h2",
   "h3",
+  "h4",
   "p",
+  "div",
+  "span",
+  "time",
   "ul",
   "ol",
   "li",
+  "blockquote",
+  "cite",
+  "code",
+  "pre",
+  "hr",
+  "table",
+  "thead",
+  "tbody",
+  "tr",
+  "th",
+  "td",
   "strong",
   "b",
   "em",
@@ -15,7 +30,7 @@ const SUMMARY_ALLOWED_TAGS = [
   "br",
 ];
 
-const SUMMARY_ALLOWED_ATTR = ["href", "target", "rel"];
+const SUMMARY_ALLOWED_ATTR = ["class", "href", "target", "rel", "datetime"];
 
 const SAFE_ABSOLUTE_LINK_PATTERN = /^https?:\/\//i;
 
@@ -53,4 +68,3 @@ export const sanitizeSummaryHtml = (html: string) => {
 
   return enforceSafeAnchors(sanitized);
 };
-

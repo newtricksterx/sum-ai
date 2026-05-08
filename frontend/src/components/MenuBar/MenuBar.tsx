@@ -5,6 +5,7 @@ import MenuBarButton from "../MenuBarButton";
 import "./MenuBar.css";
 import { useTranslation } from "react-i18next";
 import "../../i18n";
+import { memo } from 'react';
 
 
 export interface MenuBarProps {
@@ -46,4 +47,4 @@ function MenuBar({
   )
 }
 
-export default MenuBar;
+export default memo(MenuBar);

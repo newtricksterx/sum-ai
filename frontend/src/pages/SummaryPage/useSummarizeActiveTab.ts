@@ -5,6 +5,9 @@ import { useSettingsStore } from "../../stores/settingsStore";
 import { useAuthProfileStore } from "../../stores/authProfileStore";
 import { GetSummaryFromStorage, UpdateSummaryStorage } from "../../utils/storage";
 import { Format, Language, Length } from "../../utils/types";
+import { useTranslation } from "react-i18next";
+
+type TranslateFn = (key: string, options?: Record<string, unknown>) => string;
 
 type SummarizeRequestParams = {
   baseUrl: string;
@@ -13,6 +16,7 @@ type SummarizeRequestParams = {
   format: Format;
   language: Language;
   isAuthenticated: boolean;
+  t: TranslateFn;
 };
 
 export type SummarizeResult = {
@@ -29,14 +33,101 @@ type SummarizeErrorPayload = {
 };
 
 const MOCK_SUMMARY_HTML = `
-  <h1>Development Mock Summary</h1>
-  <p>This is a <strong>simulated response</strong> to help you style your UI without calling Gemini.</p>
+  <h1 class="summary-title">Development Mock Summary</h1>
+  <p class="summary-meta">
+    <time datetime="2026-05-08T00:00:00.000Z">May 8, 2026</time>
+    <span class="sep"></span>
+    <span>4 min read</span>
+  </p>
+
+  <h2>TL;DR</h2>
+  <p>
+    <strong>Mock mode is active</strong>, so this summary is generated locally to validate all summary UI states.
+    Visit <a href="https://example.com">Example</a> for a safe link test and <em>visual emphasis</em>.
+  </p>
+
+  <h2>Key Points</h2>
   <ul>
-    <li><strong>Cost:</strong> $0.00 (Local)</li>
-    <li><strong>Speed:</strong> Instant</li>
-    <li><strong>Format:</strong> Matches your production HTML</li>
+    <li><strong>Typography:</strong> Headings, body text, emphasis, and spacing scale are visible.</li>
+    <li><strong>Links:</strong> Hover, visited, and focus styling can be tested safely.</li>
+    <li>
+      <strong>Nested lists:</strong> This item contains a sub-list.
+      <ul>
+        <li>Nested bullet one</li>
+        <li>Nested bullet two</li>
+      </ul>
+    </li>
   </ul>
-  <p>Check out <a href="https://google.com" target="_blank" rel="noopener">this test link</a> to see if your link styles work.</p>
+
+  <h2>Style Coverage</h2>
+  <p>This section exists specifically to validate <strong>h2 styling</strong> in development mock mode.</p>
+
+  <h3>Ordered Checklist</h3>
+  <ol>
+    <li>Generate summary in mock mode.</li>
+    <li>Switch light and dark theme.</li>
+    <li>Verify responsive behavior on small width.</li>
+  </ol>
+
+  <h4>Inline Content Samples</h4>
+  <p>
+    Use <code>regenerate=true</code> when testing repeated runs.
+    This line checks inline <strong>bold</strong>, <em>italic</em>, and link color:
+    <a href="https://developer.mozilla.org">MDN</a>.
+  </p>
+
+  <blockquote>
+    <p>Design should feel calm, readable, and consistent with the rest of the app.</p>
+    <cite>Summary.AI Mock Note</cite>
+  </blockquote>
+
+  <h3>Code Block</h3>
+  <pre><code>const options = {
+  format: "bullet-point",
+  length: "medium",
+  language: "english",
+};</code></pre>
+
+  <hr />
+
+  <h3>Table Preview</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Plan</th>
+        <th>Daily Limit</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Free</td>
+        <td>5 summaries</td>
+        <td>Active</td>
+      </tr>
+      <tr>
+        <td>Pro</td>
+        <td>Unlimited</td>
+        <td>Preview</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="summary-empty">
+    <span class="empty-icon">○</span>
+    <div class="empty-label">Empty State Preview</div>
+    <div class="empty-hint">Use this to validate no-content styling.</div>
+  </div>
+
+  <div class="summary-loading">
+    <div class="skeleton skeleton-title"></div>
+    <div class="skeleton skeleton-meta"></div>
+    <div class="skeleton skeleton-w-full"></div>
+    <div class="skeleton skeleton-w-11"></div>
+    <div class="skeleton skeleton-w-9"></div>
+    <div class="skeleton skeleton-w-7"></div>
+    <div class="skeleton skeleton-w-half"></div>
+  </div>
 `;
 
 const MOCK_SOURCE_URL_PREFIX = "mock://dev-summary";
@@ -148,6 +239,7 @@ const requestActiveTabSummary = async ({
   format,
   language,
   isAuthenticated,
+  t,
 }: SummarizeRequestParams): Promise<SummarizeResult> => {
   if (isMockModeEnabled()) {
     return {
@@ -216,11 +308,14 @@ const requestActiveTabSummary = async ({
 
       if (response.status === 429) {
         const throttleMessage = isAuthenticated
-          ? buildThrottleMessage(errorPayload ?? {})
-          : buildAnonymousThrottleMessage(errorPayload ?? {});
+          ? buildThrottleMessage(errorPayload ?? {}, t)
+          : buildAnonymousThrottleMessage(errorPayload ?? {}, t);
 
         return {
-          html: buildErrorSummaryHtml("Rate limit reached", throttleMessage),
+          html: buildErrorSummaryHtml(
+            t("summaryErrors.rateLimitTitle", { defaultValue: "Rate limit reached" }),
+            throttleMessage,
+          ),
           isError: true,
         };
       }
@@ -255,6 +350,7 @@ const requestActiveTabSummary = async ({
 };
 
 export const useSummarizeActiveTab = () => {
+  const { t } = useTranslation();
   const [summarizedContent, setSummarizedContent] = useState<string | null>(GetSummaryFromStorage());
   const language = useSettingsStore((state) => state.language);
   const length = useSettingsStore((state) => state.length);
@@ -273,6 +369,7 @@ export const useSummarizeActiveTab = () => {
         format,
         language,
         isAuthenticated: Boolean(userProfile),
+        t,
       });
 
       setSummarizedContent(result.html);
@@ -287,7 +384,7 @@ export const useSummarizeActiveTab = () => {
 
       return result;
     },
-    [addSummaryToHistory, format, language, length, userProfile],
+    [addSummaryToHistory, format, language, length, t, userProfile],
   );
 
   const setSummaryFromHistory = useCallback((historyItem: HistorySummary) => {

@@ -8,7 +8,7 @@ export type Currency = "USD" | "CAD" | "EUR";
 export type Format =
     | "bullet-point"
     | "paragraph"
-    | "tl-dr-bullets"
+    | "tl-dr"
     | "key-takeaways"
     | "action-items"
     | "q-and-a"

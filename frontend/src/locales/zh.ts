@@ -1,4 +1,4 @@
-const zh = {
+﻿const zh = {
   translation: {
     menu: {
       home: "返回首页",
@@ -59,6 +59,7 @@ const zh = {
       wordLimit: "字数限制",
       historyCapacity: "历史容量",
       billingInterval: "计费周期",
+      subscriptionPrice: "\u8ba2\u9605\u4ef7\u683c",
       usageCycle: "本周期使用情况",
       uncapped: "不封顶",
       memberSince: "注册时间",
@@ -73,10 +74,13 @@ const zh = {
       wordLimitTooltip: "单次请求可摘要文本的大致上限。",
       historyCapacityTooltip: "此账户在已保存历史中可保留的摘要数量。",
       billingIntervalTooltip: "当前套餐的使用限额多久重置一次。",
+      subscriptionPriceTooltip: "\u60a8\u5f53\u524d\u5957\u9910\u7684\u6bcf\u671f\u8d39\u7528\u3002",
       planTooltipAria: "套餐是什么意思？",
       wordLimitTooltipAria: "字数限制是什么意思？",
       historyCapacityTooltipAria: "历史容量是什么意思？",
       billingIntervalTooltipAria: "计费周期是什么意思？",
+      subscriptionPriceTooltipAria: "\u8ba2\u9605\u4ef7\u683c\u662f\u4ec0\u4e48\u610f\u601d\uff1f",
+      subscriptionPriceFree: "\u514d\u8d39",
       billingIntervalDaily: "每日",
       billingIntervalWeekly: "每周",
       billingIntervalMonthly: "每月",
@@ -88,6 +92,7 @@ const zh = {
       switchToDark: "切换到深色模式",
       switchToLight: "切换到浅色模式",
       language: "语言",
+      currency: "货币",
       summaryFormat: "摘要格式",
       summaryLength: "摘要长度",
       fontSize: "字体大小",
@@ -100,19 +105,39 @@ const zh = {
         spanish: "Español",
         mandarin: "普通话",
         hindi: "हिन्दी",
+        USD: "USD ($)",
+        CAD: "CAD ($)",
+        EUR: "EUR (€)",
         short: "短",
         medium: "中",
         long: "长",
         paragraph: "段落",
         "bullet-point": "项目符号",
-        "tl-dr-bullets": "TL;DR + 项目符号",
+        "tl-dr": "TL;DR",
         "key-takeaways": "关键要点",
         "action-items": "行动项",
         "q-and-a": "问答",
         "pros-cons": "优缺点",
       },
     },
+    summaryErrors: {
+      rateLimitTitle: "已达到速率限制",
+      limitReached: "你已达到摘要上限。",
+      limitPerPeriodSingular: "每{{period}}你可以生成 {{count}} 条摘要。",
+      limitPerPeriodPlural: "每{{period}}你可以生成 {{count}} 条摘要。",
+      tryAgain: "请在约 {{time}} 后重试。",
+      retrySeconds: "{{count}} 秒",
+      retryMinutes: "{{count}} 分钟",
+      signInForMore: "登录后可获得更多摘要。",
+      period: {
+        sec: "秒",
+        min: "分钟",
+        hour: "小时",
+        day: "天",
+      },
+    },
   },
 } as const;
 
 export default zh;
+

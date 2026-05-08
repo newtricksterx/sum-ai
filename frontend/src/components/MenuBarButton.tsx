@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import Button from './Button';
 
 interface MenuBarButtonProps {
@@ -15,4 +15,4 @@ const MenuBarButton: React.FC<MenuBarButtonProps> = ({ onClick, title, children 
   );
 };
 
-export default MenuBarButton;
+export default memo(MenuBarButton);

@@ -4,41 +4,78 @@ type ThrottlePayload = {
   retry_after_seconds?: number;
 };
 
-const PERIOD_LABELS: Record<string, string> = {
+type TranslateFn = (key: string, options?: Record<string, unknown>) => string;
+
+const PERIOD_LABEL_DEFAULTS: Record<string, string> = {
   sec: "second",
   min: "minute",
   hour: "hour",
   day: "day",
 };
 
-const formatRetryTime = (retryAfterSeconds?: number) => {
+const formatRetryTime = (t: TranslateFn, retryAfterSeconds?: number) => {
   if (!retryAfterSeconds || retryAfterSeconds <= 0) return "";
-  if (retryAfterSeconds < 60) return `${retryAfterSeconds} second(s)`;
+  if (retryAfterSeconds < 60) {
+    return t("summaryErrors.retrySeconds", {
+      count: retryAfterSeconds,
+      defaultValue: `${retryAfterSeconds} second(s)`,
+    });
+  }
 
   const minutes = Math.ceil(retryAfterSeconds / 60);
-  return `${minutes} minute(s)`;
+  return t("summaryErrors.retryMinutes", {
+    count: minutes,
+    defaultValue: `${minutes} minute(s)`,
+  });
 };
 
 export const buildErrorSummaryHtml = (title: string, message: string) => {
   return `<h1>${title}</h1><p>${message}</p>`;
 };
 
-export const buildThrottleMessage = (payload: ThrottlePayload) => {
+export const buildThrottleMessage = (payload: ThrottlePayload, t: TranslateFn) => {
   const summariesLimit = payload.summaries_limit;
   const periodKey = payload.limit_period ?? "";
-  const periodLabel = PERIOD_LABELS[periodKey] ?? periodKey;
-  const retryText = formatRetryTime(payload.retry_after_seconds);
+  const periodLabel =
+    t(`summaryErrors.period.${periodKey}`, {
+      defaultValue: PERIOD_LABEL_DEFAULTS[periodKey] ?? periodKey,
+    }) || periodKey;
+  const retryText = formatRetryTime(t, payload.retry_after_seconds);
 
-  const limitText =
-    summariesLimit && periodLabel
-      ? `You can generate ${summariesLimit} summar${summariesLimit === 1 ? "y" : "ies"} per ${periodLabel}.`
-      : "You have reached the summary limit.";
+  let limitText = t("summaryErrors.limitReached", {
+    defaultValue: "You have reached the summary limit.",
+  });
 
-  const retryMessage = retryText ? ` Try again in about ${retryText}.` : "";
+  if (summariesLimit && periodLabel) {
+    const templateKey =
+      summariesLimit === 1
+        ? "summaryErrors.limitPerPeriodSingular"
+        : "summaryErrors.limitPerPeriodPlural";
+
+    limitText = t(templateKey, {
+      count: summariesLimit,
+      period: periodLabel,
+      defaultValue:
+        summariesLimit === 1
+          ? `You can generate ${summariesLimit} summary per ${periodLabel}.`
+          : `You can generate ${summariesLimit} summaries per ${periodLabel}.`,
+    });
+  }
+
+  const retryMessage = retryText
+    ? ` ${t("summaryErrors.tryAgain", {
+        time: retryText,
+        defaultValue: `Try again in about ${retryText}.`,
+      })}`
+    : "";
+
   return `${limitText}${retryMessage}`;
 };
 
-export const buildAnonymousThrottleMessage = (payload: ThrottlePayload) => {
-  const limitMessage = buildThrottleMessage(payload);
-  return `${limitMessage} Sign in to receive additional summaries.`;
+export const buildAnonymousThrottleMessage = (payload: ThrottlePayload, t: TranslateFn) => {
+  const limitMessage = buildThrottleMessage(payload, t);
+  const signInMessage = t("summaryErrors.signInForMore", {
+    defaultValue: "Sign in to receive additional summaries.",
+  });
+  return `${limitMessage} ${signInMessage}`.trim();
 };

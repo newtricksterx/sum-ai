@@ -67,7 +67,7 @@ def _clear_session_cookie(response: Response | HttpResponseRedirect):
 
 
 def _has_valid_csrf_token(request) -> bool:
-    check = _CSRFCheck(lambda req: None)
+    check = _CSRFCheck(lambda req: None) # type: ignore
     original_csrf_bypass = getattr(request, "_dont_enforce_csrf_checks", False)
     request._dont_enforce_csrf_checks = False
     try:
@@ -241,8 +241,9 @@ class SocialAuthCompleteView(APIView):
                             <meta name="viewport" content="width=device-width,initial-scale=1" />
                             <title>Sign in complete</title>
                             <style>
-                            body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }
-                            .wrap { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+                            html, body { height: 100%; margin: 0; }
+                            body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; background: #f8fafc; color: #0f172a; overflow: hidden; }
+                            .wrap { min-height: 100dvh; display: grid; place-items: center; padding: 24px; box-sizing: border-box; }
                             .card { width: min(520px, 100%); background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); }
                             h1 { margin: 0 0 8px; font-size: 18px; }
                             p { margin: 0; font-size: 14px; line-height: 1.45; color: #334155; }

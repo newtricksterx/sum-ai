@@ -1,6 +1,6 @@
 ﻿import './App.css'
 import '../../Summary.css'
-import { useEffect, useState } from "react"
+import { startTransition, useCallback, useMemo, useRef, useState, type ReactNode } from "react"
 import MenuBar from '../../components/MenuBar/MenuBar'
 import ToolBar from '../../components/ToolBar/ToolBar'
 import { useSettingsStore } from '../../stores/settingsStore'
@@ -21,11 +21,21 @@ import { useHistoryStore } from '../../stores/historyStore'
 import { useAppLanguageEffect } from './useAppLanguageEffect'
 import { useHydrateProfileAfterLogin } from './useHydrateProfileAfterLogin'
 import { useAuthLogoutReset } from './useAuthLogoutReset'
+import { useHydrateProfileOnAuthChange } from './useHydrateProfileOnAuthChange'
+import { useTrackMountedPages } from './useTrackMountedPages'
+import { usePageSwitchCleanup } from './usePageSwitchCleanup'
 import { SettingsPage } from '../SettingsPage/SettingsPage'
 
 
 function App() {
-  const [currentPage, setCurrentPage] = useState(GetPageFromStorage() ?? 0);
+  const [currentPage, setCurrentPage] = useState(() => GetPageFromStorage() ?? 0);
+  const pendingPageRef = useRef<number | null>(null);
+  const pageFrameRef = useRef<number | null>(null);
+  const pageStorageTimeoutRef = useRef<number | null>(null);
+  const [mountedPages, setMountedPages] = useState<Record<number, true>>(() => {
+    const initialPage = GetPageFromStorage() ?? 0;
+    return { [initialPage]: true };
+  });
   const { summarizedContent, summarize, setSummaryFromHistory } = useSummarizeActiveTab();
   const { isCopySuccess, showCopySuccess, resetCopySuccess } = useCopySuccessTimer();
 
@@ -42,43 +52,79 @@ function App() {
   useAuthLogoutReset(clearProfile, setHistoryOwner);
 
   useHistoryOwnerSync();
+  useHydrateProfileOnAuthChange(authProfile, currency, hydrateProfile);
+  useTrackMountedPages(currentPage, setMountedPages);
 
-  useEffect(() => {
-    if (!authProfile) {
+  const schedulePageStorageWrite = useCallback((nextPage: number) => {
+    if (typeof window === "undefined") {
+      UpdatePageStorage(nextPage);
       return;
     }
 
-    void hydrateProfile(true, currency);
-  }, [authProfile, currency, hydrateProfile]);
+    if (pageStorageTimeoutRef.current !== null) {
+      window.clearTimeout(pageStorageTimeoutRef.current);
+    }
 
-  const setPage = (nextPage: number) => {
-    setCurrentPage(nextPage);
-    UpdatePageStorage(nextPage);
-  };
+    // Defer localStorage writes so rapid menu taps do not block input handling.
+    pageStorageTimeoutRef.current = window.setTimeout(() => {
+      UpdatePageStorage(nextPage);
+      pageStorageTimeoutRef.current = null;
+    }, 120);
+  }, []);
 
-  const Summarize = async (regenerateBool: boolean) => {
-    await summarize(regenerateBool);
-  };
+  const commitPage = useCallback((nextPage: number) => {
+    startTransition(() => {
+      setCurrentPage((prevPage) => (prevPage === nextPage ? prevPage : nextPage));
+    });
+    schedulePageStorageWrite(nextPage);
+  }, [schedulePageStorageWrite]);
 
-  const onClickReturn = () => {
+  const setPage = useCallback((nextPage: number) => {
+    pendingPageRef.current = nextPage;
+
+    if (typeof window === "undefined") {
+      commitPage(nextPage);
+      pendingPageRef.current = null;
+      return;
+    }
+
+    if (pageFrameRef.current !== null) {
+      return;
+    }
+
+    pageFrameRef.current = window.requestAnimationFrame(() => {
+      pageFrameRef.current = null;
+      const scheduledPage = pendingPageRef.current;
+      pendingPageRef.current = null;
+
+      if (typeof scheduledPage !== "number") {
+        return;
+      }
+
+      commitPage(scheduledPage);
+    });
+  }, [commitPage]);
+  usePageSwitchCleanup(pageFrameRef, pageStorageTimeoutRef);
+
+  const onClickReturn = useCallback(() => {
     setPage(0);
-  };
+  }, [setPage]);
 
-  const onClickForward = () => {
+  const onClickForward = useCallback(() => {
     setPage(1);
-  };
+  }, [setPage]);
 
-  const onClickHistory = () => {
+  const onClickHistory = useCallback(() => {
     setPage(2);
-  };
+  }, [setPage]);
 
-  const onClickProfile = () => {
+  const onClickProfile = useCallback(() => {
     setPage(3);
-  };
+  }, [setPage]);
 
-  const onClickSettings = () => {
+  const onClickSettings = useCallback(() => {
     setPage(4);
-  }
+  }, [setPage]);
 
   const onClickDownload = async () => {
     const sanitizedSummary = sanitizeSummaryHtml(summarizedContent ?? "");
@@ -124,20 +170,19 @@ function App() {
     }
   }
 
-  const onClickGenerate = async () => {
-    //console.log("regenerate")
-    await Summarize(true);
-  }
+  const onClickGenerate = useCallback(async () => {
+    await summarize(true);
+  }, [summarize]);
 
-  const onClickStartGenerate = async () => {
+  const onClickStartGenerate = useCallback(async () => {
     setPage(1);
-    await Summarize(false);
-  }
+    await summarize(false);
+  }, [setPage, summarize]);
 
-  const onSelectHistory = (historyItem: HistorySummary) => {
+  const onSelectHistory = useCallback((historyItem: HistorySummary) => {
     setSummaryFromHistory(historyItem);
     setPage(1);
-  }
+  }, [setPage, setSummaryFromHistory]);
 
   const isSummarizing = currentPage === 1 && summarizedContent == null
 
@@ -153,47 +198,60 @@ function App() {
     }
   }
 
-  const renderUserInterface = () => {
-    // Display the loading circle
-    if (currentPage === 1 && summarizedContent == null) {
+  const summaryPageContent = useMemo(() => {
+    if (summarizedContent == null) {
       return (
         <div className="flex-1 flex relative justify-center items-center min-h-75 z-40">
           <LoaderCircle />
         </div>
-      )
-    }
-
-    // Display the summarized content
-    if (currentPage === 1) {
-      return (
-        <SummaryPage content={summarizedContent ?? ""} fontSize={fontSize} />
       );
     }
 
-    // display history content
-    if (currentPage === 2) {
-      return (
-        <HistoryPage onSelectHistory={onSelectHistory} />
-      );
-    }
-
-    if (currentPage === 3) {
-      return (
-        <ProfilePage />
-      );
-    }
-
-    if (currentPage === 4){
-      return (
-        <SettingsPage />
-      );
-    }
-
-    // Display the front page content
     return (
-      <FrontPage onClickGenerate={onClickStartGenerate} />
-    )
-  }
+      <SummaryPage content={summarizedContent} fontSize={fontSize} />
+    );
+  }, [fontSize, summarizedContent]);
+
+  const frontPageContent = useMemo(
+    () => <FrontPage onClickGenerate={onClickStartGenerate} />,
+    [onClickStartGenerate],
+  );
+  const historyPageContent = useMemo(
+    () => <HistoryPage onSelectHistory={onSelectHistory} />,
+    [onSelectHistory],
+  );
+  const profilePageContent = useMemo(() => <ProfilePage />, []);
+  const settingsPageContent = useMemo(() => <SettingsPage />, []);
+
+  const renderPagePanel = (pageIndex: number, content: ReactNode) => {
+    if (!mountedPages[pageIndex] && currentPage !== pageIndex) {
+      return null;
+    }
+
+    const isActivePage = currentPage === pageIndex;
+    return (
+      <section
+        key={pageIndex}
+        hidden={!isActivePage}
+        aria-hidden={!isActivePage}
+        className="app-page-panel"
+      >
+        {content}
+      </section>
+    );
+  };
+
+  const renderUserInterface = () => {
+    return (
+      <>
+        {renderPagePanel(0, frontPageContent)}
+        {renderPagePanel(1, summaryPageContent)}
+        {renderPagePanel(2, historyPageContent)}
+        {renderPagePanel(3, profilePageContent)}
+        {renderPagePanel(4, settingsPageContent)}
+      </>
+    );
+  };
 
   return (
     <section className="app-shell flex flex-col w-90 max-h-137.5">

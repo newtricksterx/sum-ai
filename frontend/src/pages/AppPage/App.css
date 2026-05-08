@@ -25,6 +25,11 @@
   background: var(--color-accent-strong);
 }
 
+.app-page-panel {
+  width: 100%;
+  min-height: 100%;
+}
+
 /*
 .logo {
   height: 6em;

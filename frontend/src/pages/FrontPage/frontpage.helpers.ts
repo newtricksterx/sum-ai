@@ -39,7 +39,7 @@ const SETTING_LABELS: Record<string, string> = {
   long: 'Long',
   paragraph: 'Paragraph',
   'bullet-point': 'Bullet Points',
-  'tl-dr-bullets': 'TL;DR + Bullets',
+  'tl-dr': 'TL;DR',
   'key-takeaways': 'Key Takeaways',
   'action-items': 'Action Items',
   'q-and-a': 'Q&A',

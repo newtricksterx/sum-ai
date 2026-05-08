@@ -17,7 +17,7 @@ export const all_lengths: Length[] = [
 export const all_formats: Format[] = [
     "bullet-point",
     "paragraph",
-    "tl-dr-bullets",
+    "tl-dr",
     "key-takeaways",
     "action-items",
     "q-and-a",

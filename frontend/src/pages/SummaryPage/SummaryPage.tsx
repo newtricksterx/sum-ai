@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import PageCard from '../../components/PageCard/PageCard';
 import { sanitizeSummaryHtml } from './sanitizeSummaryHtml';
+import { useSettingsStore } from '../../stores/settingsStore';
 
 interface SummaryPageProps {
   content: string;
@@ -9,18 +10,18 @@ interface SummaryPageProps {
 
 const SummaryPage: React.FC<SummaryPageProps> = ({ content, fontSize }) => {
     const sanitizedContent = useMemo(() => sanitizeSummaryHtml(content ?? ""), [content]);
+    const theme = useSettingsStore((state) => state.theme);
+    const summaryThemeClass = theme === "dark" ? "theme-dark" : "theme-light";
 
     return (
-        <div className="px-2 py-2">
-            <div className="relative">
-                <PageCard
-                    as="div"
-                    style={{ fontSize: `${fontSize}px` }}
-                    className={`summary-container font-noto min-h-[210px] h-max`}
-                    dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-                />
-            </div>
-        </div>
+        <section className={`summary-shell ${summaryThemeClass}`}>
+            <PageCard
+                as="article"
+                style={{ fontSize: `${fontSize}px` }}
+                className="summary-card summary-content summary-container min-h-[210px] h-max"
+                dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+            />
+        </section>
 
 
     );
