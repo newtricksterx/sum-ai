@@ -2,14 +2,14 @@ import { useCallback, useMemo } from 'react';
 import PageCard from '../../components/PageCard/PageCard';
 import "./ProfilePage.css";
 import AlertPopup from '../../components/AlertPopup/AlertPopup';
-import TooltipComponent from '../../components/Tooltip/TooltipComponent';
 import { useProfileAccount } from "./useProfileAccount";
-import { deriveWordLimit, formatLimit, formatDate, getInitials } from './profilepage.helpers';
+import { deriveBillingInterval, deriveSubscriptionPrice, deriveWordLimit, formatLimit, formatDate, getInitials } from './profilepage.helpers';
 import { FcGoogle } from "react-icons/fc";
 import { MenuIconSize } from '../../utils/constants';
 import { useTranslation } from 'react-i18next';
 import '../../i18n';
 import { markLoginPending } from '../../services/authSignals';
+import { ProfilePageStatRow } from './StatRow/ProfilePageStatRow';
 
 const ProfilePage: React.FC = () => {
   const { t } = useTranslation();
@@ -90,19 +90,15 @@ const ProfilePage: React.FC = () => {
       typeof historyLimitRaw === "number"
         ? `${historyLimitRaw.toLocaleString()} items`
         : formatLimit(historyLimitRaw);
-    const rawBillingInterval = userProfile.subscription?.billing_interval?.trim().toLowerCase();
-    const billingInterval =
-      rawBillingInterval === "daily"
-        ? t("profile.billingIntervalDaily", "Daily")
-        : rawBillingInterval === "weekly"
-          ? t("profile.billingIntervalWeekly", "Weekly")
-          : rawBillingInterval === "monthly"
-            ? t("profile.billingIntervalMonthly", "Monthly")
-            : rawBillingInterval === "yearly"
-              ? t("profile.billingIntervalYearly", "Yearly")
-              : rawBillingInterval && rawBillingInterval.length > 0
-                ? rawBillingInterval.charAt(0).toUpperCase() + rawBillingInterval.slice(1)
-                : t("profile.unavailable", "Unavailable");
+    const billingInterval = deriveBillingInterval(
+      userProfile.subscription?.billing_interval,
+      (key, defaultValue) => t(key, { defaultValue }),
+    );
+    const subscriptionPrice = deriveSubscriptionPrice(
+      userProfile.subscription?.price_minor,
+      userProfile.subscription?.currency,
+      (key, defaultValue) => t(key, { defaultValue }),
+    );
 
     const summaryLimit = userProfile.subscription?.summary_limit;
     const summariesUsed = Math.max(0, userProfile.subscription?.summaries_used ?? 0);
@@ -168,62 +164,45 @@ const ProfilePage: React.FC = () => {
 
             <section className="pp-card pp-section" aria-label="Plan and limits">
               <p className="pp-section-title">{t("profile.planAndLimits")}</p>
-              <div className="pp-stat-row">
-                <span className="pp-stat-label">
-                  {t("profile.plan")}
-                  <TooltipComponent
-                    content={t("profile.planTooltip")}
-                    side="top"
-                    triggerClassName="pp-stat-tooltip-trigger"
-                    ariaLabel={t("profile.planTooltipAria")}
-                  />
-                </span>
-                <span className="pp-stat-value">
-                  <span className="pp-plan-badge">{planName}</span>
-                </span>
-              </div>
 
-              <div className="pp-stat-row">
-                <span className="pp-stat-label">
-                  {t("profile.wordLimit")}
-                  <TooltipComponent
-                    content={t("profile.wordLimitTooltip")}
-                    side="top"
-                    triggerClassName="pp-stat-tooltip-trigger"
-                    ariaLabel={t("profile.wordLimitTooltipAria")}
-                  />
-                </span>
-                <span className="pp-stat-value">{wordLimit}</span>
-              </div>
+              <ProfilePageStatRow 
+                badge_id='plan'
+                title='profile.plan' 
+                content='profile.planTooltip'
+                arialabel='profile.planTooltipAria' 
+                value={planName} 
+              />
 
-              <div className="pp-stat-row">
-                <span className="pp-stat-label">
-                  {t("profile.historyCapacity")}
-                  <TooltipComponent
-                    content={t("profile.historyCapacityTooltip")}
-                    side="top"
-                    triggerClassName="pp-stat-tooltip-trigger"
-                    ariaLabel={t("profile.historyCapacityTooltipAria")}
-                  />
-                </span>
-                <span className="pp-stat-value">{historyLimit}</span>
-              </div>
+              <ProfilePageStatRow 
+                title='profile.wordLimit' 
+                content='profile.wordLimitTooltip'
+                arialabel='profile.wordLimitTooltipAria' 
+                value={wordLimit} 
+              />
 
-              <div className="pp-stat-row">
-                <span className="pp-stat-label">
-                  {t("profile.billingInterval", "Billing interval")}
-                  <TooltipComponent
-                    content={t(
-                      "profile.billingIntervalTooltip",
-                      "How often your usage limits reset for the current plan.",
-                    )}
-                    side="top"
-                    triggerClassName="pp-stat-tooltip-trigger"
-                    ariaLabel={t("profile.billingIntervalTooltipAria", "What does billing interval mean?")}
-                  />
-                </span>
-                <span className="pp-stat-value">{billingInterval}</span>
-              </div>
+              <ProfilePageStatRow 
+                title='profile.historyCapacity' 
+                content='profile.historyCapacityTooltip'
+                arialabel='profile.historyCapacityTooltipAria' 
+                value={historyLimit} 
+              />
+
+              <ProfilePageStatRow 
+                title='profile.billingInterval'
+                content='profile.billingIntervalTooltip'
+                arialabel='profile.billingIntervalTooltipAria' 
+                value={billingInterval} 
+              />
+
+              <ProfilePageStatRow 
+                title='profile.subscriptionPrice'
+                titleDefault='Subscription price'
+                content='profile.subscriptionPriceTooltip'
+                contentDefault='Current recurring cost for your active plan.'
+                arialabel='profile.subscriptionPriceTooltipAria' 
+                arialabelDefault='What does subscription price mean?'
+                value={subscriptionPrice} 
+              />
             </section>
 
             <section className="pp-card pp-section" aria-label="Usage this cycle">

@@ -1,6 +1,6 @@
 ﻿import './App.css'
 import '../../Summary.css'
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import MenuBar from '../../components/MenuBar/MenuBar'
 import ToolBar from '../../components/ToolBar/ToolBar'
 import { useSettingsStore } from '../../stores/settingsStore'
@@ -21,6 +21,7 @@ import { useHistoryStore } from '../../stores/historyStore'
 import { useAppLanguageEffect } from './useAppLanguageEffect'
 import { useHydrateProfileAfterLogin } from './useHydrateProfileAfterLogin'
 import { useAuthLogoutReset } from './useAuthLogoutReset'
+import { SettingsPage } from '../SettingsPage/SettingsPage'
 
 
 function App() {
@@ -28,18 +29,27 @@ function App() {
   const { summarizedContent, summarize, setSummaryFromHistory } = useSummarizeActiveTab();
   const { isCopySuccess, showCopySuccess, resetCopySuccess } = useCopySuccessTimer();
 
-  const theme = useSettingsStore((state) => state.theme)
   const fontSize = useSettingsStore((state) => state.fontSize)
   const language = useSettingsStore((state) => state.language)
+  const currency = useSettingsStore((state) => state.currency)
   const hydrateProfile = useAuthProfileStore((state) => state.hydrateProfile)
+  const authProfile = useAuthProfileStore((state) => state.profile)
   const clearProfile = useAuthProfileStore((state) => state.clearProfile)
   const setHistoryOwner = useHistoryStore((state) => state.setHistoryOwner)
 
   useAppLanguageEffect(language);
-  useHydrateProfileAfterLogin(hydrateProfile);
+  useHydrateProfileAfterLogin(hydrateProfile, currency);
   useAuthLogoutReset(clearProfile, setHistoryOwner);
 
   useHistoryOwnerSync();
+
+  useEffect(() => {
+    if (!authProfile) {
+      return;
+    }
+
+    void hydrateProfile(true, currency);
+  }, [authProfile, currency, hydrateProfile]);
 
   const setPage = (nextPage: number) => {
     setCurrentPage(nextPage);
@@ -65,6 +75,10 @@ function App() {
   const onClickProfile = () => {
     setPage(3);
   };
+
+  const onClickSettings = () => {
+    setPage(4);
+  }
 
   const onClickDownload = async () => {
     const sanitizedSummary = sanitizeSummaryHtml(summarizedContent ?? "");
@@ -169,6 +183,12 @@ function App() {
       );
     }
 
+    if (currentPage === 4){
+      return (
+        <SettingsPage />
+      );
+    }
+
     // Display the front page content
     return (
       <FrontPage onClickGenerate={onClickStartGenerate} />
@@ -176,12 +196,13 @@ function App() {
   }
 
   return (
-    <section className={`${theme} app-shell flex flex-col w-90 max-h-137.5`}>
+    <section className="app-shell flex flex-col w-90 max-h-137.5">
       <MenuBar
         onClickReturn={onClickReturn}
         onClickForward={onClickForward}
         onClickProfile={onClickProfile}
         onClickHistory={onClickHistory}
+        onClickSettings={onClickSettings}
       />
       <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar">
         {renderUserInterface()}

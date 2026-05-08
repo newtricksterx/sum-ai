@@ -88,6 +88,7 @@ const es = {
       switchToDark: "Cambiar a modo oscuro",
       switchToLight: "Cambiar a modo claro",
       language: "Idioma",
+      currency: "Moneda",
       summaryFormat: "Formato de resumen",
       summaryLength: "Longitud del resumen",
       fontSize: "Tamano de fuente",
@@ -100,6 +101,9 @@ const es = {
         spanish: "Espanol",
         mandarin: "Mandarin",
         hindi: "Hindi",
+        USD: "USD ($)",
+        CAD: "CAD ($)",
+        EUR: "EUR (€)",
         short: "Corto",
         medium: "Medio",
         long: "Largo",
@@ -116,5 +120,4 @@ const es = {
 } as const;
 
 export default es;
-
 

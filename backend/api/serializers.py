@@ -3,7 +3,7 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from .models.subscription import Subscription
-from .plans import PLANS
+from .plans import PLANS, get_price_currency, get_price_minor
 
 User = get_user_model()
 
@@ -11,6 +11,8 @@ User = get_user_model()
 class SubscriptionReadSerializer(serializers.ModelSerializer):
     plan_name = serializers.SerializerMethodField()
     billing_interval = serializers.CharField(read_only=True)
+    price_minor = serializers.SerializerMethodField()
+    currency = serializers.SerializerMethodField()
     summary_limit = serializers.IntegerField(read_only=True, allow_null=True)
     history_limit = serializers.IntegerField(read_only=True, allow_null=True)
     character_limit = serializers.IntegerField(read_only=True, allow_null=True)
@@ -21,12 +23,26 @@ class SubscriptionReadSerializer(serializers.ModelSerializer):
     def get_plan_name(self, obj: Subscription) -> str:
         return obj.plan["name"]
 
+    def _get_requested_currency(self) -> str | None:
+        context_currency = self.context.get("currency")
+        if isinstance(context_currency, str):
+            return context_currency
+        return None
+
+    def get_currency(self, obj: Subscription) -> str:
+        return get_price_currency(obj.plan_slug, self._get_requested_currency())
+
+    def get_price_minor(self, obj: Subscription) -> int:
+        return get_price_minor(obj.plan_slug, self.get_currency(obj))
+
     class Meta:
         model = Subscription
         fields = (
             "plan_slug",
             "plan_name",
             "billing_interval",
+            "price_minor",
+            "currency",
             "summary_limit",
             "history_limit",
             "character_limit",
@@ -48,7 +64,7 @@ class UserReadSerializer(serializers.ModelSerializer):
             user=obj,
             defaults={"plan_slug": "free"},
         )
-        return SubscriptionReadSerializer(subscription).data
+        return SubscriptionReadSerializer(subscription, context=self.context).data
 
     def get_avatar_url(self, obj):
         social_accounts = getattr(obj, "socialaccount_set", None)

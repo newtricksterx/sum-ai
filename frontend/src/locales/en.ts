@@ -59,6 +59,7 @@
       wordLimit: "Word limit",
       historyCapacity: "History capacity",
       billingInterval: "Billing interval",
+      subscriptionPrice: "Subscription price",
       usageCycle: "Usage this cycle",
       uncapped: "uncapped",
       memberSince: "Member since",
@@ -73,10 +74,13 @@
       wordLimitTooltip: "The approximate maximum amount of text you can summarize in one request.",
       historyCapacityTooltip: "The number of summaries this account can keep in saved history.",
       billingIntervalTooltip: "How often your usage limits reset for the current plan.",
+      subscriptionPriceTooltip: "Current recurring cost for your active plan.",
       planTooltipAria: "What does plan mean?",
       wordLimitTooltipAria: "What does word limit mean?",
       historyCapacityTooltipAria: "What does history capacity mean?",
       billingIntervalTooltipAria: "What does billing interval mean?",
+      subscriptionPriceTooltipAria: "What does subscription price mean?",
+      subscriptionPriceFree: "Free",
       billingIntervalDaily: "Daily",
       billingIntervalWeekly: "Weekly",
       billingIntervalMonthly: "Monthly",
@@ -88,6 +92,7 @@
       switchToDark: "Switch to dark mode",
       switchToLight: "Switch to light mode",
       language: "Language",
+      currency: "Currency",
       summaryFormat: "Summary Format",
       summaryLength: "Summary Length",
       fontSize: "Font size",
@@ -100,6 +105,9 @@
         spanish: "Spanish",
         mandarin: "Mandarin",
         hindi: "Hindi",
+        USD: "USD ($)",
+        CAD: "CAD ($)",
+        EUR: "EUR (€)",
         short: "Short",
         medium: "Medium",
         long: "Long",
@@ -116,4 +124,3 @@
 } as const;
 
 export default en;
-

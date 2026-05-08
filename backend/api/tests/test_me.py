@@ -38,8 +38,28 @@ class TestMe(TestCase):
         self.assertEqual(response.json()["email"], "test@example.com")
         self.assertEqual(response.json()["subscription"]["plan_slug"], "free")
         self.assertEqual(response.json()["subscription"]["billing_interval"], "daily")
+        self.assertEqual(response.json()["subscription"]["currency"], "USD")
+        self.assertEqual(response.json()["subscription"]["price_minor"], 0)
         self.assertIn("username", response.json())
         self.assertIn("avatar_url", response.json())
+
+    def test_me_supports_requested_currency(self):
+        self._authenticate()
+
+        response = self.client.get(f"{self.me_url}?currency=CAD")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["subscription"]["currency"], "CAD")
+        self.assertEqual(response.json()["subscription"]["price_minor"], 0)
+
+    def test_me_supports_euro_alias(self):
+        self._authenticate()
+
+        response = self.client.get(f"{self.me_url}?currency=EURO")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["subscription"]["currency"], "EUR")
+        self.assertEqual(response.json()["subscription"]["price_minor"], 0)
 
     def test_me_does_not_expose_user_id(self):
         self._authenticate()

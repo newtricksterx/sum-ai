@@ -1,9 +1,12 @@
 import { useEffect } from "react";
 import { clearLoginPending, isLoginPending } from "../../services/authSignals";
 
-type HydrateProfile = (force?: boolean) => Promise<unknown>;
+type HydrateProfile = (force?: boolean, currency?: string) => Promise<unknown>;
 
-export const useHydrateProfileAfterLogin = (hydrateProfile: HydrateProfile) => {
+export const useHydrateProfileAfterLogin = (
+  hydrateProfile: HydrateProfile,
+  currency: string,
+) => {
   useEffect(() => {
     let isMounted = true;
 
@@ -13,7 +16,7 @@ export const useHydrateProfileAfterLogin = (hydrateProfile: HydrateProfile) => {
       }
 
       try {
-        await hydrateProfile(true);
+        await hydrateProfile(true, currency);
       } catch {
         // If login is incomplete/failed, the store will remain unauthenticated.
       } finally {
@@ -43,6 +46,5 @@ export const useHydrateProfileAfterLogin = (hydrateProfile: HydrateProfile) => {
       window.removeEventListener("focus", handleWindowFocus);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [hydrateProfile]);
+  }, [currency, hydrateProfile]);
 };
-

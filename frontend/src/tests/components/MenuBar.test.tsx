@@ -3,10 +3,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../components/SettingsDropdown", () => ({
-  default: () => <div data-testid="settings-dropdown">SettingsDropdown</div>,
-}));
-
 import MenuBar from "../../components/MenuBar/MenuBar";
 
 describe("MenuBar", () => {
@@ -19,6 +15,7 @@ describe("MenuBar", () => {
     const onClickForward = vi.fn();
     const onClickProfile = vi.fn();
     const onClickHistory = vi.fn();
+    const onClickSettings = vi.fn();
 
     render(
       <MenuBar
@@ -26,18 +23,22 @@ describe("MenuBar", () => {
         onClickForward={onClickForward}
         onClickProfile={onClickProfile}
         onClickHistory={onClickHistory}
+        onClickSettings={onClickSettings}
       />
     );
 
-    expect(screen.getByTestId("settings-dropdown")).not.toBeNull();
+    const menuButtons = screen.getAllByRole("button");
+    expect(menuButtons).toHaveLength(5);
 
-    fireEvent.click(screen.getByTitle("Go to home page"));
-    fireEvent.click(screen.getByTitle("Go to summary page"));
-    fireEvent.click(screen.getByTitle("View history"));
-    fireEvent.click(screen.getByTitle("Profile page"));
+    fireEvent.click(menuButtons[0]);
+    fireEvent.click(menuButtons[1]);
+    fireEvent.click(menuButtons[2]);
+    fireEvent.click(menuButtons[3]);
+    fireEvent.click(menuButtons[4]);
 
     expect(onClickReturn).toHaveBeenCalledTimes(1);
     expect(onClickForward).toHaveBeenCalledTimes(1);
+    expect(onClickSettings).toHaveBeenCalledTimes(1);
     expect(onClickHistory).toHaveBeenCalledTimes(1);
     expect(onClickProfile).toHaveBeenCalledTimes(1);
   });

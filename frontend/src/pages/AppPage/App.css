@@ -8,7 +8,6 @@
 }
 
 .app-shell {
-  min-height: 360px;
   background: var(--color-bg);
   color: var(--color-text-primary);
 }

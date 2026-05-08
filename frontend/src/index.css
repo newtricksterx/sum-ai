@@ -91,6 +91,12 @@
   --color-ghost-hover: color-mix(in srgb, var(--color-accent) 26%, transparent);
 }
 
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
 body {
   margin: 0;
   display: flex;
@@ -152,7 +158,6 @@ input::-webkit-inner-spin-button {
 .settings-select {
   border: 1px solid var(--color-border);
   border-radius: 0.45rem;
-  background: linear-gradient(180deg, var(--color-card), var(--color-card-elev));
   color: var(--color-text-primary);
   padding: 0.34rem 1.7rem 0.34rem 0.55rem;
   font-size: 12px;

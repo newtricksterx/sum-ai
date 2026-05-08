@@ -39,7 +39,13 @@ class MeView(APIView):
     throttle_scope = 'auth'
 
     def get(self, request):
-        return Response(UserReadSerializer(request.user).data)
+        requested_currency = request.query_params.get("currency")
+        return Response(
+            UserReadSerializer(
+                request.user,
+                context={"currency": requested_currency},
+            ).data
+        )
 
 
 class AdminUserSubscriptionView(APIView):
@@ -60,7 +66,11 @@ class AdminUserSubscriptionView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
+        requested_currency = request.query_params.get("currency")
         return Response(
-            UserReadSerializer(target_user).data,
+            UserReadSerializer(
+                target_user,
+                context={"currency": requested_currency},
+            ).data,
             status=status.HTTP_200_OK,
         )

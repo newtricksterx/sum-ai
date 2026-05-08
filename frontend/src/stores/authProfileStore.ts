@@ -10,6 +10,8 @@ export type UserProfile = {
   subscription?: {
     plan_name: string;
     billing_interval?: string | null;
+    price_minor?: number | null;
+    currency?: string | null;
     summary_limit: number | null;
     summaries_used?: number;
     history_limit: number | null;
@@ -27,8 +29,10 @@ interface AuthProfileState {
   profile: UserProfile | null;
   status: AuthProfileStatus;
   lastFetchedAt: number | null;
+  lastCurrency: string | null;
   inFlightPromise: Promise<UserProfile | null> | null;
-  hydrateProfile: (force?: boolean) => Promise<UserProfile | null>;
+  inFlightCurrency: string | null;
+  hydrateProfile: (force?: boolean, currency?: string) => Promise<UserProfile | null>;
   clearProfile: () => void;
 }
 
@@ -38,30 +42,41 @@ export const useAuthProfileStore = create<AuthProfileState>()(
       profile: null,
       status: "ready",
       lastFetchedAt: null,
+      lastCurrency: null,
       inFlightPromise: null,
-      hydrateProfile: async (force = false) => {
-        const { profile, lastFetchedAt, inFlightPromise } = get();
+      inFlightCurrency: null,
+      hydrateProfile: async (force = false, currency) => {
+        const { profile, lastFetchedAt, inFlightPromise, inFlightCurrency, lastCurrency } = get();
         const now = Date.now();
-        const isFresh = profile && lastFetchedAt !== null && now - lastFetchedAt < ME_CACHE_TTL_MS;
+        const requestedCurrency = (currency ?? lastCurrency ?? "USD").trim().toUpperCase();
+        const isFresh = (
+          profile
+          && lastFetchedAt !== null
+          && now - lastFetchedAt < ME_CACHE_TTL_MS
+          && lastCurrency === requestedCurrency
+        );
 
         if (!force && isFresh) {
           return profile;
         }
 
-        if (inFlightPromise) {
+        if (inFlightPromise && inFlightCurrency === requestedCurrency) {
           return inFlightPromise;
         }
 
         set({ status: "loading" });
 
         const nextInFlightPromise = authInstance
-          .get<UserProfile>("/api/users/me")
+          .get<UserProfile>("/api/users/me", {
+            params: { currency: requestedCurrency },
+          })
           .then((response) => {
             const fetchedAt = Date.now();
             set({
               profile: response.data,
               status: "ready",
               lastFetchedAt: fetchedAt,
+              lastCurrency: requestedCurrency,
             });
             return response.data;
           })
@@ -71,6 +86,7 @@ export const useAuthProfileStore = create<AuthProfileState>()(
                 profile: null,
                 status: "ready",
                 lastFetchedAt: null,
+                lastCurrency: null,
               });
               return null;
             }
@@ -79,14 +95,21 @@ export const useAuthProfileStore = create<AuthProfileState>()(
               profile: null,
               status: "error",
               lastFetchedAt: null,
+              lastCurrency: null,
             });
             throw error;
           })
           .finally(() => {
-            set({ inFlightPromise: null });
+            set({
+              inFlightPromise: null,
+              inFlightCurrency: null,
+            });
           });
 
-        set({ inFlightPromise: nextInFlightPromise });
+        set({
+          inFlightPromise: nextInFlightPromise,
+          inFlightCurrency: requestedCurrency,
+        });
         return nextInFlightPromise;
       },
       clearProfile: () =>
@@ -94,7 +117,9 @@ export const useAuthProfileStore = create<AuthProfileState>()(
           profile: null,
           status: "ready",
           lastFetchedAt: null,
+          lastCurrency: null,
           inFlightPromise: null,
+          inFlightCurrency: null,
         }),
     }),
     {
@@ -103,12 +128,14 @@ export const useAuthProfileStore = create<AuthProfileState>()(
       partialize: (state) => ({
         profile: state.profile,
         lastFetchedAt: state.lastFetchedAt,
+        lastCurrency: state.lastCurrency,
       }),
       merge: (persistedState, currentState) => ({
         ...currentState,
         ...(persistedState as Partial<AuthProfileState>),
         status: "ready",
         inFlightPromise: null,
+        inFlightCurrency: null,
       }),
     },
   ),

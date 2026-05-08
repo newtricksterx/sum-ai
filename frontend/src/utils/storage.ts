@@ -1,4 +1,4 @@
-import { Format, Language, Length, Theme } from "./types"
+import { Currency, Format, Language, Length, Theme } from "./types"
 
 export const UpdateLanguageStorage = (currentLang: Language) => {
     localStorage.setItem('language', currentLang)
@@ -6,6 +6,10 @@ export const UpdateLanguageStorage = (currentLang: Language) => {
 
 export const UpdateLengthStorage = (currentLength: Length) => {
     localStorage.setItem('length', currentLength)
+}
+
+export const UpdateCurrencyStorage = (currentCurrency: Currency) => {
+    localStorage.setItem('currency', currentCurrency)
 }
 
 export const UpdateFontSizeStorage = (currentFontSize: number) => {
@@ -34,6 +38,10 @@ export const GetLangFromStorage = () => {
 
 export const GetLengthFromStorage = () => {
     return localStorage && localStorage.getItem('length') ? localStorage.getItem('length') as Length : null
+}
+
+export const GetCurrencyFromStorage = () => {
+    return localStorage && localStorage.getItem('currency') ? localStorage.getItem('currency') as Currency : null
 }
 
 export const GetFontSizeFromStorage = () => {

@@ -88,6 +88,7 @@ const fr = {
       switchToDark: "Passer au mode sombre",
       switchToLight: "Passer au mode clair",
       language: "Langue",
+      currency: "Devise",
       summaryFormat: "Format du resume",
       summaryLength: "Longueur du resume",
       fontSize: "Taille de police",
@@ -100,6 +101,9 @@ const fr = {
         spanish: "Espagnol",
         mandarin: "Mandarin",
         hindi: "Hindi",
+        USD: "USD ($)",
+        CAD: "CAD ($)",
+        EUR: "EUR (€)",
         short: "Court",
         medium: "Moyen",
         long: "Long",
@@ -116,5 +120,4 @@ const fr = {
 } as const;
 
 export default fr;
-
 
