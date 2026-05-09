@@ -3,8 +3,9 @@ import { buildAnonymousThrottleMessage, buildErrorSummaryHtml, buildThrottleMess
 import { useHistoryStore, type HistorySummary } from "../../stores/historyStore";
 import { useSettingsStore } from "../../stores/settingsStore";
 import { useAuthProfileStore } from "../../stores/authProfileStore";
-import { GetSummaryFromStorage, UpdateSummaryStorage } from "../../utils/storage";
+import { GetSummaryPayloadFromStorage, UpdateSummaryStorage } from "../../utils/storage";
 import { Format, Language, Length } from "../../utils/types";
+import { normalizeSummaryActionItems, type SummaryActionId, type SummaryActionItem } from "../../types/summary";
 import { useTranslation } from "react-i18next";
 
 type TranslateFn = (key: string, options?: Record<string, unknown>) => string;
@@ -22,7 +23,7 @@ type SummarizeRequestParams = {
 export type SummarizeResult = {
   html: string;
   sourceUrl?: string;
-  isError: boolean;
+  isSuccess: boolean;
 };
 
 type SummarizeErrorPayload = {
@@ -245,7 +246,7 @@ const requestActiveTabSummary = async ({
     return {
       html: MOCK_SUMMARY_HTML,
       sourceUrl: await getMockSourceUrl(),
-      isError: false,
+      isSuccess: true,
     };
   }
 
@@ -253,7 +254,7 @@ const requestActiveTabSummary = async ({
   if (!tab?.id) {
     return {
       html: buildErrorSummaryHtml("No active tab", "Could not find an active browser tab to summarize."),
-      isError: true,
+      isSuccess: false,
     };
   }
 
@@ -263,7 +264,7 @@ const requestActiveTabSummary = async ({
         "Page not supported",
         "Chrome internal pages (like chrome://settings) cannot be summarized. Open a normal website tab and try again.",
       ),
-      isError: true,
+      isSuccess: false,
     };
   }
 
@@ -272,19 +273,19 @@ const requestActiveTabSummary = async ({
     tabContent = await extractTabContent(tab.id);
   } catch (error) {
     console.log("Script Injection Error:", error);
-    return {
-      html: buildErrorSummaryHtml(
-        "Cannot summarize this page",
-        "This page blocks extension script access. Try another site tab and try again.",
-      ),
-      isError: true,
-    };
+      return {
+        html: buildErrorSummaryHtml(
+          "Cannot summarize this page",
+          "This page blocks extension script access. Try another site tab and try again.",
+        ),
+        isSuccess: false,
+      };
   }
 
   if (!tabContent.text) {
     return {
       html: buildErrorSummaryHtml("No readable content", "Could not extract readable text from this page."),
-      isError: true,
+      isSuccess: false,
     };
   }
 
@@ -316,51 +317,71 @@ const requestActiveTabSummary = async ({
             t("summaryErrors.rateLimitTitle", { defaultValue: "Rate limit reached" }),
             throttleMessage,
           ),
-          isError: true,
+          isSuccess: false,
         };
       }
 
       const fallbackMessage = errorPayload?.message || "Could not generate a summary right now. Please try again.";
       return {
         html: buildErrorSummaryHtml("Request failed", fallbackMessage),
-        isError: true,
+        isSuccess: false,
       };
     }
 
-    const result = await response.json();
-    if (!result?.data) {
+    const result = await response.json() as { data?: unknown; isSuccess?: unknown };
+    const hasSummaryData = typeof result?.data === "string" && result.data.trim().length > 0;
+    if (!hasSummaryData || result?.isSuccess !== true) {
       return {
         html: buildErrorSummaryHtml("Empty response", "The server returned an empty summary."),
-        isError: true,
+        isSuccess: false,
       };
     }
 
+    const summaryHtml = result.data as string;
+
     return {
-      html: result.data,
+      html: summaryHtml,
       sourceUrl: tab.url,
-      isError: false,
+      isSuccess: true,
     };
   } catch (error) {
     console.log("Fetch Error:", error);
     return {
       html: buildErrorSummaryHtml("Network error", "Could not contact the backend. Please try again."),
-      isError: true,
+      isSuccess: false,
     };
   }
 };
 
 export const useSummarizeActiveTab = () => {
   const { t } = useTranslation();
-  const [summarizedContent, setSummarizedContent] = useState<string | null>(GetSummaryFromStorage());
+  const [summarizedContent, setSummarizedContent] = useState<string | null>(() => GetSummaryPayloadFromStorage().html);
+  const [currentSourceUrl, setCurrentSourceUrl] = useState<string | null>(() => GetSummaryPayloadFromStorage().sourceUrl);
+  const [actionItems, setActionItems] = useState<SummaryActionItem[]>(() => GetSummaryPayloadFromStorage().actionItems);
+  const [isSummarySuccess, setIsSummarySuccess] = useState<boolean>(() => GetSummaryPayloadFromStorage().isSuccess);
   const language = useSettingsStore((state) => state.language);
   const length = useSettingsStore((state) => state.length);
   const format = useSettingsStore((state) => state.format);
   const userProfile = useAuthProfileStore((state) => state.profile);
   const addSummaryToHistory = useHistoryStore((state) => state.addSummary);
+  const updateSummaryActionItems = useHistoryStore((state) => state.updateSummaryActionItems);
+
+  const persistSummaryPayload = useCallback(
+    (html: string, sourceUrl: string | null, nextActionItems: SummaryActionItem[], isSuccess: boolean) => {
+      UpdateSummaryStorage(html, sourceUrl, nextActionItems, isSuccess);
+      if (sourceUrl) {
+        updateSummaryActionItems(sourceUrl, nextActionItems);
+      }
+    },
+    [updateSummaryActionItems],
+  );
 
   const summarize = useCallback(
     async (regenerate: boolean) => {
       setSummarizedContent(null);
+      setCurrentSourceUrl(null);
+      setActionItems([]);
+      setIsSummarySuccess(false);
 
       const result = await requestActiveTabSummary({
         baseUrl: import.meta.env.VITE_BASE_URL,
@@ -372,13 +393,19 @@ export const useSummarizeActiveTab = () => {
         t,
       });
 
+      const nextSourceUrl = result.sourceUrl ?? null;
       setSummarizedContent(result.html);
-      UpdateSummaryStorage(result.html);
+      setCurrentSourceUrl(nextSourceUrl);
+      setActionItems([]);
+      setIsSummarySuccess(result.isSuccess);
+      UpdateSummaryStorage(result.html, nextSourceUrl, [], result.isSuccess);
 
-      if (!result.isError && result.sourceUrl) {
+      if (result.isSuccess && result.sourceUrl) {
         addSummaryToHistory({
           url: result.sourceUrl,
           content: result.html,
+          actionItems: [],
+          isSuccess: true,
         });
       }
 
@@ -387,13 +414,58 @@ export const useSummarizeActiveTab = () => {
     [addSummaryToHistory, format, language, length, t, userProfile],
   );
 
+  const addActionItem = useCallback(
+    (actionId: SummaryActionId) => {
+      setActionItems((previous) => {
+        const nextActionItems = [
+          ...previous,
+          {
+            id: `${actionId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            type: actionId,
+          },
+        ];
+
+        if (summarizedContent !== null) {
+          persistSummaryPayload(summarizedContent, currentSourceUrl, nextActionItems, isSummarySuccess);
+        }
+
+        return nextActionItems;
+      });
+    },
+    [currentSourceUrl, isSummarySuccess, persistSummaryPayload, summarizedContent],
+  );
+
+  const removeActionItem = useCallback(
+    (actionItemId: string) => {
+      setActionItems((previous) => {
+        const nextActionItems = previous.filter((item) => item.id !== actionItemId);
+
+        if (summarizedContent !== null) {
+          persistSummaryPayload(summarizedContent, currentSourceUrl, nextActionItems, isSummarySuccess);
+        }
+
+        return nextActionItems;
+      });
+    },
+    [currentSourceUrl, isSummarySuccess, persistSummaryPayload, summarizedContent],
+  );
+
   const setSummaryFromHistory = useCallback((historyItem: HistorySummary) => {
+    const historyActionItems = normalizeSummaryActionItems(historyItem.actionItems);
+    const historyIsSuccess = historyItem.isSuccess !== false;
     setSummarizedContent(historyItem.content);
-    UpdateSummaryStorage(historyItem.content);
+    setCurrentSourceUrl(historyItem.url);
+    setActionItems(historyActionItems);
+    setIsSummarySuccess(historyIsSuccess);
+    UpdateSummaryStorage(historyItem.content, historyItem.url, historyActionItems, historyIsSuccess);
   }, []);
 
   return {
     summarizedContent,
+    isSummarySuccess,
+    actionItems,
+    addActionItem,
+    removeActionItem,
     summarize,
     setSummaryFromHistory,
   };

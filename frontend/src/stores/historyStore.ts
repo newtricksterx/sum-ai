@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { normalizeSummaryActionItems, type SummaryActionItem } from "../types/summary";
 
 // Logged-out users should only keep one summary.
 const DEFAULT_HISTORY_SIZE = 1;
@@ -9,6 +10,8 @@ const ANONYMOUS_OWNER_KEY = "anonymous";
 export interface HistorySummary {
   url: string;
   content: string;
+  actionItems?: SummaryActionItem[];
+  isSuccess?: boolean;
 }
 
 type OwnerHistoryState = {
@@ -53,9 +56,39 @@ interface HistoryState {
   setHistoryOwner: (ownerKey: string, limit?: number | null) => void;
   setHistoryLimit: (limit: number | null | undefined) => void;
   addSummary: (summary: HistorySummary) => void;
+  updateSummaryActionItems: (url: string, actionItems: SummaryActionItem[]) => void;
   clearHistory: () => void;
   removeSummary: (url: string) => void;
 }
+
+const normalizeHistorySummary = (value: unknown): HistorySummary | null => {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const candidate = value as Partial<HistorySummary>;
+  if (typeof candidate.url !== "string" || typeof candidate.content !== "string") {
+    return null;
+  }
+
+  return {
+    url: candidate.url,
+    content: candidate.content,
+    actionItems: normalizeSummaryActionItems(candidate.actionItems),
+    isSuccess: candidate.isSuccess !== false,
+  };
+};
+
+const normalizeHistoryCache = (value: unknown): HistorySummary[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.flatMap((item) => {
+    const normalizedItem = normalizeHistorySummary(item);
+    return normalizedItem ? [normalizedItem] : [];
+  });
+};
 
 export const useHistoryStore = create<HistoryState>()(
     persist((set) => ({
@@ -115,14 +148,43 @@ export const useHistoryStore = create<HistoryState>()(
                 };
             }),
         addSummary: (newSummary) => set((state) => {
+            const normalizedSummary: HistorySummary = {
+                ...newSummary,
+                actionItems: normalizeSummaryActionItems(newSummary.actionItems),
+                isSuccess: newSummary.isSuccess !== false,
+            };
             // Move existing item to the top by removing duplicate URL first.
-            const remaining = state.cache.filter(item => item.url !== newSummary.url);
+            const remaining = state.cache.filter(item => item.url !== normalizedSummary.url);
              
             // Newest summary first.
-            const updatedCache = [newSummary, ...remaining];
+            const updatedCache = [normalizedSummary, ...remaining];
              
             // Enforce owner-specific capacity.
             const nextCache = updatedCache.slice(0, state.maxHistorySize);
+            return {
+                cache: nextCache,
+                ownerHistories: {
+                    ...state.ownerHistories,
+                    [state.activeOwnerKey]: {
+                        cache: nextCache,
+                        maxHistorySize: state.maxHistorySize,
+                    },
+                },
+            };
+        }),
+        updateSummaryActionItems: (url, actionItems) => set((state) => {
+            const existingIndex = state.cache.findIndex((item) => item.url === url);
+            if (existingIndex === -1) {
+                return state;
+            }
+
+            const normalizedActionItems = normalizeSummaryActionItems(actionItems);
+            const nextCache = state.cache.map((item) =>
+                item.url === url
+                    ? { ...item, actionItems: normalizedActionItems }
+                    : item,
+            );
+
             return {
                 cache: nextCache,
                 ownerHistories: {
@@ -175,7 +237,7 @@ export const useHistoryStore = create<HistoryState>()(
                 // Current format: restore each owner bucket defensively.
                 Object.entries(ownerHistoriesFromStorage).forEach(([ownerKey, ownerValue]) => {
                     const normalizedOwnerKey = normalizeOwnerKey(ownerKey);
-                    const ownerCache = Array.isArray(ownerValue?.cache) ? ownerValue.cache : [];
+                    const ownerCache = normalizeHistoryCache(ownerValue?.cache);
                     const ownerLimit = normalizeHistorySize(ownerValue?.maxHistorySize);
 
                     normalizedOwnerHistories[normalizedOwnerKey] = {
@@ -186,7 +248,7 @@ export const useHistoryStore = create<HistoryState>()(
             } else {
                 // Backward compatibility: promote the old single-cache shape to anonymous owner.
                 const legacyLimit = normalizeHistorySize(stateFromStorage.maxHistorySize);
-                const legacyCache = Array.isArray(stateFromStorage.cache) ? stateFromStorage.cache : [];
+                const legacyCache = normalizeHistoryCache(stateFromStorage.cache);
                 normalizedOwnerHistories[ANONYMOUS_OWNER_KEY] = {
                     cache: legacyCache.slice(0, legacyLimit),
                     maxHistorySize: legacyLimit,

@@ -3,12 +3,15 @@ import { Flashcard } from "./Flashcard";
 import './FlashcardContainer.css'
 import { FlashcardItem } from "./Flashcard";
 import { useCallback, useState } from "react";
+import { Trash2Icon } from "lucide-react";
+import AlertPopup from "../../../../components/AlertPopup/AlertPopup";
 
 interface FlashcardProps {
-  flashcards: FlashcardItem[]
+  flashcards: FlashcardItem[];
+  onRemove: () => void;
 }
 
-export const FlashcardContainer = ( { flashcards } : FlashcardProps) => {
+export const FlashcardContainer = ({ flashcards, onRemove }: FlashcardProps) => {
     const [index, setIndex] = useState(0)
     const flashcardsLength = flashcards.length
 
@@ -41,15 +44,29 @@ export const FlashcardContainer = ( { flashcards } : FlashcardProps) => {
                     answer={flashcards[index].answer}
                 />
 
-                <div>
-                    <button className="fc-button" onClick={onClickLeft} disabled={index === 0}>
-                        <CaretLeftIcon/>
-                    </button>
-                    <button className="fc-button" onClick={onClickRight} disabled={index === flashcardsLength - 1}>
-                        <CaretRightIcon />
-                    </button>
-                </div>
-
+                <footer className="fc-controls">
+                    <div>
+                        <button className="fc-button" onClick={onClickLeft} disabled={index === 0}>
+                            <CaretLeftIcon/>
+                        </button>
+                        <button className="fc-button" onClick={onClickRight} disabled={index === flashcardsLength - 1}>
+                            <CaretRightIcon />
+                        </button>
+                    </div>
+                    <AlertPopup
+                        trigger={
+                            <button type="button" className="fc-remove-button">
+                                <Trash2Icon width={13} height={13}/>
+                            </button>
+                        }
+                        title="Remove flashcard set?"
+                        description="This flashcard action item will be removed from the summary page."
+                        onConfirm={onRemove}
+                        confirmLabel="Remove"
+                        cancelLabel="Cancel"
+                        confirmTone="danger"
+                    />
+                </footer>
             </div>
         </section>
 

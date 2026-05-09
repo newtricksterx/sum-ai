@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 
 from api.models.subscription import Subscription
 from api.plans import get_character_limit
-from backend.scripts.SumAI import SumAI
+from scripts.SumAI import SumAI
 from scripts.YouTubeTools import isYouTubeURL, getTranscript
 
 class SummarizeText(APIView):
@@ -45,6 +45,7 @@ class SummarizeText(APIView):
                     None,
                     Response(
                         {
+                            "isSuccess": False,
                             "error": "summary_limit_reached",
                             "code": "summary_limit_reached",
                             "message": "Summary limit reached for current billing period.",
@@ -72,7 +73,10 @@ class SummarizeText(APIView):
         source_url = request.data.get("source_url")
         if not source_url:
             return Response(
-                {"error": "Missing required field: 'source_url'"},
+                {
+                    "isSuccess": False,
+                    "error": "Missing required field: 'source_url'",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -85,6 +89,7 @@ class SummarizeText(APIView):
             except Exception:
                 return Response(
                     {
+                        "isSuccess": False,
                         "error": "youtube_transcript_unavailable",
                         "message": "Could not fetch a transcript for this YouTube video.",
                     },
@@ -93,7 +98,10 @@ class SummarizeText(APIView):
 
         if not content_for_summary:
             return Response(
-                {"error": "Missing required field: 'content'"},
+                {
+                    "isSuccess": False,
+                    "error": "Missing required field: 'content'",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -121,4 +129,9 @@ class SummarizeText(APIView):
                 self._release_summary_slot(reserved_subscription_id)
             raise
 
-        return Response({"data": summary})
+        return Response(
+            {
+                "isSuccess": True,
+                "data": summary,
+            }
+        )

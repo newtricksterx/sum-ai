@@ -1,4 +1,4 @@
-import { MouseEventHandler, type ReactElement } from 'react';
+import { type ReactElement } from 'react';
 import {
   ArrowRightIcon,
   CardStackIcon,
@@ -6,12 +6,14 @@ import {
   QuestionMarkCircledIcon,
 } from '@radix-ui/react-icons';
 import './ActionGrid.css';
+import type { SummaryActionId } from '../../../../types/summary';
 
 interface ActionGridProps {
-    onClickAction: MouseEventHandler;
+    onClickAction: (actionId: ActionId) => void;
+    isDisabled?: boolean;
 }
 
-type ActionId = 'flashcards' | 'quiz' | 'terms' | 'outline';
+export type ActionId = SummaryActionId;
 
 const ACTION_ITEMS: ReadonlyArray<{
   id: ActionId;
@@ -40,7 +42,10 @@ const ACTION_ITEMS: ReadonlyArray<{
 ];
 
 
-export const ActionGrid = ({ onClickAction } : ActionGridProps) => {
+export const ActionGrid = ({ onClickAction, isDisabled = false } : ActionGridProps) => {
+  if (isDisabled) {
+    return null;
+  }
 
   return (
     <section className="summary-actions" aria-label="Post-summary actions">
@@ -56,10 +61,9 @@ export const ActionGrid = ({ onClickAction } : ActionGridProps) => {
               key={item.id}
               type="button"
               className={`summary-action-card`}
-              onClick={(event) => {
-                onClickAction(event)
-              }}
-              role="listitem"
+              onClick={() => onClickAction(item.id)}
+              disabled={isDisabled}
+              aria-disabled={isDisabled}
             >
               <div
                 className={`summary-action-icon summary-action-icon--${item.tone}`}

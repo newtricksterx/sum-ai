@@ -29,8 +29,17 @@ const formatRetryTime = (t: TranslateFn, retryAfterSeconds?: number) => {
   });
 };
 
+const escapeHtml = (value: string) => {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+};
+
 export const buildErrorSummaryHtml = (title: string, message: string) => {
-  return `<h1>${title}</h1><p>${message}</p>`;
+  return `<h1>${escapeHtml(title)}</h1><p>${escapeHtml(message)}</p>`;
 };
 
 export const buildThrottleMessage = (payload: ThrottlePayload, t: TranslateFn) => {

@@ -24,6 +24,7 @@ def custom_exception_handler(exc, context):
             getattr(settings, "ANON_THROTTLE_SUMMARIES_PERIOD", None),
         )
         response.data = {
+            "isSuccess": False,
             "error": "rate_limited",
             "code": "throttled",
             "message": "Too many requests. Please try again later.",
@@ -33,5 +34,8 @@ def custom_exception_handler(exc, context):
             "retry_after_seconds": retry_after_seconds,
             "detail": str(exc.detail),
         }
+
+    if isinstance(response.data, dict) and "isSuccess" not in response.data:
+        response.data["isSuccess"] = False
 
     return response

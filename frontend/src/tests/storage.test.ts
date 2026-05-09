@@ -5,6 +5,7 @@ import {
   GetLangFromStorage,
   GetLengthFromStorage,
   GetPageFromStorage,
+  GetSummaryPayloadFromStorage,
   GetSummaryFromStorage,
   GetThemeFromStorage,
   UpdateFontSizeStorage,
@@ -81,8 +82,26 @@ describe("storage utils", () => {
 
     it("stores and retrieves summary", () => {
       const summary = "<p>Summary content</p>";
-      UpdateSummaryStorage(summary);
+      const actionItems = [{ id: "flashcards-1", type: "flashcards" as const }];
+      UpdateSummaryStorage(summary, "https://example.com/article", actionItems, true);
+      const storedValue = localStorage.getItem("summary");
+
+      expect(storedValue).not.toBeNull();
+
+      const parsedSummary = JSON.parse(storedValue!);
+      expect(parsedSummary).toMatchObject({
+        html: summary,
+        sourceUrl: "https://example.com/article",
+        actionItems,
+        isSuccess: true,
+      });
       expect(GetSummaryFromStorage()).toBe(summary);
+      expect(GetSummaryPayloadFromStorage()).toMatchObject({
+        html: summary,
+        sourceUrl: "https://example.com/article",
+        actionItems,
+        isSuccess: true,
+      });
     });
 
     it("stores and retrieves format", () => {
@@ -112,6 +131,33 @@ describe("storage utils", () => {
 
       expect(GetFontSizeFromStorage()).toBeNaN();
       expect(GetPageFromStorage()).toBeNaN();
+    });
+  });
+
+  describe("summary backward compatibility", () => {
+    it("reads summaries saved as JSON without action items", () => {
+      localStorage.setItem(
+        "summary",
+        JSON.stringify({
+          html: "<p>Old JSON summary</p>",
+          sourceUrl: "https://example.com/legacy",
+        }),
+      );
+
+      expect(GetSummaryFromStorage()).toBe("<p>Old JSON summary</p>");
+      expect(GetSummaryPayloadFromStorage()).toMatchObject({
+        html: "<p>Old JSON summary</p>",
+        sourceUrl: "https://example.com/legacy",
+        actionItems: [],
+        isSuccess: false,
+      });
+    });
+
+    it("reads legacy summary values saved as raw HTML", () => {
+      const legacySummary = "<p>Legacy summary</p>";
+      localStorage.setItem("summary", legacySummary);
+
+      expect(GetSummaryFromStorage()).toBe(legacySummary);
     });
   });
 });

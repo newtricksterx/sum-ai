@@ -85,4 +85,15 @@ describe("historyStore", () => {
     expect(state.cache[0]?.url).toBe("https://example.com/2");
     expect(state.cache[1]?.url).toBe("https://example.com/1");
   });
+
+  it("updates action items for an existing summary", () => {
+    const { addSummary, updateSummaryActionItems } = useHistoryStore.getState();
+    addSummary(makeSummary(1));
+
+    const actionItems = [{ id: "flashcards-1", type: "flashcards" as const }];
+    updateSummaryActionItems("https://example.com/1", actionItems);
+
+    const state = useHistoryStore.getState();
+    expect(state.cache[0]?.actionItems).toEqual(actionItems);
+  });
 });

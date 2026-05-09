@@ -37,7 +37,15 @@ function App() {
     const initialPage = GetPageFromStorage() ?? 0;
     return { [initialPage]: true };
   });
-  const { summarizedContent, summarize, setSummaryFromHistory } = useSummarizeActiveTab();
+  const {
+    summarizedContent,
+    isSummarySuccess,
+    actionItems,
+    addActionItem,
+    removeActionItem,
+    summarize,
+    setSummaryFromHistory,
+  } = useSummarizeActiveTab();
   const { isCopySuccess, showCopySuccess, resetCopySuccess } = useCopySuccessTimer();
 
   const fontSize = useSettingsStore((state) => state.fontSize)
@@ -173,9 +181,16 @@ function App() {
     }
 
     return (
-      <SummaryPage content={summarizedContent} fontSize={fontSize} />
+      <SummaryPage
+        content={summarizedContent}
+        isSummarySuccess={isSummarySuccess}
+        fontSize={fontSize}
+        actionItems={actionItems}
+        onAddActionItem={addActionItem}
+        onRemoveActionItem={removeActionItem}
+      />
     );
-  }, [fontSize, summarizedContent]);
+  }, [actionItems, addActionItem, fontSize, isSummarySuccess, removeActionItem, summarizedContent]);
 
   const frontPageContent = useMemo(
     () => <FrontPage onClickGenerate={onClickStartGenerate} />,

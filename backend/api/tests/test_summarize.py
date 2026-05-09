@@ -53,6 +53,7 @@ class ThrottleResponseTest(TestCase):
             content_type="application/json",
         )
         self.assertEqual(first_response.status_code, 200)
+        self.assertTrue(first_response.json()["isSuccess"])
 
         throttled_response = self.client.post(
             self.url,
@@ -62,6 +63,7 @@ class ThrottleResponseTest(TestCase):
         self.assertEqual(throttled_response.status_code, 429)
 
         body = throttled_response.json()
+        self.assertFalse(body["isSuccess"])
         self.assertEqual(body["error"], "rate_limited")
         self.assertEqual(body["code"], "throttled")
         self.assertEqual(body["summaries_limit"], 1)
@@ -96,6 +98,7 @@ class SummarizeEndpointTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["isSuccess"])
         self.assertEqual(response.json()["error"], "Missing required field: 'content'")
         mock_summarize.assert_not_called()
 
@@ -117,6 +120,7 @@ class SummarizeEndpointTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["isSuccess"])
         self.assertEqual(response.json()["data"], "<p>summary</p>")
         mock_summarize.assert_called_once_with(
             "My source text",
@@ -162,6 +166,7 @@ class AuthenticatedSummaryLimitTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["isSuccess"])
         self.subscription.refresh_from_db()
         self.assertEqual(self.subscription.summaries_used, 1)
 
@@ -184,6 +189,7 @@ class AuthenticatedSummaryLimitTest(TestCase):
 
         self.assertEqual(response.status_code, 403)
         body = response.json()
+        self.assertFalse(body["isSuccess"])
         self.assertEqual(body["error"], "summary_limit_reached")
         self.assertEqual(body["code"], "summary_limit_reached")
         self.assertEqual(body["summary_limit"], self.subscription.summary_limit)
@@ -216,6 +222,7 @@ class AuthenticatedSummaryLimitTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["isSuccess"])
         self.subscription.refresh_from_db()
         self.assertEqual(self.subscription.summaries_used, 1)
         self.assertGreater(self.subscription.current_period_start, expired_period_start)
@@ -238,6 +245,7 @@ class AuthenticatedSummaryLimitTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["isSuccess"])
         self.assertEqual(mock_summarize.call_args.kwargs["max_input_chars"], 30000)
 
     @patch("api.views.SumAI.SummarizeContent", return_value="<p>summary</p>")
@@ -258,6 +266,7 @@ class AuthenticatedSummaryLimitTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["isSuccess"])
         self.assertIsNone(mock_summarize.call_args.kwargs["max_input_chars"])
 
     @patch.dict("rest_framework.throttling.AnonRateThrottle.THROTTLE_RATES", {"anon": "1/min"})
@@ -285,3 +294,5 @@ class AuthenticatedSummaryLimitTest(TestCase):
 
         self.assertEqual(first_response.status_code, 200)
         self.assertEqual(second_response.status_code, 200)
+        self.assertTrue(first_response.json()["isSuccess"])
+        self.assertTrue(second_response.json()["isSuccess"])

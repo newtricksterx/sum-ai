@@ -10,7 +10,7 @@ from google import genai
 
 from api.plans import get_character_limit
 
-import utils
+from . import utils
 
 DEBUG_MODE = os.getenv("DEBUG", "False").lower() == "true"
 ECHO_PROMPT_MODE = os.getenv("GEMINI_ECHO_PROMPT", "False").lower() == "true"

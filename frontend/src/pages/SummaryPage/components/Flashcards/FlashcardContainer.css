@@ -73,3 +73,43 @@
     opacity: 0.4;
     cursor: not-allowed;
 }
+
+.fc-controls {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.fc-remove-button {
+    min-height: 2rem;
+    padding: 0 0.62rem;
+    border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+    border-radius: 0.58rem;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.2;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 110ms ease;
+}
+
+.fc-remove-button:hover:not(:disabled) {
+    background: color-mix(in srgb, #de2e2eb4 11%, var(--color-card-elev));
+    border-color: color-mix(in srgb, #d94a4a 42%, var(--color-border));
+    color: color-mix(in srgb, #b13b3b 86%, var(--color-text-primary));
+}
+
+.fc-remove-button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+.fc-remove-button:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.fc-remove-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
