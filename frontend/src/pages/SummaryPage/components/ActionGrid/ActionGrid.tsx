@@ -5,12 +5,14 @@ import {
   CheckCircledIcon,
   QuestionMarkCircledIcon,
 } from '@radix-ui/react-icons';
+import LoaderCircle from '../../../../components/LoaderCircle';
 import './ActionGrid.css';
 import type { SummaryActionId } from '../../../../types/summary';
 
 interface ActionGridProps {
-    onClickAction: (actionId: ActionId) => void;
+    onClickAction: (actionId: ActionId) => void | Promise<void>;
     isDisabled?: boolean;
+    loadingActionId?: ActionId | null;
 }
 
 export type ActionId = SummaryActionId;
@@ -26,7 +28,7 @@ const ACTION_ITEMS: ReadonlyArray<{
   {
     id: 'flashcards',
     title: 'Flashcards',
-    description: 'Turn key points into study cards.',
+    description: 'Generate study cards',
     tag: 'Study',
     icon: <CardStackIcon width={18} height={18} />,
     tone: 'teal',
@@ -34,7 +36,7 @@ const ACTION_ITEMS: ReadonlyArray<{
   {
     id: 'quiz',
     title: 'Quiz',
-    description: 'Test recall with focused questions.',
+    description: 'Test your knowledge.',
     tag: 'Test',
     icon: <QuestionMarkCircledIcon width={18} height={18} />,
     tone: 'purple',
@@ -42,10 +44,12 @@ const ACTION_ITEMS: ReadonlyArray<{
 ];
 
 
-export const ActionGrid = ({ onClickAction, isDisabled = false } : ActionGridProps) => {
+export const ActionGrid = ({ onClickAction, isDisabled = false, loadingActionId = null } : ActionGridProps) => {
   if (isDisabled) {
     return null;
   }
+
+  const isAnyActionLoading = loadingActionId !== null;
 
   return (
     <section className="summary-actions" aria-label="Post-summary actions">
@@ -56,14 +60,22 @@ export const ActionGrid = ({ onClickAction, isDisabled = false } : ActionGridPro
 
       <div className="summary-actions-grid" role="list">
         {ACTION_ITEMS.map((item) => {
+          const isActionLoading = loadingActionId === item.id;
+          const isActionDisabled = isDisabled || isAnyActionLoading;
+
           return (
             <button
               key={item.id}
               type="button"
-              className={`summary-action-card`}
-              onClick={() => onClickAction(item.id)}
-              disabled={isDisabled}
-              aria-disabled={isDisabled}
+              className={`summary-action-card${isActionLoading ? ' is-loading' : ''}`}
+              onClick={() => {
+                if (!isActionDisabled) {
+                  void onClickAction(item.id);
+                }
+              }}
+              disabled={isActionDisabled}
+              aria-disabled={isActionDisabled}
+              aria-busy={isActionLoading}
             >
               <div
                 className={`summary-action-icon summary-action-icon--${item.tone}`}
@@ -78,8 +90,11 @@ export const ActionGrid = ({ onClickAction, isDisabled = false } : ActionGridPro
 
               <div className="summary-action-footer">
                 <span className={`summary-action-tag summary-action-tag--${item.tone}`}>{item.tag}</span>
-                <ArrowRightIcon className="summary-action-arrow" aria-hidden="true" />
-                <span className="summary-action-spinner" aria-hidden="true" />
+                {isActionLoading ? (
+                  <LoaderCircle showText={false} className="summary-action-loader" />
+                ) : (
+                  <ArrowRightIcon className="summary-action-arrow" aria-hidden="true" />
+                )}
                 <CheckCircledIcon className="summary-action-check" aria-hidden="true" />
               </div>
             </button>

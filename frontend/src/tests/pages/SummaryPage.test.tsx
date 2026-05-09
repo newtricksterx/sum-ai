@@ -108,5 +108,42 @@ describe("SummaryPage action grid state", () => {
     expect(flashcardsButton.hasAttribute("disabled")).toBe(false);
     expect(quizButton.hasAttribute("disabled")).toBe(false);
   });
+
+  it("renders flashcards returned from action items", () => {
+    render(
+      <SummaryPage
+        {...defaultProps}
+        content={`<h1 class="summary-title">A Valid Summary</h1><p>Helpful details.</p>`}
+        actionItems={[
+          {
+            id: "flashcards-1",
+            type: "flashcards",
+            flashcards: [
+              { question: "Flashcard Question", answer: "Flashcard Answer" },
+            ],
+          },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText("Flashcard Question")).not.toBeNull();
+  });
+
+  it("disables action buttons and shows loader while action content is generating", () => {
+    const { container } = render(
+      <SummaryPage
+        {...defaultProps}
+        content={`<h1 class="summary-title">A Valid Summary</h1><p>Helpful details.</p>`}
+        loadingActionId="flashcards"
+      />,
+    );
+
+    const flashcardsButton = screen.getByRole("button", { name: /flashcards/i });
+    const quizButton = screen.getByRole("button", { name: /quiz/i });
+
+    expect(flashcardsButton.hasAttribute("disabled")).toBe(true);
+    expect(quizButton.hasAttribute("disabled")).toBe(true);
+    expect(container.querySelector(".summary-action-loader #loader")).not.toBeNull();
+  });
 });
 

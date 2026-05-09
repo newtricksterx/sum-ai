@@ -191,6 +191,16 @@
   transform: translateX(1px);
 }
 
+.summary-action-loader {
+  gap: 0;
+}
+
+.summary-action-loader #loader {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-width: 1.5px;
+}
+
 .summary-action-spinner {
   display: none;
   width: 0.84rem;

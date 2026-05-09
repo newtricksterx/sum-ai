@@ -15,4 +15,11 @@ describe("LoaderCircle", () => {
     expect(screen.getByText("Drafting Summary")).not.toBeNull();
     expect(container.querySelector("#loader")).not.toBeNull();
   });
+
+  it("can render without text", () => {
+    const { container } = render(<LoaderCircle showText={false} />);
+
+    expect(screen.queryByText("Drafting Summary")).toBeNull();
+    expect(container.querySelector("#loader")).not.toBeNull();
+  });
 });

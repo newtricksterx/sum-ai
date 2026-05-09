@@ -3,7 +3,6 @@ import PageCard from '../../components/PageCard/PageCard';
 import { sanitizeSummaryHtml } from './sanitizeSummaryHtml';
 import { ActionGrid, type ActionId } from './components/ActionGrid/ActionGrid';
 import { FlashcardContainer } from './components/Flashcards/FlashcardContainer';
-import type { FlashcardItem } from './components/Flashcards/Flashcard';
 import type { SummaryActionItem } from '../../types/summary';
 
 interface SummaryPageProps {
@@ -13,6 +12,7 @@ interface SummaryPageProps {
   actionItems: SummaryActionItem[];
   onAddActionItem: (actionId: ActionId) => void;
   onRemoveActionItem: (actionItemId: string) => void;
+  loadingActionId?: ActionId | null;
 }
 
 const getSummaryPlainText = (html: string) => {
@@ -32,6 +32,7 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
   actionItems,
   onAddActionItem,
   onRemoveActionItem,
+  loadingActionId = null,
 }) => {
   const sanitizedContent = useMemo(() => sanitizeSummaryHtml(content ?? ''), [content]);
   const isActionGridDisabled = useMemo(() => {
@@ -49,31 +50,19 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
 
     return getSummaryPlainText(sanitizedContent).length === 0;
   }, [content, isSummarySuccess, sanitizedContent]);
-  const mockFlashcards = useMemo<FlashcardItem[]>(
-    () => [
-      {
-        question: 'What is the core idea of this summary?',
-        answer: 'It condenses the source into key takeaways so you can review quickly.',
-      },
-      {
-        question: 'What does the summary keep from the original content?',
-        answer: 'It keeps the main arguments, evidence, and practical insights.',
-      },
-      {
-        question: 'How should you use this summary next?',
-        answer: 'Use it to decide what to read deeply and what to skim.',
-      },
-    ],
-    [],
-  );
 
   const renderActionItem = useCallback(
     (actionItem: SummaryActionItem) => {
       if (actionItem.type === 'flashcards') {
+        const flashcards = actionItem.flashcards ?? [];
+        if (flashcards.length === 0) {
+          return null;
+        }
+
         return (
           <PageCard key={actionItem.id} className="summary-card mt-4!">
             <FlashcardContainer
-              flashcards={mockFlashcards}
+              flashcards={flashcards}
               onRemove={() => onRemoveActionItem(actionItem.id)}
             />
           </PageCard>
@@ -82,7 +71,7 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
 
       return null;
     },
-    [mockFlashcards, onRemoveActionItem],
+    [onRemoveActionItem],
   );
 
   return (
@@ -94,7 +83,11 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
         dangerouslySetInnerHTML={{ __html: sanitizedContent }}
       />
       {actionItems.map(renderActionItem)}
-      <ActionGrid onClickAction={onAddActionItem} isDisabled={isActionGridDisabled} />
+      <ActionGrid
+        onClickAction={onAddActionItem}
+        isDisabled={isActionGridDisabled}
+        loadingActionId={loadingActionId}
+      />
     </section>
   );
 };

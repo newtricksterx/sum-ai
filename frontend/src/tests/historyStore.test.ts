@@ -90,7 +90,13 @@ describe("historyStore", () => {
     const { addSummary, updateSummaryActionItems } = useHistoryStore.getState();
     addSummary(makeSummary(1));
 
-    const actionItems = [{ id: "flashcards-1", type: "flashcards" as const }];
+    const actionItems = [
+      {
+        id: "flashcards-1",
+        type: "flashcards" as const,
+        flashcards: [{ question: "Q1", answer: "A1" }],
+      },
+    ];
     updateSummaryActionItems("https://example.com/1", actionItems);
 
     const state = useHistoryStore.getState();

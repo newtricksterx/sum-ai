@@ -41,6 +41,7 @@ function App() {
     summarizedContent,
     isSummarySuccess,
     actionItems,
+    loadingActionId,
     addActionItem,
     removeActionItem,
     summarize,
@@ -188,9 +189,10 @@ function App() {
         actionItems={actionItems}
         onAddActionItem={addActionItem}
         onRemoveActionItem={removeActionItem}
+        loadingActionId={loadingActionId}
       />
     );
-  }, [actionItems, addActionItem, fontSize, isSummarySuccess, removeActionItem, summarizedContent]);
+  }, [actionItems, addActionItem, fontSize, isSummarySuccess, loadingActionId, removeActionItem, summarizedContent]);
 
   const frontPageContent = useMemo(
     () => <FrontPage onClickGenerate={onClickStartGenerate} />,

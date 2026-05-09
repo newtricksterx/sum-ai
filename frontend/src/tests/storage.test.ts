@@ -82,7 +82,16 @@ describe("storage utils", () => {
 
     it("stores and retrieves summary", () => {
       const summary = "<p>Summary content</p>";
-      const actionItems = [{ id: "flashcards-1", type: "flashcards" as const }];
+      const actionItems = [
+        {
+          id: "flashcards-1",
+          type: "flashcards" as const,
+          flashcards: [
+            { question: "What is this?", answer: "A storage test flashcard." },
+            { question: "Why save it?", answer: "So history can restore it." },
+          ],
+        },
+      ];
       UpdateSummaryStorage(summary, "https://example.com/article", actionItems, true);
       const storedValue = localStorage.getItem("summary");
 

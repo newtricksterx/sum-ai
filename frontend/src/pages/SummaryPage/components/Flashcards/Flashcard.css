@@ -79,6 +79,7 @@
   background: var(--fc-acc-light);
   border-color: color-mix(in srgb, var(--fc-acc) 34%, var(--fc-border));
   transform: rotateY(180deg);
+  
 }
 
 .fc-face-tag {

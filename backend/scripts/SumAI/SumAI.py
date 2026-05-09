@@ -1,4 +1,5 @@
 import os
+import json
 import certifi
 import logging
 import re
@@ -199,16 +200,24 @@ def SummarizeContent(content, length, regenerate, format, language, max_input_ch
     
 
 _TYPE_FORMAT_GUIDANCE = {
-    "flashcards": "...",
+    "flashcards": (
+        "Return ONLY valid JSON as an array of objects with keys "
+        '"question" and "answer". Example: '
+        '[{"question":"What is X?","answer":"X is ..."}]. '
+        "Create 4 to 8 cards."
+        "question must be maximum 20 words"
+        "answer must be maximum 20 words"
+    ),
+    
     "quiz": "todo",
     "key-terms": "...",
     "outline": "..."
 
 }
-    
-def CreateActionContent(type, content):
+
+def CreateActionQuery(type, content):
     if not content:
-        return "Content is non-actionable"
+        return ""
 
     query = f"""
             # ROLE: You are an engine that generates {type} content.
@@ -227,20 +236,86 @@ def CreateActionContent(type, content):
     
     return query
 
+
+def _parse_flashcards(raw_output):
+    text = utils._to_text(raw_output)
+    if not text:
+        return []
+
+    # Strip markdown fences if the model includes them.
+    fenced_match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, flags=re.S | re.I)
+    if fenced_match:
+        text = fenced_match.group(1).strip()
+
+    cards = []
+    try:
+        payload = json.loads(text)
+        if isinstance(payload, list):
+            for item in payload:
+                if isinstance(item, dict):
+                    question = utils._to_text(item.get("question"))
+                    answer = utils._to_text(item.get("answer"))
+                    if question and answer:
+                        cards.append((question, answer))
+                elif isinstance(item, (list, tuple)) and len(item) == 2:
+                    question = utils._to_text(item[0])
+                    answer = utils._to_text(item[1])
+                    if question and answer:
+                        cards.append((question, answer))
+    except Exception:
+        cards = []
+
+    # Regex fallback: parse simple text forms like "Q: ... A: ...".
+    if cards:
+        return cards
+
+    pairs = re.findall(
+        r"(?:^|\n)\s*(?:Q(?:uestion)?\s*[:\-]\s*)(.+?)\s*(?:\n\s*(?:A(?:nswer)?\s*[:\-]\s*)(.+?))(?=\n\s*(?:Q(?:uestion)?\s*[:\-]|$)|$)",
+        text,
+        flags=re.I | re.S,
+    )
+    for question, answer in pairs:
+        q = utils._to_text(question)
+        a = utils._to_text(answer)
+        if q and a:
+            cards.append((q, a))
+
+    return cards
+
+
+def CreateActionContent(type, content):
+    normalized_type = utils._to_text(type).lower()
+    if normalized_type != "flashcards":
+        raise ValueError("CreateActionContent currently supports only flashcards.")
+
+    query = CreateActionQuery(normalized_type, content)
+    if not query:
+        return []
+
+    result = query if ECHO_PROMPT_MODE else QueryAI(query=query)
+    return _parse_flashcards(result)
+
     
 def ActionContent(type, content):
-    logger.debug(f'Action type: {type}, Received at: {time.time()}' )
+    normalized_type = utils._to_text(type).lower()
+    logger.debug(f'Action type: {normalized_type}, Received at: {time.time()}' )
 
     try:
-        query = CreateActionContent(
-            type,
-            content
-        )
+        if normalized_type == "flashcards":
+            return CreateActionContent(normalized_type, content)
+
+        query = CreateActionQuery(normalized_type, content)
+        if not query:
+            return "Content is non-actionable"
+
         # Keep DEBUG for local diagnostics, but only echo prompts when explicitly requested.
         result = query if ECHO_PROMPT_MODE else QueryAI(query=query)
+        return result
     except Exception:
-        logger.exception(f"Failed to generate {type} output.")
+        logger.exception(f"Failed to generate {normalized_type} output.")
+        if normalized_type == "flashcards":
+            return []
         return (
-            f"<h1>{type} unavailable</h1>"
-            f"<p>We could not generate a {type} right now. Please try again.</p>"
+            f"<h1>{normalized_type} unavailable</h1>"
+            f"<p>We could not generate a {normalized_type} right now. Please try again.</p>"
         )

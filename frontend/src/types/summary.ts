@@ -1,10 +1,16 @@
-export const SUMMARY_ACTION_IDS = ["flashcards", "quiz", "terms", "outline"] as const;
+export const SUMMARY_ACTION_IDS = ["flashcards", "quiz"] as const;
 
 export type SummaryActionId = (typeof SUMMARY_ACTION_IDS)[number];
+
+export type SummaryFlashcardItem = {
+  question: string;
+  answer: string;
+};
 
 export type SummaryActionItem = {
   id: string;
   type: SummaryActionId;
+  flashcards?: SummaryFlashcardItem[];
 };
 
 const SUMMARY_ACTION_ID_SET = new Set<string>(SUMMARY_ACTION_IDS);
@@ -13,12 +19,44 @@ export const isSummaryActionId = (value: unknown): value is SummaryActionId => {
   return typeof value === "string" && SUMMARY_ACTION_ID_SET.has(value);
 };
 
-export const normalizeSummaryActionItems = (value: unknown): SummaryActionItem[] => {
+const normalizeFlashcards = (value: unknown): SummaryFlashcardItem[] => {
   if (!Array.isArray(value)) {
     return [];
   }
 
   return value.flatMap((item) => {
+    let question: unknown;
+    let answer: unknown;
+
+    if (Array.isArray(item) && item.length === 2) {
+      question = item[0];
+      answer = item[1];
+    } else if (item && typeof item === "object") {
+      const candidate = item as { question?: unknown; answer?: unknown };
+      question = candidate.question;
+      answer = candidate.answer;
+    }
+
+    if (typeof question !== "string" || typeof answer !== "string") {
+      return [];
+    }
+
+    const normalizedQuestion = question.trim();
+    const normalizedAnswer = answer.trim();
+    if (!normalizedQuestion || !normalizedAnswer) {
+      return [];
+    }
+
+    return [{ question: normalizedQuestion, answer: normalizedAnswer }];
+  });
+};
+
+export const normalizeSummaryActionItems = (value: unknown): SummaryActionItem[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.flatMap<SummaryActionItem>((item): SummaryActionItem[] => {
     if (!item || typeof item !== "object") {
       return [];
     }
@@ -32,6 +70,28 @@ export const normalizeSummaryActionItems = (value: unknown): SummaryActionItem[]
       return [];
     }
 
-    return [{ id: candidate.id, type: candidate.type }];
+    if (candidate.type !== "flashcards") {
+      const normalizedActionItem: SummaryActionItem = {
+        id: candidate.id,
+        type: candidate.type,
+      };
+      return [normalizedActionItem];
+    }
+
+    const flashcards = normalizeFlashcards((candidate as { flashcards?: unknown }).flashcards);
+    if (flashcards.length === 0) {
+      const normalizedActionItem: SummaryActionItem = {
+        id: candidate.id,
+        type: candidate.type,
+      };
+      return [normalizedActionItem];
+    }
+
+    const normalizedActionItem: SummaryActionItem = {
+      id: candidate.id,
+      type: candidate.type,
+      flashcards,
+    };
+    return [normalizedActionItem];
   });
 };
