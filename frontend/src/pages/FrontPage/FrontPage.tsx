@@ -9,9 +9,10 @@ import '../../i18n';
 
 interface FrontPageProps {
   onClickGenerate: () => void;
+  isGenerateDisabled?: boolean;
 }
 
-const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate }) => {
+const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate, isGenerateDisabled = false }) => {
   const { t } = useTranslation();
   const language = useSettingsStore((state) => state.language);
   const length = useSettingsStore((state) => state.length);
@@ -83,7 +84,12 @@ const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate }) => {
         </section>
 
         <section className="front-action-section" aria-label="Generate summary">
-          <button type="button" onClick={onClickGenerate} className="front-generate-btn">
+          <button
+            type="button"
+            onClick={onClickGenerate}
+            disabled={isGenerateDisabled}
+            className={`front-generate-btn ${isGenerateDisabled ? "cursor-not-allowed opacity-70" : ""}`.trim()}
+          >
             <WandSparkles size={15} />
             {t("frontpage.summarizeTab")}
           </button>

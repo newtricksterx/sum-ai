@@ -4,7 +4,7 @@ from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 from scripts.SumAI import SumAI
 
-SUPPORTED_ACTION_TYPES = {"flashcards"}
+SUPPORTED_ACTION_TYPES = {"flashcards", "quiz"}
 
 
 def _normalize_flashcards(value):
@@ -31,12 +31,70 @@ def _normalize_flashcards(value):
     return normalized_cards
 
 
+def _normalize_quiz_items(value):
+    if not isinstance(value, list):
+        return []
+
+    normalized_items = []
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+
+        prompt = item.get("prompt")
+        options = item.get("options")
+        correct_index = item.get("correctIndex")
+        explanation = item.get("explanation")
+
+        if not isinstance(prompt, str) or not isinstance(explanation, str):
+            continue
+
+        prompt_text = prompt.strip()
+        explanation_text = explanation.strip()
+        if not prompt_text or not explanation_text:
+            continue
+
+        if not isinstance(options, list):
+            continue
+
+        normalized_options = []
+        for option in options:
+            if isinstance(option, str):
+                option_text = option.strip()
+                if option_text:
+                    normalized_options.append(option_text)
+
+        if len(normalized_options) < 2:
+            continue
+
+        if isinstance(correct_index, str) and correct_index.strip().isdigit():
+            correct_index = int(correct_index.strip())
+
+        if not isinstance(correct_index, int) or isinstance(correct_index, bool):
+            continue
+
+        if correct_index < 0 or correct_index >= len(normalized_options):
+            continue
+
+        normalized_items.append(
+            {
+                "prompt": prompt_text,
+                "options": normalized_options,
+                "correctIndex": correct_index,
+                "explanation": explanation_text,
+            }
+        )
+
+    return normalized_items
+
+
 class ActionItem(APIView):
     throttle_classes = [AnonRateThrottle]
 
     def post(self, request):
         action_type = request.data.get("type")
+        language = request.data.get("language")
         summary_content = request.data.get("content")
+
 
         if not isinstance(action_type, str) or not action_type.strip():
             return Response(
@@ -67,7 +125,7 @@ class ActionItem(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        action_content = SumAI.ActionContent(normalized_action_type, summary_content)
+        action_content = SumAI.ActionContent(normalized_action_type, language, summary_content)
 
         if normalized_action_type == "flashcards":
             normalized_flashcards = _normalize_flashcards(action_content)
@@ -84,6 +142,25 @@ class ActionItem(APIView):
                 {
                     "isSuccess": True,
                     "content": normalized_flashcards,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        if normalized_action_type == "quiz":
+            normalized_quiz_items = _normalize_quiz_items(action_content)
+            if not normalized_quiz_items:
+                return Response(
+                    {
+                        "isSuccess": False,
+                        "error": "Could not generate action content.",
+                    },
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
+
+            return Response(
+                {
+                    "isSuccess": True,
+                    "content": normalized_quiz_items,
                 },
                 status=status.HTTP_200_OK,
             )

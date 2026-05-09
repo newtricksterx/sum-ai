@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { buildAnonymousThrottleMessage, buildErrorSummaryHtml, buildThrottleMessage } from "./summaryMessages";
 import { useHistoryStore, type HistorySummary } from "../../stores/historyStore";
 import { useSettingsStore } from "../../stores/settingsStore";
@@ -7,11 +7,10 @@ import { GetSummaryPayloadFromStorage, UpdateSummaryStorage } from "../../utils/
 import { Format, Language, Length } from "../../utils/types";
 import {
   normalizeSummaryActionItems,
-  type SummaryActionId,
   type SummaryActionItem,
-  type SummaryFlashcardItem,
 } from "../../types/summary";
 import { useTranslation } from "react-i18next";
+import { useActionItem } from "./useActionItem";
 
 type TranslateFn = (key: string, options?: Record<string, unknown>) => string;
 
@@ -36,16 +35,6 @@ type SummarizeErrorPayload = {
   summaries_limit?: number;
   limit_period?: string;
   retry_after_seconds?: number;
-};
-
-type ActionItemErrorPayload = {
-  message?: string;
-  error?: string;
-};
-
-type ActionItemResponse = {
-  isSuccess: boolean;
-  content?: unknown;
 };
 
 const MOCK_SUMMARY_HTML = `
@@ -147,20 +136,6 @@ const MOCK_SUMMARY_HTML = `
 `;
 
 const MOCK_SOURCE_URL_PREFIX = "mock://dev-summary";
-const MOCK_FLASHCARDS: SummaryFlashcardItem[] = [
-  {
-    question: "What is the core idea of this summary?",
-    answer: "It condenses the source into key takeaways so you can review quickly.",
-  },
-  {
-    question: "What does the summary keep from the original content?",
-    answer: "It keeps the main arguments, evidence, and practical insights.",
-  },
-  {
-    question: "How should you use this summary next?",
-    answer: "Use it to decide what to read deeply and what to skim.",
-  },
-];
 
 const isRestrictedPage = (url?: string) => {
   if (!url) return true;
@@ -177,40 +152,6 @@ const isMockModeEnabled = () =>
   import.meta.env.DEV ||
   import.meta.env.VITE_DEV === "true" ||
   import.meta.env.VITE_USE_MOCK_SUMMARY === "true";
-
-const isMockActionItemModeEnabled = () => import.meta.env.VITE_USE_MOCK_ACTION_ITEM === "true";
-
-const normalizeFlashcards = (value: unknown): SummaryFlashcardItem[] => {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value.flatMap((item) => {
-    let question: unknown;
-    let answer: unknown;
-
-    if (Array.isArray(item) && item.length === 2) {
-      question = item[0];
-      answer = item[1];
-    } else if (item && typeof item === "object") {
-      const candidate = item as { question?: unknown; answer?: unknown };
-      question = candidate.question;
-      answer = candidate.answer;
-    }
-
-    if (typeof question !== "string" || typeof answer !== "string") {
-      return [];
-    }
-
-    const normalizedQuestion = question.trim();
-    const normalizedAnswer = answer.trim();
-    if (!normalizedQuestion || !normalizedAnswer) {
-      return [];
-    }
-
-    return [{ question: normalizedQuestion, answer: normalizedAnswer }];
-  });
-};
 
 const queryTabsSafe = async (
   queryInfo: chrome.tabs.QueryInfo,
@@ -293,49 +234,6 @@ const getErrorPayload = async (response: Response): Promise<SummarizeErrorPayloa
     return await response.json();
   } catch {
     return null;
-  }
-};
-
-const getActionItemErrorPayload = async (response: Response): Promise<ActionItemErrorPayload | null> => {
-  try {
-    return await response.json();
-  } catch {
-    return null;
-  }
-};
-
-const requestFlashcards = async (baseUrl: string, summaryHtml: string): Promise<SummaryFlashcardItem[]> => {
-  if (isMockActionItemModeEnabled()) {
-    return MOCK_FLASHCARDS;
-  }
-
-  try {
-    const response = await fetch(`${baseUrl}/api/action-item`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "flashcards",
-        content: summaryHtml,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorPayload = await getActionItemErrorPayload(response);
-      const fallbackMessage = errorPayload?.message || errorPayload?.error || "Could not generate flashcards.";
-      console.log("Action Item Error:", fallbackMessage);
-      return [];
-    }
-
-    const result = (await response.json()) as ActionItemResponse;
-    if (result.isSuccess !== true) {
-      return [];
-    }
-
-    return normalizeFlashcards(result.content);
-  } catch (error) {
-    console.log("Fetch Action Item Error:", error);
-    return [];
   }
 };
 
@@ -463,10 +361,8 @@ export const useSummarizeActiveTab = () => {
   const { t } = useTranslation();
   const [summarizedContent, setSummarizedContent] = useState<string | null>(() => GetSummaryPayloadFromStorage().html);
   const [currentSourceUrl, setCurrentSourceUrl] = useState<string | null>(() => GetSummaryPayloadFromStorage().sourceUrl);
-  const [actionItems, setActionItems] = useState<SummaryActionItem[]>(() => GetSummaryPayloadFromStorage().actionItems);
+  const [initialActionItems] = useState<SummaryActionItem[]>(() => GetSummaryPayloadFromStorage().actionItems);
   const [isSummarySuccess, setIsSummarySuccess] = useState<boolean>(() => GetSummaryPayloadFromStorage().isSuccess);
-  const [loadingActionId, setLoadingActionId] = useState<SummaryActionId | null>(null);
-  const actionRequestInFlightRef = useRef(false);
   const language = useSettingsStore((state) => state.language);
   const length = useSettingsStore((state) => state.length);
   const format = useSettingsStore((state) => state.format);
@@ -484,10 +380,28 @@ export const useSummarizeActiveTab = () => {
     [updateSummaryActionItems],
   );
 
+  const {
+    actionItems,
+    setActionItems,
+    loadingActionId,
+    addActionItem,
+    removeActionItem,
+    resetActionItemRequestState,
+  } = useActionItem({
+    baseUrl: import.meta.env.VITE_BASE_URL,
+    language,
+    summarizedContent,
+    initialActionItems,
+    onActionItemsChange: (nextActionItems) => {
+      if (summarizedContent !== null) {
+        persistSummaryPayload(summarizedContent, currentSourceUrl, nextActionItems, isSummarySuccess);
+      }
+    },
+  });
+
   const summarize = useCallback(
     async (regenerate: boolean) => {
-      actionRequestInFlightRef.current = false;
-      setLoadingActionId(null);
+      resetActionItemRequestState();
       setSummarizedContent(null);
       setCurrentSourceUrl(null);
       setActionItems([]);
@@ -521,87 +435,11 @@ export const useSummarizeActiveTab = () => {
 
       return result;
     },
-    [addSummaryToHistory, format, language, length, t, userProfile],
-  );
-
-  const addActionItem = useCallback(
-    async (actionId: SummaryActionId) => {
-      if (actionRequestInFlightRef.current) {
-        return;
-      }
-
-      actionRequestInFlightRef.current = true;
-      setLoadingActionId(actionId);
-
-      const actionItemId = `${actionId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      try {
-        if (actionId !== "flashcards") {
-          setActionItems((previous) => {
-            const nextActionItems = [
-              ...previous,
-              {
-                id: actionItemId,
-                type: actionId,
-              },
-            ];
-
-            if (summarizedContent !== null) {
-              persistSummaryPayload(summarizedContent, currentSourceUrl, nextActionItems, isSummarySuccess);
-            }
-
-            return nextActionItems;
-          });
-          return;
-        }
-
-        if (summarizedContent === null) {
-          return;
-        }
-
-        const flashcards = await requestFlashcards(import.meta.env.VITE_BASE_URL, summarizedContent);
-        if (flashcards.length === 0) {
-          return;
-        }
-
-        setActionItems((previous) => {
-          const nextActionItems = [
-            ...previous,
-            {
-              id: actionItemId,
-              type: actionId,
-              flashcards,
-            },
-          ];
-
-          persistSummaryPayload(summarizedContent, currentSourceUrl, nextActionItems, isSummarySuccess);
-          return nextActionItems;
-        });
-      } finally {
-        actionRequestInFlightRef.current = false;
-        setLoadingActionId(null);
-      }
-    },
-    [currentSourceUrl, isSummarySuccess, persistSummaryPayload, summarizedContent],
-  );
-
-  const removeActionItem = useCallback(
-    (actionItemId: string) => {
-      setActionItems((previous) => {
-        const nextActionItems = previous.filter((item) => item.id !== actionItemId);
-
-        if (summarizedContent !== null) {
-          persistSummaryPayload(summarizedContent, currentSourceUrl, nextActionItems, isSummarySuccess);
-        }
-
-        return nextActionItems;
-      });
-    },
-    [currentSourceUrl, isSummarySuccess, persistSummaryPayload, summarizedContent],
+    [addSummaryToHistory, format, language, length, resetActionItemRequestState, setActionItems, t, userProfile],
   );
 
   const setSummaryFromHistory = useCallback((historyItem: HistorySummary) => {
-    actionRequestInFlightRef.current = false;
-    setLoadingActionId(null);
+    resetActionItemRequestState();
     const historyActionItems = normalizeSummaryActionItems(historyItem.actionItems);
     const historyIsSuccess = historyItem.isSuccess !== false;
     setSummarizedContent(historyItem.content);
@@ -609,7 +447,7 @@ export const useSummarizeActiveTab = () => {
     setActionItems(historyActionItems);
     setIsSummarySuccess(historyIsSuccess);
     UpdateSummaryStorage(historyItem.content, historyItem.url, historyActionItems, historyIsSuccess);
-  }, []);
+  }, [resetActionItemRequestState, setActionItems]);
 
   return {
     summarizedContent,

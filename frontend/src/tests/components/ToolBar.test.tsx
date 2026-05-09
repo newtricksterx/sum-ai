@@ -61,4 +61,24 @@ describe("ToolBar", () => {
     expect(onClickDownload).toHaveBeenCalledTimes(1);
     expect(onClickCopy).toHaveBeenCalledTimes(1);
   });
+
+  it("disables only generate button when action item is loading", () => {
+    copyStateMock.mockReturnValue(true);
+
+    render(
+      <ToolBar
+        onClickCopy={vi.fn()}
+        onClickDownload={vi.fn()}
+        isGenerateDisabled={true}
+      />,
+    );
+
+    const generateButton = screen.getByTitle("Generate a new summary for the current tab");
+    const downloadButton = screen.getByTitle("Download summary as PDF");
+    const copyButton = screen.getByTitle("Copy summary");
+
+    expect((generateButton as HTMLButtonElement).disabled).toBe(true);
+    expect((downloadButton as HTMLButtonElement).disabled).toBe(false);
+    expect((copyButton as HTMLButtonElement).disabled).toBe(false);
+  });
 });

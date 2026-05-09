@@ -13,28 +13,31 @@ export interface ToolBarProps {
     onClickGenerate?: React.MouseEventHandler;
     isCopySuccess?: boolean;
     isSummarizing?: boolean;
+    isGenerateDisabled?: boolean;
 }
 
 function ToolBar({
   onClickCopy,
   onClickDownload,
   isSummarizing = false,
+  isGenerateDisabled = false,
   onClickGenerate = () => {},
   isCopySuccess = false,
 } : ToolBarProps) {
   const { t } = useTranslation();
+  const disableGenerate = isSummarizing || isGenerateDisabled;
   const canUseSummaryActions = CopyState() && !isSummarizing;
   
   return (
     <nav className="toolbar-shell m-1 flex flex-row items-center justify-between">
-        <span className={`toolbar-generate-shell ${isSummarizing ? "is-disabled" : ""}`}>
+        <span className={`toolbar-generate-shell ${disableGenerate ? "is-disabled" : ""}`}>
         <button
           type="button"
           onClick={onClickGenerate}
-          disabled={isSummarizing}
+          disabled={disableGenerate}
           title={t("toolbar.generateTitle")}
           className={`toolbar-generate-btn inline-flex items-center justify-center gap-1 rounded-xl border px-2.5 py-1.5 text-[11px] font-semibold tracking-[0.01em] transition-colors ${
-            isSummarizing
+            disableGenerate
               ? "toolbar-generate-btn-disabled cursor-not-allowed opacity-80"
               : "toolbar-generate-btn-active cursor-pointer"
           }`}

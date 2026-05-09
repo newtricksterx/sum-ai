@@ -3,6 +3,7 @@ import PageCard from '../../components/PageCard/PageCard';
 import { sanitizeSummaryHtml } from './sanitizeSummaryHtml';
 import { ActionGrid, type ActionId } from './components/ActionGrid/ActionGrid';
 import { FlashcardContainer } from './components/Flashcards/FlashcardContainer';
+import { Quiz } from './components/Quiz/Quiz';
 import type { SummaryActionItem } from '../../types/summary';
 
 interface SummaryPageProps {
@@ -51,25 +52,40 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
     return getSummaryPlainText(sanitizedContent).length === 0;
   }, [content, isSummarySuccess, sanitizedContent]);
 
-  const renderActionItem = useCallback(
-    (actionItem: SummaryActionItem) => {
-      if (actionItem.type === 'flashcards') {
-        const flashcards = actionItem.flashcards ?? [];
-        if (flashcards.length === 0) {
-          return null;
+  const renderActionItem = useCallback((actionItem: SummaryActionItem) => {
+        if (actionItem.type === 'flashcards') {
+            const flashcards = actionItem.flashcards ?? [];
+            if (flashcards.length === 0) {
+            return null;
+            }
+
+            return (
+            <PageCard key={actionItem.id} className="summary-card mt-4!">
+                <FlashcardContainer
+                flashcards={flashcards}
+                onRemove={() => onRemoveActionItem(actionItem.id)}
+                />
+            </PageCard>
+            );
         }
 
-        return (
-          <PageCard key={actionItem.id} className="summary-card mt-4!">
-            <FlashcardContainer
-              flashcards={flashcards}
-              onRemove={() => onRemoveActionItem(actionItem.id)}
-            />
-          </PageCard>
-        );
-      }
+        if (actionItem.type === 'quiz') {
+            const quizItems = actionItem.quiz ?? [];
+            if (quizItems.length === 0) {
+                return null;
+            }
 
-      return null;
+            return (
+            <PageCard key={actionItem.id} className="summary-card mt-4!">
+                <Quiz
+                questions={quizItems}
+                onClose={() => onRemoveActionItem(actionItem.id)}
+                />
+            </PageCard>
+            );
+        }
+
+        return null;
     },
     [onRemoveActionItem],
   );

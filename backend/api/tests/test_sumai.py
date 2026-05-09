@@ -9,8 +9,8 @@ from backend.scripts.SumAI import SumAI
 
 class SumAIScriptTest(SimpleTestCase):
     def setUp(self):
-        SumAI._GEMINI_CLIENT = None
-        SumAI._GEMINI_CLIENT_API_KEY = None
+        SumAI.utils._GEMINI_CLIENT = None
+        SumAI.utils._GEMINI_CLIENT_API_KEY = None
 
     def test_extract_links_includes_source_url_and_dedupes(self):
         content = """

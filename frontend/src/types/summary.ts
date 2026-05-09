@@ -7,10 +7,18 @@ export type SummaryFlashcardItem = {
   answer: string;
 };
 
+export type SummaryQuizItem = {
+  prompt: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+};
+
 export type SummaryActionItem = {
   id: string;
   type: SummaryActionId;
   flashcards?: SummaryFlashcardItem[];
+  quiz?: SummaryQuizItem[];
 };
 
 const SUMMARY_ACTION_ID_SET = new Set<string>(SUMMARY_ACTION_IDS);
@@ -51,6 +59,73 @@ const normalizeFlashcards = (value: unknown): SummaryFlashcardItem[] => {
   });
 };
 
+const normalizeQuizItems = (value: unknown): SummaryQuizItem[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") {
+      return [];
+    }
+
+    const candidate = item as {
+      prompt?: unknown;
+      options?: unknown;
+      correctIndex?: unknown;
+      explanation?: unknown;
+    };
+
+    if (typeof candidate.prompt !== "string" || typeof candidate.explanation !== "string") {
+      return [];
+    }
+
+    if (!Array.isArray(candidate.options)) {
+      return [];
+    }
+
+    const options = candidate.options.flatMap((option) => {
+      if (typeof option !== "string") {
+        return [];
+      }
+
+      const optionText = option.trim();
+      if (!optionText) {
+        return [];
+      }
+
+      return [optionText];
+    });
+
+    if (options.length < 2) {
+      return [];
+    }
+
+    if (typeof candidate.correctIndex !== "number" || !Number.isInteger(candidate.correctIndex)) {
+      return [];
+    }
+
+    if (candidate.correctIndex < 0 || candidate.correctIndex >= options.length) {
+      return [];
+    }
+
+    const prompt = candidate.prompt.trim();
+    const explanation = candidate.explanation.trim();
+    if (!prompt || !explanation) {
+      return [];
+    }
+
+    return [
+      {
+        prompt,
+        options,
+        correctIndex: candidate.correctIndex,
+        explanation,
+      },
+    ];
+  });
+};
+
 export const normalizeSummaryActionItems = (value: unknown): SummaryActionItem[] => {
   if (!Array.isArray(value)) {
     return [];
@@ -68,6 +143,24 @@ export const normalizeSummaryActionItems = (value: unknown): SummaryActionItem[]
 
     if (!isSummaryActionId(candidate.type)) {
       return [];
+    }
+
+    if (candidate.type === "quiz") {
+      const quiz = normalizeQuizItems((candidate as { quiz?: unknown }).quiz);
+      if (quiz.length === 0) {
+        const normalizedActionItem: SummaryActionItem = {
+          id: candidate.id,
+          type: candidate.type,
+        };
+        return [normalizedActionItem];
+      }
+
+      const normalizedActionItem: SummaryActionItem = {
+        id: candidate.id,
+        type: candidate.type,
+        quiz,
+      };
+      return [normalizedActionItem];
     }
 
     if (candidate.type !== "flashcards") {

@@ -145,13 +145,19 @@ function App() {
   }
 
   const onClickGenerate = useCallback(async () => {
+    if (loadingActionId !== null) {
+      return;
+    }
     await summarize(true);
-  }, [summarize]);
+  }, [loadingActionId, summarize]);
 
   const onClickStartGenerate = useCallback(async () => {
+    if (loadingActionId !== null) {
+      return;
+    }
     setPage(1);
     await summarize(false);
-  }, [setPage, summarize]);
+  }, [loadingActionId, setPage, summarize]);
 
   const onSelectHistory = useCallback((historyItem: HistorySummary) => {
     setSummaryFromHistory(historyItem);
@@ -159,6 +165,7 @@ function App() {
   }, [setPage, setSummaryFromHistory]);
 
   const isSummarizing = currentPage === 1 && summarizedContent == null
+  const isActionItemLoading = loadingActionId !== null;
 
   const onClickCopy = async () => {
     if (!summarizedContent) return;
@@ -195,8 +202,8 @@ function App() {
   }, [actionItems, addActionItem, fontSize, isSummarySuccess, loadingActionId, removeActionItem, summarizedContent]);
 
   const frontPageContent = useMemo(
-    () => <FrontPage onClickGenerate={onClickStartGenerate} />,
-    [onClickStartGenerate],
+    () => <FrontPage onClickGenerate={onClickStartGenerate} isGenerateDisabled={isActionItemLoading} />,
+    [isActionItemLoading, onClickStartGenerate],
   );
   const historyPageContent = useMemo(
     () => <HistoryPage onSelectHistory={onSelectHistory} />,
@@ -215,7 +222,6 @@ function App() {
       <section
         key={pageIndex}
         hidden={!isActivePage}
-        aria-hidden={!isActivePage}
         className="app-page-panel"
       >
         {content}
@@ -252,6 +258,7 @@ function App() {
           onClickCopy={onClickCopy}
           onClickDownload={onClickDownload}
           isSummarizing={isSummarizing}
+          isGenerateDisabled={isActionItemLoading}
           onClickGenerate={onClickGenerate}
           isCopySuccess={isCopySuccess}
         />

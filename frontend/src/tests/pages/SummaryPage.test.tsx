@@ -129,6 +129,35 @@ describe("SummaryPage action grid state", () => {
     expect(screen.getByText("Flashcard Question")).not.toBeNull();
   });
 
+  it("renders quiz screen UI for quiz action items", () => {
+    render(
+      <SummaryPage
+        {...defaultProps}
+        content={`<h1 class="summary-title">A Valid Summary</h1><p>Helpful details.</p>`}
+        actionItems={[
+          {
+            id: "quiz-1",
+            type: "quiz",
+            quiz: [
+              {
+                prompt: "What is the main point?",
+                options: ["Point A", "Point B", "Point C", "Point D"],
+                correctIndex: 1,
+                explanation: "Point B is supported by the summary.",
+              },
+            ],
+          },
+        ]}
+      />,
+    );
+
+    expect(screen.getByLabelText("Summary quiz")).not.toBeNull();
+    expect(screen.getByText("Question 1")).not.toBeNull();
+    expect(screen.getByRole("button", { name: /next question|finish quiz/i })).not.toBeNull();
+    const previousButton = screen.getByRole("button", { name: /previous question/i });
+    expect(previousButton.hasAttribute("disabled")).toBe(true);
+  });
+
   it("disables action buttons and shows loader while action content is generating", () => {
     const { container } = render(
       <SummaryPage
