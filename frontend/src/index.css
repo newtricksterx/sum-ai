@@ -34,34 +34,89 @@
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
   font-family: Noto-Sans, system-ui, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   height: auto;
-  --color-bg: light-dark(rgba(245, 244, 237, 1), rgba(38, 38, 36, 1));
-  --color-secondary: var(--color-bg);
-  --color-page-card-backdrop: var(--color-secondary);
-  --color-bg-elev: var(--color-secondary);
-  --color-card: #ffffff;
-  --color-tertiary: light-dark(rgba(250, 249, 245, 1), rgba(20, 20, 19, 1));
-  --color-card-elev: var(--color-tertiary);
-  --color-text-primary: #1f1f1f;
-  --color-text-secondary: #5f5f5f;
-  --color-border: #cfcfcf;
-  --color-accent: #6f6f6f;
-  --color-accent-strong: #575757;
-  --color-action-bg: #EFBF04;
-  --color-action-bg-hover: #EFBF04;
-  --color-action-border: #EFBF04;
-  --color-action-text: #091417;
-  --color-focus-ring: color-mix(in srgb, var(--color-action-bg) 42%, transparent);
-  --color-ghost-hover: color-mix(in srgb, var(--color-accent) 18%, transparent);
-  /*
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-  */
+
+  --color-background-primary: light-dark(rgba(255, 255, 255, 1), rgba(48, 48, 46, 1));
+  --color-background-secondary: light-dark(rgba(245, 244, 237, 1), rgba(38, 38, 36, 1));
+  --color-background-tertiary: light-dark(rgba(250, 249, 245, 1), rgba(20, 20, 19, 1));
+  --color-background-inverse: light-dark(rgba(20, 20, 19, 1), rgba(250, 249, 245, 1));
+  --color-background-ghost: light-dark(rgba(255, 255, 255, 0), rgba(48, 48, 46, 0));
+  --color-background-info: light-dark(rgba(214, 228, 246, 1), rgba(37, 62, 95, 1));
+  --color-background-danger: light-dark(rgba(247, 236, 236, 1), rgba(96, 42, 40, 1));
+  --color-background-success: light-dark(rgba(233, 241, 220, 1), rgba(27, 70, 20, 1));
+  --color-background-warning: light-dark(rgba(246, 238, 223, 1), rgba(72, 58, 15, 1));
+  --color-background-disabled: light-dark(rgba(255, 255, 255, 0.5), rgba(48, 48, 46, 0.5));
+  
+  --color-text-primary: light-dark(rgba(20, 20, 19, 1), rgba(250, 249, 245, 1));
+  --color-text-secondary: light-dark(rgba(61, 61, 58, 1), rgba(194, 192, 182, 1));
+  --color-text-tertiary: light-dark(rgba(115, 114, 108, 1), rgba(156, 154, 146, 1));
+  --color-text-inverse: light-dark(rgba(255, 255, 255, 1), rgba(20, 20, 19, 1));
+  --color-text-info: light-dark(rgba(50, 102, 173, 1), rgba(128, 170, 221, 1));
+  --color-text-danger: light-dark(rgba(127, 44, 40, 1), rgba(238, 136, 132, 1));
+  --color-text-success: light-dark(rgba(38, 91, 25, 1), rgba(122, 185, 72, 1));
+  --color-text-warning: light-dark(rgba(90, 72, 21, 1), rgba(209, 160, 65, 1));
+  --color-text-disabled: light-dark(rgba(20, 20, 19, 0.5), rgba(250, 249, 245, 0.5));
+  --color-text-ghost: light-dark(rgba(115, 114, 108, 0.5), rgba(156, 154, 146, 0.5));
+  
+  --color-border-primary: light-dark(rgba(31, 30, 29, 0.4), rgba(240, 238, 227, 0.4));
+  --color-border-secondary: light-dark(rgba(31, 30, 29, 0.3), rgba(232, 230, 219, 0.3));
+  --color-border-tertiary: light-dark(rgba(31, 30, 29, 0.15), rgba(222, 220, 209, 0.15));
+  --color-border-inverse: light-dark(rgba(255, 255, 255, 0.3), rgba(20, 20, 19, 0.15));
+  --color-border-ghost: light-dark(rgba(31, 30, 29, 0), rgba(222, 220, 209, 0));
+  --color-border-info: light-dark(rgba(70, 130, 213, 1), rgba(70, 130, 213, 1));
+  --color-border-danger: light-dark(rgba(167, 61, 57, 1), rgba(205, 92, 88, 1));
+  --color-border-success: light-dark(rgba(67, 116, 38, 1), rgba(89, 145, 48, 1));
+  --color-border-warning: light-dark(rgba(128, 92, 31, 1), rgba(168, 120, 41, 1));
+  --color-border-disabled: light-dark(rgba(31, 30, 29, 0.1), rgba(222, 220, 209, 0.1));
+  
+  --color-ring-primary: light-dark(rgba(20, 20, 19, 0.7), rgba(250, 249, 245, 0.7));
+  --color-ring-secondary: light-dark(rgba(61, 61, 58, 0.7), rgba(194, 192, 182, 0.7));
+  --color-ring-inverse: light-dark(rgba(255, 255, 255, 0.7), rgba(20, 20, 19, 0.7));
+  --color-ring-info: light-dark(rgba(50, 102, 173, 0.5), rgba(128, 170, 221, 0.5));
+  --color-ring-danger: light-dark(rgba(167, 61, 57, 0.5), rgba(205, 92, 88, 0.5));
+  --color-ring-success: light-dark(rgba(67, 116, 38, 0.5), rgba(89, 145, 48, 0.5));
+  --color-ring-warning: light-dark(rgba(128, 92, 31, 0.5), rgba(168, 120, 41, 0.5));
+
+  /* Semantic aliases used by component styles */
+  --color-surface-primary: var(--color-background-primary);
+  --color-surface-secondary: var(--color-background-secondary);
+  --color-surface-tertiary: var(--color-background-tertiary);
+
+  --color-link: var(--color-text-info);
+  --color-link-hover: color-mix(in srgb, var(--color-text-info) 86%, var(--color-text-primary));
+  --color-link-active: color-mix(in srgb, var(--color-text-info) 74%, var(--color-text-primary));
+
+  --color-status-info-bg: var(--color-background-info);
+  --color-status-info-border: var(--color-border-info);
+  --color-status-info-text: var(--color-text-info);
+  --color-status-success-bg: var(--color-background-success);
+  --color-status-success-border: var(--color-border-success);
+  --color-status-success-text: var(--color-text-success);
+  --color-status-danger-bg: var(--color-background-danger);
+  --color-status-danger-border: var(--color-border-danger);
+  --color-status-danger-text: var(--color-text-danger);
+  --color-status-warning-bg: var(--color-background-warning);
+  --color-status-warning-border: var(--color-border-warning);
+  --color-status-warning-text: var(--color-text-warning);
+
+  --color-shadow-soft: light-dark(rgba(15, 23, 42, 0.06), rgba(0, 0, 0, 0.28));
+  --color-shadow-popover: light-dark(rgba(15, 23, 42, 0.16), rgba(0, 0, 0, 0.38));
+  --color-shadow-modal: light-dark(rgba(15, 23, 42, 0.28), rgba(0, 0, 0, 0.52));
+  --color-overlay-scrim: light-dark(rgba(0, 0, 0, 0.36), rgba(0, 0, 0, 0.5));
+
+  /* Compatibility aliases for existing component styles */
+  --color-border: var(--color-border-primary);
+  --color-card: var(--color-surface-secondary);
+  --color-card-elev: var(--color-surface-primary);
+  --color-card-tertiary: var(--color-surface-tertiary);
+  --color-focus-ring: var(--color-ring-primary);
+  --color-page-card-backdrop: var(--color-surface-secondary);
+  --color-accent: var(--color-text-secondary);
+  --color-accent-strong: var(--color-text-primary);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -69,27 +124,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.light {
-  color-scheme: light;
-}
-
-.dark {
-  color-scheme: dark;
-  --color-bg-elev: var(--color-secondary);
-  --color-card: #1d1d1d;
-  --color-card-elev: var(--color-tertiary);
-  --color-text-primary: #e0e0e0;
-  --color-text-secondary: #b0b0b0;
-  --color-border: #444444;
-  --color-accent: #888888;
-  --color-accent-strong: #9b9b9b;
-  --color-action-bg: #EFBF04;
-  --color-action-bg-hover: #EFBF04;
-  --color-action-border: #EFBF04;
-  --color-action-text: #0b1215;
-  --color-focus-ring: color-mix(in srgb, var(--color-action-bg) 46%, transparent);
-  --color-ghost-hover: color-mix(in srgb, var(--color-accent) 26%, transparent);
-}
 
 .theme-switching *,
 .theme-switching *::before,
@@ -105,7 +139,7 @@ body {
   min-width: 360px;
   height: auto;
   color: var(--color-text-primary);
-  background: var(--color-bg);
+  background: var(--color-background-tertiary);
 }
 
 :lang(zh) body {
@@ -122,7 +156,7 @@ ul {
 }
 
 a {
-  color: var(--color-accent);
+  color: var(--color-link);
 }
 
 a:hover {
@@ -130,7 +164,7 @@ a:hover {
 }
 
 a:active {
-  color: var(--color-accent-strong);
+  color: var(--color-link-active);
 }
 button:not(:disabled):not([aria-disabled="true"]) {
   cursor: pointer;
@@ -156,7 +190,7 @@ input::-webkit-inner-spin-button {
 }
 
 .settings-select {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-primary);
   border-radius: 0.45rem;
   color: var(--color-text-primary);
   padding: 0.34rem 1.7rem 0.34rem 0.55rem;
@@ -166,18 +200,18 @@ input::-webkit-inner-spin-button {
 }
 
 .settings-select:hover {
-  border-color: var(--color-accent);
+  border-color: var(--color-border-info);
 }
 
 .settings-select:focus {
   outline: none;
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 2px var(--color-focus-ring);
+  border-color: var(--color-border-info);
+  box-shadow: 0 0 0 2px var(--color-ring-info);
 }
 
 .settings-option {
   font-weight: 500;
-  background: var(--color-card);
+  background: var(--color-surface-secondary);
   color: var(--color-text-primary);
 }
 
@@ -191,8 +225,8 @@ input::-webkit-inner-spin-button {
 #loader {
   height: 1.25rem; /* Using rem for better scaling than em in menus */
   width: 1.25rem;
-  border: 2px solid color-mix(in srgb, var(--color-border) 88%, transparent); /* Thinner border looks more "pro" in small sizes */
-  border-top-color: var(--color-accent);
+  border: 2px solid color-mix(in srgb, var(--color-border-primary) 88%, transparent); /* Thinner border looks more "pro" in small sizes */
+  border-top-color: var(--color-text-secondary);
   border-radius: 50%;
   animation: spin 1s linear infinite; /* Added 'linear' for smooth rotation */
 }
@@ -209,12 +243,12 @@ input::-webkit-inner-spin-button {
 }
 
 .ui-ghost-interactive:hover {
-  background: var(--color-ghost-hover);
+  background: var(--color-interactive-quiet-hover);
 }
 
 .ui-ghost-interactive:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-focus-ring);
+  box-shadow: 0 0 0 2px var(--color-ring-primary);
 }
 
 @keyframes spin {

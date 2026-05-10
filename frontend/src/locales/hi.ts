@@ -119,6 +119,23 @@ const hi = {
         "q-and-a": "प्रश्नोत्तर",
         "pros-cons": "फायदे और नुकसान",
       },
+      },
+    summaryActions: {
+      regionAriaLabel: "सारांश के बाद की कार्रवाइयाँ",
+      whatsNext: "अगला क्या है",
+      pickAction: "कोई कार्रवाई चुनें",
+      items: {
+        flashcards: {
+          title: "फ्लैशकार्ड",
+          description: "अध्ययन कार्ड बनाएं",
+          tag: "अध्ययन",
+        },
+        quiz: {
+          title: "क्विज",
+          description: "अपनी समझ की जांच करें।",
+          tag: "परीक्षण",
+        },
+      },
     },
     summaryErrors: {
       rateLimitTitle: "रेट लिमिट पहुँच गई",

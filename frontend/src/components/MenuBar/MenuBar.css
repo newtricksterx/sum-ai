@@ -1,3 +1,12 @@
-.menu-bar-shell {
-  background: var(--color-page-card-backdrop);
+.menubar-btn {
+  padding: 12px;
+  background-color: var(--color-background-secondary);
+  border-radius: var(--radius-3xl);
+  padding: calc(var(--spacing) * 2);
+  margin: calc(var(--spacing) * 1);
+  transition: background-color 0.15s ease;
+}
+
+.menubar-btn:hover {
+  background-color: var(--color-background-primary);
 }

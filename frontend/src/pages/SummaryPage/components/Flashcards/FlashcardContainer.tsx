@@ -64,7 +64,6 @@ export const FlashcardContainer = ({ flashcards, onRemove }: FlashcardProps) => 
                         onConfirm={onRemove}
                         confirmLabel="Remove"
                         cancelLabel="Cancel"
-                        confirmTone="danger"
                     />
                 </footer>
             </div>

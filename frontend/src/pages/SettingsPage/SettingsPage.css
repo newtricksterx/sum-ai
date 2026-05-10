@@ -16,7 +16,7 @@
   justify-content: space-between;
   padding: 13px 16px;
   align-items: center;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border-primary) 88%, transparent);
 }
 
 .settings-page-title {
@@ -62,7 +62,7 @@
 }
 
 .settings-card {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-tertiary);
   border-radius: 11px;
   overflow: hidden;
 }
@@ -72,7 +72,8 @@
   align-items: center;
   gap: 0.52rem;
   padding: 0.64rem 0.68rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  /*border-bottom: 1px solid color-mix(in srgb, var(--color-border-primary) 88%, transparent);*/
+  background: var(--color-background-primary);
 }
 
 .settings-row:last-child {
@@ -83,9 +84,9 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
-  background: color-mix(in srgb, var(--color-card-elev) 82%, transparent);
-  color: var(--color-text-secondary);
+  border: 1px solid color-mix(in srgb, var(--color-border-primary) 90%, transparent);
+  background: color-mix(in srgb, var(--color-background-tertiary) 82%, transparent);
+  color: var(--color-text-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -114,11 +115,11 @@
 }
 
 .settings-row-hint--accent {
-  color: color-mix(in srgb, var(--color-action-bg) 76%, #5a4300);
+  color: var(--color-interactive-primary-text);
 }
 
 .dark .settings-row-hint--accent {
-  color: color-mix(in srgb, var(--color-action-bg) 84%, #eed88b);
+  color: var(--color-interactive-primary-text);
 }
 
 .settings-row-control {
@@ -142,9 +143,9 @@
   font-weight: 600;
 }
 
-.settings-page-dropdown-trigger--open {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 2px var(--color-focus-ring);
+.settings-page-dropdown-trigger[data-state="open"] {
+  border-color: var(--color-border-info);
+  box-shadow: 0 0 0 2px var(--color-ring-info);
 }
 
 .settings-page-dropdown-value {
@@ -161,7 +162,7 @@
   transition: transform 150ms ease, color 150ms ease;
 }
 
-.settings-page-dropdown-chevron--open {
+.settings-page-dropdown-trigger[data-state="open"] .settings-page-dropdown-chevron {
   transform: rotate(180deg);
   color: var(--color-text-primary);
 }
@@ -172,11 +173,11 @@
   max-height: 12.5rem;
   overflow-y: auto;
   overscroll-behavior: contain;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-primary);
   border-radius: 0.55rem;
-  background: var(--color-card);
+  background: var(--color-surface-secondary);
   padding: 0.25rem;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 10px 24px var(--color-shadow-popover);
   outline: none;
 }
 
@@ -196,7 +197,7 @@
 }
 
 .settings-page-dropdown-item[data-highlighted] {
-  background: color-mix(in srgb, var(--color-card-elev) 86%, transparent);
+  background: color-mix(in srgb, var(--color-surface-primary) 86%, transparent);
 }
 
 .settings-page-dropdown-indicator {
@@ -204,7 +205,7 @@
   left: 0.48rem;
   display: inline-flex;
   align-items: center;
-  color: color-mix(in srgb, #16a34a 78%, var(--color-text-primary));
+  color: var(--color-status-success-text);
 }
 
 .settings-fontsize-wrap {
@@ -215,7 +216,7 @@
 
 .settings-fontsize-input {
   width: 72px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-primary);
   border-radius: 0.45rem;
   color: var(--color-text-primary);
   padding: 0.32rem 0.4rem;
@@ -227,13 +228,13 @@
 }
 
 .settings-fontsize-input:hover {
-  border-color: var(--color-accent);
+  border-color: var(--color-border-info);
 }
 
 .settings-fontsize-input:focus {
   outline: none;
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 2px var(--color-focus-ring);
+  border-color: var(--color-border-info);
+  box-shadow: 0 0 0 2px var(--color-ring-info);
 }
 
 .settings-fontsize-unit {
@@ -245,10 +246,10 @@
 .settings-save-button {
   width: 100%;
   min-height: 38px;
-  border: 1px solid var(--color-action-border);
+  border: 1px solid var(--color-border-secondary);
   border-radius: 10px;
-  background: var(--color-action-bg);
-  color: var(--color-action-text);
+  background: var(--color-background-secondary);
+  color: var(--color-text-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -260,7 +261,7 @@
 }
 
 .settings-save-button:hover {
-  opacity: 0.9;
+  opacity: 0.8;
 }
 
 .settings-save-button:active {
@@ -269,13 +270,25 @@
 
 .settings-save-button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-focus-ring);
+  box-shadow: 0 0 0 2px var(--color-ring-primary);
 }
 
 .settings-save-button--saved {
-  border-color: color-mix(in srgb, #16a34a 52%, var(--color-border));
-  background: color-mix(in srgb, #16a34a 16%, var(--color-card));
-  color: color-mix(in srgb, #166534 90%, var(--color-text-primary));
+  border-color: var(--color-status-success-border);
+  background: var(--color-status-success-bg);
+  color: var(--color-status-success-text);
+}
+
+.settings-theme-button {
+  background-color: var(--color-background-secondary);
+  padding: 6px;
+  border: 1px solid var(--color-border-primary);
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.settings-theme-button:hover {
+    opacity: 0.8;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,7 +1,6 @@
 import { MenuIconSize } from '../../utils/constants'
 import { GoHistory, GoHome  } from "react-icons/go";
 import { ReaderIcon, PersonIcon, GearIcon } from "@radix-ui/react-icons";
-import MenuBarButton from "../MenuBarButton";
 import "./MenuBar.css";
 import { useTranslation } from "react-i18next";
 import "../../i18n";
@@ -28,21 +27,21 @@ function MenuBar({
 
   return (
     <nav className="menu-bar-shell flex flex-row gap-1 justify-between items-center border-b-gray-500 border-b-[0.25px]">
-        <MenuBarButton onClick={onClickReturn}  title={t("menu.home")}>
+        <button className='menubar-btn' onClick={onClickReturn}  title={t("menu.home")}>
             <GoHome size={MenuIconSize}/>
-        </MenuBarButton>
-        <MenuBarButton onClick={onClickForward} title={t("menu.summary")}>
+        </button>
+        <button className='menubar-btn' onClick={onClickForward} title={t("menu.summary")}>
             <ReaderIcon width={MenuIconSize} height={MenuIconSize}/>
-        </MenuBarButton>
-        <MenuBarButton onClick={onClickSettings} title={t("menu.summary")}>
+        </button>
+        <button className='menubar-btn' onClick={onClickSettings} title={t("menu.summary")}>
             <GearIcon width={MenuIconSize} height={MenuIconSize}/>
-        </MenuBarButton>
-        <MenuBarButton onClick={onClickHistory} title={t("menu.history")}>
+        </button>
+        <button className='menubar-btn' onClick={onClickHistory} title={t("menu.history")}>
           <GoHistory size={MenuIconSize}/>
-        </MenuBarButton>
-        <MenuBarButton onClick={onClickProfile} title={t("menu.profile")}>
+        </button>
+        <button className='menubar-btn' onClick={onClickProfile} title={t("menu.profile")}>
           <PersonIcon width={MenuIconSize} height={MenuIconSize}/>
-        </MenuBarButton>
+        </button>
     </nav>
   )
 }

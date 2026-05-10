@@ -120,6 +120,23 @@
         "pros-cons": "优缺点",
       },
     },
+    summaryActions: {
+      regionAriaLabel: "摘要后操作",
+      whatsNext: "下一步",
+      pickAction: "选择一个操作",
+      items: {
+        flashcards: {
+          title: "闪卡",
+          description: "生成学习卡片",
+          tag: "学习",
+        },
+        quiz: {
+          title: "测验",
+          description: "测试你的掌握程度。",
+          tag: "测试",
+        },
+      },
+    },
     summaryErrors: {
       rateLimitTitle: "已达到速率限制",
       limitReached: "你已达到摘要上限。",

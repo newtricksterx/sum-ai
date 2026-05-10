@@ -120,6 +120,23 @@ const fr = {
         "pros-cons": "Pour et Contre",
       },
     },
+    summaryActions: {
+      regionAriaLabel: "Actions apres resume",
+      whatsNext: "Et ensuite",
+      pickAction: "Choisissez une action",
+      items: {
+        flashcards: {
+          title: "Fiches",
+          description: "Generer des fiches d'etude",
+          tag: "Etude",
+        },
+        quiz: {
+          title: "Quiz",
+          description: "Testez vos connaissances.",
+          tag: "Test",
+        },
+      },
+    },
     summaryErrors: {
       rateLimitTitle: "Limite atteinte",
       limitReached: "Vous avez atteint la limite de resumes.",

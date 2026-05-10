@@ -1,38 +1,34 @@
 /* Summary styles aligned to app design tokens */
 
 .summary-shell {
-  --summary-surface: var(--color-card);
-  --summary-surface-subtle: var(--color-card-elev);
+  --summary-surface: var(--color-background-secondary);
+  --summary-surface-subtle: var(--color-background-primary);
   --summary-text-primary: var(--color-text-primary);
   --summary-text-secondary: var(--color-text-secondary);
-  --summary-text-muted: color-mix(in srgb, var(--color-text-secondary) 68%, transparent);
-  --summary-border: color-mix(in srgb, var(--color-border) 86%, transparent);
-  --summary-border-strong: color-mix(in srgb, var(--color-border) 95%, transparent);
-  --summary-focus: var(--color-focus-ring);
-  --summary-accent: var(--color-action-border);
-  --summary-code-bg: color-mix(in srgb, var(--color-tertiary) 86%, transparent);
+  --summary-text-muted: var(--color-text-secondary);
+  --summary-border: var(--color-border-secondary);
+  --summary-border-strong: var(--color-border-primary);
+  --summary-focus: var(--color-ring-primary);
+  --summary-accent: var(--color-interactive-primary-border);
+  --summary-code-bg: var(--color-background-tertiary);
   --summary-code-text: var(--summary-text-primary);
-  --summary-link: #1f6fd6;
-  --summary-link-hover: #1557ab;
+  --summary-link: var(--color-link);
+  --summary-link-hover: var(--color-link-hover);
   --summary-radius-card: 0.95rem;
   --summary-radius-inline: 0.35rem;
   --summary-radius-block: 0.7rem;
   --summary-transition: 140ms ease;
 
   color: var(--summary-text-primary);
-  background: transparent;
   font-family: inherit;
   padding: 0.5rem;
 }
 
 .summary-shell.theme-dark {
-  --summary-link: #7fc3ff;
-  --summary-link-hover: #add9ff;
-  --summary-code-text: #f3d775;
+  --summary-code-text: var(--color-status-warning-text);
 }
 
 .summary-card {
-  background: var(--summary-surface);
   border: 1px solid var(--summary-border);
   border-radius: var(--summary-radius-card);
   padding: 1rem 1.1rem 1.2rem;

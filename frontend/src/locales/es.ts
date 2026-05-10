@@ -120,6 +120,23 @@ const es = {
         "pros-cons": "Pros y Contras",
       },
     },
+    summaryActions: {
+      regionAriaLabel: "Acciones despues del resumen",
+      whatsNext: "Que sigue",
+      pickAction: "Elige una accion",
+      items: {
+        flashcards: {
+          title: "Tarjetas",
+          description: "Genera tarjetas de estudio",
+          tag: "Estudio",
+        },
+        quiz: {
+          title: "Quiz",
+          description: "Pon a prueba tus conocimientos.",
+          tag: "Prueba",
+        },
+      },
+    },
     summaryErrors: {
       rateLimitTitle: "Limite alcanzado",
       limitReached: "Has alcanzado el limite de resumenes.",

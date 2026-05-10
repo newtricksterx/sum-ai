@@ -1,7 +1,7 @@
 .fc-title {
     margin: 0 0 0.55rem;
     padding-bottom: 0.45rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 84%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border-secondary) 84%, transparent);
     color: var(--color-text-primary);
     font-size: 0.86rem;
     font-weight: 700;
@@ -18,9 +18,9 @@
     justify-content: center;
     min-width: 3.1rem;
     padding: 0.14rem 0.5rem;
-    border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-border-secondary) 88%, transparent);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--color-card-elev) 80%, transparent);
+    background: color-mix(in srgb, var(--color-surface-tertiary) 80%, transparent);
     color: var(--color-text-secondary);
     font-size: 0.66rem;
     font-weight: 700;
@@ -43,10 +43,10 @@
 .fc-button {
     width: 2rem;
     height: 2rem;
-    border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+    border: 1px solid var(--color-border-primary);
     border-radius: 0.58rem;
-    background: transparent;
-    color: var(--color-text-secondary);
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -55,14 +55,14 @@
 }
 
 .fc-button:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--color-card-elev) 84%, transparent);
-    border-color: color-mix(in srgb, var(--color-accent) 52%, var(--color-border));
+    background: color-mix(in srgb, var(--color-background-secondary) 84%, transparent);
+    border-color: color-mix(in srgb, var(--color-border-secondary) 52%, var(--color-border-primary));
     color: var(--color-text-primary);
 }
 
 .fc-button:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px var(--color-focus-ring);
+    box-shadow: 0 0 0 2px var(--color-ring-secondary);
 }
 
 .fc-button:active:not(:disabled) {
@@ -84,25 +84,26 @@
 .fc-remove-button {
     min-height: 2rem;
     padding: 0 0.62rem;
-    border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-border-secondary) 88%, transparent);
     border-radius: 0.58rem;
-    background: transparent;
-    color: var(--color-text-secondary);
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
     font-size: 0.72rem;
     font-weight: 700;
     line-height: 1.2;
     transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 110ms ease;
 }
 
-.fc-remove-button:hover:not(:disabled) {
-    background: color-mix(in srgb, #de2e2eb4 11%, var(--color-card-elev));
-    border-color: color-mix(in srgb, #d94a4a 42%, var(--color-border));
-    color: color-mix(in srgb, #b13b3b 86%, var(--color-text-primary));
+.fc-remove-button:hover {
+    background: var(--color-background-danger);
+    border-color: var(--color-border-danger);
+    color: var(--color-text-danger);
 }
+
 
 .fc-remove-button:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px var(--color-focus-ring);
+    box-shadow: 0 0 0 2px var(--color-ring-secondary);
 }
 
 .fc-remove-button:active:not(:disabled) {

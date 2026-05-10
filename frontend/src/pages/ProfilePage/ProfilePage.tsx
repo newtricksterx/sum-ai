@@ -271,7 +271,6 @@ const ProfilePage: React.FC = () => {
                 previewTitle={userProfile.email}
                 confirmLabel={t("profile.logout")}
                 cancelLabel={t("profile.cancel", "Cancel")}
-                confirmTone="primary"
                 onConfirm={() => void handleLogout()}
               />
             </div>
@@ -302,7 +301,6 @@ const ProfilePage: React.FC = () => {
           </p>
         )}
 
-        <section className="TabsContent" aria-label="Sign in with Google">
           <button
             type="button"
             onClick={handleGoogleSignIn}
@@ -311,7 +309,6 @@ const ProfilePage: React.FC = () => {
             <FcGoogle size={MenuIconSize}/>
             {t("profile.signInGoogle")}
           </button>
-        </section>
       </PageCard>
     </main>
   );

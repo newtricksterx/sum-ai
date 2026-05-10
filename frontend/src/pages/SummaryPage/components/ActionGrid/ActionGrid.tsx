@@ -5,7 +5,9 @@ import {
   CheckCircledIcon,
   QuestionMarkCircledIcon,
 } from '@radix-ui/react-icons';
+import { useTranslation } from 'react-i18next';
 import LoaderCircle from '../../../../components/LoaderCircle';
+import '../../../../i18n';
 import './ActionGrid.css';
 import type { SummaryActionId } from '../../../../types/summary';
 
@@ -19,25 +21,16 @@ export type ActionId = SummaryActionId;
 
 const ACTION_ITEMS: ReadonlyArray<{
   id: ActionId;
-  title: string;
-  description: string;
-  tag: string;
   icon: ReactElement;
   tone: 'teal' | 'purple' | 'amber' | 'blue';
 }> = [
   {
     id: 'flashcards',
-    title: 'Flashcards',
-    description: 'Generate study cards',
-    tag: 'Study',
     icon: <CardStackIcon width={18} height={18} />,
     tone: 'teal',
   },
   {
     id: 'quiz',
-    title: 'Quiz',
-    description: 'Test your knowledge.',
-    tag: 'Test',
     icon: <QuestionMarkCircledIcon width={18} height={18} />,
     tone: 'purple',
   }
@@ -45,6 +38,8 @@ const ACTION_ITEMS: ReadonlyArray<{
 
 
 export const ActionGrid = ({ onClickAction, isDisabled = false, loadingActionId = null } : ActionGridProps) => {
+  const { t } = useTranslation();
+
   if (isDisabled) {
     return null;
   }
@@ -52,14 +47,17 @@ export const ActionGrid = ({ onClickAction, isDisabled = false, loadingActionId 
   const isAnyActionLoading = loadingActionId !== null;
 
   return (
-    <section className="summary-actions" aria-label="Post-summary actions">
+    <section className="summary-actions" aria-label={t('summaryActions.regionAriaLabel')}>
       <header className="summary-actions-header">
-        <p className="summary-actions-label">What&apos;s next</p>
-        <p className="summary-actions-hint">Pick an action</p>
+        <p className="summary-actions-label">{t('summaryActions.whatsNext')}</p>
+        <p className="summary-actions-hint">{t('summaryActions.pickAction')}</p>
       </header>
 
       <div className="summary-actions-grid" role="list">
         {ACTION_ITEMS.map((item) => {
+          const itemTitle = t(`summaryActions.items.${item.id}.title`);
+          const itemDescription = t(`summaryActions.items.${item.id}.description`);
+          const itemTag = t(`summaryActions.items.${item.id}.tag`);
           const isActionLoading = loadingActionId === item.id;
           const isActionDisabled = isDisabled || isAnyActionLoading;
 
@@ -84,12 +82,12 @@ export const ActionGrid = ({ onClickAction, isDisabled = false, loadingActionId 
                 {item.icon}
               </div>
               <div className="summary-action-body">
-                <span className="summary-action-title">{item.title}</span>
-                <span className="summary-action-desc">{item.description}</span>
+                <span className="summary-action-title">{itemTitle}</span>
+                <span className="summary-action-desc">{itemDescription}</span>
               </div>
 
               <div className="summary-action-footer">
-                <span className={`summary-action-tag summary-action-tag--${item.tone}`}>{item.tag}</span>
+                <span className={`summary-action-tag summary-action-tag--${item.tone}`}>{itemTag}</span>
                 {isActionLoading ? (
                   <LoaderCircle showText={false} className="summary-action-loader" />
                 ) : (

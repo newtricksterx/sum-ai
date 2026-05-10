@@ -4,7 +4,7 @@
   align-items: baseline;
   gap: 0.5rem;
   padding: 0.28rem 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border-primary) 80%, transparent);
 }
 
 .pp-stat-row:last-child {
@@ -36,9 +36,9 @@
 #plan {
   display: inline-block;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--pp-accent) 52%, var(--color-border));
+  border: 1px solid color-mix(in srgb, var(--pp-accent) 52%, var(--color-border-primary));
   background: var(--pp-accent-muted);
-  color: color-mix(in srgb, var(--pp-accent) 90%, #594700);
+  color: var(--color-interactive-primary-text);
   padding: 0.08rem 0.45rem;
   font-size: 10px;
   letter-spacing: 0.02em;

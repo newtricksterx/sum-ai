@@ -120,6 +120,23 @@
         "pros-cons": "Pros & Cons",
       },
     },
+    summaryActions: {
+      regionAriaLabel: "Post-summary actions",
+      whatsNext: "What's next",
+      pickAction: "Pick an action",
+      items: {
+        flashcards: {
+          title: "Flashcards",
+          description: "Generate study cards",
+          tag: "Study",
+        },
+        quiz: {
+          title: "Quiz",
+          description: "Test your knowledge.",
+          tag: "Test",
+        },
+      },
+    },
     summaryErrors: {
       rateLimitTitle: "Rate limit reached",
       limitReached: "You have reached the summary limit.",

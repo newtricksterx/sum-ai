@@ -1,7 +1,7 @@
 import React from 'react';
 import { useHistoryStore, type HistorySummary } from '../../stores/historyStore';
 import { getSummaryIntroFromHtml } from '../../utils/html';
-import HistoryCard from '../../components/HistoryCard/HistoryCard';
+import HistoryCard from './HistoryCard/HistoryCard';
 import AlertPopup from '../../components/AlertPopup/AlertPopup';
 import { useTranslation } from 'react-i18next';
 import '../../i18n';
@@ -64,7 +64,6 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
           previewText={`${cache.length} ${cache.length === 1 ? t("history.summary") : t("history.summaries")} ${t("history.willBeDeleted")}`}
           confirmLabel={t("history.clearAll")}
           cancelLabel={t("profile.cancel", "Cancel")}
-          confirmTone="danger"
           onConfirm={onConfirmClearAll}
         />
       </div>

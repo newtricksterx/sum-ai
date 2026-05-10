@@ -2,8 +2,6 @@ import React, { ReactElement, ReactNode } from "react";
 import { AlertDialog } from "radix-ui";
 import "./AlertPopup.css";
 
-type ConfirmTone = "danger" | "primary";
-
 interface AlertPopupProps {
   trigger: ReactElement;
   title: string;
@@ -11,19 +9,11 @@ interface AlertPopupProps {
   onConfirm: () => void;
   confirmLabel?: string;
   cancelLabel?: string;
-  confirmTone?: ConfirmTone;
   previewTitle?: string;
   previewText?: string;
   previewContent?: ReactNode;
 }
 
-const getConfirmToneClassName = (confirmTone: ConfirmTone) => {
-  if (confirmTone === "primary") {
-    return "alert-popup-btn-confirm-primary";
-  }
-
-  return "alert-popup-btn-confirm-danger";
-};
 
 const AlertPopup: React.FC<AlertPopupProps> = ({
   trigger,
@@ -32,7 +22,6 @@ const AlertPopup: React.FC<AlertPopupProps> = ({
   onConfirm,
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
-  confirmTone = "danger",
   previewTitle,
   previewText,
   previewContent,
@@ -77,7 +66,7 @@ const AlertPopup: React.FC<AlertPopupProps> = ({
               <button
                 type="button"
                 onClick={onConfirm}
-                className={`alert-popup-btn ${getConfirmToneClassName(confirmTone)}`}
+                className={`alert-popup-btn alert-popup-btn-confirm-danger`}
               >
                 {confirmLabel}
               </button>

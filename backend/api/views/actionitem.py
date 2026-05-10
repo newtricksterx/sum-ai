@@ -88,7 +88,6 @@ def _normalize_quiz_items(value):
 
 
 class ActionItem(APIView):
-    throttle_classes = [AnonRateThrottle]
 
     def post(self, request):
         action_type = request.data.get("type")

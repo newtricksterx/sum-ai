@@ -134,7 +134,6 @@ export const Quiz = ({ questions, onClose } : QuizProps) => {
                             onConfirm={() => onClose?.()}
                             confirmLabel="Close"
                             cancelLabel="Cancel"
-                            confirmTone="danger"
                         />
                     </header>
                 

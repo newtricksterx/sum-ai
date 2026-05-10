@@ -8,12 +8,12 @@
 .summary-flashcard {
   width: 100%;
 
-  --fc-acc: #1d9e75;
-  --fc-acc-light: color-mix(in srgb, #1d9e75 15%, var(--color-card));
-  --fc-bg: var(--color-card);
-  --fc-bg2: var(--color-card-elev);
-  --fc-border: color-mix(in srgb, var(--color-border) 86%, transparent);
-  --fc-border-strong: color-mix(in srgb, var(--color-border) 96%, transparent);
+  --fc-acc: var(--color-status-success-text);
+  --fc-acc-light: color-mix(in srgb, var(--color-status-success-bg) 62%, var(--color-background-primary));
+  --fc-acc-dark: color-mix(in srgb, var(--color-status-success-text) 86%, var(--color-text-primary));
+  --fc-bg: var(--color-background-tertiary);
+  --fc-border: color-mix(in srgb, var(--color-border-secondary) 86%, transparent);
+  --fc-border-strong: color-mix(in srgb, var(--color-border-primary) 96%, transparent);
   --fc-t1: var(--color-text-primary);
   --fc-t2: var(--color-text-secondary);
   --fc-t3: color-mix(in srgb, var(--color-text-secondary) 82%, transparent);
@@ -29,7 +29,7 @@
 
 .fc-scene:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-focus-ring);
+  box-shadow: 0 0 0 2px var(--color-ring-secondary);
 }
 
 .fc-inner {

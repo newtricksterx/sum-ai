@@ -166,6 +166,13 @@ function App() {
 
   const isSummarizing = currentPage === 1 && summarizedContent == null
   const isActionItemLoading = loadingActionId !== null;
+  const canUseSummaryActions = useMemo(() => {
+    if (currentPage !== 1 || isSummarizing || !isSummarySuccess || summarizedContent == null) {
+      return false;
+    }
+
+    return sanitizeSummaryHtml(summarizedContent).trim().length > 0;
+  }, [currentPage, isSummarizing, isSummarySuccess, summarizedContent]);
 
   const onClickCopy = async () => {
     if (!summarizedContent) return;
@@ -261,6 +268,7 @@ function App() {
           isGenerateDisabled={isActionItemLoading}
           onClickGenerate={onClickGenerate}
           isCopySuccess={isCopySuccess}
+          canUseSummaryActions={canUseSummaryActions}
         />
       )}
     </section>

@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, ReactNode, memo, useCallback, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, ReactNode, memo, useCallback, useMemo, useRef, useState } from "react";
 import {
   Check,
   Coins,
@@ -14,12 +14,13 @@ import { useTranslation } from "react-i18next";
 import { all_currencies, all_formats, all_languages, all_lengths } from "../../utils/constants";
 import { Currency, Format, Language, Length } from "../../utils/types";
 import { useSettingsStore } from "../../stores/settingsStore";
-import { SettingsPageDropdown } from "./SettingsPageDropdown";
+import { SettingsPageDropdown, type SettingsPageDropdownOption } from "./SettingsPageDropdown";
 import "./SettingsPage.css";
 import { SunIcon, MoonIcon, GearIcon } from "@radix-ui/react-icons";
 
 const MIN_FONT_SIZE = 10;
 const MAX_FONT_SIZE = 24;
+type SaveTimeoutHandle = ReturnType<typeof window.setTimeout>;
 
 function clampFontSize(value: number): number {
   if (!Number.isFinite(value)) return 12;
@@ -68,7 +69,7 @@ const SettingsThemeToggleButton = memo(function SettingsThemeToggleButton() {
       onClick={UpdateTheme}
       title={theme === "light" ? t("settings.switchToDark") : t("settings.switchToLight")}
       aria-label={theme === "light" ? t("settings.switchToDark") : t("settings.switchToLight")}
-      className="inline-flex items-center justify-center rounded-md border border-gray-200 dark:border-[#3a3a3a] p-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
+      className="settings-theme-button"
     >
       {theme === "light" ? <SunIcon width={16} height={16} /> : <MoonIcon width={16} height={16} />}
     </button>
@@ -96,6 +97,7 @@ export const SettingsPage: React.FC = () => {
   const [fontSize, setFontSize] = useState<number>(settingsFontSize);
   const [format, setFormat] = useState<Format>(settingsFormat);
   const [hasSavedFeedback, setHasSavedFeedback] = useState(false);
+  const saveTimeoutRef = useRef<SaveTimeoutHandle | null>(null);
 
   const languageOptionLabel: Record<Language, string> = useMemo(
     () => ({
@@ -118,6 +120,42 @@ export const SettingsPage: React.FC = () => {
       return humanizeOption(value);
     },
     [t],
+  );
+
+  const languageOptions = useMemo<ReadonlyArray<SettingsPageDropdownOption<Language>>>(
+    () =>
+      all_languages.map((value) => ({
+        value,
+        label: languageOptionLabel[value] ?? humanizeOption(value),
+      })),
+    [languageOptionLabel],
+  );
+
+  const formatOptions = useMemo<ReadonlyArray<SettingsPageDropdownOption<Format>>>(
+    () =>
+      all_formats.map((value) => ({
+        value,
+        label: getOptionLabel(value),
+      })),
+    [getOptionLabel],
+  );
+
+  const lengthOptions = useMemo<ReadonlyArray<SettingsPageDropdownOption<Length>>>(
+    () =>
+      all_lengths.map((value) => ({
+        value,
+        label: getOptionLabel(value),
+      })),
+    [getOptionLabel],
+  );
+
+  const currencyOptions = useMemo<ReadonlyArray<SettingsPageDropdownOption<Currency>>>(
+    () =>
+      all_currencies.map((value) => ({
+        value,
+        label: getOptionLabel(value),
+      })),
+    [getOptionLabel],
   );
 
   const clampedFontSize = useMemo(() => clampFontSize(fontSize), [fontSize]);
@@ -158,13 +196,24 @@ export const SettingsPage: React.FC = () => {
         return;
       }
 
-      UpdateLanguage(language);
-      UpdateCurrency(currency);
-      UpdateLength(length);
-      UpdateFontSize(clampedFontSize);
-      UpdateFormat(format);
       setFontSize(clampedFontSize);
       setHasSavedFeedback(true);
+
+      const pendingTimeout = saveTimeoutRef.current;
+      if (pendingTimeout !== null) {
+        window.clearTimeout(pendingTimeout);
+      }
+
+      // Defer synchronous store/localStorage work to the next task so the
+      // click interaction can paint immediately and reduce INP processing time.
+      saveTimeoutRef.current = window.setTimeout(() => {
+        UpdateLanguage(language);
+        UpdateCurrency(currency);
+        UpdateLength(length);
+        UpdateFontSize(clampedFontSize);
+        UpdateFormat(format);
+        saveTimeoutRef.current = null;
+      }, 0);
     },
     [
       UpdateCurrency,
@@ -206,12 +255,9 @@ export const SettingsPage: React.FC = () => {
                   <SettingsPageDropdown
                     id="settings-language"
                     value={language}
-                    options={all_languages}
+                    options={languageOptions}
                     ariaLabel={t("settings.language")}
-                    getOptionLabel={(value) => languageOptionLabel[value as Language] ?? value}
-                    onValueChange={(nextValue) => {
-                      setLanguage(nextValue);
-                    }}
+                    onValueChange={setLanguage}
                   />
                 }
               />
@@ -223,12 +269,9 @@ export const SettingsPage: React.FC = () => {
                   <SettingsPageDropdown
                     id="settings-format"
                     value={format}
-                    options={all_formats}
+                    options={formatOptions}
                     ariaLabel={t("settings.summaryFormat")}
-                    getOptionLabel={getOptionLabel}
-                    onValueChange={(nextValue) => {
-                      setFormat(nextValue);
-                    }}
+                    onValueChange={setFormat}
                   />
                 }
               />
@@ -240,12 +283,9 @@ export const SettingsPage: React.FC = () => {
                   <SettingsPageDropdown
                     id="settings-length"
                     value={length}
-                    options={all_lengths}
+                    options={lengthOptions}
                     ariaLabel={t("settings.summaryLength")}
-                    getOptionLabel={getOptionLabel}
-                    onValueChange={(nextValue) => {
-                      setLength(nextValue);
-                    }}
+                    onValueChange={setLength}
                   />
                 }
               />
@@ -264,12 +304,9 @@ export const SettingsPage: React.FC = () => {
                   <SettingsPageDropdown
                     id="settings-currency"
                     value={currency}
-                    options={all_currencies}
+                    options={currencyOptions}
                     ariaLabel={t("settings.currency")}
-                    getOptionLabel={getOptionLabel}
-                    onValueChange={(nextValue) => {
-                      setCurrency(nextValue);
-                    }}
+                    onValueChange={setCurrency}
                   />
                 }
               />

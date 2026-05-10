@@ -1,5 +1,5 @@
 .toolbar-shell {
-  background: var(--color-page-card-backdrop);
+  background: var(--color-background-secondary);
 }
 
 .toolbar-generate-shell {
@@ -10,97 +10,27 @@
   isolation: isolate;
 }
 
-.toolbar-generate-shell::before,
-.toolbar-generate-shell::after {
-  content: "";
-  position: absolute;
-  border-radius: inherit;
-  background: linear-gradient(
-    110deg,
-    #EFBF04,
-    #EFBF04,
-    #EFBF04
-  );
-  background-size: 260% 260%;
-  animation: toolbar-accent-flow 2.2s ease-in-out infinite;
-  animation-play-state: paused;
-  opacity: 0;
-  transition: opacity 160ms ease;
-}
-
-.toolbar-generate-shell::before {
-  inset: 0;
-  z-index: -2;
-}
-
-.toolbar-generate-shell::after {
-  inset: -3px;
-  filter: blur(10px);
-  z-index: -3;
-}
-
-.toolbar-generate-shell:hover::before,
-.toolbar-generate-shell:hover::after {
-  animation-play-state: running;
-}
-
-.toolbar-generate-shell:hover::before {
-  opacity: 1;
-}
-
-.toolbar-generate-shell:hover::after {
-  opacity: 0.28;
-}
-
-.toolbar-generate-shell.is-disabled::before,
-.toolbar-generate-shell.is-disabled::after {
-  animation-play-state: paused;
-  filter: saturate(0.25);
-  opacity: 0;
-}
-
 .toolbar-generate-btn {
   position: relative;
-  z-index: 1;
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: 12px;
+  font-size: 11px;
+  padding: 8px;
+  background-color: var(--color-background-primary);
+  transition: background-color 0.3s ease;
 }
 
-.toolbar-generate-btn-active {
-  border-color: var(--color-action-border);
-  background: var(--color-action-bg);
-  color: var(--color-action-text);
-}
 
 .toolbar-generate-btn-active:hover {
-  background: var(--color-action-bg-hover);
-}
-
-.toolbar-generate-btn-active:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-focus-ring);
+  background: var(--color-background-tertiary);
 }
 
 .toolbar-generate-btn-disabled {
-  border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
-  background: color-mix(in srgb, var(--color-card-elev) 84%, transparent);
+  border-color: color-mix(in srgb, var(--color-border-primary) 88%, transparent);
+  background: color-mix(in srgb, var(--color-background-primary) 84%, transparent);
   color: color-mix(in srgb, var(--color-text-secondary) 72%, transparent);
 }
 
-@keyframes toolbar-accent-flow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+.toolbar-btn:hover {
+  background-color: var(--color-background-primary);
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .toolbar-generate-shell::before,
-  .toolbar-generate-shell::after {
-    animation: none;
-  }
-}
-

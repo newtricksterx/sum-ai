@@ -2,6 +2,14 @@
   margin-top: 0.7rem;
   border-radius: 0.95rem;
   padding: 0.7rem;
+  --ag-tone-teal-bg: color-mix(in srgb, var(--color-status-success-bg) 42%, var(--color-surface-primary));
+  --ag-tone-teal-fg: var(--color-status-success-text);
+  --ag-tone-purple-bg: color-mix(in srgb, var(--color-status-info-bg) 58%, var(--color-surface-primary));
+  --ag-tone-purple-fg: color-mix(in srgb, var(--color-status-info-text) 72%, var(--color-text-primary));
+  --ag-tone-amber-bg: color-mix(in srgb, var(--color-status-warning-bg) 78%, var(--color-surface-primary));
+  --ag-tone-amber-fg: var(--color-status-warning-text);
+  --ag-tone-blue-bg: color-mix(in srgb, var(--color-status-info-bg) 74%, var(--color-surface-primary));
+  --ag-tone-blue-fg: var(--color-status-info-text);
 }
 
 .summary-actions-header {
@@ -34,9 +42,9 @@
 }
 
 .summary-action-card {
-  border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border-secondary) 90%, transparent);
   border-radius: 0.78rem;
-  background: color-mix(in srgb, var(--color-card-elev) 72%, transparent);
+  background: var(--color-background-primary);
   color: var(--color-text-primary);
   text-align: left;
   display: flex;
@@ -48,8 +56,8 @@
 }
 
 .summary-action-card:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--color-accent) 52%, var(--color-border));
-  background: color-mix(in srgb, var(--color-card-elev) 86%, transparent);
+  border-color: color-mix(in srgb, var(--color-border-secondary) 52%, var(--color-border-primary));
+  background: var(--color-background-tertiary);
 }
 
 .summary-action-card:active:not(:disabled) {
@@ -58,7 +66,7 @@
 
 .summary-action-card:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-focus-ring);
+  box-shadow: 0 0 0 2px var(--color-ring-primary);
 }
 
 .summary-action-card:disabled {
@@ -67,7 +75,7 @@
 }
 
 .summary-action-card.is-done {
-  border-color: color-mix(in srgb, #16a34a 48%, var(--color-border));
+  border-color: color-mix(in srgb, var(--color-status-success-border) 48%, var(--color-border-secondary));
 }
 
 .summary-action-icon {
@@ -77,43 +85,27 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid color-mix(in srgb, var(--color-border) 64%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border-primary) 64%, transparent);
 }
 
 .summary-action-icon--teal {
-  background: color-mix(in srgb, #1d9e75 18%, var(--color-card));
-  color: #0b5842;
+  background: var(--ag-tone-teal-bg);
+  color: var(--ag-tone-teal-fg);
 }
 
 .summary-action-icon--purple {
-  background: color-mix(in srgb, #6953c8 18%, var(--color-card));
-  color: #3b2f72;
+  background: var(--ag-tone-purple-bg);
+  color: var(--ag-tone-purple-fg);
 }
 
 .summary-action-icon--amber {
-  background: color-mix(in srgb, #d79a24 24%, var(--color-card));
-  color: #724d09;
+  background: var(--ag-tone-amber-bg);
+  color: var(--ag-tone-amber-fg);
 }
 
 .summary-action-icon--blue {
-  background: color-mix(in srgb, #2f7fdd 18%, var(--color-card));
-  color: #0f4e96;
-}
-
-.dark .summary-action-icon--teal {
-  color: #8fdcc8;
-}
-
-.dark .summary-action-icon--purple {
-  color: #c6bcff;
-}
-
-.dark .summary-action-icon--amber {
-  color: #f1d189;
-}
-
-.dark .summary-action-icon--blue {
-  color: #9dd0ff;
+  background: var(--ag-tone-blue-bg);
+  color: var(--ag-tone-blue-fg);
 }
 
 .summary-action-body {
@@ -155,23 +147,23 @@
 }
 
 .summary-action-tag--teal {
-  background: color-mix(in srgb, #1d9e75 15%, transparent);
-  color: color-mix(in srgb, #0c6248 78%, var(--color-text-primary));
+  background: color-mix(in srgb, var(--ag-tone-teal-bg) 52%, transparent);
+  color: var(--ag-tone-teal-fg);
 }
 
 .summary-action-tag--purple {
-  background: color-mix(in srgb, #6953c8 15%, transparent);
-  color: color-mix(in srgb, #473890 78%, var(--color-text-primary));
+  background: color-mix(in srgb, var(--ag-tone-purple-bg) 52%, transparent);
+  color: var(--ag-tone-purple-fg);
 }
 
 .summary-action-tag--amber {
-  background: color-mix(in srgb, #d79a24 21%, transparent);
-  color: color-mix(in srgb, #704a07 76%, var(--color-text-primary));
+  background: color-mix(in srgb, var(--ag-tone-amber-bg) 52%, transparent);
+  color: var(--ag-tone-amber-fg);
 }
 
 .summary-action-tag--blue {
-  background: color-mix(in srgb, #2f7fdd 16%, transparent);
-  color: color-mix(in srgb, #1157a8 76%, var(--color-text-primary));
+  background: color-mix(in srgb, var(--ag-tone-blue-bg) 52%, transparent);
+  color: var(--ag-tone-blue-fg);
 }
 
 .summary-action-arrow,
@@ -205,15 +197,15 @@
   display: none;
   width: 0.84rem;
   height: 0.84rem;
-  border: 1.5px solid color-mix(in srgb, var(--color-border) 74%, transparent);
-  border-top-color: color-mix(in srgb, var(--color-accent) 80%, #1d9e75);
+  border: 1.5px solid color-mix(in srgb, var(--color-border-primary) 74%, transparent);
+  border-top-color: var(--color-status-success-text);
   border-radius: 999px;
   animation: summary-action-spin 650ms linear infinite;
 }
 
 .summary-action-check {
   display: none;
-  color: #1d9e75;
+  color: var(--color-status-success-text);
 }
 
 .summary-action-card.is-loading .summary-action-arrow {

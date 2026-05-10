@@ -1,8 +1,8 @@
 import React from "react";
 import { ExternalLink, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import AlertPopup from "../AlertPopup/AlertPopup";
-import PageCard from "../PageCard/PageCard";
+import AlertPopup from "../../../components/AlertPopup/AlertPopup";
+import PageCard from "../../../components/PageCard/PageCard";
 import "./HistoryCard.css";
 
 interface HistoryCardProps {
@@ -51,7 +51,6 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
           onConfirm={onRemove}
           confirmLabel={t("history.remove")}
           cancelLabel={t("profile.cancel")}
-          confirmTone="danger"
           previewTitle={hostName}
           previewText={previewText}
         />
