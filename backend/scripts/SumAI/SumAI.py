@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 from google import genai
+from google.genai import errors as genai_errors
 
 from api.plans import get_character_limit
 
@@ -18,6 +19,11 @@ DEBUG_MODE = os.getenv("DEBUG", "False").lower() == "true"
 ECHO_PROMPT_MODE = os.getenv("GEMINI_ECHO_PROMPT", "False").lower() == "true"
 # Default for anonymous requests and fallbacks (Free plan).
 MAX_INPUT_CHARS = get_character_limit("free") or 10000
+
+# Transient Gemini failures that are worth retrying.
+_RETRYABLE_STATUS_CODES = {429, 500, 503, 504}
+_MAX_ATTEMPTS_PER_MODEL = 3
+_RETRY_BASE_DELAY_SECONDS = 1.0
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +106,6 @@ def CreateSummaryQuery(page_content, length, format, language, max_input_chars=M
         """
 
     return query
-    
 
 def QueryAI(query):
     api_key, model_name, missing = utils._get_gemini_config()
@@ -111,18 +116,30 @@ def QueryAI(query):
         )
 
     client = utils._get_gemini_client(api_key)
+    fallback_model = utils._get_gemini_fallback_model()
 
     try:
-        response = client.models.generate_content(
-            model=model_name, # type: ignore
-            contents=query
-        )
-        if not getattr(response, "text", None):
-            raise RuntimeError("Gemini returned an empty response.")
-        return response.text
-    except Exception as exc:
+        return utils._generate_with_retries(client, model_name, query)
+    except Exception as primary_exc:
+        # Only fall back when the primary failure is a transient API error
+        # and a different fallback model is configured.
+        if (
+            fallback_model
+            and fallback_model != model_name
+            and utils._is_retryable_gemini_error(primary_exc)
+        ):
+            logger.warning(
+                "Gemini primary model %s exhausted retries; falling back to %s",
+                model_name, fallback_model,
+            )
+            try:
+                return utils._generate_with_retries(client, fallback_model, query)
+            except Exception as fallback_exc:
+                logger.exception("Gemini fallback model also failed.")
+                raise RuntimeError("Gemini summary request failed.") from fallback_exc
+
         logger.exception("Gemini summary request failed.")
-        raise RuntimeError("Gemini summary request failed.") from exc
+        raise RuntimeError("Gemini summary request failed.") from primary_exc
 
    
 def SummarizeContent(content, length, format, language, max_input_chars=MAX_INPUT_CHARS, source_url=None):
@@ -140,12 +157,21 @@ def SummarizeContent(content, length, format, language, max_input_chars=MAX_INPU
             source_links=source_links,
         )
         result = query if ECHO_PROMPT_MODE else QueryAI(query=query)
-        return utils._clean_ai_output(result, fallback_links=source_links)
+        return (
+            {
+                "success": True,
+                "content": utils._clean_ai_output(result, fallback_links=source_links),
+            }
+        )
     except Exception:
         logger.exception("Failed to generate summary output.")
         return (
-            "<h1>Summary unavailable</h1>"
-            "<p>We could not generate a summary right now. Please try again.</p>"
+            {
+                "success": False,
+                "content": ("<h1>Summary unavailable</h1>"
+                            "<p>We could not generate a summary right now. Please try again.</p>")
+            }
+
         )
     
 

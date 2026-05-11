@@ -128,9 +128,11 @@ class SummarizeText(APIView):
                 self._release_summary_slot(reserved_subscription_id)
             raise
 
+        #print(summary["success"])
+
         return Response(
             {
-                "isSuccess": True,
-                "data": summary,
+                "isSuccess": summary["success"],
+                "data": summary["content"],
             }
         )

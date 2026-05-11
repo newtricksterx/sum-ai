@@ -9,6 +9,7 @@ import ast
 
 from bs4 import BeautifulSoup
 from google import genai
+from google.genai import errors as genai_errors
 
 from api.plans import get_character_limit
 from . import formats
@@ -16,6 +17,11 @@ from . import formats
 logger = logging.getLogger(__name__)
 _GEMINI_CLIENT = None
 _GEMINI_CLIENT_API_KEY = None
+
+# Transient Gemini failures that are worth retrying.
+_RETRYABLE_STATUS_CODES = {429, 500, 503, 504}
+_MAX_ATTEMPTS_PER_MODEL = 3
+_RETRY_BASE_DELAY_SECONDS = 1.0
 
 
 def _get_gemini_config():
@@ -27,6 +33,11 @@ def _get_gemini_config():
     if not model_name:
         missing.append("GEMINI_API_MODEL")
     return api_key, model_name, missing
+
+
+def _get_gemini_fallback_model():
+    name = os.getenv("GEMINI_API_FALLBACK_MODEL", "").strip()
+    return name or None
 
 
 def _log_startup_config():
@@ -226,3 +237,35 @@ def _load_json_like_payload(raw_output):
             continue
 
     return None
+
+def _is_retryable_gemini_error(exc):
+    return (
+        isinstance(exc, genai_errors.APIError)
+        and getattr(exc, "code", None) in _RETRYABLE_STATUS_CODES
+    )
+
+
+def _generate_with_retries(client, model_name, query):
+    last_exc = None
+    for attempt in range(1, _MAX_ATTEMPTS_PER_MODEL + 1):
+        try:
+            response = client.models.generate_content(
+                model=model_name,  # type: ignore
+                contents=query,
+            )
+            if not getattr(response, "text", None):
+                raise RuntimeError("Gemini returned an empty response.")
+            return response.text
+        except Exception as exc:
+            last_exc = exc
+            if not _is_retryable_gemini_error(exc) or attempt == _MAX_ATTEMPTS_PER_MODEL:
+                raise
+            delay = _RETRY_BASE_DELAY_SECONDS * (2 ** (attempt - 1))
+            logger.warning(
+                "Gemini %s returned %s; retry %d/%d after %.1fs",
+                model_name, getattr(exc, "code", "error"),
+                attempt, _MAX_ATTEMPTS_PER_MODEL - 1, delay,
+            )
+            time.sleep(delay)
+    # Unreachable, but keeps type checkers happy.
+    raise last_exc  # type: ignore[misc]
