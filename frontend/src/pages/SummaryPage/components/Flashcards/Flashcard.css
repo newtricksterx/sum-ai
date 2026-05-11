@@ -98,7 +98,7 @@
   color: var(--fc-t1);
   text-align: center;
   line-height: 1.45;
-  font-family: DMSerifDisplay-Regular, "Times New Roman", serif;
+  font-family: var(--font-google), "Times New Roman", serif;
 }
 
 .fc-q {

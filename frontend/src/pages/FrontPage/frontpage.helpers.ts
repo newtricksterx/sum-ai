@@ -14,7 +14,7 @@ export const FALLBACK_TAB_META: ActiveTabMeta = {
   readTime: "Read time unavailable",
 };
 
-const WORDS_PER_MINUTE = 225;
+export const WORDS_PER_MINUTE = 225;
 
 export const QUICK_STEPS = [
   {

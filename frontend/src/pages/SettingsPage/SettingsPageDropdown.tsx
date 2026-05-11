@@ -1,19 +1,6 @@
-import { memo, startTransition, useCallback, useMemo } from "react";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { Check, ChevronDown } from "lucide-react";
-
-export type SettingsPageDropdownOption<T extends string> = {
-  value: T;
-  label: string;
-};
-
-type SettingsPageDropdownProps<T extends string> = {
-  id: string;
-  value: T;
-  options: readonly SettingsPageDropdownOption<T>[];
-  onValueChange: (value: T) => void;
-  ariaLabel: string;
-};
+import { memo } from "react";
+import { SettingsPageDropdownProps } from "./settingspage.utils";
+import './SettingsPageDropdown.css'
 
 function SettingsPageDropdownInner<T extends string>({
   id,
@@ -22,39 +9,26 @@ function SettingsPageDropdownInner<T extends string>({
   onValueChange,
   ariaLabel,
 }: SettingsPageDropdownProps<T>) {
-  const selectedLabel = useMemo(() => {
-    const selectedOption = options.find((option) => option.value === value);
-    return selectedOption?.label ?? value;
-  }, [options, value]);
 
-  const handleValueChange = useCallback(
-    (nextValue: string) => {
-      // Keep the menu interaction responsive by deferring parent rerender work.
-      startTransition(() => {
-        onValueChange(nextValue as T);
-      });
-    },
-    [onValueChange],
-  );
 
-  const renderedOptions = useMemo(
-    () =>
-      options.map((option) => (
-        <DropdownMenu.RadioItem
-          key={option.value}
-          value={option.value}
-          textValue={option.label}
-          className="settings-page-dropdown-item"
-        >
-          <DropdownMenu.ItemIndicator className="settings-page-dropdown-indicator">
-            <Check size={12} />
-          </DropdownMenu.ItemIndicator>
-          {option.label}
-        </DropdownMenu.RadioItem>
-      )),
-    [options],
-  );
+  const handleValueChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    onValueChange(event.target.value as T)
+  };
 
+
+  return (
+    <select name="" id={id} onChange={handleValueChange} value={value} className="settings-page-dropdown">
+      {
+        options.map((item, index) => (
+          <option key={index} value={item.value} className="settings-page-dropdown-item" aria-label={ariaLabel}>
+            {item.label}
+          </option>
+        ))
+      }
+    </select>
+  )
+
+  /*
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
@@ -86,6 +60,7 @@ function SettingsPageDropdownInner<T extends string>({
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
   );
+  */
 }
 
 export const SettingsPageDropdown = memo(SettingsPageDropdownInner) as typeof SettingsPageDropdownInner;

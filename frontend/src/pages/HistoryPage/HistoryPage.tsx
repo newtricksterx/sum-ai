@@ -5,23 +5,7 @@ import HistoryCard from './HistoryCard/HistoryCard';
 import AlertPopup from '../../components/AlertPopup/AlertPopup';
 import { useTranslation } from 'react-i18next';
 import '../../i18n';
-
-interface HistoryPageProps {
-  onSelectHistory: (historyItem: HistorySummary) => void;
-}
-
-const truncateText = (text: string, maxLength: number) => {
-  if (text.length <= maxLength) return text;
-  return `${text.slice(0, maxLength)}...`;
-};
-
-const getHostName = (url: string) => {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return url;
-  }
-};
+import { HistoryPageProps, truncateText, getHostName } from './historypage.utils';
 
 const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
   const { t } = useTranslation();
@@ -42,9 +26,9 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
   };
 
   return (
-    <div className="relative px-2 py-2 font-noto">
+    <div className="relative px-2 py-2 font-google">
       <div className="flex items-center justify-between mb-3">
-        <h1 className="text-[16px] font-semibold text-slate-900 dark:text-slate-100 !mb-0">{t("history.title")}</h1>
+        <h1 className="text-[16px] font-semibold mb-0!">{t("history.title")}</h1>
         <AlertPopup
           trigger={
             <button

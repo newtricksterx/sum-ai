@@ -27,7 +27,7 @@ export const isSummaryActionId = (value: unknown): value is SummaryActionId => {
   return typeof value === "string" && SUMMARY_ACTION_ID_SET.has(value);
 };
 
-const normalizeFlashcards = (value: unknown): SummaryFlashcardItem[] => {
+export const normalizeFlashcards = (value: unknown): SummaryFlashcardItem[] => {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -59,7 +59,7 @@ const normalizeFlashcards = (value: unknown): SummaryFlashcardItem[] => {
   });
 };
 
-const normalizeQuizItems = (value: unknown): SummaryQuizItem[] => {
+export const normalizeQuizItems = (value: unknown): SummaryQuizItem[] => {
   if (!Array.isArray(value)) {
     return [];
   }

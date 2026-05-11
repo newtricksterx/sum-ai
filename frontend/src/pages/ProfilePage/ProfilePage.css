@@ -205,20 +205,20 @@
 .pp-bar-fill {
   height: 100%;
   border-radius: inherit;
-  background: var(--pp-accent);
+  background: var(--color-blue-400);
   transition: width 0.35s ease;
 }
 
 .pp-bar-fill--mid {
-  background: var(--color-status-warning-border);
+  background: var(--color-border-warning);
 }
 
 .pp-bar-fill--high {
-  background: var(--color-status-danger-border);
+  background: var(--color-border-danger);
 }
 
 .pp-bar-track--unlimited {
-  background: var(--pp-accent-muted);
+  background: var(--color-blue-950);
 }
 
 .pp-bar-fill--unlimited {
@@ -226,7 +226,7 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    color-mix(in srgb, var(--pp-accent) 85%, transparent) 40%,
+    color-mix(in srgb, var(--color-blue-400) 85%, transparent) 40%,
     transparent 100%
   );
   background-size: 200% 100%;
@@ -249,11 +249,10 @@
   gap: 0.42rem;
 }
 
-.pp-logout-btn,
-.pp-delete-btn {
+.pp-logout-btn {
   width: 100%;
   min-height: 34px;
-  border-radius: var(--pp-radius);
+  border-radius: 8px;
   border: 1px solid var(--color-border-primary);
   background: transparent;
   color: var(--color-text-secondary);
@@ -270,19 +269,9 @@
   background: color-mix(in srgb, var(--color-surface-primary) 72%, transparent);
 }
 
-.pp-delete-btn {
-  color: var(--color-status-danger-text);
-}
 
-.pp-delete-btn:hover {
-  border-color: var(--color-status-danger-border);
-  color: var(--color-status-danger-border);
-  background: color-mix(in srgb, var(--color-status-danger-bg) 84%, transparent);
-}
-
-.pp-logout-btn:focus-visible,
-.pp-delete-btn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--pp-accent) 82%, transparent);
+.pp-logout-btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-blue-400) 82%, transparent);
   outline-offset: 2px;
 }
 

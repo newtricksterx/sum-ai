@@ -64,6 +64,14 @@ export const useSettingsStore = create<Settings>()((set) => ({
         UpdateFormatStorage(format)
         return {format: format}
     }),
+    saveSettings: ({ language, currency, length, fontSize, format }) => set(() => {
+        UpdateLanguageStorage(language);
+        UpdateCurrencyStorage(currency);
+        UpdateLengthStorage(length);
+        UpdateFontSizeStorage(fontSize);
+        UpdateFormatStorage(format);
+        return { language, currency, length, fontSize, format };
+    }),
     UpdateTheme: () => set((state) => {
         const newTheme = state.theme === "light" ? "dark" : "light";
         applyThemeToDocument(newTheme);

@@ -7,3 +7,11 @@
 
 # Ignore local private keys
 private_key.pem
+
+.agents
+
+CLAUDE.md
+.claude
+
+skills-lock.json
+public_key.pem

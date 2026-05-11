@@ -18,10 +18,9 @@ const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate, isGenerateDisabl
   const length = useSettingsStore((state) => state.length);
   const format = useSettingsStore((state) => state.format);
   const activeTabMeta = useTabChange();
-  const quickSteps = [t("frontpage.step1"), t("frontpage.step2"), t("frontpage.step3")];
 
   return (
-    <main className="front-page-shell overflow-y-auto custom-scrollbar px-2 py-2 font-noto">
+    <main className="front-page-shell overflow-y-auto custom-scrollbar px-2 py-2 font-google">
       <PageCard as="section" className="front-page-card p-4">
         <h1 className="sr-only">{t("frontpage.heading")}</h1>
 
@@ -35,6 +34,18 @@ const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate, isGenerateDisabl
             <p className="front-tab-domain" title={activeTabMeta.domain}>{activeTabMeta.domain}</p>
             <p className="front-tab-time">{activeTabMeta.readTime}</p>
           </div>
+        </section>
+
+        <section className="front-action-section" aria-label="Generate summary">
+          <button
+            type="button"
+            onClick={onClickGenerate}
+            disabled={isGenerateDisabled}
+            className={`front-generate-btn ${isGenerateDisabled ? "cursor-not-allowed opacity-70" : ""}`.trim()}
+          >
+            <WandSparkles size={15} />
+            {t("frontpage.summarizeTab")}
+          </button>
         </section>
 
         <section className="front-preset-panel" aria-label="Current summary preset">
@@ -67,36 +78,6 @@ const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate, isGenerateDisabl
               <p className="front-preset-value">{t(`settings.option.${format}`)}</p>
             </li>
           </ul>
-        </section>
-
-        <section className="front-flow" aria-label="How summary generation works">
-          <p className="front-section-label">{t("frontpage.howItWorks")}</p>
-          <ol className="front-flow-list">
-            {quickSteps.map((text, index) => (
-              <li key={`${text}-${index}`} className="front-flow-row">
-                <span className="front-flow-index">{index + 1}</span>
-                <div className="front-flow-copy">
-                  <p className="front-flow-text">{text}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <section className="front-action-section" aria-label="Generate summary">
-          <button
-            type="button"
-            onClick={onClickGenerate}
-            disabled={isGenerateDisabled}
-            className={`front-generate-btn ${isGenerateDisabled ? "cursor-not-allowed opacity-70" : ""}`.trim()}
-          >
-            <WandSparkles size={15} />
-            {t("frontpage.summarizeTab")}
-          </button>
-          <div className="front-footer-row" aria-label="Generation status">
-            <span>{t("frontpage.usesSavedSettings")}</span>
-            <span>{t("frontpage.ready")}</span>
-          </div>
         </section>
       </PageCard>
     </main>

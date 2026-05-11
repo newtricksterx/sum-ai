@@ -1,10 +1,3 @@
-@font-face {
-  font-family: DMSerifDisplay-Regular;
-  src: url("../../../../assets/fonts/DMSerifDisplay-Regular.ttf") format("truetype");
-  font-style: normal;
-  font-weight: 400;
-}
-
 .qz-content {
   font-family: "Noto-Sans", Helvetica, Arial, sans-serif;
   width: 100%;
@@ -177,7 +170,7 @@
   color: var(--color-text-primary);
   font-size: 1rem;
   line-height: 1.45;
-  font-family: "DMSerifDisplay-Regular", "Times New Roman", serif;
+  font-family: var(--font-google), "Times New Roman", serif;
   min-height: 2.8rem;
 }
 

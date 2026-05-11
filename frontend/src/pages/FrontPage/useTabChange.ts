@@ -4,6 +4,7 @@ import "../../i18n";
 import {
   type ActiveTabMeta,
   FALLBACK_TAB_META,
+  WORDS_PER_MINUTE,
   getDomainFromUrl,
   getTabWordCount,
   isRestrictedPage,
@@ -11,24 +12,20 @@ import {
 } from "./frontpage.helpers";
 
 export const useTabChange = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [activeTabMeta, setActiveTabMeta] = useState<ActiveTabMeta>(FALLBACK_TAB_META);
-  const wordsPerMinute = 225;
-
-  const getReadTimeUnavailable = () => t("frontpage.readTimeUnavailable");
-  const getEstimatingLabel = () => t("frontpage.estimating");
-  const formatReadTimeLabel = (wordCount: number) => {
-    if (wordCount <= 0) {
-      return getReadTimeUnavailable();
-    }
-
-    const minutes = Math.max(1, Math.ceil(wordCount / wordsPerMinute));
-    return `${minutes} ${t("frontpage.minRead")}`;
-  };
 
   useEffect(() => {
     let isMounted = true;
     let latestMetaRequestId = 0;
+
+    const readTimeUnavailable = t("frontpage.readTimeUnavailable");
+    const estimatingLabel = t("frontpage.estimating");
+    const formatReadTimeLabel = (wordCount: number) => {
+      if (wordCount <= 0) return readTimeUnavailable;
+      const minutes = Math.max(1, Math.ceil(wordCount / WORDS_PER_MINUTE));
+      return `${minutes} ${t("frontpage.minRead")}`;
+    };
 
     const loadActiveTabMeta = async () => {
       const requestId = latestMetaRequestId + 1;
@@ -41,7 +38,7 @@ export const useTabChange = () => {
       if (!tab) {
         setActiveTabMeta({
           ...FALLBACK_TAB_META,
-          readTime: getReadTimeUnavailable(),
+          readTime: readTimeUnavailable,
         });
         return;
       }
@@ -49,7 +46,7 @@ export const useTabChange = () => {
       const nextMeta: ActiveTabMeta = {
         title: tab.title?.trim() || FALLBACK_TAB_META.title,
         domain: getDomainFromUrl(tab.url),
-        readTime: isRestrictedPage(tab.url) ? getReadTimeUnavailable() : getEstimatingLabel(),
+        readTime: isRestrictedPage(tab.url) ? readTimeUnavailable : estimatingLabel,
       };
 
       setActiveTabMeta(nextMeta);
@@ -70,7 +67,7 @@ export const useTabChange = () => {
         if (isMounted && requestId === latestMetaRequestId) {
           setActiveTabMeta((currentMeta) => ({
             ...currentMeta,
-            readTime: getReadTimeUnavailable(),
+            readTime: readTimeUnavailable,
           }));
         }
       }
@@ -78,10 +75,6 @@ export const useTabChange = () => {
 
     const refreshActiveTabMeta = () => {
       void loadActiveTabMeta();
-    };
-
-    const handleTabActivated = () => {
-      refreshActiveTabMeta();
     };
 
     const handleTabUpdated = (
@@ -107,7 +100,7 @@ export const useTabChange = () => {
     void loadActiveTabMeta();
     window.addEventListener("focus", refreshActiveTabMeta);
     if (typeof chrome !== "undefined") {
-      chrome.tabs?.onActivated?.addListener(handleTabActivated);
+      chrome.tabs?.onActivated?.addListener(refreshActiveTabMeta);
       chrome.tabs?.onUpdated?.addListener(handleTabUpdated);
       chrome.windows?.onFocusChanged?.addListener(handleWindowFocusChanged);
     }
@@ -116,12 +109,12 @@ export const useTabChange = () => {
       isMounted = false;
       window.removeEventListener("focus", refreshActiveTabMeta);
       if (typeof chrome !== "undefined") {
-        chrome.tabs?.onActivated?.removeListener(handleTabActivated);
+        chrome.tabs?.onActivated?.removeListener(refreshActiveTabMeta);
         chrome.tabs?.onUpdated?.removeListener(handleTabUpdated);
         chrome.windows?.onFocusChanged?.removeListener(handleWindowFocusChanged);
       }
     };
-  }, [i18n.language, t]);
+  }, [t]);
 
   return activeTabMeta;
 };

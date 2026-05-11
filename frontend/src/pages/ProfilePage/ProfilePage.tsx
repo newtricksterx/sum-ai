@@ -3,7 +3,7 @@ import PageCard from '../../components/PageCard/PageCard';
 import "./ProfilePage.css";
 import AlertPopup from '../../components/AlertPopup/AlertPopup';
 import { useProfileAccount } from "./useProfileAccount";
-import { deriveBillingInterval, deriveSubscriptionPrice, deriveWordLimit, formatLimit, formatDate, getInitials } from './profilepage.helpers';
+import { deriveBillingInterval, deriveSubscriptionPrice, deriveWordLimit, formatLimit, formatDate, getInitials, getUsageClass, deriveDisplayName } from './profilepage.helpers';
 import { FcGoogle } from "react-icons/fc";
 import { MenuIconSize } from '../../utils/constants';
 import { useTranslation } from 'react-i18next';
@@ -52,23 +52,11 @@ const ProfilePage: React.FC = () => {
     window.open(googleSignInUrl, "_blank", "noopener,noreferrer");
   }, [googleSignInUrl]);
 
-  const displayName = useMemo(() => {
-    if (!userProfile) {
-      return "";
-    }
-
-    const username = userProfile.username?.trim();
-    if (username && username.length > 0) {
-      return username;
-    }
-
-    const emailLocalPart = userProfile.email.split("@")[0]?.trim();
-    return emailLocalPart && emailLocalPart.length > 0 ? emailLocalPart : userProfile.email;
-  }, [userProfile]);
+  const displayName = useMemo(() => deriveDisplayName(userProfile), [userProfile]);
 
   if (isInitializing) {
     return (
-      <main className="h-full overflow-y-auto custom-scrollbar px-2 py-2 font-noto">
+      <main className="h-full overflow-y-auto custom-scrollbar px-2 py-2 font-google">
         <PageCard as="section" className="p-4">
           <div className="animate-pulse space-y-3">
             <div className="h-3 w-20 rounded bg-gray-300 dark:bg-[#3a3a3a]" />
@@ -86,10 +74,7 @@ const ProfilePage: React.FC = () => {
     const planName = userProfile.subscription?.plan_name ?? t("profile.unavailable", "Unavailable");
     const wordLimit = deriveWordLimit(userProfile.subscription?.character_limit);
     const historyLimitRaw = userProfile.subscription?.history_limit;
-    const historyLimit =
-      typeof historyLimitRaw === "number"
-        ? `${historyLimitRaw.toLocaleString()} items`
-        : formatLimit(historyLimitRaw);
+    const historyLimit = formatLimit(historyLimitRaw, " items");
     const billingInterval = deriveBillingInterval(
       userProfile.subscription?.billing_interval,
       (key, defaultValue) => t(key, { defaultValue }),
@@ -109,20 +94,13 @@ const ProfilePage: React.FC = () => {
       boundedSummaryLimit && boundedSummaryLimit > 0
         ? Math.min(100, (Math.min(summariesUsed, boundedSummaryLimit) / boundedSummaryLimit) * 100)
         : 0;
-    const usageClass =
-      usagePercentage >= 80
-        ? " pp-bar-fill--high"
-        : usagePercentage >= 50
-          ? " pp-bar-fill--mid"
-          : "";
+    const usageClass = getUsageClass(usagePercentage);
 
     const memberSince = formatDate(userProfile.created_at);
     const updatedAt = formatDate(userProfile.updated_at);
     const initials = getInitials(displayName || "User") || "U";
-    const isAccountActionPending = isSubmitting
-
     return (
-      <main className="profile-page-shell h-full overflow-y-auto custom-scrollbar px-2 py-2 font-noto">
+      <main className="profile-page-shell h-full overflow-y-auto custom-scrollbar px-2 py-2 font-google">
         <PageCard as="section" className="profile-account-card p-3">
           <div className="pp-root">
             {infoMessage && (
@@ -260,7 +238,7 @@ const ProfilePage: React.FC = () => {
                 trigger={
                   <button
                     type="button"
-                    disabled={isAccountActionPending}
+                    disabled={isSubmitting}
                     className="pp-logout-btn"
                   >
                     {isSubmitting ? t("profile.signingOut") : t("profile.logout")}
@@ -281,7 +259,7 @@ const ProfilePage: React.FC = () => {
   }
 
   return (
-    <main className="test-profile-page px-2 py-2 font-noto">
+    <main className="test-profile-page px-2 py-2 font-google">
       <PageCard className="test-profile-card p-4">
         <header className="test-profile-header">
           <p className="test-profile-kicker">{t("profile.account")}</p>

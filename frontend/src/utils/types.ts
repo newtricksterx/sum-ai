@@ -29,4 +29,5 @@ export type Settings = {
     UpdateFontSize: (fontSize: number) => void;
     UpdateFormat: (format: Format) => void;
     UpdateTheme: () => void;
+    saveSettings: (values: { language: Language; currency: Currency; length: Length; fontSize: number; format: Format }) => void;
 }

@@ -1,246 +1,31 @@
 import { useCallback, useState } from "react";
-import { buildAnonymousThrottleMessage, buildErrorSummaryHtml, buildThrottleMessage } from "./summaryMessages";
+import { buildAnonymousThrottleMessage, buildThrottleMessage } from "./summaryMessages";
 import { useHistoryStore, type HistorySummary } from "../../stores/historyStore";
 import { useSettingsStore } from "../../stores/settingsStore";
 import { useAuthProfileStore } from "../../stores/authProfileStore";
 import { GetSummaryPayloadFromStorage, UpdateSummaryStorage } from "../../utils/storage";
-import { Format, Language, Length } from "../../utils/types";
 import {
   normalizeSummaryActionItems,
   type SummaryActionItem,
 } from "../../types/summary";
 import { useTranslation } from "react-i18next";
 import { useActionItem } from "./useActionItem";
-
-type TranslateFn = (key: string, options?: Record<string, unknown>) => string;
-
-type SummarizeRequestParams = {
-  baseUrl: string;
-  length: Length;
-  regenerate: boolean;
-  format: Format;
-  language: Language;
-  isAuthenticated: boolean;
-  t: TranslateFn;
-};
-
-export type SummarizeResult = {
-  html: string;
-  sourceUrl?: string;
-  isSuccess: boolean;
-};
-
-type SummarizeErrorPayload = {
-  message?: string;
-  summaries_limit?: number;
-  limit_period?: string;
-  retry_after_seconds?: number;
-};
-
-const MOCK_SUMMARY_HTML = `
-  <h1 class="summary-title">Development Mock Summary</h1>
-  <p class="summary-meta">
-    <time datetime="2026-05-08T00:00:00.000Z">May 8, 2026</time>
-    <span class="sep"></span>
-    <span>4 min read</span>
-  </p>
-
-  <h2>TL;DR</h2>
-  <p>
-    <strong>Mock mode is active</strong>, so this summary is generated locally to validate all summary UI states.
-    Visit <a href="https://example.com">Example</a> for a safe link test and <em>visual emphasis</em>.
-  </p>
-
-  <h2>Key Points</h2>
-  <ul>
-    <li><strong>Typography:</strong> Headings, body text, emphasis, and spacing scale are visible.</li>
-    <li><strong>Links:</strong> Hover, visited, and focus styling can be tested safely.</li>
-    <li>
-      <strong>Nested lists:</strong> This item contains a sub-list.
-      <ul>
-        <li>Nested bullet one</li>
-        <li>Nested bullet two</li>
-      </ul>
-    </li>
-  </ul>
-
-  <h2>Style Coverage</h2>
-  <p>This section exists specifically to validate <strong>h2 styling</strong> in development mock mode.</p>
-
-  <h3>Ordered Checklist</h3>
-  <ol>
-    <li>Generate summary in mock mode.</li>
-    <li>Switch light and dark theme.</li>
-    <li>Verify responsive behavior on small width.</li>
-  </ol>
-
-  <h4>Inline Content Samples</h4>
-  <p>
-    Use <code>regenerate=true</code> when testing repeated runs.
-    This line checks inline <strong>bold</strong>, <em>italic</em>, and link color:
-    <a href="https://developer.mozilla.org">MDN</a>.
-  </p>
-
-  <blockquote>
-    <p>Design should feel calm, readable, and consistent with the rest of the app.</p>
-    <cite>Summary.AI Mock Note</cite>
-  </blockquote>
-
-  <h3>Code Block</h3>
-  <pre><code>const options = {
-  format: "bullet-point",
-  length: "medium",
-  language: "english",
-};</code></pre>
-
-  <hr />
-
-  <h3>Table Preview</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Plan</th>
-        <th>Daily Limit</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Free</td>
-        <td>5 summaries</td>
-        <td>Active</td>
-      </tr>
-      <tr>
-        <td>Pro</td>
-        <td>Unlimited</td>
-        <td>Preview</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="summary-empty">
-    <span class="empty-icon">○</span>
-    <div class="empty-label">Empty State Preview</div>
-    <div class="empty-hint">Use this to validate no-content styling.</div>
-  </div>
-
-  <div class="summary-loading">
-    <div class="skeleton skeleton-title"></div>
-    <div class="skeleton skeleton-meta"></div>
-    <div class="skeleton skeleton-w-full"></div>
-    <div class="skeleton skeleton-w-11"></div>
-    <div class="skeleton skeleton-w-9"></div>
-    <div class="skeleton skeleton-w-7"></div>
-    <div class="skeleton skeleton-w-half"></div>
-  </div>
-`;
-
-const MOCK_SOURCE_URL_PREFIX = "mock://dev-summary";
-
-const isRestrictedPage = (url?: string) => {
-  if (!url) return true;
-  return (
-    url.startsWith("chrome://") ||
-    url.startsWith("edge://") ||
-    url.startsWith("about:") ||
-    url.startsWith("view-source:") ||
-    url.startsWith("chrome-extension://")
-  );
-};
-
-const isMockModeEnabled = () =>
-  import.meta.env.DEV ||
-  import.meta.env.VITE_DEV === "true" ||
-  import.meta.env.VITE_USE_MOCK_SUMMARY === "true";
-
-const queryTabsSafe = async (
-  queryInfo: chrome.tabs.QueryInfo,
-): Promise<chrome.tabs.Tab[]> => {
-  try {
-    return await chrome.tabs.query(queryInfo);
-  } catch {
-    return [];
-  }
-};
-
-const resolveTargetTab = async (): Promise<chrome.tabs.Tab | null> => {
-  if (typeof chrome === "undefined" || !chrome.tabs?.query) {
-    return null;
-  }
-
-  const normalWindowQueries: chrome.tabs.QueryInfo[] = [
-    { active: true, currentWindow: true, windowType: "normal" },
-    { active: true, lastFocusedWindow: true, windowType: "normal" },
-    { active: true, windowType: "normal" },
-  ];
-
-  for (const queryInfo of normalWindowQueries) {
-    const tabs = await queryTabsSafe(queryInfo);
-    const supportedTab = tabs.find((tab) => tab.id && !isRestrictedPage(tab.url));
-    if (supportedTab) {
-      return supportedTab;
-    }
-  }
-
-  const [currentTab] = await queryTabsSafe({ active: true, currentWindow: true });
-  return currentTab ?? null;
-};
-
-const getActiveTabUrlIfAvailable = async () => {
-  const tab = await resolveTargetTab();
-  return tab?.url ?? null;
-};
-
-const getMockSourceUrl = async () => {
-  const tabUrl = await getActiveTabUrlIfAvailable();
-  if (tabUrl && !isRestrictedPage(tabUrl)) {
-    return tabUrl;
-  }
-
-  return `${MOCK_SOURCE_URL_PREFIX}/${Date.now()}`;
-};
-
-type TabContentPayload = {
-  text: string;
-};
-
-const emptyTabContent = (): TabContentPayload => ({ text: "" });
-
-const extractTabContent = async (tabId: number): Promise<TabContentPayload> => {
-  const injectionResults = await chrome.scripting.executeScript({
-    target: { tabId },
-    func: () => {
-      const rootElement = (document.querySelector("article, main") || document.body) as HTMLElement;
-      const normalizeText = (value: string) => value.replace(/\s\s+/g, " ").trim();
-
-      const text = normalizeText(rootElement?.innerText || document.body.innerText || "").slice(0, 10000);
-
-      return {
-        text,
-      };
-    },
-  });
-
-  const payload = injectionResults?.[0]?.result as { text?: unknown } | undefined;
-  if (!payload || typeof payload.text !== "string") {
-    return emptyTabContent();
-  }
-
-  return { text: payload.text };
-};
-
-const getErrorPayload = async (response: Response): Promise<SummarizeErrorPayload | null> => {
-  try {
-    return await response.json();
-  } catch {
-    return null;
-  }
-};
+import {
+  SummarizeRequestParams,
+  SummarizeResult,
+  MOCK_SUMMARY_HTML,
+  isMockModeEnabled,
+  getMockSourceUrl,
+  emptyTabContent,
+  extractTabContent,
+  getErrorPayload,
+  returnError,
+} from "./utils/summarypage.utils";
+import { isRestrictedPage, resolveCurrentTab } from "../FrontPage/frontpage.helpers";
 
 const requestActiveTabSummary = async ({
   baseUrl,
   length,
-  regenerate,
   format,
   language,
   isAuthenticated,
@@ -254,43 +39,31 @@ const requestActiveTabSummary = async ({
     };
   }
 
-  const tab = await resolveTargetTab();
+  const tab = await resolveCurrentTab();
   if (!tab?.id) {
-    return {
-      html: buildErrorSummaryHtml("No active tab", "Could not find an active browser tab to summarize."),
-      isSuccess: false,
-    };
+    return returnError("No active tab", "Could not find an active browser tab to summarize.");
   }
 
   if (isRestrictedPage(tab.url)) {
-    return {
-      html: buildErrorSummaryHtml(
-        "Page not supported",
-        "Chrome internal pages (like chrome://settings) cannot be summarized. Open a normal website tab and try again.",
-      ),
-      isSuccess: false,
-    };
+    return returnError(
+      "Page not supported",
+      "Chrome internal pages (like chrome://settings) cannot be summarized. Open a normal website tab and try again.",
+    );
   }
 
   let tabContent = emptyTabContent();
   try {
     tabContent = await extractTabContent(tab.id);
   } catch (error) {
-    console.log("Script Injection Error:", error);
-      return {
-        html: buildErrorSummaryHtml(
-          "Cannot summarize this page",
-          "This page blocks extension script access. Try another site tab and try again.",
-        ),
-        isSuccess: false,
-      };
+    console.error("Script Injection Error:", error);
+    return returnError(
+      "Cannot summarize this page",
+      "This page blocks extension script access. Try another site tab and try again.",
+    );
   }
 
   if (!tabContent.text) {
-    return {
-      html: buildErrorSummaryHtml("No readable content", "Could not extract readable text from this page."),
-      isSuccess: false,
-    };
+    return returnError("No readable content", "Could not extract readable text from this page.");
   }
 
   try {
@@ -302,7 +75,6 @@ const requestActiveTabSummary = async ({
         content: tabContent.text,
         source_url: tab.url ?? null,
         length,
-        regenerate,
         format,
         language,
       }),
@@ -316,44 +88,30 @@ const requestActiveTabSummary = async ({
           ? buildThrottleMessage(errorPayload ?? {}, t)
           : buildAnonymousThrottleMessage(errorPayload ?? {}, t);
 
-        return {
-          html: buildErrorSummaryHtml(
-            t("summaryErrors.rateLimitTitle", { defaultValue: "Rate limit reached" }),
-            throttleMessage,
-          ),
-          isSuccess: false,
-        };
+        return returnError(
+          t("summaryErrors.rateLimitTitle", { defaultValue: "Rate limit reached" }),
+          throttleMessage,
+        );
       }
 
       const fallbackMessage = errorPayload?.message || "Could not generate a summary right now. Please try again.";
-      return {
-        html: buildErrorSummaryHtml("Request failed", fallbackMessage),
-        isSuccess: false,
-      };
+      return returnError("Request failed", fallbackMessage);
     }
 
     const result = await response.json() as { data?: unknown; isSuccess?: unknown };
     const hasSummaryData = typeof result?.data === "string" && result.data.trim().length > 0;
     if (!hasSummaryData || result?.isSuccess !== true) {
-      return {
-        html: buildErrorSummaryHtml("Empty response", "The server returned an empty summary."),
-        isSuccess: false,
-      };
+      return returnError("Empty response", "The server returned an empty summary.");
     }
 
-    const summaryHtml = result.data as string;
-
     return {
-      html: summaryHtml,
+      html: result.data as string,
       sourceUrl: tab.url,
       isSuccess: true,
     };
   } catch (error) {
-    console.log("Fetch Error:", error);
-    return {
-      html: buildErrorSummaryHtml("Network error", "Could not contact the backend. Please try again."),
-      isSuccess: false,
-    };
+    console.error("Fetch Error:", error);
+    return returnError("Network error", "Could not contact the backend. Please try again.");
   }
 };
 
@@ -400,7 +158,7 @@ export const useSummarizeActiveTab = () => {
   });
 
   const summarize = useCallback(
-    async (regenerate: boolean) => {
+    async () => {
       resetActionItemRequestState();
       setSummarizedContent(null);
       setCurrentSourceUrl(null);
@@ -410,7 +168,6 @@ export const useSummarizeActiveTab = () => {
       const result = await requestActiveTabSummary({
         baseUrl: import.meta.env.VITE_BASE_URL,
         length,
-        regenerate,
         format,
         language,
         isAuthenticated: Boolean(userProfile),
@@ -420,7 +177,6 @@ export const useSummarizeActiveTab = () => {
       const nextSourceUrl = result.sourceUrl ?? null;
       setSummarizedContent(result.html);
       setCurrentSourceUrl(nextSourceUrl);
-      setActionItems([]);
       setIsSummarySuccess(result.isSuccess);
       UpdateSummaryStorage(result.html, nextSourceUrl, [], result.isSuccess);
 

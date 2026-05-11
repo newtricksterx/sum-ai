@@ -12,7 +12,6 @@ interface StatProp {
     arialabel: string;
     arialabelDefault?: string;
     value: string;
-
 }
 
 export const ProfilePageStatRow = ({

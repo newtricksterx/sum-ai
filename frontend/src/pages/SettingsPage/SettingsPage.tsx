@@ -14,24 +14,12 @@ import { useTranslation } from "react-i18next";
 import { all_currencies, all_formats, all_languages, all_lengths } from "../../utils/constants";
 import { Currency, Format, Language, Length } from "../../utils/types";
 import { useSettingsStore } from "../../stores/settingsStore";
-import { SettingsPageDropdown, type SettingsPageDropdownOption } from "./SettingsPageDropdown";
+import { useShallow } from "zustand/react/shallow";
+import { SettingsPageDropdown } from "./SettingsPageDropdown";
+import { SettingsPageDropdownOption } from "./settingspage.utils";
 import "./SettingsPage.css";
 import { SunIcon, MoonIcon, GearIcon } from "@radix-ui/react-icons";
-
-const MIN_FONT_SIZE = 10;
-const MAX_FONT_SIZE = 24;
-type SaveTimeoutHandle = ReturnType<typeof window.setTimeout>;
-
-function clampFontSize(value: number): number {
-  if (!Number.isFinite(value)) return 12;
-  return Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, Math.round(value)));
-}
-
-function humanizeOption(value: string): string {
-  return value
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (character) => character.toUpperCase());
-}
+import { MIN_FONT_SIZE, MAX_FONT_SIZE, SaveTimeoutHandle, clampFontSize, humanizeOption } from "./settingspage.utils";
 
 function SettingsRow({
   icon,
@@ -79,17 +67,23 @@ const SettingsThemeToggleButton = memo(function SettingsThemeToggleButton() {
 export const SettingsPage: React.FC = () => {
   const { t } = useTranslation();
 
-  const settingsLanguage = useSettingsStore((state) => state.language);
-  const settingsCurrency = useSettingsStore((state) => state.currency);
-  const settingsLength = useSettingsStore((state) => state.length);
-  const settingsFontSize = useSettingsStore((state) => state.fontSize);
-  const settingsFormat = useSettingsStore((state) => state.format);
-
-  const UpdateLanguage = useSettingsStore((state) => state.UpdateLanguage);
-  const UpdateCurrency = useSettingsStore((state) => state.UpdateCurrency);
-  const UpdateLength = useSettingsStore((state) => state.UpdateLength);
-  const UpdateFontSize = useSettingsStore((state) => state.UpdateFontSize);
-  const UpdateFormat = useSettingsStore((state) => state.UpdateFormat);
+  const {
+    language: settingsLanguage,
+    currency: settingsCurrency,
+    length: settingsLength,
+    fontSize: settingsFontSize,
+    format: settingsFormat,
+    saveSettings,
+  } = useSettingsStore(
+    useShallow((state) => ({
+      language: state.language,
+      currency: state.currency,
+      length: state.length,
+      fontSize: state.fontSize,
+      format: state.format,
+      saveSettings: state.saveSettings,
+    }))
+  );
 
   const [language, setLanguage] = useState<Language>(settingsLanguage);
   const [currency, setCurrency] = useState<Currency>(settingsCurrency);
@@ -188,6 +182,98 @@ export const SettingsPage: React.FC = () => {
     setFontSize(Number.isFinite(next) ? next : 12);
   }, []);
 
+  const onFontSizeBlur = useCallback(() => {
+    setFontSize((current) => clampFontSize(current));
+  }, []);
+
+  const languageRow = useMemo(() => (
+    <SettingsRow
+      icon={<Languages size={15} />}
+      label={t("settings.language")}
+      control={
+        <SettingsPageDropdown
+          id="settings-language"
+          value={language}
+          options={languageOptions}
+          ariaLabel={t("settings.language")}
+          onValueChange={setLanguage}
+        />
+      }
+    />
+  ), [language, languageOptions, t]);
+
+  const formatRow = useMemo(() => (
+    <SettingsRow
+      icon={<List size={15} />}
+      label={t("settings.summaryFormat")}
+      control={
+        <SettingsPageDropdown
+          id="settings-format"
+          value={format}
+          options={formatOptions}
+          ariaLabel={t("settings.summaryFormat")}
+          onValueChange={setFormat}
+        />
+      }
+    />
+  ), [format, formatOptions, t]);
+
+  const lengthRow = useMemo(() => (
+    <SettingsRow
+      icon={<Ruler size={15} />}
+      label={t("settings.summaryLength")}
+      control={
+        <SettingsPageDropdown
+          id="settings-length"
+          value={length}
+          options={lengthOptions}
+          ariaLabel={t("settings.summaryLength")}
+          onValueChange={setLength}
+        />
+      }
+    />
+  ), [length, lengthOptions, t]);
+
+  const currencyRow = useMemo(() => (
+    <SettingsRow
+      icon={<Coins size={15} />}
+      label={t("settings.currency")}
+      control={
+        <SettingsPageDropdown
+          id="settings-currency"
+          value={currency}
+          options={currencyOptions}
+          ariaLabel={t("settings.currency")}
+          onValueChange={setCurrency}
+        />
+      }
+    />
+  ), [currency, currencyOptions, t]);
+
+  const fontSizeRow = useMemo(() => (
+    <SettingsRow
+      icon={<Type size={15} />}
+      label={<label htmlFor="settings-font-size">{t("settings.fontSize")}</label>}
+      hint={t("settings.fontSizeHint", { defaultValue: "Summary output text" })}
+      control={
+        <div className="settings-fontsize-wrap">
+          <input
+            id="settings-font-size"
+            type="number"
+            min={MIN_FONT_SIZE}
+            max={MAX_FONT_SIZE}
+            step={1}
+            value={fontSize}
+            onChange={onFontSizeChange}
+            onBlur={onFontSizeBlur}
+            className="settings-fontsize-input"
+          />
+          <span className="settings-fontsize-unit">px</span>
+        </div>
+      }
+    />
+  ), [fontSize, onFontSizeBlur, onFontSizeChange, t]);
+
   const onSaveSettings = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -207,20 +293,12 @@ export const SettingsPage: React.FC = () => {
       // Defer synchronous store/localStorage work to the next task so the
       // click interaction can paint immediately and reduce INP processing time.
       saveTimeoutRef.current = window.setTimeout(() => {
-        UpdateLanguage(language);
-        UpdateCurrency(currency);
-        UpdateLength(length);
-        UpdateFontSize(clampedFontSize);
-        UpdateFormat(format);
+        saveSettings({ language, currency, length, fontSize: clampedFontSize, format });
         saveTimeoutRef.current = null;
       }, 0);
     },
     [
-      UpdateCurrency,
-      UpdateFontSize,
-      UpdateFormat,
-      UpdateLanguage,
-      UpdateLength,
+      saveSettings,
       clampedFontSize,
       currency,
       format,
@@ -231,7 +309,7 @@ export const SettingsPage: React.FC = () => {
   );
 
   return (
-    <main className="settings-page-shell h-full overflow-y-auto custom-scrollbar px-2 py-2 font-noto">
+    <main className="settings-page-shell h-full overflow-y-auto custom-scrollbar px-2 py-2 font-google">
       <PageCard as="section" className="settings-page-card">
         <header className="settings-page-header">
             <h1 className="settings-page-title">
@@ -248,47 +326,9 @@ export const SettingsPage: React.FC = () => {
             </p>
             
             <div className="settings-card">
-              <SettingsRow
-                icon={<Languages size={15} />}
-                label={t("settings.language")}
-                control={
-                  <SettingsPageDropdown
-                    id="settings-language"
-                    value={language}
-                    options={languageOptions}
-                    ariaLabel={t("settings.language")}
-                    onValueChange={setLanguage}
-                  />
-                }
-              />
-
-              <SettingsRow
-                icon={<List size={15} />}
-                label={t("settings.summaryFormat")}
-                control={
-                  <SettingsPageDropdown
-                    id="settings-format"
-                    value={format}
-                    options={formatOptions}
-                    ariaLabel={t("settings.summaryFormat")}
-                    onValueChange={setFormat}
-                  />
-                }
-              />
-
-              <SettingsRow
-                icon={<Ruler size={15} />}
-                label={t("settings.summaryLength")}
-                control={
-                  <SettingsPageDropdown
-                    id="settings-length"
-                    value={length}
-                    options={lengthOptions}
-                    ariaLabel={t("settings.summaryLength")}
-                    onValueChange={setLength}
-                  />
-                }
-              />
+              {languageRow}
+              {formatRow}
+              {lengthRow}
             </div>
           </section>
 
@@ -297,19 +337,7 @@ export const SettingsPage: React.FC = () => {
               {t("settings.sectionRegional", { defaultValue: "Regional" })}
             </p>
             <div className="settings-card">
-              <SettingsRow
-                icon={<Coins size={15} />}
-                label={t("settings.currency")}
-                control={
-                  <SettingsPageDropdown
-                    id="settings-currency"
-                    value={currency}
-                    options={currencyOptions}
-                    ariaLabel={t("settings.currency")}
-                    onValueChange={setCurrency}
-                  />
-                }
-              />
+              {currencyRow}
             </div>
           </section>
 
@@ -318,27 +346,7 @@ export const SettingsPage: React.FC = () => {
               {t("settings.sectionAppearance", { defaultValue: "Appearance" })}
             </p>
             <div className="settings-card">
-              <SettingsRow
-                icon={<Type size={15} />}
-                label={<label htmlFor="settings-font-size">{t("settings.fontSize")}</label>}
-                hint={t("settings.fontSizeHint", { defaultValue: "Summary output text" })}
-                control={
-                  <div className="settings-fontsize-wrap">
-                    <input
-                      id="settings-font-size"
-                      type="number"
-                      min={MIN_FONT_SIZE}
-                      max={MAX_FONT_SIZE}
-                      step={1}
-                      value={fontSize}
-                      onChange={onFontSizeChange}
-                      onBlur={() => setFontSize((current) => clampFontSize(current))}
-                      className="settings-fontsize-input"
-                    />
-                    <span className="settings-fontsize-unit">px</span>
-                  </div>
-                }
-              />
+              {fontSizeRow}
             </div>
           </section>
 

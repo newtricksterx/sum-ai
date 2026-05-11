@@ -118,7 +118,6 @@ class SummarizeText(APIView):
             summary = SumAI.SummarizeContent(
                 content_for_summary,
                 request.data.get("length"),
-                request.data.get("regenerate"),
                 request.data.get("format"),
                 request.data.get("language"),
                 max_input_chars=character_limit, # type: ignore

@@ -1,3 +1,5 @@
+import axios from "axios";
+
 export const PLAN_TOOLTIP = "Your current subscription tier. It controls usage limits and available features.";
 export const WORD_LIMIT_TOOLTIP = "The approximate maximum amount of text you can summarize in one request.";
 export const HISTORY_CAPACITY_TOOLTIP = "The number of summaries this account can keep in saved history.";
@@ -15,13 +17,13 @@ export const formatDate = (rawDate: string) => {
   }).format(parsedDate);
 };
 
-export const formatLimit = (value: number | null | undefined) => {
+export const formatLimit = (value: number | null | undefined, suffix = "") => {
   if (value === null) {
     return "Unlimited";
   }
 
   if (typeof value === "number") {
-    return value.toLocaleString();
+    return `${value.toLocaleString()}${suffix}`;
   }
 
   return "Unavailable";
@@ -106,6 +108,20 @@ export const deriveSubscriptionPrice = (
   }
 };
 
+export const getUsageClass = (percentage: number): string => {
+  if (percentage >= 80) return " pp-bar-fill--high";
+  if (percentage >= 50) return " pp-bar-fill--mid";
+  return "";
+};
+
+export const deriveDisplayName = (userProfile: { username?: string | null; email: string } | null | undefined): string => {
+  if (!userProfile) return "";
+  const username = userProfile.username?.trim();
+  if (username && username.length > 0) return username;
+  const emailLocalPart = userProfile.email.split("@")[0]?.trim();
+  return emailLocalPart && emailLocalPart.length > 0 ? emailLocalPart : userProfile.email;
+};
+
 export const getInitials = (name: string) => {
   return name
     .split(" ")
@@ -113,4 +129,56 @@ export const getInitials = (name: string) => {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("");
+};
+
+
+export const DEFAULT_REQUEST_ERROR = "We could not complete that request. Please try again.";
+
+export const parseApiErrorMessage = (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    const responseData = error.response?.data;
+
+    if (typeof responseData === "string") {
+      return responseData;
+    }
+
+    if (responseData && typeof responseData === "object") {
+      const data = responseData as Record<string, unknown>;
+      const detail = data.detail;
+      if (typeof detail === "string" && detail.trim().length > 0) {
+        return detail;
+      }
+
+      const messages: string[] = [];
+      Object.values(data).forEach((value) => {
+        if (Array.isArray(value)) {
+          value.forEach((item) => {
+            if (typeof item === "string" && item.trim().length > 0) {
+              messages.push(item);
+            }
+          });
+          return;
+        }
+
+        if (typeof value === "string" && value.trim().length > 0) {
+          messages.push(value);
+        }
+      });
+
+      if (messages.length > 0) {
+        return messages.join(" ");
+      }
+    }
+  }
+
+  return DEFAULT_REQUEST_ERROR;
+};
+
+export const getHistoryOwnerKeyFromEmail = (email: string | null | undefined) => {
+  if (typeof email !== "string") {
+    return "anonymous";
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  return normalizedEmail.length > 0 ? `user:${normalizedEmail}` : "anonymous";
 };

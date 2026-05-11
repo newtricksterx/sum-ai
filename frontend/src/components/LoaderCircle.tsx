@@ -10,8 +10,8 @@ export default function LoaderCircle({ showText = true, className = "" }: Loader
   const { t } = useTranslation();
   const normalizedClassName = className.trim();
   const shellClassName = normalizedClassName
-    ? `loader-shell font-noto ${normalizedClassName}`
-    : "loader-shell font-noto";
+    ? `loader-shell font-google ${normalizedClassName}`
+    : "loader-shell font-google";
 
   return (
     <div className={shellClassName}>

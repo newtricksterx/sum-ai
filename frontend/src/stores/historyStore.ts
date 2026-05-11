@@ -90,6 +90,22 @@ const normalizeHistoryCache = (value: unknown): HistorySummary[] => {
   });
 };
 
+const applyOwnerCache = (
+  state: Pick<HistoryState, 'activeOwnerKey' | 'ownerHistories' | 'maxHistorySize'>,
+  nextCache: HistorySummary[],
+  nextLimit?: number,
+) => {
+  const maxHistorySize = nextLimit ?? state.maxHistorySize;
+  return {
+    cache: nextCache,
+    maxHistorySize,
+    ownerHistories: {
+      ...state.ownerHistories,
+      [state.activeOwnerKey]: { cache: nextCache, maxHistorySize },
+    },
+  };
+};
+
 export const useHistoryStore = create<HistoryState>()(
     persist((set) => ({
         cache: [],
@@ -134,18 +150,7 @@ export const useHistoryStore = create<HistoryState>()(
             set((state) => {
                 const nextLimit = normalizeHistorySize(limit);
                 const nextCache = state.cache.slice(0, nextLimit);
-
-                return {
-                    maxHistorySize: nextLimit,
-                    cache: nextCache,
-                    ownerHistories: {
-                        ...state.ownerHistories,
-                        [state.activeOwnerKey]: {
-                            cache: nextCache,
-                            maxHistorySize: nextLimit,
-                        },
-                    },
-                };
+                return applyOwnerCache(state, nextCache, nextLimit);
             }),
         addSummary: (newSummary) => set((state) => {
             const normalizedSummary: HistorySummary = {
@@ -155,22 +160,8 @@ export const useHistoryStore = create<HistoryState>()(
             };
             // Move existing item to the top by removing duplicate URL first.
             const remaining = state.cache.filter(item => item.url !== normalizedSummary.url);
-             
-            // Newest summary first.
-            const updatedCache = [normalizedSummary, ...remaining];
-             
-            // Enforce owner-specific capacity.
-            const nextCache = updatedCache.slice(0, state.maxHistorySize);
-            return {
-                cache: nextCache,
-                ownerHistories: {
-                    ...state.ownerHistories,
-                    [state.activeOwnerKey]: {
-                        cache: nextCache,
-                        maxHistorySize: state.maxHistorySize,
-                    },
-                },
-            };
+            const nextCache = [normalizedSummary, ...remaining].slice(0, state.maxHistorySize);
+            return applyOwnerCache(state, nextCache);
         }),
         updateSummaryActionItems: (url, actionItems) => set((state) => {
             const existingIndex = state.cache.findIndex((item) => item.url === url);
@@ -185,37 +176,13 @@ export const useHistoryStore = create<HistoryState>()(
                     : item,
             );
 
-            return {
-                cache: nextCache,
-                ownerHistories: {
-                    ...state.ownerHistories,
-                    [state.activeOwnerKey]: {
-                        cache: nextCache,
-                        maxHistorySize: state.maxHistorySize,
-                    },
-                },
-            };
+            return applyOwnerCache(state, nextCache);
         }),
-        clearHistory: () => set((state) => ({
-            cache: [],
-            ownerHistories: {
-                ...state.ownerHistories,
-                [state.activeOwnerKey]: {
-                    cache: [],
-                    maxHistorySize: state.maxHistorySize,
-                },
-            },
-        })),
-        removeSummary: (url) => set((state) => ({
-            cache: state.cache.filter((item) => item.url !== url),
-            ownerHistories: {
-                ...state.ownerHistories,
-                [state.activeOwnerKey]: {
-                    cache: state.cache.filter((item) => item.url !== url),
-                    maxHistorySize: state.maxHistorySize,
-                },
-            },
-        })),
+        clearHistory: () => set((state) => applyOwnerCache(state, [])),
+        removeSummary: (url) => set((state) => {
+            const nextCache = state.cache.filter((item) => item.url !== url);
+            return applyOwnerCache(state, nextCache);
+        }),
     }), 
 
     {

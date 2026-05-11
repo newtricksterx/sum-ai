@@ -148,7 +148,7 @@ function App() {
     if (loadingActionId !== null) {
       return;
     }
-    await summarize(true);
+    await summarize();
   }, [loadingActionId, summarize]);
 
   const onClickStartGenerate = useCallback(async () => {
@@ -156,7 +156,7 @@ function App() {
       return;
     }
     setPage(1);
-    await summarize(false);
+    await summarize();
   }, [loadingActionId, setPage, summarize]);
 
   const onSelectHistory = useCallback((historyItem: HistorySummary) => {
@@ -181,7 +181,7 @@ function App() {
       await navigator.clipboard.writeText(getPlainTextFromHtml(summarizedContent));
       showCopySuccess();
     } catch (error) {
-      console.log("Copy Error:", error);
+      console.error("Copy Error:", error);
       resetCopySuccess();
     }
   }
