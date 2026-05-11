@@ -54,6 +54,14 @@ def CreateSummaryQuery(page_content, length, format, language, max_input_chars=M
         else "Do not include any links because SOURCE_LINKS is empty."
     )
     source_links_block = link_string if link_string else "None"
+    introduction_block = ""
+
+    if length == "long":
+        introduction_block =  """
+            <h2>Introduction</h2>
+            <p id="introduction">One-sentence overview.</p>
+        """
+
 
     query = f"""
             ROLE:
@@ -71,11 +79,9 @@ def CreateSummaryQuery(page_content, length, format, language, max_input_chars=M
             1) Return raw HTML only. No markdown, no code fences, no explanation text.
             2) Use this section order:
             <h1 class="summary-title">...</h1>
-            <h2>Introduction</h2>
-            <p id="introduction">One-sentence overview.</p>
-            <h2>Summary</h2>
+            {introduction_block}
             [Format-dependent summary]
-            3) Use at least two <h2> sections overall.
+            3) use <strong></strong> block to highlight key points.
             4) {link_rule}
             5) Every <a> must include target="_blank" and rel="noopener noreferrer".
             6) Be faithful to SOURCE_TEXT. Do not invent facts, quotes, or stats.

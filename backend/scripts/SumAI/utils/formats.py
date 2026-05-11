@@ -1,30 +1,28 @@
 _LENGTH_GUIDANCE = {
-    "short": "Target 90 to 140 words total.",
-    "medium": "Target 180 to 260 words total.",
-    "long": "Target 320 to 450 words total.",
+    "short": "Target 30 to 100 words total.",
+    "medium": "Target 120 to 240 words total.",
+    "long": "Target 260 to 420 words total.",
 }
 
 _FORMAT_GUIDANCE = {
-    "bullet-point": "Use one <ul> with 5 to 8 concise <li> items. Max 25 words per <li>",
-    "paragraph": "Use 2 to 4 short <p> paragraphs.",
+    "bullet-point": (
+        "Use one <ul> with 5 to 8 concise <li> items. Max 25 words per <li>"
+    ),
+    "paragraph": (
+        "Use 2 to 4 short <p> paragraphs."
+    ),
     "tl-dr": (
-        "One <p> that begins with <strong>TL;DR:</strong>, "
-    ),
-    "key-takeaways": (
-        "Use one <ul> with 4 to 7 <li> items. Each item should begin with "
-        "a short <strong>label:</strong> followed by an explanation."
-    ),
-    "action-items": (
-        "Use one <ol> with 4 to 8 concrete actions. "
-        "Each <li> should start with a verb."
+        "On TL;DR block, 1-3 sentences and 100 words maximum. Structure: "
+        "<h3>tl;dr: <h3>"
+        "<p>[tl;dr contents]<p>"
     ),
     "q-and-a": (
         "Create 4 to 6 Q&A pairs using repeating blocks of "
-        "<h3>Question</h3> then <p>Answer</p>."
+        "<h3>Question: [QUESTION]</h3> then <p>Answer: [ANSWER]</p>."
     ),
     "pros-cons": (
-        "Use <h3>Pros</h3> + <ul> (3 to 6 <li>) and "
-        "<h3>Cons</h3> + <ul> (2 to 5 <li>)."
+        "Use <h3>Pros:</h3> + <ul> (3 to 6 <li>) and "
+        "<h3>Cons:</h3> + <ul> (2 to 5 <li>)."
     ),
 }
 

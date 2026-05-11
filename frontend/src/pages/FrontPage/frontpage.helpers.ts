@@ -40,8 +40,6 @@ const SETTING_LABELS: Record<string, string> = {
   paragraph: 'Paragraph',
   'bullet-point': 'Bullet Points',
   'tl-dr': 'TL;DR',
-  'key-takeaways': 'Key Takeaways',
-  'action-items': 'Action Items',
   'q-and-a': 'Q&A',
   'pros-cons': 'Pros & Cons',
 };

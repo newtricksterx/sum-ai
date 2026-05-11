@@ -1,4 +1,4 @@
-.history-card {
+﻿.history-card {
   position: relative;
   overflow: hidden;
   border-color: var(--color-border-secondary);
@@ -79,4 +79,16 @@
 
 .history-card-btn-remove:hover {
   background: color-mix(in srgb, var(--color-status-danger-bg) 84%, var(--color-status-danger-border));
+}
+
+
+.history-clear-btn {
+  border-color: var(--color-border-secondary);
+  background-color: var(--color-background-secondary);
+  transition: background-color 0.3s ease;
+  color: var(--color-text-secondary);
+}
+
+.history-clear-btn:hover {
+  background-color: var(--color-background-tertiary);
 }

@@ -34,10 +34,10 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
             <button
               type="button"
               disabled={cache.length === 0}
-              className={`text-[11px] px-2 py-1 rounded-md border ${
+              className={`history-clear-btn text-[11px] px-2 py-1 rounded-md border ${
                 cache.length === 0
-                  ? "opacity-50 cursor-not-allowed border-slate-300 dark:border-slate-700"
-                  : "cursor-pointer border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
+                  ? "opacity-50 cursor-not-allowed"
+                  : "cursor-pointer "
               }`}
             >
               {t("history.clearAll")}

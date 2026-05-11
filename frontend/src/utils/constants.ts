@@ -18,8 +18,6 @@ export const all_formats: Format[] = [
     "bullet-point",
     "paragraph",
     "tl-dr",
-    "key-takeaways",
-    "action-items",
     "q-and-a",
     "pros-cons",
 ]

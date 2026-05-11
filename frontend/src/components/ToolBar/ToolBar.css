@@ -18,8 +18,8 @@
   padding: 8px;
   background-color: var(--color-background-primary);
   transition: background-color 0.3s ease;
+  font-weight: 700;
 }
-
 
 .toolbar-generate-btn-active:hover {
   background: var(--color-background-tertiary);
@@ -29,6 +29,11 @@
   border-color: color-mix(in srgb, var(--color-border-primary) 88%, transparent);
   background: color-mix(in srgb, var(--color-background-primary) 84%, transparent);
   color: color-mix(in srgb, var(--color-text-secondary) 72%, transparent);
+}
+
+.toolbar-btn {
+  background-color: var(--color-background-secondary);
+  transition: background-color 0.3s ease;
 }
 
 .toolbar-btn:hover {

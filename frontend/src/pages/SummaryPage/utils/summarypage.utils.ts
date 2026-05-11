@@ -40,19 +40,6 @@ export const MOCK_SUMMARY_HTML = `
     Visit <a href="https://example.com">Example</a> for a safe link test and <em>visual emphasis</em>.
   </p>
 
-  <h2>Key Points</h2>
-  <ul>
-    <li><strong>Typography:</strong> Headings, body text, emphasis, and spacing scale are visible.</li>
-    <li><strong>Links:</strong> Hover, visited, and focus styling can be tested safely.</li>
-    <li>
-      <strong>Nested lists:</strong> This item contains a sub-list.
-      <ul>
-        <li>Nested bullet one</li>
-        <li>Nested bullet two</li>
-      </ul>
-    </li>
-  </ul>
-
   <h2>Style Coverage</h2>
   <p>This section exists specifically to validate <strong>h2 styling</strong> in development mock mode.</p>
 

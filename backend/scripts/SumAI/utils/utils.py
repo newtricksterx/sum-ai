@@ -138,38 +138,6 @@ def _ensure_required_markup(html, fallback_links):
                 source_paragraph.append(" | ")
         soup.append(source_paragraph)
 
-    has_key_point = any(
-        "key point" in strong.get_text(" ", strip=True).lower()
-        for strong in soup.find_all("strong")
-    )
-
-    if not has_key_point:
-        candidate_node = (
-            soup.find("li")
-            or soup.find("p", attrs={"id": "introduction"})
-            or soup.find("p")
-        )
-        candidate_text = candidate_node.get_text(" ", strip=True) if candidate_node else ""
-        plain_text = soup.get_text(" ", strip=True)
-        first_sentence = re.split(r"(?<=[.!?])\s+", candidate_text)[0] if candidate_text else ""
-        key_point_text = _truncate_key_point(first_sentence or candidate_text or plain_text or "Summary generated.")
-
-        key_point_paragraph = soup.new_tag("p")
-        key_point_strong = soup.new_tag("strong")
-        key_point_strong.string = f"Key point: {key_point_text}"
-        key_point_paragraph.append(key_point_strong)
-
-        summary_heading = None
-        for heading in soup.find_all("h2"):
-            if "summary" in heading.get_text(" ", strip=True).lower():
-                summary_heading = heading
-                break
-
-        if summary_heading is not None:
-            summary_heading.insert_after(key_point_paragraph)
-        else:
-            soup.append(key_point_paragraph)
-
     return str(soup)
 
 

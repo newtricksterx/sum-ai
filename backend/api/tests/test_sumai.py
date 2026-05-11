@@ -30,7 +30,6 @@ class SumAIScriptTest(SimpleTestCase):
         result = "<h1>Title</h1><h2>Summary</h2><ul><li>First item</li></ul>"
         cleaned = SumAI.utils._clean_ai_output(result, fallback_links=["https://example.com/source"])
 
-        self.assertIn("<strong>Key point:", cleaned)
         self.assertIn('href="https://example.com/source"', cleaned)
         self.assertIn('target="_blank"', cleaned)
         self.assertIn('rel="noopener noreferrer"', cleaned)
