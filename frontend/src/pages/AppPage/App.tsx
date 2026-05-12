@@ -8,7 +8,7 @@ import { GetPageFromStorage, UpdatePageStorage } from '../../utils/storage'
 import LoaderCircle from '../../components/LoaderCircle'
 import FrontPage from '../FrontPage/FrontPage'
 import SummaryPage from '../SummaryPage/SummaryPage'
-import { sanitizeSummaryHtml } from '../SummaryPage/sanitizeSummaryHtml'
+import { documentToText } from '../SummaryPage/utils/document'
 import { getPlainTextFromHtml } from '../../utils/html'
 import HistoryPage from '../HistoryPage/HistoryPage'
 import { type HistorySummary } from '../../stores/historyStore'
@@ -137,11 +137,9 @@ function App() {
   }, [setPage]);
 
   const onClickDownload = async () => {
-    const sanitizedSummary = sanitizeSummaryHtml(summarizedContent ?? "");
-
-    if (!sanitizedSummary.trim()) return;
-
-    await savePDF(sanitizedSummary)
+    const summaryString = summarizedContent == null ? "" : documentToText(summarizedContent);
+    if (!summaryString.trim()) return;
+    await savePDF(summaryString);
   }
 
   const onClickGenerate = useCallback(async () => {
@@ -166,19 +164,22 @@ function App() {
 
   const isSummarizing = currentPage === 1 && summarizedContent == null
   const isActionItemLoading = loadingActionId !== null;
+  const summarizedContentString = useMemo(
+    () => (summarizedContent == null ? null : documentToText(summarizedContent)),
+    [summarizedContent],
+  );
   const canUseSummaryActions = useMemo(() => {
-    if (currentPage !== 1 || isSummarizing || !isSummarySuccess || summarizedContent == null) {
+    if (currentPage !== 1 || isSummarizing || !isSummarySuccess || summarizedContentString == null) {
       return false;
     }
-
-    return sanitizeSummaryHtml(summarizedContent).trim().length > 0;
-  }, [currentPage, isSummarizing, isSummarySuccess, summarizedContent]);
+    return summarizedContentString.trim().length > 0;
+  }, [currentPage, isSummarizing, isSummarySuccess, summarizedContentString]);
 
   const onClickCopy = async () => {
-    if (!summarizedContent) return;
+    if (!summarizedContentString) return;
 
     try {
-      await navigator.clipboard.writeText(getPlainTextFromHtml(summarizedContent));
+      await navigator.clipboard.writeText(getPlainTextFromHtml(summarizedContentString));
       showCopySuccess();
     } catch (error) {
       console.error("Copy Error:", error);

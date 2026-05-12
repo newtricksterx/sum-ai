@@ -20,7 +20,6 @@
     "@radix-ui/themes": "^3.3.0",
     "@tailwindcss/vite": "^4.0.15",
     "axios": "^1.15.2",
-    "dompurify": "^3.4.0",
     "dotenv": "^16.4.7",
     "i18next": "^26.0.9",
     "jspdf": "^4.2.1",

@@ -5,21 +5,16 @@ import type {
 } from "../../types/summary";
 import { normalizeFlashcards, normalizeQuizItems } from "../../types/summary";
 import type { Language } from "../../utils/types";
-import { 
-  ActionItemResponse, 
-  UseActionItemOptions,
-  MOCK_FLASHCARDS,
-  MOCK_QUIZ_ITEMS,
-  isMockActionItemModeEnabled,
-  getActionItemErrorPayload,
-} from "./utils/actionitem.utils";
+import type { ActionItemErrorPayload, ActionItemResponse, UseActionItemOptions } from "./utils/types";
+import { MOCK_FLASHCARDS, MOCK_QUIZ_ITEMS, isMockActionItemModeEnabled } from "./utils/mocks";
+import { readErrorBody } from "./utils/sources";
 
 
 const requestActionItem = async <T>(
   baseUrl: string,
   language: Language,
   type: SummaryActionId,
-  summaryHtml: string,
+  summaryJson: string,
   mockData: T[],
   normalizer: (content: unknown) => T[],
 ): Promise<T[]> => {
@@ -32,11 +27,11 @@ const requestActionItem = async <T>(
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, language, content: summaryHtml }),
+      body: JSON.stringify({ type, language, content: summaryJson }),
     });
 
     if (!response.ok) {
-      const errorPayload = await getActionItemErrorPayload(response);
+      const errorPayload = await readErrorBody<ActionItemErrorPayload>(response);
       const fallbackMessage = errorPayload?.message || errorPayload?.error || "Could not generate action item.";
       console.error("Action Item Error:", fallbackMessage);
       return [];

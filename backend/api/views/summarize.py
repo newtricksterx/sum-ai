@@ -1,3 +1,6 @@
+import logging
+
+import fitz  # PyMuPDF
 from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
@@ -5,11 +8,17 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
+import re
 
 from api.models.subscription import Subscription
 from api.plans import get_character_limit
 from scripts.SumAI import SumAI
-from scripts.YouTubeTools import isYouTubeURL, getTranscript
+from scripts.YouTubeTools import getTranscript
+import json
+
+logger = logging.getLogger(__name__)
+
+PDF_MAX_PAGES = 200
 
 class SummarizeText(APIView):
     # Limit only anonymous requests; authenticated users continue using subscription-based limits.
@@ -69,8 +78,7 @@ class SummarizeText(APIView):
             summaries_used__gt=0,
         ).update(summaries_used=F("summaries_used") - 1)
 
-    def post(self, request):
-        source_url = request.data.get("source_url")
+    def _validate_request(self, source_url, source_type, source_content, pdf_file):
         if not source_url:
             return Response(
                 {
@@ -80,23 +88,25 @@ class SummarizeText(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        content = request.data.get("content")
-        content_for_summary = content
+        if source_type not in ("webpage", "youtube", "pdf"):
+            return Response(
+                {
+                    "isSuccess": False,
+                    "error": f"Invalid source type: {source_type}",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        if isYouTubeURL(source_url):
-            try:
-                content_for_summary = getTranscript(source_url)
-            except Exception:
+        if source_type == "pdf":
+            if pdf_file is None:
                 return Response(
                     {
                         "isSuccess": False,
-                        "error": "youtube_transcript_unavailable",
-                        "message": "Could not fetch a transcript for this YouTube video.",
+                        "error": "Missing required file: 'pdf'",
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
-        if not content_for_summary:
+        elif not source_content:
             return Response(
                 {
                     "isSuccess": False,
@@ -104,6 +114,67 @@ class SummarizeText(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        return None
+
+
+    def _handle_youtube(self, source_url):
+        try:
+            return getTranscript(source_url)
+        except Exception:
+            return Response(
+                {
+                    "isSuccess": False,
+                    "error": "youtube_transcript_unavailable",
+                    "message": "Could not fetch a transcript for this YouTube video.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    def _handle_pdf(self, pdf_file):
+        try:
+            data = pdf_file.read()
+            with fitz.open(stream=data, filetype="pdf") as document:
+                pages = [page.get_text() for page in document.pages(stop=PDF_MAX_PAGES)]
+        except Exception:
+            logger.exception("Could not parse uploaded PDF.")
+            return Response(
+                {
+                    "isSuccess": False,
+                    "error": "pdf_unreadable",
+                    "message": "Could not read this PDF. It may be corrupted or password-protected.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return "\n\n".join(pages).strip()
+
+    def post(self, request):
+        source_url = request.data.get("source_url")
+        source_type = request.data.get("source_type")
+        source_content = request.data.get("source_content")
+        pdf_file = request.FILES.get("pdf")
+
+        validation_error = self._validate_request(
+            source_url=source_url,
+            source_type=source_type,
+            source_content=source_content,
+            pdf_file=pdf_file,
+        )
+        if validation_error is not None:
+            return validation_error
+
+        content_to_summarize = source_content
+
+        if source_type == "youtube":
+            content_to_summarize = self._handle_youtube(source_url=source_url)
+            if isinstance(content_to_summarize, Response):
+                return content_to_summarize
+
+        if source_type == "pdf":
+            content_to_summarize = self._handle_pdf(pdf_file=pdf_file)
+            if isinstance(content_to_summarize, Response):
+                return content_to_summarize
+
 
         character_limit = get_character_limit("free")
         reserved_subscription_id = None
@@ -116,7 +187,7 @@ class SummarizeText(APIView):
 
         try:
             summary = SumAI.SummarizeContent(
-                content_for_summary,
+                content_to_summarize,
                 request.data.get("length"),
                 request.data.get("format"),
                 request.data.get("language"),
@@ -127,12 +198,14 @@ class SummarizeText(APIView):
             if reserved_subscription_id is not None:
                 self._release_summary_slot(reserved_subscription_id)
             raise
+ 
+        #print(isinstance(summary["content"], str))
 
-        #print(summary["success"])
+        #print(summary["content"])
 
         return Response(
             {
                 "isSuccess": summary["success"],
-                "data": summary["content"],
+                "data": summary["content"], # is a string
             }
         )

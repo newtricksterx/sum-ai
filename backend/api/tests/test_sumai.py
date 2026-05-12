@@ -12,28 +12,6 @@ class SumAIScriptTest(SimpleTestCase):
         SumAI.utils._GEMINI_CLIENT = None
         SumAI.utils._GEMINI_CLIENT_API_KEY = None
 
-    def test_extract_links_includes_source_url_and_dedupes(self):
-        content = """
-            <p>Read more:</p>
-            <a href="https://example.com/a">A</a>
-            <a href="https://example.com/a">A again</a>
-            https://example.com/b
-        """
-        links = SumAI.utils._extract_links(content, source_url="https://example.com/source")
-
-        self.assertEqual(links[0], "https://example.com/source")
-        self.assertIn("https://example.com/a", links)
-        self.assertIn("https://example.com/b", links)
-        self.assertEqual(len(links), len(set(links)))
-
-    def test_clean_ai_output_injects_key_point_and_sources_when_missing(self):
-        result = "<h1>Title</h1><h2>Summary</h2><ul><li>First item</li></ul>"
-        cleaned = SumAI.utils._clean_ai_output(result, fallback_links=["https://example.com/source"])
-
-        self.assertIn('href="https://example.com/source"', cleaned)
-        self.assertIn('target="_blank"', cleaned)
-        self.assertIn('rel="noopener noreferrer"', cleaned)
-
     @patch.dict(
         os.environ,
         {

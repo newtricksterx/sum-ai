@@ -17,6 +17,7 @@
         "scripting"
     ],
     "host_permissions": [
-        "https://super-summarizer.ddns.net/*"
+        "https://super-summarizer.ddns.net/*",
+        "file:///*"
     ]
 }

@@ -10,6 +10,7 @@ import ast
 from bs4 import BeautifulSoup
 from google import genai
 from google.genai import errors as genai_errors
+from google.genai import types as genai_types
 
 from api.plans import get_character_limit
 from . import formats
@@ -66,107 +67,6 @@ def _to_text(value):
     return str(value).strip()
 
 
-def _normalize_http_url(value):
-    candidate = _to_text(value)
-    if not candidate:
-        return ""
-
-    parsed = urlparse(candidate)
-    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
-        return ""
-    return parsed.geturl()
-
-
-def _extract_links(page_content, source_url=None):
-    unique_links = []
-
-    # Parse anchors if HTML was provided.
-    if "<a" in page_content.lower():
-        soup = BeautifulSoup(page_content, "html.parser")
-        links = soup.find_all("a", href=True)
-        for link in links[:15]:
-            href = _normalize_http_url(link.get("href")) # type: ignore[arg-type]
-            if href and href not in unique_links:
-                unique_links.append(href)
-
-    # Also capture raw URLs in plain text.
-    raw_urls = re.findall(r"https?://[^\s<>()\"']+", page_content, flags=re.I)
-    for raw_url in raw_urls[:15]:
-        href = _normalize_http_url(raw_url.rstrip(".,;:!?"))
-        if href and href not in unique_links:
-            unique_links.append(href)
-
-    source_href = _normalize_http_url(source_url)
-    if source_href and source_href not in unique_links:
-        unique_links.insert(0, source_href)
-
-    return unique_links[:15]
-
-
-def _truncate_key_point(text, max_chars=180):
-    candidate = _to_text(text)
-    if len(candidate) <= max_chars:
-        return candidate
-    cut = candidate[:max_chars].rsplit(" ", 1)[0].strip()
-    if not cut:
-        cut = candidate[:max_chars].strip()
-    return f"{cut}..."
-
-
-def _ensure_required_markup(html, fallback_links):
-    soup = BeautifulSoup(html, "html.parser")
-
-    title_heading = soup.find("h1")
-    if title_heading is not None:
-        title_heading["class"] = ["summary-title"]  # type: ignore[index]
-
-    if soup.find("h2") is None:
-        default_h2 = soup.new_tag("h2")
-        default_h2.string = "Summary"
-        if title_heading is not None:
-            title_heading.insert_after(default_h2)
-        else:
-            soup.insert(0, default_h2)
-
-    anchors = soup.find_all("a", href=True)
-    for anchor in anchors:
-        anchor["target"] = "_blank" # type: ignore
-        anchor["rel"] = "noopener noreferrer" # type: ignore
-
-    if not anchors and fallback_links:
-        source_paragraph = soup.new_tag("p")
-        strong_label = soup.new_tag("strong")
-        strong_label.string = "Sources:"
-        source_paragraph.append(strong_label)
-        source_paragraph.append(" ")
-        for index, href in enumerate(fallback_links[:2]):
-            anchor = soup.new_tag("a", href=href)
-            anchor["target"] = "_blank"
-            anchor["rel"] = "noopener noreferrer"
-            anchor.string = f"Source {index + 1}"
-            source_paragraph.append(anchor)
-            if index < min(len(fallback_links), 2) - 1:
-                source_paragraph.append(" | ")
-        soup.append(source_paragraph)
-
-    return str(soup)
-
-
-def _clean_ai_output(result, fallback_links=None):
-    cleaned = re.sub(r"```html|```", "", result or "").strip()
-    if not cleaned:
-        return ""
-
-    # Convert common markdown fallbacks so frontend still gets HTML.
-    cleaned = re.sub(r"^### (.*)$", r"<h3>\1</h3>", cleaned, flags=re.M)
-    cleaned = re.sub(r"^## (.*)$", r"<h2>\1</h2>", cleaned, flags=re.M)
-    cleaned = re.sub(r"^# (.*)$", r"<h1>\1</h1>", cleaned, flags=re.M)
-    cleaned = re.sub(r"^\* (.*)$", r"<li>\1</li>", cleaned, flags=re.M)
-    cleaned = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", cleaned)
-    cleaned = re.sub(r"\[([^\]]+)\]\((https?://[^)]+)\)", r'<a href="\2">\1</a>', cleaned)
-    return _ensure_required_markup(cleaned, fallback_links or [])
-
-
 def _normalize_option(value, options, default):
     key = _to_text(value).lower()
     return key if key in options else default
@@ -177,7 +77,7 @@ def _normalize_length(value):
 
 
 def _normalize_format(value):
-    return _normalize_option(value, formats._FORMAT_GUIDANCE, "paragraph")
+    return _normalize_option(value, formats._JSON_FORMAT_GUIDANCE, "bullet-point")
 
 
 def _normalize_language(value):
@@ -238,6 +138,10 @@ def _load_json_like_payload(raw_output):
 
     return None
 
+class _InvalidJSONResponse(RuntimeError):
+    """Raised when Gemini returns a body that does not parse as JSON, despite a JSON mime type being requested."""
+
+
 def _is_retryable_gemini_error(exc):
     return (
         isinstance(exc, genai_errors.APIError)
@@ -245,20 +149,40 @@ def _is_retryable_gemini_error(exc):
     )
 
 
-def _generate_with_retries(client, model_name, query):
+def _should_retry(exc):
+    return isinstance(exc, _InvalidJSONResponse) or _is_retryable_gemini_error(exc)
+
+
+def _generate_with_retries(client, model_name, query, response_mime_type=None):
     last_exc = None
+    require_json = response_mime_type == "application/json"
+
+    request_kwargs = {"model": model_name, "contents": query}
+    if response_mime_type:
+        request_kwargs["config"] = genai_types.GenerateContentConfig(
+            response_mime_type=response_mime_type,
+        )
+
     for attempt in range(1, _MAX_ATTEMPTS_PER_MODEL + 1):
         try:
-            response = client.models.generate_content(
-                model=model_name,  # type: ignore
-                contents=query,
-            )
-            if not getattr(response, "text", None):
+            response = client.models.generate_content(**request_kwargs)  # type: ignore[arg-type]
+            text = getattr(response, "text", None)
+            if not text:
                 raise RuntimeError("Gemini returned an empty response.")
-            return response.text
+            if require_json:
+                try:
+                    json.loads(text)
+                except json.JSONDecodeError as parse_exc:
+                    logger.warning(
+                        "Gemini %s returned invalid JSON on attempt %d.", model_name, attempt,
+                    )
+                    raise _InvalidJSONResponse(
+                        "Gemini returned invalid JSON."
+                    ) from parse_exc
+            return text
         except Exception as exc:
             last_exc = exc
-            if not _is_retryable_gemini_error(exc) or attempt == _MAX_ATTEMPTS_PER_MODEL:
+            if not _should_retry(exc) or attempt == _MAX_ATTEMPTS_PER_MODEL:
                 raise
             delay = _RETRY_BASE_DELAY_SECONDS * (2 ** (attempt - 1))
             logger.warning(
