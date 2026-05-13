@@ -20,8 +20,11 @@
 
 .history-card-host-row {
   display: flex;
-  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
   gap: 0.375rem;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--color-border-secondary);
 }
 
 .history-card-host {
@@ -32,6 +35,60 @@
   white-space: nowrap;
   font-size: 11px;
   font-weight: 600;
+}
+
+.history-card-host-format {
+  --fmt-bg: transparent;
+  --fmt-border: var(--color-border-secondary);
+  --fmt-text: var(--color-text-secondary);
+  margin: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid var(--fmt-border);
+  border-radius: 9999px;
+  background: var(--fmt-bg);
+  color: var(--fmt-text);
+}
+
+.history-card-host-format[data-format="bullet-point"] {
+  --fmt-bg: color-mix(in srgb, #3b82f6 14%, transparent);
+  --fmt-border: color-mix(in srgb, #3b82f6 45%, transparent);
+  --fmt-text: color-mix(in srgb, #3b82f6 78%, var(--color-text-primary));
+}
+
+.history-card-host-format[data-format="paragraph"] {
+  --fmt-bg: color-mix(in srgb, #22c55e 14%, transparent);
+  --fmt-border: color-mix(in srgb, #22c55e 45%, transparent);
+  --fmt-text: color-mix(in srgb, #22c55e 78%, var(--color-text-primary));
+}
+
+.history-card-host-format[data-format="tl-dr"] {
+  --fmt-bg: color-mix(in srgb, #f59e0b 16%, transparent);
+  --fmt-border: color-mix(in srgb, #f59e0b 50%, transparent);
+  --fmt-text: color-mix(in srgb, #f59e0b 78%, var(--color-text-primary));
+}
+
+.history-card-host-format[data-format="q-and-a"] {
+  --fmt-bg: color-mix(in srgb, #8b5cf6 14%, transparent);
+  --fmt-border: color-mix(in srgb, #8b5cf6 45%, transparent);
+  --fmt-text: color-mix(in srgb, #8b5cf6 80%, var(--color-text-primary));
+}
+
+.history-card-host-format[data-format="pros-cons"] {
+  --fmt-bg: color-mix(in srgb, #14b8a6 14%, transparent);
+  --fmt-border: color-mix(in srgb, #14b8a6 45%, transparent);
+  --fmt-text: color-mix(in srgb, #14b8a6 80%, var(--color-text-primary));
+}
+
+.history-card-host-format[data-format="error"] {
+  --fmt-bg: var(--color-status-danger-bg);
+  --fmt-border: var(--color-status-danger-border);
+  --fmt-text: var(--color-status-danger-text);
 }
 
 .history-card-preview {

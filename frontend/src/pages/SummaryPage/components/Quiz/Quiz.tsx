@@ -1,28 +1,37 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Cross2Icon, TriangleLeftIcon, TriangleRightIcon, ExitIcon, CheckIcon } from "@radix-ui/react-icons";
 import AlertPopup from "../../../../components/AlertPopup/AlertPopup";
-import type { SummaryQuizItem } from "../../../../types/summary";
+import type { SummaryBlock, SummaryDocument } from "../../utils/types";
+import { renderInlineSegment } from "../../utils/renderInline";
 import "./Quiz.css";
 
 interface QuizProps {
-    questions: SummaryQuizItem[]
-    onClose?: () => void
+    document: SummaryDocument;
+    onClose?: () => void;
 }
-
-const OPTION_KEYS = ["A", "B", "C", "D"] as const;
 
 const createInitialAnswers = (length: number): Array<number | null> => {
   return Array.from({ length }, () => null);
 };
 
-export const Quiz = ({ questions, onClose } : QuizProps) => {
-  const totalQuestions = questions.length;
+const findCorrectIndex = (block: SummaryBlock): number => {
+  const options = block.options ?? [];
+  const correctIndex = options.findIndex((option) => option.correct);
+  return correctIndex;
+};
+
+export const Quiz = ({ document, onClose } : QuizProps) => {
+  const questionBlocks = useMemo(
+    () => document.blocks.filter((block) => block.type === "question"),
+    [document.blocks],
+  );
+  const totalQuestions = questionBlocks.length;
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Array<number | null>>(() => createInitialAnswers(totalQuestions));
   const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
 
-  const currentQuestion = questions[currentQuestionIndex];
+  const currentQuestion = questionBlocks[currentQuestionIndex];
   const isFirstQuestion = currentQuestionIndex === 0;
   const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
 
@@ -31,7 +40,7 @@ export const Quiz = ({ questions, onClose } : QuizProps) => {
     setAnswers(createInitialAnswers(totalQuestions));
     setSelectedOptionIndex(null);
     setIsAnswered(false);
-  }, [questions, totalQuestions]);
+  }, [questionBlocks, totalQuestions]);
 
   const resetQuiz = () => {
     setCurrentQuestionIndex(0);
@@ -43,6 +52,9 @@ export const Quiz = ({ questions, onClose } : QuizProps) => {
   if (totalQuestions === 0 || !currentQuestion) {
     return null;
   }
+
+  const currentOptions = currentQuestion.options ?? [];
+  const currentCorrectIndex = findCorrectIndex(currentQuestion);
 
   const handleSelectOption = (optionIndex: number) => {
     if (isAnswered) {
@@ -89,7 +101,7 @@ export const Quiz = ({ questions, onClose } : QuizProps) => {
   const getDotClassName = (index: number) => {
     const answeredOption = answers[index];
     if (answeredOption !== null) {
-      const wasCorrect = answeredOption === questions[index].correctIndex;
+      const wasCorrect = answeredOption === findCorrectIndex(questionBlocks[index]);
       return `qz-dot ${wasCorrect ? "correct" : "wrong"}`;
     }
 
@@ -100,18 +112,18 @@ export const Quiz = ({ questions, onClose } : QuizProps) => {
     return "qz-dot";
   };
 
-  const isSelectedCorrect = selectedOptionIndex === currentQuestion.correctIndex;
+  const isSelectedCorrect = selectedOptionIndex === currentCorrectIndex;
 
   return (
     <section>
         <header className="qz-title">
-            Quiz
+            {document.title || "Quiz"}
         </header>
         <div className="qz-content" aria-label="Summary quiz">
             <div id="qz-screen">
                 <div className="qz-dots" aria-hidden="true">
-                {questions.map((question, index) => (
-                    <span key={`${question.prompt}-${index}`} className={getDotClassName(index)} />
+                {questionBlocks.map((_block, index) => (
+                    <span key={index} className={getDotClassName(index)} />
                 ))}
                 </div>
 
@@ -136,20 +148,20 @@ export const Quiz = ({ questions, onClose } : QuizProps) => {
                             cancelLabel="Cancel"
                         />
                     </header>
-                
-                <p className="qz-q">{currentQuestion.prompt}</p>
+
+                <p className="qz-q rich-inline">{(currentQuestion.question ?? []).map(renderInlineSegment)}</p>
 
                 <div className="qz-opts" role="group" aria-label="Answer options">
-                    {currentQuestion.options.map((option, optionIndex) => {
-                    const keyLabel = OPTION_KEYS[optionIndex] ?? String(optionIndex + 1);
+                    {currentOptions.map((option, optionIndex) => {
+                    const keyLabel = option.key || String.fromCharCode(65 + optionIndex);
 
                     let statusClass = "";
                     if (isAnswered) {
-                        if (optionIndex === currentQuestion.correctIndex && optionIndex === selectedOptionIndex) {
+                        if (optionIndex === currentCorrectIndex && optionIndex === selectedOptionIndex) {
                         statusClass = "s-correct";
                         } else if (optionIndex === selectedOptionIndex) {
                         statusClass = "s-wrong";
-                        } else if (optionIndex === currentQuestion.correctIndex) {
+                        } else if (optionIndex === currentCorrectIndex) {
                         statusClass = "r-correct";
                         } else {
                         statusClass = "dimmed";
@@ -158,39 +170,39 @@ export const Quiz = ({ questions, onClose } : QuizProps) => {
 
                     return (
                         <button
-                        key={`${currentQuestion.prompt}-${option}`}
+                        key={`${currentQuestionIndex}-${optionIndex}`}
                         type="button"
                         className={`qz-opt ${statusClass} ${isAnswered ? "answered" : ""}`.trim()}
                         onClick={() => handleSelectOption(optionIndex)}
-                        aria-label={`Option ${keyLabel}: ${option}`}
+                        aria-label={`Option ${keyLabel}`}
                         >
                         <span className="qz-key" aria-hidden="true">
                             {keyLabel}
                         </span>
-                        <span className="qz-opt-txt">{option}</span>
+                        <span className="qz-opt-txt rich-inline">{option.children.map(renderInlineSegment)}</span>
                         </button>
                     );
                     })}
                 </div>
 
                 {isAnswered && (
-                    <div className={`qz-exp ${isSelectedCorrect ? "" : "wrong"}`.trim()} role="status" aria-live="polite">
-                    {currentQuestion.explanation}
+                    <div className={`qz-exp rich-inline ${isSelectedCorrect ? "" : "wrong"}`.trim()} role="status" aria-live="polite">
+                    {(currentQuestion.explanation ?? []).map(renderInlineSegment)}
                     </div>
                 )}
                 </div>
 
                 <footer className="qz-foot">
                     <span className="qz-hint" aria-hidden="true">
-                        {isAnswered ? (isSelectedCorrect ? 
+                        {isAnswered ? (isSelectedCorrect ?
                             <div className="qz-correct">
                                 <CheckIcon />
                                 Well Done!
-                            </div> : 
+                            </div> :
                             <div className="qz-incorrect">
                                 <Cross2Icon />
                                 Review Above
-                            </div>) 
+                            </div>)
                         : "Select an Answer"}
                     </span>
                     <div className="qz-btn-ctrl">

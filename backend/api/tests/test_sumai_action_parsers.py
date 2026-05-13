@@ -1,54 +1,68 @@
 from django.test import SimpleTestCase
 
-from scripts.SumAI import SumAI
+from scripts.SumAI.utils.parsers import _parse_action_document
 
 
-class SumAIActionParserTest(SimpleTestCase):
-    def test_parse_quiz_accepts_json_like_output(self):
+class ParseActionDocumentTest(SimpleTestCase):
+    def test_accepts_fenced_flashcards_document(self):
         raw_output = """
         ```json
-        [
-          {
-            prompt: "What is an LLM trained to do first?",
-            options: [
-              "Classify labels only",
-              "Predict the next token",
-              "Ignore context",
-              "Output random text",
-            ],
-            correctIndex: 1,
-            explanation: "Base pretraining predicts the next token from context.",
-          },
-        ]
+        {
+          "title": "Flashcards",
+          "format": "flashcards",
+          "blocks": [
+            {
+              "type": "flashcard",
+              "front": [{ "text": "What is an LLM?" }],
+              "back": [{ "text": "A large language model." }]
+            }
+          ]
+        }
         ```
         """
 
-        parsed = SumAI._parse_quiz(raw_output)
+        parsed = _parse_action_document(raw_output)
 
-        self.assertEqual(len(parsed), 1)
-        self.assertEqual(parsed[0]["correctIndex"], 1)
-        self.assertEqual(len(parsed[0]["options"]), 4)
-        self.assertEqual(parsed[0]["prompt"], "What is an LLM trained to do first?")
+        self.assertIsNotNone(parsed)
+        self.assertEqual(parsed["format"], "flashcards")
+        self.assertEqual(len(parsed["blocks"]), 1)
+        self.assertEqual(parsed["blocks"][0]["type"], "flashcard")
 
-    def test_parse_quiz_skips_invalid_items(self):
+    def test_accepts_quiz_document(self):
         raw_output = """
-        [
-          {
-            "prompt": "Valid question",
-            "options": ["A", "B", "C", "D"],
-            "correctIndex": 2,
-            "explanation": "Valid explanation"
-          },
-          {
-            "prompt": "Bad index",
-            "options": ["A", "B"],
-            "correctIndex": 5,
-            "explanation": "Invalid index should be dropped"
-          }
-        ]
+        {
+          "title": "Quiz",
+          "format": "quiz",
+          "blocks": [
+            {
+              "type": "question",
+              "question": [{"text": "Q?"}],
+              "options": [
+                {"key": "A", "correct": true,  "children": [{"text": "right"}]},
+                {"key": "B", "correct": false, "children": [{"text": "wrong"}]}
+              ],
+              "explanation": [{"text": "Because."}]
+            }
+          ]
+        }
         """
 
-        parsed = SumAI._parse_quiz(raw_output)
+        parsed = _parse_action_document(raw_output)
 
-        self.assertEqual(len(parsed), 1)
-        self.assertEqual(parsed[0]["prompt"], "Valid question")
+        self.assertIsNotNone(parsed)
+        self.assertEqual(parsed["format"], "quiz")
+        self.assertEqual(parsed["blocks"][0]["options"][0]["correct"], True)
+
+    def test_rejects_non_dict_payload(self):
+        self.assertIsNone(_parse_action_document("[1, 2, 3]"))
+
+    def test_rejects_missing_blocks(self):
+        raw_output = '{"title": "X", "format": "flashcards"}'
+        self.assertIsNone(_parse_action_document(raw_output))
+
+    def test_rejects_empty_blocks(self):
+        raw_output = '{"title": "X", "format": "flashcards", "blocks": []}'
+        self.assertIsNone(_parse_action_document(raw_output))
+
+    def test_rejects_unparseable_text(self):
+        self.assertIsNone(_parse_action_document("not json at all"))

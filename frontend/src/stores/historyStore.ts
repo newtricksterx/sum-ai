@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { normalizeSummaryActionItems, type SummaryActionItem } from "../types/summary";
-import { SummaryDocument } from "../pages/SummaryPage/utils/types";
+import type { SummaryDocument } from "../pages/SummaryPage/utils/types";
 import { isSummaryDocument } from "../pages/SummaryPage/utils/document";
 
 
@@ -12,6 +12,7 @@ const ANONYMOUS_OWNER_KEY = "anonymous";
 
 export interface HistorySummary {
   url: string;
+  format: string;
   document_content: SummaryDocument;
   json_content: string;
   actionItems?: SummaryActionItem[];
@@ -52,6 +53,12 @@ const getOwnerHistory = (
   ownerKey: string,
 ): OwnerHistoryState => ownerHistories[ownerKey] ?? getDefaultOwnerHistory();
 
+const isSameSummaryKey = (
+  item: Pick<HistorySummary, "url" | "format">,
+  url: string,
+  format: string,
+) => item.url === url && item.format === format;
+
 interface HistoryState {
   cache: HistorySummary[];
   maxHistorySize: number;
@@ -60,9 +67,9 @@ interface HistoryState {
   setHistoryOwner: (ownerKey: string, limit?: number | null) => void;
   setHistoryLimit: (limit: number | null | undefined) => void;
   addSummary: (summary: HistorySummary) => void;
-  updateSummaryActionItems: (url: string, actionItems: SummaryActionItem[]) => void;
+  updateSummaryActionItems: (url: string, format: string, actionItems: SummaryActionItem[]) => void;
   clearHistory: () => void;
-  removeSummary: (url: string) => void;
+  removeSummary: (url: string, format: string) => void;
 }
 
 const normalizeHistorySummary = (value: unknown): HistorySummary | null => {
@@ -77,6 +84,7 @@ const normalizeHistorySummary = (value: unknown): HistorySummary | null => {
 
   return {
     url: candidate.url,
+    format: candidate.document_content.format,
     document_content: candidate.document_content,
     json_content: candidate.json_content,
     actionItems: normalizeSummaryActionItems(candidate.actionItems),
@@ -163,20 +171,22 @@ export const useHistoryStore = create<HistoryState>()(
                 actionItems: normalizeSummaryActionItems(newSummary.actionItems),
                 isSuccess: newSummary.isSuccess !== false,
             };
-            // Move existing item to the top by removing duplicate URL first.
-            const remaining = state.cache.filter(item => item.url !== normalizedSummary.url);
+            // Move existing item to the top by removing only an exact URL+format duplicate first.
+            const remaining = state.cache.filter(
+                (item) => !isSameSummaryKey(item, normalizedSummary.url, normalizedSummary.format),
+            );
             const nextCache = [normalizedSummary, ...remaining].slice(0, state.maxHistorySize);
             return applyOwnerCache(state, nextCache);
         }),
-        updateSummaryActionItems: (url, actionItems) => set((state) => {
-            const existingIndex = state.cache.findIndex((item) => item.url === url);
+        updateSummaryActionItems: (url, format, actionItems) => set((state) => {
+            const existingIndex = state.cache.findIndex((item) => isSameSummaryKey(item, url, format));
             if (existingIndex === -1) {
                 return state;
             }
 
             const normalizedActionItems = normalizeSummaryActionItems(actionItems);
             const nextCache = state.cache.map((item) =>
-                item.url === url
+                isSameSummaryKey(item, url, format)
                     ? { ...item, actionItems: normalizedActionItems }
                     : item,
             );
@@ -184,8 +194,8 @@ export const useHistoryStore = create<HistoryState>()(
             return applyOwnerCache(state, nextCache);
         }),
         clearHistory: () => set((state) => applyOwnerCache(state, [])),
-        removeSummary: (url) => set((state) => {
-            const nextCache = state.cache.filter((item) => item.url !== url);
+        removeSummary: (url, format) => set((state) => {
+            const nextCache = state.cache.filter((item) => !isSameSummaryKey(item, url, format));
             return applyOwnerCache(state, nextCache);
         }),
     }), 

@@ -261,7 +261,7 @@ export const useSummarizeActiveTab = () => {
     ) => {
       UpdateSummaryStorage(serializeSummaryContent(content), sourceUrl, nextActionItems, isSuccess);
       if (sourceUrl) {
-        updateSummaryActionItems(sourceUrl, nextActionItems);
+        updateSummaryActionItems(sourceUrl, content.format, nextActionItems);
       }
     },
     [updateSummaryActionItems],
@@ -316,6 +316,7 @@ export const useSummarizeActiveTab = () => {
       if (result.isSuccess && result.sourceUrl) {
         addSummaryToHistory({
           url: result.sourceUrl,
+          format: result.json.format,
           document_content: result.json,
           json_content: documentToJSONString(result.json),
           actionItems: [],

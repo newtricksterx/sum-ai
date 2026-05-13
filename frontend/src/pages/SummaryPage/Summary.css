@@ -129,17 +129,22 @@
 }
 
 .summary-content strong,
-.summary-content b {
+.summary-content b,
+.rich-inline strong,
+.rich-inline b {
   color: var(--summary-text-primary);
   font-weight: 700;
 }
 
 .summary-content em,
-.summary-content i {
+.summary-content i,
+.rich-inline em,
+.rich-inline i {
   color: inherit;
 }
 
-.summary-content a {
+.summary-content a,
+.rich-inline a {
   color: var(--summary-link);
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -147,11 +152,13 @@
   transition: color var(--summary-transition), text-decoration-color var(--summary-transition);
 }
 
-.summary-content a:hover {
+.summary-content a:hover,
+.rich-inline a:hover {
   color: var(--summary-link-hover);
 }
 
-.summary-content a:focus-visible {
+.summary-content a:focus-visible,
+.rich-inline a:focus-visible {
   outline: 2px solid var(--summary-focus);
   outline-offset: 2px;
   border-radius: 2px;
@@ -199,7 +206,8 @@
   color: inherit;
 }
 
-.summary-content code {
+.summary-content code,
+.rich-inline code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 0.82rem;
   color: var(--summary-code-text);
@@ -209,7 +217,8 @@
   padding: 0.08rem 0.36rem;
 }
 
-.summary-content var {
+.summary-content var,
+.rich-inline var {
   font-family: "Latin Modern Math", "STIX Two Math", Cambria, "Times New Roman", serif;
   font-style: italic;
   font-weight: 600;
@@ -221,7 +230,8 @@
   border-radius: 0.3em;
 }
 
-.summary-content var + var {
+.summary-content var + var,
+.rich-inline var + var {
   margin-left: 0.08em;
 }
 

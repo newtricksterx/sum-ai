@@ -16,6 +16,41 @@ TEST_REST_FRAMEWORK = {
     },
 }
 
+
+def _flashcards_document():
+    return {
+        "title": "Flashcards",
+        "format": "flashcards",
+        "blocks": [
+            {
+                "type": "flashcard",
+                "front": [{"text": "What is an LLM?"}],
+                "back": [{"text": "A large language model."}],
+            }
+        ],
+    }
+
+
+def _quiz_document():
+    return {
+        "title": "Quiz",
+        "format": "quiz",
+        "blocks": [
+            {
+                "type": "question",
+                "question": [{"text": "What is self-supervised learning?"}],
+                "options": [
+                    {"key": "A", "correct": False, "children": [{"text": "Using labels for every sample"}]},
+                    {"key": "B", "correct": True, "children": [{"text": "Predicting the next token from context"}]},
+                    {"key": "C", "correct": False, "children": [{"text": "Only trial-and-error rewards"}]},
+                    {"key": "D", "correct": False, "children": [{"text": "Removing all context windows"}]},
+                ],
+                "explanation": [{"text": "LLMs are trained to predict the next token in context."}],
+            }
+        ],
+    }
+
+
 @override_settings(REST_FRAMEWORK=TEST_REST_FRAMEWORK)
 class ActionItemEndpointTest(TestCase):
     def setUp(self):
@@ -58,27 +93,27 @@ class ActionItemEndpointTest(TestCase):
         self.assertFalse(response.json()["isSuccess"])
         self.assertEqual(response.json()["error"], "Missing required field: 'content'")
 
-    @patch("api.views.actionitem.SumAI.ActionContent", return_value=[("Q1", "A1"), ("Q2", "A2")])
+    @patch("api.views.actionitem.SumAI.ActionContent", return_value=_flashcards_document())
     def test_flashcards_returns_generated_content(self, mock_action_content):
-        summary_html = "<h1>Summary</h1><p>Body</p>"
+        summary_content = '{"title":"S","format":"paragraph","blocks":[]}'
         response = self.client.post(
             self.url,
-            data=json.dumps({"type": "flashcards", "content": summary_html}),
+            data=json.dumps({"type": "flashcards", "language": "english", "content": summary_content}),
             content_type="application/json",
         )
 
         self.assertEqual(response.status_code, 200)
         body = response.json()
         self.assertTrue(body["isSuccess"])
-        self.assertEqual(body["content"], [["Q1", "A1"], ["Q2", "A2"]])
-        mock_action_content.assert_called_once_with("flashcards", summary_html)
+        self.assertEqual(body["content"], _flashcards_document())
+        mock_action_content.assert_called_once_with("flashcards", "english", summary_content)
 
-    @patch("api.views.actionitem.SumAI.ActionContent", return_value=[])
+    @patch("api.views.actionitem.SumAI.ActionContent", return_value=None)
     def test_flashcards_returns_502_when_generation_fails(self, mock_action_content):
-        summary_html = "<h1>Summary</h1><p>Body</p>"
+        summary_content = '{"title":"S","format":"paragraph","blocks":[]}'
         response = self.client.post(
             self.url,
-            data=json.dumps({"type": "flashcards", "content": summary_html}),
+            data=json.dumps({"type": "flashcards", "language": "english", "content": summary_content}),
             content_type="application/json",
         )
 
@@ -86,49 +121,30 @@ class ActionItemEndpointTest(TestCase):
         body = response.json()
         self.assertFalse(body["isSuccess"])
         self.assertEqual(body["error"], "Could not generate action content.")
-        mock_action_content.assert_called_once_with("flashcards", summary_html)
+        mock_action_content.assert_called_once_with("flashcards", "english", summary_content)
 
-    @patch(
-        "api.views.actionitem.SumAI.ActionContent",
-        return_value=[
-            {
-                "prompt": "What is self-supervised learning?",
-                "options": [
-                    "Using labels for every sample",
-                    "Predicting the next token from context",
-                    "Only trial-and-error rewards",
-                    "Removing all context windows",
-                ],
-                "correctIndex": 1,
-                "explanation": "LLMs are trained to predict the next token in context.",
-            }
-        ],
-    )
+    @patch("api.views.actionitem.SumAI.ActionContent", return_value=_quiz_document())
     def test_quiz_returns_generated_content(self, mock_action_content):
-        summary_html = "<h1>Summary</h1><p>Body</p>"
+        summary_content = '{"title":"S","format":"paragraph","blocks":[]}'
         response = self.client.post(
             self.url,
-            data=json.dumps({"type": "quiz", "content": summary_html}),
+            data=json.dumps({"type": "quiz", "language": "english", "content": summary_content}),
             content_type="application/json",
         )
 
         self.assertEqual(response.status_code, 200)
         body = response.json()
         self.assertTrue(body["isSuccess"])
-        self.assertEqual(len(body["content"]), 1)
-        self.assertEqual(body["content"][0]["correctIndex"], 1)
-        self.assertEqual(
-            body["content"][0]["prompt"],
-            "What is self-supervised learning?",
-        )
-        mock_action_content.assert_called_once_with("quiz", summary_html)
+        self.assertEqual(body["content"]["format"], "quiz")
+        self.assertEqual(len(body["content"]["blocks"]), 1)
+        mock_action_content.assert_called_once_with("quiz", "english", summary_content)
 
-    @patch("api.views.actionitem.SumAI.ActionContent", return_value=[])
-    def test_quiz_returns_502_when_generation_fails(self, mock_action_content):
-        summary_html = "<h1>Summary</h1><p>Body</p>"
+    @patch("api.views.actionitem.SumAI.ActionContent", return_value={"title": "Quiz", "format": "quiz", "blocks": []})
+    def test_quiz_returns_502_when_blocks_empty(self, mock_action_content):
+        summary_content = '{"title":"S","format":"paragraph","blocks":[]}'
         response = self.client.post(
             self.url,
-            data=json.dumps({"type": "quiz", "content": summary_html}),
+            data=json.dumps({"type": "quiz", "language": "english", "content": summary_content}),
             content_type="application/json",
         )
 
@@ -136,4 +152,4 @@ class ActionItemEndpointTest(TestCase):
         body = response.json()
         self.assertFalse(body["isSuccess"])
         self.assertEqual(body["error"], "Could not generate action content.")
-        mock_action_content.assert_called_once_with("quiz", summary_html)
+        mock_action_content.assert_called_once_with("quiz", "english", summary_content)

@@ -86,9 +86,18 @@ describe("SummaryPage action grid state", () => {
           {
             id: "flashcards-1",
             type: "flashcards",
-            flashcards: [
-              { question: "Flashcard Question", answer: "Flashcard Answer" },
-            ],
+            document: {
+              title: "Flashcards",
+              format: "flashcards",
+              blocks: [
+                {
+                  type: "flashcard",
+                  children: [],
+                  front: [{ text: "Flashcard Question" }],
+                  back: [{ text: "Flashcard Answer" }],
+                },
+              ],
+            },
           },
         ]}
       />,
@@ -106,14 +115,24 @@ describe("SummaryPage action grid state", () => {
           {
             id: "quiz-1",
             type: "quiz",
-            quiz: [
-              {
-                prompt: "What is the main point?",
-                options: ["Point A", "Point B", "Point C", "Point D"],
-                correctIndex: 1,
-                explanation: "Point B is supported by the summary.",
-              },
-            ],
+            document: {
+              title: "Quiz",
+              format: "quiz",
+              blocks: [
+                {
+                  type: "question",
+                  children: [],
+                  question: [{ text: "What is the main point?" }],
+                  options: [
+                    { key: "A", correct: false, children: [{ text: "Point A" }] },
+                    { key: "B", correct: true, children: [{ text: "Point B" }] },
+                    { key: "C", correct: false, children: [{ text: "Point C" }] },
+                    { key: "D", correct: false, children: [{ text: "Point D" }] },
+                  ],
+                  explanation: [{ text: "Point B is supported by the summary." }],
+                },
+              ],
+            },
           },
         ]}
       />,

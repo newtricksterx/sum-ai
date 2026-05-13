@@ -12,7 +12,7 @@ export type SummarizeRequestParams = {
   t: TranslateFn;
 };
 
-export type SummaryInline = {
+export type InlineItems = {
   link?: string;
   text: string;
   bold?: boolean;
@@ -21,11 +21,23 @@ export type SummaryInline = {
   var?: boolean;
 };
 
+export type SummaryQuizOption = {
+  key: string;
+  correct: boolean;
+  children: InlineItems[];
+};
+
 export type SummaryBlock = {
   type: string;
-  children: SummaryInline[];
-  question?: SummaryInline[];
-  answer?: SummaryInline[];
+  children: InlineItems[];
+  // Field-specific inline arrays used by qna_pair / flashcard / question blocks.
+  // `children` stays as the canonical text bucket; these blocks emit `children: []`.
+  question?: InlineItems[];
+  answer?: InlineItems[];
+  front?: InlineItems[];
+  back?: InlineItems[];
+  options?: SummaryQuizOption[];
+  explanation?: InlineItems[];
 };
 
 export type SummaryDocument = {

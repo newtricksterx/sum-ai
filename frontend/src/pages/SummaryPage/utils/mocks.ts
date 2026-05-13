@@ -1,4 +1,4 @@
-import type { SummaryFlashcardItem, SummaryQuizItem } from "../../../types/summary";
+import type { SummaryDocument } from "./types";
 import { isRestrictedPage, resolveCurrentTab } from "../../FrontPage/frontpage.helpers";
 
 // Dev-mode summary fixture: a serialized SummaryDocument (JSON string, NOT HTML despite legacy variable name).
@@ -251,45 +251,107 @@ export const MOCK_SUMMARY_DOCUMENT = `
 }
 `;
 
-export const MOCK_FLASHCARDS: SummaryFlashcardItem[] = [
-  {
-    question: "What is the core idea of this summary?",
-    answer: "It condenses the source into key takeaways so you can review quickly.",
-  },
-  {
-    question: "What does the summary keep from the original content?",
-    answer: "It keeps the main arguments, evidence, and practical insights.",
-  },
-  {
-    question: "How should you use this summary next?",
-    answer: "Use it to decide what to read deeply and what to skim.",
-  },
-];
+export const MOCK_FLASHCARDS_DOCUMENT: SummaryDocument = {
+  title: "Flashcards",
+  format: "flashcards",
+  blocks: [
+    {
+      type: "flashcard",
+      children: [],
+      front: [{ text: "What is the core idea of this summary?" }],
+      back: [
+        { text: "It condenses the source into key takeaways so you can review quickly." },
+      ],
+    },
+    {
+      type: "flashcard",
+      children: [],
+      front: [{ text: "What does the summary keep from the original content?" }],
+      back: [
+        { text: "It keeps the main arguments, evidence, and practical insights." },
+      ],
+    },
+    {
+      type: "flashcard",
+      children: [],
+      front: [{ text: "How should you use this summary next?" }],
+      back: [{ text: "Use it to decide what to read deeply and what to skim." }],
+    },
+  ],
+};
 
-export const MOCK_QUIZ_ITEMS: SummaryQuizItem[] = [
-  {
-    prompt: "What training objective do large language models primarily use?",
-    options: [
-      "Supervised classification on labeled datasets.",
-      "Self-supervised next-token prediction on large text corpora.",
-      "Reinforcement learning from environment rewards.",
-      "Generative adversarial training.",
-    ],
-    correctIndex: 1,
-    explanation: "LLMs are first trained with self-supervised next-token prediction.",
-  },
-  {
-    prompt: "Which architecture powers most modern LLMs?",
-    options: [
-      "Recurrent neural networks.",
-      "Convolutional neural networks.",
-      "Transformers with attention.",
-      "Restricted Boltzmann machines.",
-    ],
-    correctIndex: 2,
-    explanation: "Transformers use attention to model relationships across long sequences.",
-  },
-];
+export const MOCK_QUIZ_DOCUMENT: SummaryDocument = {
+  title: "Quiz",
+  format: "quiz",
+  blocks: [
+    {
+      type: "question",
+      children: [],
+      question: [
+        { text: "What training objective do large language models primarily use?" },
+      ],
+      options: [
+        {
+          key: "A",
+          correct: false,
+          children: [{ text: "Supervised classification on labeled datasets." }],
+        },
+        {
+          key: "B",
+          correct: true,
+          children: [
+            { text: "Self-supervised next-token prediction on large text corpora." },
+          ],
+        },
+        {
+          key: "C",
+          correct: false,
+          children: [{ text: "Reinforcement learning from environment rewards." }],
+        },
+        {
+          key: "D",
+          correct: false,
+          children: [{ text: "Generative adversarial training." }],
+        },
+      ],
+      explanation: [
+        { text: "LLMs are first trained with self-supervised next-token prediction." },
+      ],
+    },
+    {
+      type: "question",
+      children: [],
+      question: [{ text: "Which architecture powers most modern LLMs?" }],
+      options: [
+        {
+          key: "A",
+          correct: false,
+          children: [{ text: "Recurrent neural networks." }],
+        },
+        {
+          key: "B",
+          correct: false,
+          children: [{ text: "Convolutional neural networks." }],
+        },
+        {
+          key: "C",
+          correct: true,
+          children: [{ text: "Transformers with attention." }],
+        },
+        {
+          key: "D",
+          correct: false,
+          children: [{ text: "Restricted Boltzmann machines." }],
+        },
+      ],
+      explanation: [
+        {
+          text: "Transformers use attention to model relationships across long sequences.",
+        },
+      ],
+    },
+  ],
+};
 
 export const isMockModeEnabled = () =>
   import.meta.env.DEV ||
@@ -297,6 +359,8 @@ export const isMockModeEnabled = () =>
   import.meta.env.VITE_USE_MOCK_SUMMARY === "true";
 
 export const isMockActionItemModeEnabled = () =>
+  import.meta.env.DEV ||
+  import.meta.env.VITE_DEV === "true" ||
   import.meta.env.VITE_USE_MOCK_ACTION_ITEM === "true";
 
 // In dev/mock mode, returns the active tab's URL when it's a real page; otherwise synthesizes a sentinel mock URL.

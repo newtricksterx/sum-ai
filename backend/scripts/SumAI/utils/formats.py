@@ -4,185 +4,89 @@ _LENGTH_GUIDANCE = {
     "long": "Target 400 to 700 words total.",
 }
 
+# Shared rules for inline marks and JSON output. Embedded into both summary
+# and action-item prompts, so brevity here directly enlarges SOURCE_TEXT room.
+_INLINE_MARKS_RULES = """\
+Output rules:
+- Return ONE valid JSON object. No markdown fences, no commentary, no fields outside the schema.
+- "title" is concise and derived from the source.
+- Each inline element is {"text": <string>} with optional marks below. Plain runs stay one segment; split only when a mark applies to a sub-span.
+- Consider what type of content is being asked to summarize. For example, a math textbook or article, you want to use the var mark often. Whereas for a python documentation, you would use a code mark
+
+Inline marks (each has ONE meaning; never invent or substitute):
+- "bold": the single most important concept per bullet/paragraph. Never bold whole sentences, code, math, or URLs.
+- "italic": contrast, foreign words, or titles of works. Use sparingly.
+- "code": LITERAL source code — function calls, identifiers, file paths, CLI flags, JSON/HTML/regex. NOT math.
+- "var": MATHEMATICAL notation — variables, equations, Greek letters, math operators. NOT code identifiers.
+- "link": "<full URL>". Only when the source contains a real URL — never invent one.
+
+Code vs var: code-editor monospace context → "code"; LaTeX math context → "var". For an isolated single letter naming a math object, prefer "var".
+
+Math inside "var" (write the formatted form directly in "text"):
+- Superscripts/subscripts: use Unicode (x², σ², A⁻¹, x₁, e⁻ⁿ). Never x^2, A^-1, or x_1.
+- Greek: use the Unicode glyph (α β γ θ σ Σ Ω). Never spell or escape.
+- Keep compound expressions in ONE "var" segment: {"text": "Ax = b", "var": true}.
+- Fallback only when no Unicode glyph exists: parenthesized form like "e^(a+b)".
+
+Marks may combine when both genuinely apply (e.g. {"text": "Ax = b", "var": true, "italic": true}). Never combine "code" and "var" on the same segment. Do not invent URLs or facts not present in the source."""
+
+
 _JSON_FORMAT_GUIDANCE = {
-    "bullet-point": (
-        """
-        {
-            "title": "Title of the summary",
-            "format": "bullet-point",
-            "blocks": [
-                {
-                    "type": "bullet",
-                    "children": [
-                        { "text": <plain text segment> },
-                        { "text": <Important term>, "bold": true },
-                        { "text": <code>", "code": true },
-                        { "text": <emphasized word>, "italic": true },
-                        { "text": <link text>, "link": "https://example.com" },
-                        { "text": <variable>, "var": true}
-                    ]
-                }
-            ]
-        }
-
-        Rules:
-        - "format" must always be "bullet-point".
-        - "blocks" must be an array.
-        - Each bullet must be one object in "blocks" with "type": "bullet".
-        - Each bullet must have a "children" array.
-        - Do not nest bullets inside bullets.
-        - Do not output empty bullets.
-        """
-    ),
-
-    "paragraph": (
-        """
-        {
-            "title": "Title of the summary",
-            "format": "paragraph",
-            "blocks": [
-                {
-                    "type": "heading",
-                    "children": [
-                        { "text": "<short descriptive heading>" }
-                    ]
-                },
-                {
-                    "type": "paragraph",
-                    "children": [
-                        { "text": "<plain text segment>" },
-                        { "text": "<important term>", "bold": true },
-                        { "text": "<code>", "code": true },
-                        { "text": "<emphasized word>", "italic": true },
-                        { "text": "<link text>", "link": "https://example.com" },
-                        { "text": "<variable>", "var": true}
-                    ]
-                }
-            ]
-        }
-
-        Rules:
-        - Alternate between one "heading" block followed by one or more "paragraph" blocks
-        - Each heading is a short 2-5 word label for the section that follows it
-        - Each paragraph is one cohesive idea — do not dump the entire summary into one paragraph
-        - Each block has a "children" array of inline text segments
-        - Split text into segments only where formatting changes — plain runs stay as one segment
-        - Headings never have marks — plain text only
-        """
-    ),
-
-    "tl-dr" : (
-        """
-            {
-                "title": "title of the summary",
-                "format": "tl-dr",
-                "blocks": [
-                    {
-                    "type": "tl-dr",
-                    "children": [
-                        { "text": "<plain text segment>" },
-                        { "text": "<important term>", "bold": true },
-                        { "text": "<code>", "code": true },
-                        { "text": "<emphasized word>", "italic": true },
-                        { "text": "<link text>", "link": "https://example.com" },
-                        { "text": "<variable>", "var": true}
-                    ]
-                    }
-                ]
-                }
-
-                Rules:
-                - "blocks" contains exactly one object with type "tl-dr" — never more than one
-                - Write it as a single, dense sentence or two — the kind you'd say out loud to a friend
-                - Lead with the most important takeaway, not background context
-                - Each block has a "children" array of inline text segments
-                - Split text into segments only where formatting changes — plain runs stay as one segment
-                - Do not use headings, bullets, or multiple paragraphs
-                - Do not add any fields outside this schema
-        """
-    ),
-
-    "q-and-a" : (
-        """
-            {
-            "title": "Title of the summary",
-            "format": "q-and-a",
-            "blocks": [
-                {
-                    "type": "qna_pair",
-                    "question": [
-                        { "text": "<plain text question>", "bold": true }
-                    ],
-                    "answer": [
-                        { "text": "<plain text segment>" },
-                        { "text": "<important term>", "bold": true },
-                        { "text": "<code>", "code": true },
-                        { "text": "<emphasized word>", "italic": true },
-                        { "text": "<link text>", "link": "https://example.com" },
-                        { "text": "<variable>", "var": true}
-                    ]
-                }
-            ]
-            }
-
-            Rules:
-            - Each block has type "qna_pair" with two fields: "question" and "answer"
-            - "question" is always plain text only — no bold, italic, or code marks
-            - "question" must be a genuine question a curious reader would actually ask — not a heading rephrased as a question
-            - Questions should be short, direct, and self-contained — readable without needing the answer for context
-            - "answer" is a concise, direct response to its question — do not repeat the question inside the answer
-            - Each "answer" has a "children" array of inline text segments
-            - Split text into segments only where formatting changes — plain runs stay as one segment
-            - Do not add any fields outside this schema
-        """
-    ),
-
-    "pros-cons" : (
-        """
-        {
-            "title": "Title of summary",
-            "format": "pros-cons",
-            "blocks": [
-                {
-                "type": "pro",
-                "children": [
-                    { "text": "<plain text segment>" },
-                    { "text": "<important term>", "bold": true },
-                    { "text": "<code>", "code": true },
-                    { "text": "<emphasized word>", "italic": true },
-                    { "text": "<link text>", "link": "https://example.com" },
-                    { "text": "<variable>", "var": true}
-                ]
-                },
-                {
-                "type": "con",
-                "children": [
-                    { "text": "<plain text segment>" },
-                    { "text": "<important term>", "bold": true },
-                    { "text": "<code>", "code": true },
-                    { "text": "<emphasized word>", "italic": true },
-                    { "text": "<link text>", "link": "https://example.com" },
-                    { "text": "<variable>", "var": true}
-                ]
-                }
-            ]
-        }
-
-        Rules:
-        - "blocks" contains a flat list of "pro" and "con" objects — do not nest them into separate groups
-        - Each block has type "pro" or "con" and a "children" array of inline text segments
-        - Your renderer will group them by type — you just emit them in discovery order
-        - Each pro or con is one distinct point — do not combine multiple ideas into one block
-        - State each point as a direct claim, not a question or a heading
-        - Lead with the most impactful pro and the most impactful con
-        - Split text into segments only where formatting changes — plain runs stay as one segment
-        - Do not add any fields outside this schema
-        - Aim for a balanced count — never more than 2 extra points on either side
-        """
-    )
-
-
+    "bullet-point": """\
+{
+  "title": "...",
+  "format": "bullet-point",
+  "blocks": [
+    {"type": "bullet", "children": [{"text": "..."}, {"text": "...", "bold": true}]}
+  ]
 }
+Rules: one "bullet" block per point. No nested or empty bullets.""",
+
+    "paragraph": """\
+{
+  "title": "...",
+  "format": "paragraph",
+  "blocks": [
+    {"type": "heading",   "children": [{"text": "<2-5 word label, plain text>"}]},
+    {"type": "paragraph", "children": [{"text": "..."}]}
+  ]
+}
+Rules: alternate one "heading" with one or more "paragraph" blocks. One cohesive idea per paragraph. Headings are plain text (no marks).""",
+
+    "tl-dr": """\
+{
+  "title": "...",
+  "format": "tl-dr",
+  "blocks": [
+    {"type": "tl-dr", "children": [{"text": "..."}]}
+  ]
+}
+Rules: exactly ONE "tl-dr" block. One or two dense sentences, leading with the takeaway. No headings, bullets, or extra paragraphs.""",
+
+    "q-and-a": """\
+{
+  "title": "...",
+  "format": "q-and-a",
+  "blocks": [
+    {"type": "qna_pair",
+     "question": [{"text": "<plain text question>"}],
+     "answer":   [{"text": "..."}]}
+  ]
+}
+Rules: each block is "qna_pair". "question" is plain text only (no marks) and is a genuine question, not a heading rephrased. "answer" does not restate the question.""",
+
+    "pros-cons": """\
+{
+  "title": "...",
+  "format": "pros-cons",
+  "blocks": [
+    {"type": "pro", "children": [{"text": "..."}]},
+    {"type": "con", "children": [{"text": "..."}]}
+  ]
+}
+Rules: flat list of "pro" and "con" blocks (do not group). Each is one distinct point stated as a direct claim. Lead with the strongest pro and the strongest con. Keep counts balanced (≤2 difference).""",
+}
+
 
 _LANGUAGE_DISPLAY = {
     "english": "English",
@@ -192,23 +96,35 @@ _LANGUAGE_DISPLAY = {
     "hindi": "Hindi",
 }
 
-_TYPE_FORMAT_GUIDANCE = {
-    "flashcards": (
-        "Return ONLY valid JSON as an array of objects with keys "
-        '"question" and "answer". Example: '
-        '[{"question":"What is X?","answer":"X is ..."}]. '
-        "Create 4 to 8 cards. "
-        "Question must be maximum 20 words. "
-        "Answer must be maximum 20 words."
-    ),
 
-    "quiz": (
-        "Return ONLY valid JSON as an array of objects with keys "
-        '"prompt", "options", "correctIndex", and "explanation". '
-        "Each options value must be an array of 4 strings. "
-        "Exactly one option is correct, and correctIndex must be the zero-based index "
-        "of the correct option in options. "
-        "Create 5 to 10 quiz objects. "
-        'Example: [{"prompt":"...","options":["A","B","C","D"],"correctIndex":1,"explanation":"..."}]'
-    ),
+_TYPE_FORMAT_GUIDANCE = {
+    "flashcards": """\
+{
+  "title": "...",
+  "format": "flashcards",
+  "blocks": [
+    {"type": "flashcard",
+     "front": [{"text": "<plain text question or term>"}],
+     "back":  [{"text": "..."}]}
+  ]
+}
+Rules: each block is "flashcard". "front" is plain text only — a focused question or term, answerable in 1-2 sentences (split into two cards otherwise). "back" is a direct answer, not a restatement of the front. One idea per card.""",
+
+    "quiz": """\
+{
+  "title": "...",
+  "format": "quiz",
+  "blocks": [
+    {"type": "question",
+     "question": [{"text": "<plain text question>"}],
+     "options": [
+       {"key": "A", "correct": false, "children": [{"text": "..."}]},
+       {"key": "B", "correct": true,  "children": [{"text": "..."}]},
+       {"key": "C", "correct": false, "children": [{"text": "..."}]},
+       {"key": "D", "correct": false, "children": [{"text": "..."}]}
+     ],
+     "explanation": [{"text": "..."}]}
+  ]
+}
+Rules: each block is "question" with plain-text "question" (no marks), exactly 4 options keyed A-D, and "explanation". Exactly ONE option has "correct": true; vary which key is correct across questions. Wrong options must be plausible (common misconceptions, not absurd filler). Up to 10 questions.""",
 }

@@ -4,7 +4,8 @@ import { ActionGrid, type ActionId } from './components/ActionGrid/ActionGrid';
 import { FlashcardContainer } from './components/Flashcards/FlashcardContainer';
 import { Quiz } from './components/Quiz/Quiz';
 import type { SummaryActionItem } from '../../types/summary';
-import { SummaryDocument, SummaryInline } from "./utils/types";
+import type { SummaryDocument } from "./utils/types";
+import { renderInlineSegment } from "./utils/renderInline";
 
 interface SummaryPageProps {
   content: SummaryDocument | null;
@@ -15,17 +16,6 @@ interface SummaryPageProps {
   onRemoveActionItem: (actionItemId: string) => void;
   loadingActionId?: ActionId | null;
 }
-
-const renderInlineSegment = (segment: SummaryInline, key: number): React.ReactNode => {
-  let node: React.ReactNode = segment.text;
-  if (segment.code) node = <code>{node}</code>;
-  if (segment.italic) node = <em>{node}</em>;
-  if (segment.bold) node = <strong>{node}</strong>;
-  if (segment.link) node = <a href={segment.link}>{node}</a>;
-  if (segment.var) node = <var>{node}</var>
-
-  return <React.Fragment key={key}>{node}</React.Fragment>;
-};
 
 const renderDocumentBody = (document: SummaryDocument) => {
 
@@ -157,16 +147,15 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
   }, [content, isSummarySuccess]);
 
   const renderActionItem = useCallback((actionItem: SummaryActionItem) => {
-        if (actionItem.type === 'flashcards') {
-            const flashcards = actionItem.flashcards ?? [];
-            if (flashcards.length === 0) {
+        if (actionItem.document.blocks.length === 0) {
             return null;
-            }
+        }
 
+        if (actionItem.type === 'flashcards') {
             return (
             <PageCard key={actionItem.id} className="summary-card mt-4!">
                 <FlashcardContainer
-                flashcards={flashcards}
+                document={actionItem.document}
                 onRemove={() => onRemoveActionItem(actionItem.id)}
                 />
             </PageCard>
@@ -174,15 +163,10 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
         }
 
         if (actionItem.type === 'quiz') {
-            const quizItems = actionItem.quiz ?? [];
-            if (quizItems.length === 0) {
-                return null;
-            }
-
             return (
             <PageCard key={actionItem.id} className="summary-card mt-4!">
                 <Quiz
-                questions={quizItems}
+                document={actionItem.document}
                 onClose={() => onRemoveActionItem(actionItem.id)}
                 />
             </PageCard>

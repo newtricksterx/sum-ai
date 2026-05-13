@@ -7,6 +7,7 @@ import "./HistoryCard.css";
 
 interface HistoryCardProps {
   hostName: string;
+  format: string;
   previewText: string;
   onOpen: () => void;
   onRemove: () => void;
@@ -14,11 +15,15 @@ interface HistoryCardProps {
 
 const HistoryCard: React.FC<HistoryCardProps> = ({
   hostName,
+  format,
   previewText,
   onOpen,
   onRemove,
 }) => {
   const { t } = useTranslation();
+  const localizedFormat = t(`settings.option.${format}`, {
+    defaultValue: format,
+  });
 
   return (
     <PageCard as="article" className="history-card group">
@@ -26,8 +31,9 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
 
       <div className="history-card-host-row">
         <p className="history-card-host">{hostName}</p>
+        <p className="history-card-host-format" data-format={format}>{localizedFormat}</p>
       </div>
-
+ 
       <p className="history-card-preview">{previewText}</p>
 
       <div className="history-card-actions">

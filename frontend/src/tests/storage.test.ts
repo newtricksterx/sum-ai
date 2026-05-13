@@ -86,10 +86,24 @@ describe("storage utils", () => {
         {
           id: "flashcards-1",
           type: "flashcards" as const,
-          flashcards: [
-            { question: "What is this?", answer: "A storage test flashcard." },
-            { question: "Why save it?", answer: "So history can restore it." },
-          ],
+          document: {
+            title: "Flashcards",
+            format: "flashcards",
+            blocks: [
+              {
+                type: "flashcard",
+                children: [],
+                front: [{ text: "What is this?" }],
+                back: [{ text: "A storage test flashcard." }],
+              },
+              {
+                type: "flashcard",
+                children: [],
+                front: [{ text: "Why save it?" }],
+                back: [{ text: "So history can restore it." }],
+              },
+            ],
+          },
         },
       ];
       UpdateSummaryStorage(summary, "https://example.com/article", actionItems, true);

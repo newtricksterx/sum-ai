@@ -3,16 +3,16 @@ import type {
   SummarizeResult,
   SummaryBlock,
   SummaryDocument,
-  SummaryInline,
+  InlineItems,
+  SummaryQuizOption,
   TranslateFn,
 } from "./types";
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
-const ALLOWED_BLOCK_TYPES = new Set(["bullet", "heading", "paragraph", "tl-dr", "qna_pair", "pro", "con"]);
 
-const isSummaryInline = (value: unknown): value is SummaryInline => {
+const isInlineItems = (value: unknown): value is InlineItems => {
   if (!isObject(value) || typeof value.text !== "string") return false;
   if (value.bold !== undefined && typeof value.bold !== "boolean") return false;
   if (value.italic !== undefined && typeof value.italic !== "boolean") return false;
@@ -22,20 +22,40 @@ const isSummaryInline = (value: unknown): value is SummaryInline => {
   return true;
 };
 
-const isSummaryInlineArray = (value: unknown): value is SummaryInline[] =>
-  Array.isArray(value) && value.every(isSummaryInline);
+const isInlineItemsArray = (value: unknown): value is InlineItems[] =>
+  Array.isArray(value) && value.every(isInlineItems);
+
+const isSummaryQuizOption = (value: unknown): value is SummaryQuizOption => {
+  if (!isObject(value)) return false;
+  if (typeof value.key !== "string" || typeof value.correct !== "boolean") return false;
+  return isInlineItemsArray(value.children);
+};
+
+const isSummaryQuizOptionArray = (value: unknown): value is SummaryQuizOption[] =>
+  Array.isArray(value) && value.every(isSummaryQuizOption);
 
 const isSummaryBlock = (value: unknown): value is SummaryBlock => {
-  if (!isObject(value) || typeof value.type !== "string" || !ALLOWED_BLOCK_TYPES.has(value.type)) {
+  if (!isObject(value) || typeof value.type !== "string") {
     return false;
   }
-  if (!isSummaryInlineArray(value.children)) return false;
-  if (value.question !== undefined && !isSummaryInlineArray(value.question)) return false;
-  if (value.answer !== undefined && !isSummaryInlineArray(value.answer)) return false;
-  if (value.type === "qna_pair" && (!isSummaryInlineArray(value.question) || !isSummaryInlineArray(value.answer))) {
-    return false;
+
+  if (value.type === "qna_pair") {
+    return isInlineItemsArray(value.question) && isInlineItemsArray(value.answer);
   }
-  return true;
+
+  if (value.type === "flashcard") {
+    return isInlineItemsArray(value.front) && isInlineItemsArray(value.back);
+  }
+
+  if (value.type === "question") {
+    return (
+      isInlineItemsArray(value.question) &&
+      isSummaryQuizOptionArray(value.options) &&
+      isInlineItemsArray(value.explanation)
+    );
+  }
+
+  return isInlineItemsArray(value.children);
 };
 
 // Runtime type guard for objects that already have the SummaryDocument shape.
@@ -61,12 +81,12 @@ export const parseSummaryDocument = (raw: unknown): SummaryDocument | null => {
     return null;
   }
 
-  const parseInlineArray = (candidate: unknown): SummaryInline[] => {
+  const parseInlineArray = (candidate: unknown): InlineItems[] => {
     if (!Array.isArray(candidate)) return [];
-    const inlines: SummaryInline[] = [];
+    const inlines: InlineItems[] = [];
     for (const childCandidate of candidate) {
       if (!isObject(childCandidate) || typeof childCandidate.text !== "string") continue;
-      const inline: SummaryInline = { text: childCandidate.text };
+      const inline: InlineItems = { text: childCandidate.text };
       if (childCandidate.bold === true) inline.bold = true;
       if (childCandidate.italic === true) inline.italic = true;
       if (childCandidate.code === true) inline.code = true;
@@ -77,10 +97,25 @@ export const parseSummaryDocument = (raw: unknown): SummaryDocument | null => {
     return inlines;
   };
 
+  const parseQuizOptions = (candidate: unknown): SummaryQuizOption[] => {
+    if (!Array.isArray(candidate)) return [];
+    const options: SummaryQuizOption[] = [];
+    for (const optionCandidate of candidate) {
+      if (!isObject(optionCandidate)) continue;
+      if (typeof optionCandidate.key !== "string") continue;
+      options.push({
+        key: optionCandidate.key,
+        correct: optionCandidate.correct === true,
+        children: parseInlineArray(optionCandidate.children),
+      });
+    }
+    return options;
+  };
+
   const blocks: SummaryBlock[] = [];
   for (const blockCandidate of parsed.blocks) {
     if (!isObject(blockCandidate)) continue;
-    if (typeof blockCandidate.type !== "string" || !ALLOWED_BLOCK_TYPES.has(blockCandidate.type)) continue;
+    if (typeof blockCandidate.type !== "string") continue;
 
     if (blockCandidate.type === "qna_pair") {
       blocks.push({
@@ -88,6 +123,27 @@ export const parseSummaryDocument = (raw: unknown): SummaryDocument | null => {
         children: [],
         question: parseInlineArray(blockCandidate.question),
         answer: parseInlineArray(blockCandidate.answer),
+      });
+      continue;
+    }
+
+    if (blockCandidate.type === "flashcard") {
+      blocks.push({
+        type: "flashcard",
+        children: [],
+        front: parseInlineArray(blockCandidate.front),
+        back: parseInlineArray(blockCandidate.back),
+      });
+      continue;
+    }
+
+    if (blockCandidate.type === "question") {
+      blocks.push({
+        type: "question",
+        children: [],
+        question: parseInlineArray(blockCandidate.question),
+        options: parseQuizOptions(blockCandidate.options),
+        explanation: parseInlineArray(blockCandidate.explanation),
       });
       continue;
     }

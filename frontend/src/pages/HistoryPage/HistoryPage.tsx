@@ -18,7 +18,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
   };
 
   const onClickRemove = (item: HistorySummary) => {
-    removeSummary(item.url);
+    removeSummary(item.url, item.format);
   };
 
   const onConfirmClearAll = () => {
@@ -60,8 +60,9 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
         <div className="flex flex-col gap-2">
           {cache.map((item) => (
             <HistoryCard
-              key={item.url}
+              key={`${item.url}::${item.format}`}
               hostName={truncateText(getHostName(item.url), 40)}
+              format={item.format}
               previewText={truncateText(getSummaryIntroFromHtml(item.document_content["title"]), 120)}
               onOpen={() => onClickOpen(item)}
               onRemove={() => onClickRemove(item)}

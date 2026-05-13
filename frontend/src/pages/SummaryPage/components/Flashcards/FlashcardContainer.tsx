@@ -1,19 +1,23 @@
 import { CaretLeftIcon, CaretRightIcon } from "@radix-ui/react-icons";
 import { Flashcard } from "./Flashcard";
 import './FlashcardContainer.css'
-import { FlashcardItem } from "./Flashcard";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Trash2Icon } from "lucide-react";
 import AlertPopup from "../../../../components/AlertPopup/AlertPopup";
+import type { SummaryDocument } from "../../utils/types";
 
-interface FlashcardProps {
-  flashcards: FlashcardItem[];
+interface FlashcardContainerProps {
+  document: SummaryDocument;
   onRemove: () => void;
 }
 
-export const FlashcardContainer = ({ flashcards, onRemove }: FlashcardProps) => {
+export const FlashcardContainer = ({ document, onRemove }: FlashcardContainerProps) => {
+    const flashcardBlocks = useMemo(
+        () => document.blocks.filter((block) => block.type === "flashcard"),
+        [document.blocks],
+    );
     const [index, setIndex] = useState(0)
-    const flashcardsLength = flashcards.length
+    const flashcardsLength = flashcardBlocks.length
 
     const onClickLeft = useCallback(() => {
         if (index >= 1){
@@ -28,10 +32,16 @@ export const FlashcardContainer = ({ flashcards, onRemove }: FlashcardProps) => 
 
     }, [index, flashcardsLength])
 
+    if (flashcardsLength === 0) {
+        return null;
+    }
+
+    const currentBlock = flashcardBlocks[Math.min(index, flashcardsLength - 1)];
+
     return (
         <section>
             <header className="fc-title">
-                Flashcards
+                {document.title || "Flashcards"}
                 <div className="fc-pagination">
                     {index + 1} / {flashcardsLength}
                 </div>
@@ -40,8 +50,8 @@ export const FlashcardContainer = ({ flashcards, onRemove }: FlashcardProps) => 
 
                 <Flashcard
                     key={index}
-                    question={flashcards[index].question}
-                    answer={flashcards[index].answer}
+                    front={currentBlock.front ?? []}
+                    back={currentBlock.back ?? []}
                 />
 
                 <footer className="fc-controls">

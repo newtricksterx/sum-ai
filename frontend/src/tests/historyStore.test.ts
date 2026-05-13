@@ -2,12 +2,24 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { useHistoryStore } from "../stores/historyStore";
+import { useHistoryStore, type HistorySummary } from "../stores/historyStore";
 
-const makeSummary = (id: number) => ({
-  url: `https://example.com/${id}`,
-  content: `summary-${id}`,
-});
+const makeSummary = (id: number, format = "paragraph"): HistorySummary => {
+  const documentContent = {
+    title: `Summary ${id}`,
+    format,
+    blocks: [
+      { type: "paragraph", children: [{ text: `summary-${id}` }] },
+    ],
+  };
+
+  return {
+    url: `https://example.com/${id}`,
+    format,
+    document_content: documentContent,
+    json_content: JSON.stringify(documentContent),
+  };
+};
 
 describe("historyStore", () => {
   beforeEach(() => {
@@ -94,12 +106,92 @@ describe("historyStore", () => {
       {
         id: "flashcards-1",
         type: "flashcards" as const,
-        flashcards: [{ question: "Q1", answer: "A1" }],
+        document: {
+          title: "Flashcards",
+          format: "flashcards",
+          blocks: [
+            {
+              type: "flashcard",
+              children: [],
+              front: [{ text: "Q1" }],
+              back: [{ text: "A1" }],
+            },
+          ],
+        },
       },
     ];
-    updateSummaryActionItems("https://example.com/1", actionItems);
+    updateSummaryActionItems("https://example.com/1", "paragraph", actionItems);
 
     const state = useHistoryStore.getState();
     expect(state.cache[0]?.actionItems).toEqual(actionItems);
+  });
+
+  it("keeps separate entries for the same url with different formats", () => {
+    const { addSummary, setHistoryOwner } = useHistoryStore.getState();
+    setHistoryOwner("user:1", 5);
+
+    addSummary(makeSummary(1, "paragraph"));
+    addSummary(makeSummary(1, "bullet-point"));
+
+    const state = useHistoryStore.getState();
+    expect(state.cache).toHaveLength(2);
+    expect(state.cache[0]?.url).toBe("https://example.com/1");
+    expect(state.cache[0]?.format).toBe("bullet-point");
+    expect(state.cache[1]?.url).toBe("https://example.com/1");
+    expect(state.cache[1]?.format).toBe("paragraph");
+  });
+
+  it("updates action items only for the matching url+format entry", () => {
+    const { addSummary, updateSummaryActionItems, setHistoryOwner } = useHistoryStore.getState();
+    setHistoryOwner("user:1", 5);
+    addSummary(makeSummary(1, "paragraph"));
+    addSummary(makeSummary(1, "bullet-point"));
+
+    const actionItems = [
+      {
+        id: "quiz-1",
+        type: "quiz" as const,
+        document: {
+          title: "Quiz",
+          format: "quiz",
+          blocks: [
+            {
+              type: "question",
+              children: [],
+              question: [{ text: "P" }],
+              options: [
+                { key: "A", correct: true, children: [{ text: "A" }] },
+                { key: "B", correct: false, children: [{ text: "B" }] },
+                { key: "C", correct: false, children: [{ text: "C" }] },
+                { key: "D", correct: false, children: [{ text: "D" }] },
+              ],
+              explanation: [{ text: "Because A is correct." }],
+            },
+          ],
+        },
+      },
+    ];
+
+    updateSummaryActionItems("https://example.com/1", "paragraph", actionItems);
+
+    const state = useHistoryStore.getState();
+    const paragraphItem = state.cache.find((item) => item.url === "https://example.com/1" && item.format === "paragraph");
+    const bulletItem = state.cache.find((item) => item.url === "https://example.com/1" && item.format === "bullet-point");
+    expect(paragraphItem?.actionItems).toEqual(actionItems);
+    expect(bulletItem?.actionItems ?? []).toHaveLength(0);
+  });
+
+  it("removes only the matching url+format entry", () => {
+    const { addSummary, removeSummary, setHistoryOwner } = useHistoryStore.getState();
+    setHistoryOwner("user:1", 5);
+    addSummary(makeSummary(1, "paragraph"));
+    addSummary(makeSummary(1, "bullet-point"));
+
+    removeSummary("https://example.com/1", "paragraph");
+
+    const state = useHistoryStore.getState();
+    expect(state.cache).toHaveLength(1);
+    expect(state.cache[0]?.url).toBe("https://example.com/1");
+    expect(state.cache[0]?.format).toBe("bullet-point");
   });
 });

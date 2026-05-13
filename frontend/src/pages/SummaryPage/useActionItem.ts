@@ -3,23 +3,23 @@ import type {
   SummaryActionId,
   SummaryActionItem,
 } from "../../types/summary";
-import { normalizeFlashcards, normalizeQuizItems } from "../../types/summary";
+import { coerceActionItemDocument } from "../../types/summary";
 import type { Language } from "../../utils/types";
+import type { SummaryDocument } from "./utils/types";
 import type { ActionItemErrorPayload, ActionItemResponse, UseActionItemOptions } from "./utils/types";
-import { MOCK_FLASHCARDS, MOCK_QUIZ_ITEMS, isMockActionItemModeEnabled } from "./utils/mocks";
+import { MOCK_FLASHCARDS_DOCUMENT, MOCK_QUIZ_DOCUMENT, isMockActionItemModeEnabled } from "./utils/mocks";
 import { readErrorBody } from "./utils/sources";
 
 
-const requestActionItem = async <T>(
+const requestActionItem = async (
   baseUrl: string,
   language: Language,
   type: SummaryActionId,
   summaryJson: string,
-  mockData: T[],
-  normalizer: (content: unknown) => T[],
-): Promise<T[]> => {
+  mockDocument: SummaryDocument,
+): Promise<SummaryDocument | null> => {
   if (isMockActionItemModeEnabled()) {
-    return mockData;
+    return mockDocument;
   }
 
   try {
@@ -34,18 +34,18 @@ const requestActionItem = async <T>(
       const errorPayload = await readErrorBody<ActionItemErrorPayload>(response);
       const fallbackMessage = errorPayload?.message || errorPayload?.error || "Could not generate action item.";
       console.error("Action Item Error:", fallbackMessage);
-      return [];
+      return null;
     }
 
     const result = (await response.json()) as ActionItemResponse;
     if (result.isSuccess !== true) {
-      return [];
+      return null;
     }
 
-    return normalizer(result.content);
+    return coerceActionItemDocument(result.content);
   } catch (error) {
     console.error("Fetch Action Item Error:", error);
-    return [];
+    return null;
   }
 };
 
@@ -80,35 +80,21 @@ export const useActionItem = ({
         }
 
         const actionItemId = `${actionId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const mockDocument = actionId === "flashcards" ? MOCK_FLASHCARDS_DOCUMENT : MOCK_QUIZ_DOCUMENT;
+        const document = await requestActionItem(baseUrl, language, actionId, summarizedContent, mockDocument);
 
-        if (actionId === "flashcards") {
-          const flashcards = await requestActionItem(
-            baseUrl, language, "flashcards", summarizedContent, MOCK_FLASHCARDS, normalizeFlashcards,
-          );
-          if (!flashcards.length) {
-            return;
-          }
-          setActionItems((previous) => {
-            const nextActionItems = [...previous, { id: actionItemId, type: actionId, flashcards }];
-            onActionItemsChange?.(nextActionItems);
-            return nextActionItems;
-          });
+        if (!document || document.blocks.length === 0) {
           return;
         }
 
-        if (actionId === "quiz") {
-          const quiz = await requestActionItem(
-            baseUrl, language, "quiz", summarizedContent, MOCK_QUIZ_ITEMS, normalizeQuizItems,
-          );
-          if (!quiz.length) {
-            return;
-          }
-          setActionItems((previous) => {
-            const nextActionItems = [...previous, { id: actionItemId, type: actionId, quiz }];
-            onActionItemsChange?.(nextActionItems);
-            return nextActionItems;
-          });
-        }
+        setActionItems((previous) => {
+          const nextActionItems: SummaryActionItem[] = [
+            ...previous,
+            { id: actionItemId, type: actionId, document },
+          ];
+          onActionItemsChange?.(nextActionItems);
+          return nextActionItems;
+        });
       } finally {
         actionRequestInFlightRef.current = false;
         setLoadingActionId(null);
