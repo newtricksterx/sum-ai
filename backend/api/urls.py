@@ -8,7 +8,6 @@ from api.views import (
     SocialAuthCompleteView,
     SocialJWTBridgeView,
     CreateUserView,
-    SummarizeText,
     LogoutUserView,
     CookieTokenRefreshView,
     MeView,
@@ -17,7 +16,6 @@ from api.views import (
 urlpatterns = [
     path("", ApiRootView.as_view(), name="api-root"),
     path("auth/csrf", CSRFTokenView.as_view(), name="csrf-token"),
-    path("summarize", SummarizeText.as_view(), name="summarize-text"),
     path("action-item", ActionItem.as_view(), name="action-item"),
     path("logout", LogoutUserView.as_view(), name="logout-user"),
     path("auth/social/complete", SocialAuthCompleteView.as_view(), name="social-auth-complete"),

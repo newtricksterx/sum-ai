@@ -1,62 +1,125 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from scripts.SumAI import SumAI
+from rest_framework.throttling import AnonRateThrottle
 
-SUPPORTED_ACTION_TYPES = {"flashcards", "quiz"}
+from api.quota import QuotaExceeded, release_request_slot, reserve_request_slot
+from scripts.SumAI import SumAI
+from scripts.summary import getSummary
+
+ACTION_ITEM_TYPES = {"flashcards", "quiz"}
+SUPPORTED_ACTION_TYPES = ACTION_ITEM_TYPES | {"summary"}
+
+
+def _error_response(message, status_code, **extra):
+    return Response(
+        {"isSuccess": False, "error": message, **extra},
+        status=status_code,
+    )
+
+
+def _success_response(content, *, is_success=True, status_code=status.HTTP_200_OK):
+    return Response(
+        {"isSuccess": is_success, "content": content},
+        status=status_code,
+    )
+
+
+def _quota_response(exc: QuotaExceeded) -> Response:
+    sub = exc.subscription
+    return Response(
+        {
+            "isSuccess": False,
+            "error": "summary_limit_reached",
+            "message": "Summary limit reached for current billing period.",
+            "summary_limit": sub.summary_limit,
+            "summaries_used": sub.summaries_used,
+            "billing_interval": sub.billing_interval,
+        },
+        status=status.HTTP_403_FORBIDDEN,
+    )
+
+
+def _reserve_for(user):
+    """Reserve a slot for an authenticated user; returns (subscription_pk, character_limit)
+    or (None, None) for anonymous users. Raises QuotaExceeded when the user is at limit."""
+    if not user.is_authenticated:
+        return None, None
+    subscription, character_limit = reserve_request_slot(user)
+    return subscription.pk, character_limit
+
+
+def _handle_summary(request):
+    try:
+        reservation_pk, character_limit = _reserve_for(request.user)
+    except QuotaExceeded as exc:
+        return _quota_response(exc)
+
+    result = getSummary(request, character_limit=character_limit) or {}
+    content = result.get("content")
+    is_success = bool(result.get("isSuccess"))
+
+    if content is None:
+        if reservation_pk is not None:
+            release_request_slot(reservation_pk)
+        return _error_response(
+            "Could not generate summary content.",
+            status.HTTP_502_BAD_GATEWAY,
+        )
+
+    # Soft failures (invalid request / transcript miss / PDF parse fail) flow through at 200
+    # so the frontend's existing error-doc renderer handles them via isSuccess + content.
+    # Refund the slot since no real LLM-generated summary was produced.
+    if not is_success and reservation_pk is not None:
+        release_request_slot(reservation_pk)
+
+    return _success_response(content, is_success=is_success)
+
+
+def _handle_action_item(action_type, request):
+    content = request.data.get("content")
+    if not isinstance(content, str) or not content.strip():
+        return _error_response(
+            "Missing required field: 'content'",
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        reservation_pk, _ = _reserve_for(request.user)
+    except QuotaExceeded as exc:
+        return _quota_response(exc)
+
+    language = request.data.get("language")
+    document = SumAI.ActionContent(action_type, language, content)
+    if not isinstance(document, dict) or not document.get("blocks"):
+        if reservation_pk is not None:
+            release_request_slot(reservation_pk)
+        return _error_response(
+            "Could not generate action content.",
+            status.HTTP_502_BAD_GATEWAY,
+        )
+    return _success_response(document)
 
 
 class ActionItem(APIView):
+    throttle_classes = [AnonRateThrottle]
 
     def post(self, request):
         action_type = request.data.get("type")
-        language = request.data.get("language")
-        summary_content = request.data.get("content")
-
         if not isinstance(action_type, str) or not action_type.strip():
-            return Response(
-                {
-                    "isSuccess": False,
-                    "error": "Missing required field: 'type'",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            return _error_response(
+                "Missing required field: 'type'",
+                status.HTTP_400_BAD_REQUEST,
             )
 
         normalized_action_type = action_type.strip().lower()
         if normalized_action_type not in SUPPORTED_ACTION_TYPES:
-            return Response(
-                {
-                    "isSuccess": False,
-                    "error": "Unsupported action type.",
-                    "supported_types": sorted(SUPPORTED_ACTION_TYPES),
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            return _error_response(
+                "Unsupported action type.",
+                status.HTTP_400_BAD_REQUEST,
+                supported_types=sorted(SUPPORTED_ACTION_TYPES),
             )
 
-        if not isinstance(summary_content, str) or not summary_content.strip():
-            return Response(
-                {
-                    "isSuccess": False,
-                    "error": "Missing required field: 'content'",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        action_document = SumAI.ActionContent(normalized_action_type, language, summary_content)
-
-        if not isinstance(action_document, dict) or not action_document.get("blocks"):
-            return Response(
-                {
-                    "isSuccess": False,
-                    "error": "Could not generate action content.",
-                },
-                status=status.HTTP_502_BAD_GATEWAY,
-            )
-
-        return Response(
-            {
-                "isSuccess": True,
-                "content": action_document,
-            },
-            status=status.HTTP_200_OK,
-        )
+        if normalized_action_type == "summary":
+            return _handle_summary(request)
+        return _handle_action_item(normalized_action_type, request)

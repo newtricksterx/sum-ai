@@ -122,7 +122,7 @@ def SummarizeContent(content, length, format, language, max_input_chars=MAX_INPU
         )
         return (
             {
-                "success": True,
+                "isSuccess": True,
                 "content": result,
             }
         )
@@ -142,7 +142,7 @@ def SummarizeContent(content, length, format, language, max_input_chars=MAX_INPU
         }
         return (
             {
-                "success": False,
+                "isSuccess": False,
                 "content": json.dumps(error_document),
             }
         )

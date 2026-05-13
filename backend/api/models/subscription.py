@@ -80,8 +80,6 @@ class Subscription(models.Model):
         return _add_months(period_start, 1)
 
     def usage_period_ends_at(self) -> datetime:
-        # Free plan usage is daily and should not be blocked by any stale
-        # persisted period-end value from previous plan logic.
         if self.billing_interval == "daily":
             return self._calculate_period_end_from_start(self.current_period_start)
 

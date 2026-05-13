@@ -65,6 +65,7 @@ const buildSummarizeRequest = ({
     formData.append("length", length);
     formData.append("format", format);
     formData.append("language", language);
+    formData.append("type", "summary");
     // Browser sets multipart Content-Type with boundary automatically.
     return { body: formData };
   }
@@ -72,6 +73,7 @@ const buildSummarizeRequest = ({
   return {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      type: "summary",
       source_content: sourceContent,
       source_url: sourceUrl ?? null,
       source_type: sourceType,
@@ -105,12 +107,21 @@ const postSummarize = async ({
   });
 
   try {
-    const response = await fetch(`${baseUrl}/api/summarize`, {
+    const response = await fetch(`${baseUrl}/api/action-item`, {
       method: "POST",
       credentials: "include",
       headers,
       body,
     });
+
+    /*
+        const response = await fetch(`${baseUrl}/api/action-item`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, language, content: summaryJson }),
+    });
+    */
 
     if (!response.ok) {
       const errorPayload = await readErrorBody<SummarizeErrorPayload>(response);
@@ -130,13 +141,16 @@ const postSummarize = async ({
       return errorResult("Request failed", fallbackMessage);
     }
 
-    const result = await response.json() as { data?: unknown; isSuccess?: unknown };
-    const hasSummaryData = typeof result?.data === "string" && result.data.trim().length > 0;
+    const result = await response.json() as { content?: unknown; isSuccess?: unknown };
+    const hasSummaryData = typeof result?.content === "string" && result.content.trim().length > 0;
+
+    console.log(result?.content)
+
     if (!hasSummaryData) {
       return errorResult("Empty response", "The server returned an empty summary.");
     }
 
-    const parsed = parseSummaryDocument(result.data);
+    const parsed = parseSummaryDocument(result.content);
     if (!parsed) {
       return errorResult("Malformed response", "The server returned a summary that could not be parsed.");
     }
