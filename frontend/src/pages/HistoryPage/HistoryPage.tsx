@@ -53,7 +53,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
       </div>
 
       {cache.length === 0 ? (
-        <p className="text-[13px] text-slate-600 dark:text-slate-300">
+        <p className="text-[13px]">
           {t("history.empty")}
         </p>
       ) : (
@@ -62,7 +62,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
             <HistoryCard
               key={item.url}
               hostName={truncateText(getHostName(item.url), 40)}
-              previewText={truncateText(getSummaryIntroFromHtml(item.content), 120)}
+              previewText={truncateText(getSummaryIntroFromHtml(item.document_content["title"]), 120)}
               onOpen={() => onClickOpen(item)}
               onRemove={() => onClickRemove(item)}
             />

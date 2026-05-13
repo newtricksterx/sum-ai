@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { useActionItem } from "./useActionItem";
 import {
   anonymousThrottleMessage,
+  documentToJSONString,
   errorDocument,
   errorResult,
   parseSummaryDocument,
@@ -315,7 +316,8 @@ export const useSummarizeActiveTab = () => {
       if (result.isSuccess && result.sourceUrl) {
         addSummaryToHistory({
           url: result.sourceUrl,
-          content: serializedContent,
+          document_content: result.json,
+          json_content: documentToJSONString(result.json),
           actionItems: [],
           isSuccess: true,
         });
@@ -330,7 +332,7 @@ export const useSummarizeActiveTab = () => {
     resetActionItemRequestState();
     const historyActionItems = normalizeSummaryActionItems(historyItem.actionItems);
     const historyIsSuccess = historyItem.isSuccess !== false;
-    const parsedContent = deserializeSummaryContent(historyItem.content)
+    const parsedContent = deserializeSummaryContent(historyItem.json_content)
       ?? errorDocument(
         "Summary unavailable",
         "This summary is from an older version and cannot be displayed. Please re-summarize the page.",

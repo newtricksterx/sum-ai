@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { normalizeSummaryActionItems, type SummaryActionItem } from "../types/summary";
+import { SummaryDocument } from "../pages/SummaryPage/utils/types";
+import { isSummaryDocument } from "../pages/SummaryPage/utils/document";
+
 
 // Logged-out users should only keep one summary.
 const DEFAULT_HISTORY_SIZE = 1;
@@ -9,7 +12,8 @@ const ANONYMOUS_OWNER_KEY = "anonymous";
 
 export interface HistorySummary {
   url: string;
-  content: string;
+  document_content: SummaryDocument;
+  json_content: string;
   actionItems?: SummaryActionItem[];
   isSuccess?: boolean;
 }
@@ -67,13 +71,14 @@ const normalizeHistorySummary = (value: unknown): HistorySummary | null => {
   }
 
   const candidate = value as Partial<HistorySummary>;
-  if (typeof candidate.url !== "string" || typeof candidate.content !== "string") {
+  if (typeof candidate.url !== "string" || !(isSummaryDocument(candidate.document_content))|| typeof candidate.json_content !== "string") {
     return null;
   }
 
   return {
     url: candidate.url,
-    content: candidate.content,
+    document_content: candidate.document_content,
+    json_content: candidate.json_content,
     actionItems: normalizeSummaryActionItems(candidate.actionItems),
     isSuccess: candidate.isSuccess !== false,
   };

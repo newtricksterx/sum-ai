@@ -12,6 +12,40 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
 
 const ALLOWED_BLOCK_TYPES = new Set(["bullet", "heading", "paragraph", "tl-dr", "qna_pair", "pro", "con"]);
 
+const isSummaryInline = (value: unknown): value is SummaryInline => {
+  if (!isObject(value) || typeof value.text !== "string") return false;
+  if (value.bold !== undefined && typeof value.bold !== "boolean") return false;
+  if (value.italic !== undefined && typeof value.italic !== "boolean") return false;
+  if (value.code !== undefined && typeof value.code !== "boolean") return false;
+  if (value.var !== undefined && typeof value.var !== "boolean") return false;
+  if (value.link !== undefined && typeof value.link !== "string") return false;
+  return true;
+};
+
+const isSummaryInlineArray = (value: unknown): value is SummaryInline[] =>
+  Array.isArray(value) && value.every(isSummaryInline);
+
+const isSummaryBlock = (value: unknown): value is SummaryBlock => {
+  if (!isObject(value) || typeof value.type !== "string" || !ALLOWED_BLOCK_TYPES.has(value.type)) {
+    return false;
+  }
+  if (!isSummaryInlineArray(value.children)) return false;
+  if (value.question !== undefined && !isSummaryInlineArray(value.question)) return false;
+  if (value.answer !== undefined && !isSummaryInlineArray(value.answer)) return false;
+  if (value.type === "qna_pair" && (!isSummaryInlineArray(value.question) || !isSummaryInlineArray(value.answer))) {
+    return false;
+  }
+  return true;
+};
+
+// Runtime type guard for objects that already have the SummaryDocument shape.
+export const isSummaryDocument = (value: unknown): value is SummaryDocument => {
+  if (!isObject(value)) return false;
+  if (typeof value.title !== "string" || typeof value.format !== "string") return false;
+  if (!Array.isArray(value.blocks)) return false;
+  return value.blocks.every(isSummaryBlock);
+};
+
 // Validates a JSON string and returns a typed SummaryDocument, or null if the input isn't a well-formed document.
 export const parseSummaryDocument = (raw: unknown): SummaryDocument | null => {
   if (typeof raw !== "string") return null;
@@ -72,6 +106,10 @@ export const documentToText = (value: SummaryDocument): string =>
     .filter((line) => line.length > 0)
     .map((line) => `• ${line}`)
     .join("\n");
+
+export const documentToJSONString = (value: SummaryDocument): string => {
+  return JSON.stringify(value)
+}
 
 // Builds an error-shaped SummaryDocument so the renderer can display failure states the same way it displays summaries.
 export const errorDocument = (title: string, message: string): SummaryDocument => ({
