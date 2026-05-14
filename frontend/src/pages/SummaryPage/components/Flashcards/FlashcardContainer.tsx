@@ -2,16 +2,13 @@ import { CaretLeftIcon, CaretRightIcon } from "@radix-ui/react-icons";
 import { Flashcard } from "./Flashcard";
 import './FlashcardContainer.css'
 import { useCallback, useMemo, useState } from "react";
-import { Trash2Icon } from "lucide-react";
-import AlertPopup from "../../../../components/AlertPopup/AlertPopup";
 import type { SummaryDocument } from "../../utils/types";
 
 interface FlashcardContainerProps {
   document: SummaryDocument;
-  onRemove: () => void;
 }
 
-export const FlashcardContainer = ({ document, onRemove }: FlashcardContainerProps) => {
+export const FlashcardContainer = ({ document }: FlashcardContainerProps) => {
     const flashcardBlocks = useMemo(
         () => document.blocks.filter((block) => block.type === "flashcard"),
         [document.blocks],
@@ -63,18 +60,6 @@ export const FlashcardContainer = ({ document, onRemove }: FlashcardContainerPro
                             <CaretRightIcon />
                         </button>
                     </div>
-                    <AlertPopup
-                        trigger={
-                            <button type="button" className="fc-remove-button">
-                                <Trash2Icon width={13} height={13}/>
-                            </button>
-                        }
-                        title="Remove flashcard set?"
-                        description="This flashcard action item will be removed from the summary page."
-                        onConfirm={onRemove}
-                        confirmLabel="Remove"
-                        cancelLabel="Cancel"
-                    />
                 </footer>
             </div>
         </section>

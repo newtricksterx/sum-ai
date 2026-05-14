@@ -4,12 +4,13 @@ import {
   CardStackIcon,
   CheckCircledIcon,
   QuestionMarkCircledIcon,
+  ReaderIcon,
 } from '@radix-ui/react-icons';
 import { useTranslation } from 'react-i18next';
 import LoaderCircle from '../../../../components/LoaderCircle';
 import '../../../../i18n';
 import './ActionGrid.css';
-import type { SummaryActionId } from '../../../../types/summary';
+import type { ActionId } from '../../../../types/summary';
 
 interface ActionGridProps {
     onClickAction: (actionId: ActionId) => void | Promise<void>;
@@ -17,13 +18,16 @@ interface ActionGridProps {
     loadingActionId?: ActionId | null;
 }
 
-export type ActionId = SummaryActionId;
-
 const ACTION_ITEMS: ReadonlyArray<{
   id: ActionId;
   icon: ReactElement;
   tone: 'teal' | 'purple' | 'amber' | 'blue';
 }> = [
+  {
+    id: 'summary',
+    icon: <ReaderIcon width={18} height={18} />,
+    tone: 'blue'
+  },
   {
     id: 'flashcards',
     icon: <CardStackIcon width={18} height={18} />,
@@ -32,7 +36,7 @@ const ACTION_ITEMS: ReadonlyArray<{
   {
     id: 'quiz',
     icon: <QuestionMarkCircledIcon width={18} height={18} />,
-    tone: 'purple',
+    tone: 'amber',
   }
 ];
 

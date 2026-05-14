@@ -125,6 +125,11 @@ const hi = {
       whatsNext: "अगला क्या है",
       pickAction: "कोई कार्रवाई चुनें",
       items: {
+        summary: {
+          title: "सारांश",
+          description: "सारांश बनाएं",
+          tag: "पठन",
+        },
         flashcards: {
           title: "फ्लैशकार्ड",
           description: "अध्ययन कार्ड बनाएं",

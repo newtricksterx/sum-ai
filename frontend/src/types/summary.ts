@@ -1,19 +1,19 @@
 import type { SummaryDocument } from "../pages/SummaryPage/utils/types";
 import { isSummaryDocument, parseSummaryDocument } from "../pages/SummaryPage/utils/document";
 
-export const SUMMARY_ACTION_IDS = ["flashcards", "quiz"] as const;
+export const SUMMARY_ACTION_IDS = ["flashcards", "quiz", "summary"] as const;
 
-export type SummaryActionId = (typeof SUMMARY_ACTION_IDS)[number];
+export type ActionId = (typeof SUMMARY_ACTION_IDS)[number];
 
 export type SummaryActionItem = {
   id: string;
-  type: SummaryActionId;
+  type: ActionId;
   document: SummaryDocument;
 };
 
 const SUMMARY_ACTION_ID_SET = new Set<string>(SUMMARY_ACTION_IDS);
 
-export const isSummaryActionId = (value: unknown): value is SummaryActionId => {
+export const isSummaryActionId = (value: unknown): value is ActionId => {
   return typeof value === "string" && SUMMARY_ACTION_ID_SET.has(value);
 };
 

@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Cross2Icon, TriangleLeftIcon, TriangleRightIcon, ExitIcon, CheckIcon } from "@radix-ui/react-icons";
-import AlertPopup from "../../../../components/AlertPopup/AlertPopup";
 import type { SummaryBlock, SummaryDocument } from "../../utils/types";
 import { renderInlineSegment } from "../../utils/renderInline";
 import "./Quiz.css";
 
 interface QuizProps {
     document: SummaryDocument;
-    onClose?: () => void;
 }
 
 const createInitialAnswers = (length: number): Array<number | null> => {
@@ -20,7 +18,7 @@ const findCorrectIndex = (block: SummaryBlock): number => {
   return correctIndex;
 };
 
-export const Quiz = ({ document, onClose } : QuizProps) => {
+export const Quiz = ({ document } : QuizProps) => {
   const questionBlocks = useMemo(
     () => document.blocks.filter((block) => block.type === "question"),
     [document.blocks],
@@ -130,23 +128,6 @@ export const Quiz = ({ document, onClose } : QuizProps) => {
                 <div className="qz-body">
                     <header className="qz-header">
                         <p className="qz-qnum">{`Question ${currentQuestionIndex + 1}`}</p>
-                        <AlertPopup
-                            trigger={
-                                <button
-                                    type="button"
-                                    className="qz-close"
-                                    aria-label="Close quiz"
-                                >
-                                    <Cross2Icon className="qz-close-icon" aria-hidden="true" />
-                                    <span>Close</span>
-                                </button>
-                            }
-                            title="Close quiz?"
-                            description="This quiz action item will be removed from the summary page."
-                            onConfirm={() => onClose?.()}
-                            confirmLabel="Close"
-                            cancelLabel="Cancel"
-                        />
                     </header>
 
                 <p className="qz-q rich-inline">{(currentQuestion.question ?? []).map(renderInlineSegment)}</p>

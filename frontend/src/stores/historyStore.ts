@@ -12,7 +12,6 @@ const ANONYMOUS_OWNER_KEY = "anonymous";
 
 export interface HistorySummary {
   url: string;
-  format: string;
   document_content: SummaryDocument;
   json_content: string;
   actionItems?: SummaryActionItem[];
@@ -54,10 +53,9 @@ const getOwnerHistory = (
 ): OwnerHistoryState => ownerHistories[ownerKey] ?? getDefaultOwnerHistory();
 
 const isSameSummaryKey = (
-  item: Pick<HistorySummary, "url" | "format">,
+  item: Pick<HistorySummary, "url">,
   url: string,
-  format: string,
-) => item.url === url && item.format === format;
+) => item.url === url;
 
 interface HistoryState {
   cache: HistorySummary[];
@@ -67,9 +65,9 @@ interface HistoryState {
   setHistoryOwner: (ownerKey: string, limit?: number | null) => void;
   setHistoryLimit: (limit: number | null | undefined) => void;
   addSummary: (summary: HistorySummary) => void;
-  updateSummaryActionItems: (url: string, format: string, actionItems: SummaryActionItem[]) => void;
+  updateSummaryActionItems: (url: string, actionItems: SummaryActionItem[]) => void;
   clearHistory: () => void;
-  removeSummary: (url: string, format: string) => void;
+  removeSummary: (url: string) => void;
 }
 
 const normalizeHistorySummary = (value: unknown): HistorySummary | null => {
@@ -84,7 +82,6 @@ const normalizeHistorySummary = (value: unknown): HistorySummary | null => {
 
   return {
     url: candidate.url,
-    format: candidate.document_content.format,
     document_content: candidate.document_content,
     json_content: candidate.json_content,
     actionItems: normalizeSummaryActionItems(candidate.actionItems),
@@ -173,20 +170,20 @@ export const useHistoryStore = create<HistoryState>()(
             };
             // Move existing item to the top by removing only an exact URL+format duplicate first.
             const remaining = state.cache.filter(
-                (item) => !isSameSummaryKey(item, normalizedSummary.url, normalizedSummary.format),
+                (item) => !isSameSummaryKey(item, normalizedSummary.url),
             );
             const nextCache = [normalizedSummary, ...remaining].slice(0, state.maxHistorySize);
             return applyOwnerCache(state, nextCache);
         }),
-        updateSummaryActionItems: (url, format, actionItems) => set((state) => {
-            const existingIndex = state.cache.findIndex((item) => isSameSummaryKey(item, url, format));
+        updateSummaryActionItems: (url, actionItems) => set((state) => {
+            const existingIndex = state.cache.findIndex((item) => isSameSummaryKey(item, url));
             if (existingIndex === -1) {
                 return state;
             }
 
             const normalizedActionItems = normalizeSummaryActionItems(actionItems);
             const nextCache = state.cache.map((item) =>
-                isSameSummaryKey(item, url, format)
+                isSameSummaryKey(item, url)
                     ? { ...item, actionItems: normalizedActionItems }
                     : item,
             );
@@ -194,8 +191,8 @@ export const useHistoryStore = create<HistoryState>()(
             return applyOwnerCache(state, nextCache);
         }),
         clearHistory: () => set((state) => applyOwnerCache(state, [])),
-        removeSummary: (url, format) => set((state) => {
-            const nextCache = state.cache.filter((item) => !isSameSummaryKey(item, url, format));
+        removeSummary: (url) => set((state) => {
+            const nextCache = state.cache.filter((item) => !isSameSummaryKey(item, url));
             return applyOwnerCache(state, nextCache);
         }),
     }), 

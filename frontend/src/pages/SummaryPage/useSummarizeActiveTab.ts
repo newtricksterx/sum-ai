@@ -157,6 +157,70 @@ type ActiveTabSummaryOutcome = {
   payload: SourcePayload | null;
 };
 
+// Builds a SourcePayload from an already-resolved, non-restricted tab: detects the source
+// type, then scrapes webpage text or fetches PDF bytes. Returns an error result instead of
+// a payload when extraction fails so callers can decide whether to surface it or fall back.
+const buildSourcePayloadFromTab = async (
+  tab: chrome.tabs.Tab,
+): Promise<{ payload: SourcePayload | null; error: SummarizeResult | null }> => {
+  const sourceType = detectSourceType(tab.url);
+
+  // YouTube content is fetched server-side as a transcript, so we skip the DOM scrape.
+  let sourceContent = "";
+  let pdf: PdfPayload | undefined;
+
+  if (sourceType === "webpage") {
+    let tabContent: { text: string } = { text: "" };
+    try {
+      tabContent = await extractTabContent(tab.id as number);
+    } catch (error) {
+      console.error("Script Injection Error:", error);
+      return {
+        payload: null,
+        error: errorResult(
+          "Cannot summarize this page",
+          "This page blocks extension script access. Try another site tab and try again.",
+        ),
+      };
+    }
+
+    if (!tabContent.text) {
+      return {
+        payload: null,
+        error: errorResult("No readable content", "Could not extract readable text from this page."),
+      };
+    }
+    sourceContent = tabContent.text;
+  } else if (sourceType === "pdf") {
+    try {
+      pdf = await fetchPdfBytes(tab);
+    } catch (error) {
+      console.error("PDF Fetch Error:", error);
+      if (error instanceof PdfFileAccessDeniedError) {
+        return {
+          payload: null,
+          error: errorResult(
+            "Local PDF access blocked",
+            "Open chrome://extensions, find Super Simple Summarizer, and enable \"Allow access to file URLs\", then try again.",
+          ),
+        };
+      }
+      return {
+        payload: null,
+        error: errorResult(
+          "Could not read PDF",
+          "Could not fetch this PDF. Try opening it in a fresh tab and reloading.",
+        ),
+      };
+    }
+  }
+
+  return {
+    payload: { sourceType, sourceUrl: tab.url, sourceContent, pdf },
+    error: null,
+  };
+};
+
 const requestActiveTabSummary = async ({
   baseUrl,
   length,
@@ -197,56 +261,10 @@ const requestActiveTabSummary = async ({
     };
   }
 
-  const sourceType = detectSourceType(tab.url);
-
-  // YouTube content is fetched server-side as a transcript, so we skip the DOM scrape.
-  let sourceContent = "";
-  let pdf: PdfPayload | undefined;
-
-  if (sourceType === "webpage") {
-    let tabContent: { text: string } = { text: "" };
-    try {
-      tabContent = await extractTabContent(tab.id);
-    } catch (error) {
-      console.error("Script Injection Error:", error);
-      return {
-        result: errorResult(
-          "Cannot summarize this page",
-          "This page blocks extension script access. Try another site tab and try again.",
-        ),
-        payload: null,
-      };
-    }
-
-    if (!tabContent.text) {
-      return { result: errorResult("No readable content", "Could not extract readable text from this page."), payload: null };
-    }
-    sourceContent = tabContent.text;
-  } else if (sourceType === "pdf") {
-    try {
-      pdf = await fetchPdfBytes(tab);
-    } catch (error) {
-      console.error("PDF Fetch Error:", error);
-      if (error instanceof PdfFileAccessDeniedError) {
-        return {
-          result: errorResult(
-            "Local PDF access blocked",
-            "Open chrome://extensions, find Super Simple Summarizer, and enable \"Allow access to file URLs\", then try again.",
-          ),
-          payload: null,
-        };
-      }
-      return {
-        result: errorResult(
-          "Could not read PDF",
-          "Could not fetch this PDF. Try opening it in a fresh tab and reloading.",
-        ),
-        payload: null,
-      };
-    }
+  const { payload, error } = await buildSourcePayloadFromTab(tab);
+  if (error || !payload) {
+    return { result: error ?? errorResult("No readable content", "Could not extract content from this page."), payload: null };
   }
-
-  const payload: SourcePayload = { sourceType, sourceUrl: tab.url, sourceContent, pdf };
 
   const result = await postSummarize({
     baseUrl,
@@ -279,6 +297,7 @@ export const useSummarizeActiveTab = () => {
   const updateSummaryActionItems = useHistoryStore((state) => state.updateSummaryActionItems);
 
   const [sourcePayload, setSourcePayload] = useState<SourcePayload | null>(null);
+  const [isHistorySession, setIsHistorySession] = useState(false);
 
   const persistSummaryPayload = useCallback(
     (
@@ -289,11 +308,26 @@ export const useSummarizeActiveTab = () => {
     ) => {
       UpdateSummaryStorage(serializeSummaryContent(content), sourceUrl, nextActionItems, isSuccess);
       if (sourceUrl) {
-        updateSummaryActionItems(sourceUrl, content.format, nextActionItems);
+        updateSummaryActionItems(sourceUrl, nextActionItems);
       }
     },
     [updateSummaryActionItems],
   );
+
+  // For history sessions the stored payload only carries the saved summary text. If the user
+  // is currently on the exact page the summary came from, re-extract the live source instead.
+  const resolveSourcePayload = useCallback(async (): Promise<SourcePayload | null> => {
+    if (sourcePayload === null) return null;
+    if (!isHistorySession) return sourcePayload;
+    if (isMockModeEnabled()) return sourcePayload;
+
+    const tab = await resolveCurrentTab();
+    if (!tab?.id || isRestrictedPage(tab.url)) return sourcePayload;
+    if (tab.url !== sourcePayload.sourceUrl) return sourcePayload;
+
+    const { payload } = await buildSourcePayloadFromTab(tab);
+    return payload ?? sourcePayload;
+  }, [sourcePayload, isHistorySession]);
 
   const {
     actionItems,
@@ -305,7 +339,7 @@ export const useSummarizeActiveTab = () => {
   } = useActionItem({
     baseUrl: import.meta.env.VITE_BASE_URL,
     language,
-    sourcePayload,
+    resolveSourcePayload,
     initialActionItems,
     onActionItemsChange: (nextActionItems) => {
       if (summarizedContent !== null) {
@@ -327,6 +361,7 @@ export const useSummarizeActiveTab = () => {
       setActionItems([]);
       setIsSummarySuccess(false);
       setSourcePayload(null);
+      setIsHistorySession(false);
 
       const { result, payload } = await requestActiveTabSummary({
         baseUrl: import.meta.env.VITE_BASE_URL,
@@ -351,7 +386,6 @@ export const useSummarizeActiveTab = () => {
       if (result.isSuccess && result.sourceUrl) {
         addSummaryToHistory({
           url: result.sourceUrl,
-          format: result.json.format,
           document_content: result.json,
           json_content: documentToJSONString(result.json),
           actionItems: [],
@@ -381,7 +415,17 @@ export const useSummarizeActiveTab = () => {
     setCurrentSourceUrl(historyItem.url);
     setActionItems(historyActionItems);
     setIsSummarySuccess(historyIsSuccess);
-    setSourcePayload(null);
+    setIsHistorySession(true);
+    if (historyIsSuccess) {
+      const detectedType = detectSourceType(historyItem.url);
+      setSourcePayload({
+        sourceType: detectedType === "pdf" ? "webpage" : detectedType,
+        sourceUrl: historyItem.url,
+        sourceContent: historyItem.json_content,
+      });
+    } else {
+      setSourcePayload(null);
+    }
     UpdateSummaryStorage(serializeSummaryContent(parsedContent), historyItem.url, historyActionItems, historyIsSuccess);
   }, [resetActionItemRequestState, setActionItems]);
 
@@ -394,6 +438,5 @@ export const useSummarizeActiveTab = () => {
     removeActionItem,
     summarize,
     setSummaryFromHistory,
-    canGenerateActionItems: sourcePayload !== null,
   };
 };

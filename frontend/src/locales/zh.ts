@@ -125,6 +125,11 @@
       whatsNext: "下一步",
       pickAction: "选择一个操作",
       items: {
+        summary: {
+          title: "摘要",
+          description: "生成摘要",
+          tag: "阅读",
+        },
         flashcards: {
           title: "闪卡",
           description: "生成学习卡片",

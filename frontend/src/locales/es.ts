@@ -125,6 +125,11 @@ const es = {
       whatsNext: "Que sigue",
       pickAction: "Elige una accion",
       items: {
+        summary: {
+          title: "Resumen",
+          description: "Genera un resumen",
+          tag: "Lectura",
+        },
         flashcards: {
           title: "Tarjetas",
           description: "Genera tarjetas de estudio",

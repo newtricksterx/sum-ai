@@ -1,7 +1,7 @@
 .summary-actions {
   margin-top: 0.7rem;
   border-radius: 0.95rem;
-  padding: 0.7rem;
+  padding: 5px 0px;
   --ag-tone-teal-bg: color-mix(in srgb, var(--color-status-success-bg) 42%, var(--color-surface-primary));
   --ag-tone-teal-fg: var(--color-status-success-text);
   --ag-tone-purple-bg: color-mix(in srgb, var(--color-status-info-bg) 58%, var(--color-surface-primary));
@@ -14,10 +14,11 @@
 
 .summary-actions-header {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  margin: 0 0 0.55rem;
+  margin: 0.2rem 0.5rem 0.3rem 0.5rem;
 }
 
 .summary-actions-label {
@@ -37,7 +38,7 @@
 
 .summary-actions-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.45rem;
 }
 

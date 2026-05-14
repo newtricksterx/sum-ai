@@ -125,6 +125,11 @@ const fr = {
       whatsNext: "Et ensuite",
       pickAction: "Choisissez une action",
       items: {
+        summary: {
+          title: "Resume",
+          description: "Generer un resume",
+          tag: "Lecture",
+        },
         flashcards: {
           title: "Fiches",
           description: "Generer des fiches d'etude",

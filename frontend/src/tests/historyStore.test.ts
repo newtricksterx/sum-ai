@@ -15,7 +15,6 @@ const makeSummary = (id: number, format = "paragraph"): HistorySummary => {
 
   return {
     url: `https://example.com/${id}`,
-    format,
     document_content: documentContent,
     json_content: JSON.stringify(documentContent),
   };
@@ -120,13 +119,13 @@ describe("historyStore", () => {
         },
       },
     ];
-    updateSummaryActionItems("https://example.com/1", "paragraph", actionItems);
+    updateSummaryActionItems("https://example.com/1", actionItems);
 
     const state = useHistoryStore.getState();
     expect(state.cache[0]?.actionItems).toEqual(actionItems);
   });
 
-  it("keeps separate entries for the same url with different formats", () => {
+  it("replaces an existing entry when the same url is added again", () => {
     const { addSummary, setHistoryOwner } = useHistoryStore.getState();
     setHistoryOwner("user:1", 5);
 
@@ -134,18 +133,16 @@ describe("historyStore", () => {
     addSummary(makeSummary(1, "bullet-point"));
 
     const state = useHistoryStore.getState();
-    expect(state.cache).toHaveLength(2);
+    expect(state.cache).toHaveLength(1);
     expect(state.cache[0]?.url).toBe("https://example.com/1");
-    expect(state.cache[0]?.format).toBe("bullet-point");
-    expect(state.cache[1]?.url).toBe("https://example.com/1");
-    expect(state.cache[1]?.format).toBe("paragraph");
+    expect(state.cache[0]?.document_content.format).toBe("bullet-point");
   });
 
-  it("updates action items only for the matching url+format entry", () => {
+  it("updates action items only for the matching url entry", () => {
     const { addSummary, updateSummaryActionItems, setHistoryOwner } = useHistoryStore.getState();
     setHistoryOwner("user:1", 5);
-    addSummary(makeSummary(1, "paragraph"));
-    addSummary(makeSummary(1, "bullet-point"));
+    addSummary(makeSummary(1));
+    addSummary(makeSummary(2));
 
     const actionItems = [
       {
@@ -172,26 +169,25 @@ describe("historyStore", () => {
       },
     ];
 
-    updateSummaryActionItems("https://example.com/1", "paragraph", actionItems);
+    updateSummaryActionItems("https://example.com/1", actionItems);
 
     const state = useHistoryStore.getState();
-    const paragraphItem = state.cache.find((item) => item.url === "https://example.com/1" && item.format === "paragraph");
-    const bulletItem = state.cache.find((item) => item.url === "https://example.com/1" && item.format === "bullet-point");
-    expect(paragraphItem?.actionItems).toEqual(actionItems);
-    expect(bulletItem?.actionItems ?? []).toHaveLength(0);
+    const item1 = state.cache.find((item) => item.url === "https://example.com/1");
+    const item2 = state.cache.find((item) => item.url === "https://example.com/2");
+    expect(item1?.actionItems).toEqual(actionItems);
+    expect(item2?.actionItems ?? []).toHaveLength(0);
   });
 
-  it("removes only the matching url+format entry", () => {
+  it("removes only the matching url entry", () => {
     const { addSummary, removeSummary, setHistoryOwner } = useHistoryStore.getState();
     setHistoryOwner("user:1", 5);
-    addSummary(makeSummary(1, "paragraph"));
-    addSummary(makeSummary(1, "bullet-point"));
+    addSummary(makeSummary(1));
+    addSummary(makeSummary(2));
 
-    removeSummary("https://example.com/1", "paragraph");
+    removeSummary("https://example.com/1");
 
     const state = useHistoryStore.getState();
     expect(state.cache).toHaveLength(1);
-    expect(state.cache[0]?.url).toBe("https://example.com/1");
-    expect(state.cache[0]?.format).toBe("bullet-point");
+    expect(state.cache[0]?.url).toBe("https://example.com/2");
   });
 });

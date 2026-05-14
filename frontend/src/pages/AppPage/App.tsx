@@ -46,7 +46,6 @@ function App() {
     removeActionItem,
     summarize,
     setSummaryFromHistory,
-    canGenerateActionItems,
   } = useSummarizeActiveTab();
   const { isCopySuccess, showCopySuccess, resetCopySuccess } = useCopySuccessTimer();
 
@@ -206,10 +205,9 @@ function App() {
         onAddActionItem={addActionItem}
         onRemoveActionItem={removeActionItem}
         loadingActionId={loadingActionId}
-        canGenerateActionItems={canGenerateActionItems}
       />
     );
-  }, [actionItems, addActionItem, canGenerateActionItems, fontSize, isSummarySuccess, loadingActionId, removeActionItem, summarizedContent]);
+  }, [actionItems, addActionItem, fontSize, isSummarySuccess, loadingActionId, removeActionItem, summarizedContent]);
 
   const frontPageContent = useMemo(
     () => <FrontPage onClickGenerate={onClickStartGenerate} isGenerateDisabled={isActionItemLoading} />,

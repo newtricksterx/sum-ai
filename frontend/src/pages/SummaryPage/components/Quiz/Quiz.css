@@ -29,7 +29,7 @@
   min-height: 1.6rem;
   padding: 0 0.56rem;
   border: 1px solid color-mix(in srgb, var(--color-border-primary) 90%, transparent);
-  border-radius: 999px;
+  border-radius: 0.5rem;
   background: color-mix(in srgb, var(--color-surface-primary) 86%, transparent);
   color: var(--color-text-secondary);
   font-size: 0.66rem;

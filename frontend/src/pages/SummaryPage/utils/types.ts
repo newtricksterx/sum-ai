@@ -84,7 +84,7 @@ export type ActionItemResponse = {
 export type UseActionItemOptions = {
   baseUrl: string;
   language: Language;
-  sourcePayload: SourcePayload | null;
+  resolveSourcePayload: () => Promise<SourcePayload | null>;
   initialActionItems?: SummaryActionItem[];
   onActionItemsChange?: (nextActionItems: SummaryActionItem[]) => void;
   onActionItemSuccess?: () => void;

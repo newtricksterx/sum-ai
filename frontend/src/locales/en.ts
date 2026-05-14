@@ -125,6 +125,11 @@
       whatsNext: "What's next",
       pickAction: "Pick an action",
       items: {
+        summary: {
+          title: "Summary",
+          description: "Generate a summary",
+          tag: "Read",
+        },
         flashcards: {
           title: "Flashcards",
           description: "Generate study cards",

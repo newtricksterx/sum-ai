@@ -1,4 +1,5 @@
 import type { SummaryDocument } from "./types";
+import { parseSummaryDocument } from "./document";
 import { isRestrictedPage, resolveCurrentTab } from "../../FrontPage/frontpage.helpers";
 
 // Dev-mode summary fixture: a serialized SummaryDocument (JSON string, NOT HTML despite legacy variable name).
@@ -352,6 +353,13 @@ export const MOCK_QUIZ_DOCUMENT: SummaryDocument = {
     },
   ],
 };
+
+export const MOCK_SUMMARY_ACTION_ITEM_DOCUMENT: SummaryDocument =
+  parseSummaryDocument(MOCK_SUMMARY_DOCUMENT) ?? {
+    title: "Summary",
+    format: "paragraph",
+    blocks: [],
+  };
 
 export const isMockModeEnabled = () =>
   import.meta.env.DEV ||
