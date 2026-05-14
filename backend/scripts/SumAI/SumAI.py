@@ -187,7 +187,10 @@ def ActionContent(type, language, content):
     logger.debug(f'Action type: {normalized_type}, Received at: {time.time()}')
 
     try:
-        return CreateActionContent(normalized_type, language, content)
+        document = CreateActionContent(normalized_type, language, content)
+        if not isinstance(document, dict) or not document.get("blocks"):
+            return {"isSuccess": False, "content": None}
+        return {"isSuccess": True, "content": document}
     except Exception:
         logger.exception(f"Failed to generate {normalized_type} output.")
-        return None
+        return {"isSuccess": False, "content": None}

@@ -70,60 +70,73 @@ def _handle_pdf(pdf_file):
             }
         )
 
-def getSummary(request, character_limit=None):
+def _extract_source_text(request):
+    """Validate the request and return {isSuccess, content} where content is raw source text."""
     source_url = request.data.get("source_url")
     source_type = request.data.get("source_type")
     source_content = request.data.get("source_content")
     pdf_file = request.FILES.get("pdf")
 
-    isValid = isValidRequest(
+    if not isValidRequest(
         source_url=source_url,
         source_type=source_type,
         source_content=source_content,
         pdf_file=pdf_file,
-    )
-    if not isValid:
-        return {
-            "isSuccess": False,
-            "content": "Error: Invalid request."
-        }
-
-    content_to_summarize = (
-        {
-            "isSuccess": True,
-            "content": source_content
-        }
-    )
+    ):
+        return {"isSuccess": False, "content": "Error: Invalid request."}
 
     if source_type == "youtube":
-        content_to_summarize = _handle_youtube(source_url=source_url)
+        return _handle_youtube(source_url=source_url)
 
     if source_type == "pdf":
-        content_to_summarize = _handle_pdf(pdf_file=pdf_file)
+        return _handle_pdf(pdf_file=pdf_file)
 
-    if not content_to_summarize.get("isSuccess"):
-        return (
-            {
-                "isSuccess": content_to_summarize.get("isSuccess"),
-                "content": content_to_summarize.get("content")
-            }
-        )
+    return {"isSuccess": True, "content": source_content}
+
+
+def get_summary(request, character_limit=None):
+    source = _extract_source_text(request)
+    if not source.get("isSuccess"):
+        return source
 
     if character_limit is None:
         character_limit = get_character_limit("free")
 
-    summary = SumAI.SummarizeContent(
-        content_to_summarize.get("content"),
+    result = SumAI.SummarizeContent(
+        source.get("content"),
         request.data.get("length"),
         request.data.get("format"),
         request.data.get("language"),
         max_input_chars=character_limit, # type: ignore
-        source_url=source_url,
+        source_url=request.data.get("source_url"),
     )
 
-    return (
-        {
-            "isSuccess": summary.get("isSuccess"),
-            "content": summary.get("content"), # is a string
-        }
+    return {
+        "isSuccess": result.get("isSuccess"),
+        "content": result.get("content"), # is a string
+    }
+
+
+def get_action_item(request, character_limit=None):
+    source = _extract_source_text(request)
+    if not source.get("isSuccess"):
+        return source
+
+    if character_limit is None:
+        character_limit = get_character_limit("free")
+
+    text = source.get("content") or ""
+    if isinstance(character_limit, int) and character_limit > 0:
+        text = text[:character_limit]
+
+    result = SumAI.ActionContent(
+        request.data.get("type"),
+        request.data.get("language"),
+        text,
     )
+
+    return {
+        "isSuccess": result.get("isSuccess"),
+        "content": result.get("content"),
+    }
+

@@ -63,6 +63,20 @@ def _summary_document_json():
     return '{"title":"Summary","format":"paragraph","blocks":[{"type":"paragraph","children":[{"text":"Result"}]}]}'
 
 
+def _webpage_payload(action_type, **overrides):
+    payload = {
+        "type": action_type,
+        "language": "english",
+        "source_content": "Raw source",
+        "source_url": "https://example.com/article",
+        "source_type": "webpage",
+        "length": "short",
+        "format": "bullet-point",
+    }
+    payload.update(overrides)
+    return payload
+
+
 @override_settings(REST_FRAMEWORK=TEST_REST_FRAMEWORK)
 class ActionItemEndpointTest(TestCase):
     def setUp(self):
@@ -73,7 +87,7 @@ class ActionItemEndpointTest(TestCase):
     def test_missing_type_returns_400(self):
         response = self.client.post(
             self.url,
-            data=json.dumps({"content": "<h1>Summary</h1><p>Body</p>"}),
+            data=json.dumps({"source_content": "Body", "source_url": "https://x", "source_type": "webpage"}),
             content_type="application/json",
         )
 
@@ -84,7 +98,7 @@ class ActionItemEndpointTest(TestCase):
     def test_unsupported_type_returns_400(self):
         response = self.client.post(
             self.url,
-            data=json.dumps({"type": "outline", "content": "<h1>Summary</h1><p>Body</p>"}),
+            data=json.dumps({"type": "outline", "source_url": "https://x", "source_type": "webpage", "source_content": "x"}),
             content_type="application/json",
         )
 
@@ -94,23 +108,41 @@ class ActionItemEndpointTest(TestCase):
         self.assertEqual(body["error"], "Unsupported action type.")
         self.assertEqual(body["supported_types"], ["flashcards", "quiz", "summary"])
 
-    def test_missing_content_returns_400(self):
+    def test_missing_source_returns_soft_failure(self):
+        # No source_url / source_content -> _extract_source_text returns isSuccess=False
+        # which the endpoint surfaces as a 200 with isSuccess=false (parity with summary).
         response = self.client.post(
             self.url,
-            data=json.dumps({"type": "flashcards"}),
+            data=json.dumps({"type": "flashcards", "language": "english"}),
             content_type="application/json",
         )
 
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(response.json()["isSuccess"])
-        self.assertEqual(response.json()["error"], "Missing required field: 'content'")
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertFalse(body["isSuccess"])
+        self.assertEqual(body["content"], "Error: Invalid request.")
 
-    @patch("api.views.actionitem.SumAI.ActionContent", return_value=_flashcards_document())
-    def test_flashcards_returns_generated_content(self, mock_action_content):
-        summary_content = '{"title":"S","format":"paragraph","blocks":[]}'
+    def test_missing_source_returns_same_soft_failure_for_summary(self):
+        # Sharing the helper means summary and flashcards return identical invalid-request shapes.
         response = self.client.post(
             self.url,
-            data=json.dumps({"type": "flashcards", "language": "english", "content": summary_content}),
+            data=json.dumps({"type": "summary", "language": "english"}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertFalse(body["isSuccess"])
+        self.assertEqual(body["content"], "Error: Invalid request.")
+
+    @patch(
+        "scripts.summary.SumAI.ActionContent",
+        return_value={"isSuccess": True, "content": _flashcards_document()},
+    )
+    def test_flashcards_returns_generated_content(self, mock_action_content):
+        response = self.client.post(
+            self.url,
+            data=json.dumps(_webpage_payload("flashcards")),
             content_type="application/json",
         )
 
@@ -118,14 +150,17 @@ class ActionItemEndpointTest(TestCase):
         body = response.json()
         self.assertTrue(body["isSuccess"])
         self.assertEqual(body["content"], _flashcards_document())
-        mock_action_content.assert_called_once_with("flashcards", "english", summary_content)
+        # Source text (not a pre-summarized JSON) is what reaches the LLM helper.
+        mock_action_content.assert_called_once_with("flashcards", "english", "Raw source")
 
-    @patch("api.views.actionitem.SumAI.ActionContent", return_value=None)
+    @patch(
+        "scripts.summary.SumAI.ActionContent",
+        return_value={"isSuccess": False, "content": None},
+    )
     def test_flashcards_returns_502_when_generation_fails(self, mock_action_content):
-        summary_content = '{"title":"S","format":"paragraph","blocks":[]}'
         response = self.client.post(
             self.url,
-            data=json.dumps({"type": "flashcards", "language": "english", "content": summary_content}),
+            data=json.dumps(_webpage_payload("flashcards")),
             content_type="application/json",
         )
 
@@ -133,14 +168,16 @@ class ActionItemEndpointTest(TestCase):
         body = response.json()
         self.assertFalse(body["isSuccess"])
         self.assertEqual(body["error"], "Could not generate action content.")
-        mock_action_content.assert_called_once_with("flashcards", "english", summary_content)
+        mock_action_content.assert_called_once_with("flashcards", "english", "Raw source")
 
-    @patch("api.views.actionitem.SumAI.ActionContent", return_value=_quiz_document())
+    @patch(
+        "scripts.summary.SumAI.ActionContent",
+        return_value={"isSuccess": True, "content": _quiz_document()},
+    )
     def test_quiz_returns_generated_content(self, mock_action_content):
-        summary_content = '{"title":"S","format":"paragraph","blocks":[]}'
         response = self.client.post(
             self.url,
-            data=json.dumps({"type": "quiz", "language": "english", "content": summary_content}),
+            data=json.dumps(_webpage_payload("quiz")),
             content_type="application/json",
         )
 
@@ -149,39 +186,16 @@ class ActionItemEndpointTest(TestCase):
         self.assertTrue(body["isSuccess"])
         self.assertEqual(body["content"]["format"], "quiz")
         self.assertEqual(len(body["content"]["blocks"]), 1)
-        mock_action_content.assert_called_once_with("quiz", "english", summary_content)
+        mock_action_content.assert_called_once_with("quiz", "english", "Raw source")
 
-    @patch("api.views.actionitem.SumAI.ActionContent", return_value={"title": "Quiz", "format": "quiz", "blocks": []})
-    def test_quiz_returns_502_when_blocks_empty(self, mock_action_content):
-        summary_content = '{"title":"S","format":"paragraph","blocks":[]}'
-        response = self.client.post(
-            self.url,
-            data=json.dumps({"type": "quiz", "language": "english", "content": summary_content}),
-            content_type="application/json",
-        )
-
-        self.assertEqual(response.status_code, 502)
-        body = response.json()
-        self.assertFalse(body["isSuccess"])
-        self.assertEqual(body["error"], "Could not generate action content.")
-        mock_action_content.assert_called_once_with("quiz", "english", summary_content)
-
-    @patch("api.views.actionitem.SumAI.SummarizeContent", return_value={"isSuccess": True, "content": _summary_document_json()})
+    @patch(
+        "scripts.summary.SumAI.SummarizeContent",
+        return_value={"isSuccess": True, "content": _summary_document_json()},
+    )
     def test_summary_returns_summarize_content_shape(self, mock_summarize):
-        source_content = "Raw source content"
         response = self.client.post(
             self.url,
-            data=json.dumps(
-                {
-                    "type": "summary",
-                    "language": "english",
-                    "source_content": source_content,
-                    "source_url": "https://example.com/article",
-                    "source_type": "webpage",
-                    "length": "short",
-                    "format": "bullet-point",
-                }
-            ),
+            data=json.dumps(_webpage_payload("summary")),
             content_type="application/json",
         )
 
@@ -190,7 +204,7 @@ class ActionItemEndpointTest(TestCase):
         self.assertTrue(body["isSuccess"])
         self.assertEqual(body["content"], _summary_document_json())
         mock_summarize.assert_called_once_with(
-            source_content,
+            "Raw source",
             "short",
             "bullet-point",
             "english",
@@ -198,22 +212,14 @@ class ActionItemEndpointTest(TestCase):
             source_url="https://example.com/article",
         )
 
-    @patch("api.views.actionitem.SumAI.SummarizeContent", return_value={"isSuccess": False, "content": _summary_document_json()})
+    @patch(
+        "scripts.summary.SumAI.SummarizeContent",
+        return_value={"isSuccess": False, "content": _summary_document_json()},
+    )
     def test_summary_surfaces_unsuccessful_summarize_result(self, mock_summarize):
-        source_content = "Raw source content"
         response = self.client.post(
             self.url,
-            data=json.dumps(
-                {
-                    "type": "summary",
-                    "language": "english",
-                    "source_content": source_content,
-                    "source_url": "https://example.com/article",
-                    "source_type": "webpage",
-                    "length": "short",
-                    "format": "bullet-point",
-                }
-            ),
+            data=json.dumps(_webpage_payload("summary")),
             content_type="application/json",
         )
 
@@ -223,22 +229,14 @@ class ActionItemEndpointTest(TestCase):
         self.assertEqual(body["content"], _summary_document_json())
         self.assertEqual(mock_summarize.call_count, 1)
 
-    @patch("api.views.actionitem.SumAI.SummarizeContent", return_value={"isSuccess": False, "content": None})
+    @patch(
+        "scripts.summary.SumAI.SummarizeContent",
+        return_value={"isSuccess": False, "content": None},
+    )
     def test_summary_returns_502_when_summarizer_returns_invalid_payload(self, mock_summarize):
-        source_content = "Raw source content"
         response = self.client.post(
             self.url,
-            data=json.dumps(
-                {
-                    "type": "summary",
-                    "language": "english",
-                    "source_content": source_content,
-                    "source_url": "https://example.com/article",
-                    "source_type": "webpage",
-                    "length": "short",
-                    "format": "bullet-point",
-                }
-            ),
+            data=json.dumps(_webpage_payload("summary")),
             content_type="application/json",
         )
 
@@ -263,44 +261,34 @@ class ActionItemQuotaTest(TestCase):
         )
         self.client.force_authenticate(user=self.user)
 
-    def _summary_payload(self):
-        return {
-            "type": "summary",
-            "language": "english",
-            "source_content": "Raw source",
-            "source_url": "https://example.com/article",
-            "source_type": "webpage",
-            "length": "short",
-            "format": "bullet-point",
-        }
-
-    def _flashcards_payload(self):
-        return {
-            "type": "flashcards",
-            "language": "english",
-            "content": '{"title":"S","format":"paragraph","blocks":[]}',
-        }
-
     def _used(self):
         return Subscription.objects.get(user=self.user).summaries_used
 
     @patch(
-        "api.views.actionitem.SumAI.SummarizeContent",
+        "scripts.summary.SumAI.SummarizeContent",
         return_value={"isSuccess": True, "content": _summary_document_json()},
     )
     def test_authenticated_summary_under_limit_increments_counter(self, _mock):
         self.assertEqual(self._used(), 0)
-        response = self.client.post(self.url, data=json.dumps(self._summary_payload()), content_type="application/json")
+        response = self.client.post(
+            self.url,
+            data=json.dumps(_webpage_payload("summary")),
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self._used(), 1)
 
     @patch(
-        "api.views.actionitem.SumAI.ActionContent",
-        return_value=_flashcards_document(),
+        "scripts.summary.SumAI.ActionContent",
+        return_value={"isSuccess": True, "content": _flashcards_document()},
     )
     def test_authenticated_flashcards_increments_counter(self, _mock):
-        response = self.client.post(self.url, data=json.dumps(self._flashcards_payload()), content_type="application/json")
+        response = self.client.post(
+            self.url,
+            data=json.dumps(_webpage_payload("flashcards")),
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self._used(), 1)
@@ -309,7 +297,11 @@ class ActionItemQuotaTest(TestCase):
         free_limit = get_summary_limit("free")
         Subscription.objects.filter(user=self.user).update(summaries_used=free_limit)
 
-        response = self.client.post(self.url, data=json.dumps(self._flashcards_payload()), content_type="application/json")
+        response = self.client.post(
+            self.url,
+            data=json.dumps(_webpage_payload("flashcards")),
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 403)
         body = response.json()
@@ -319,28 +311,46 @@ class ActionItemQuotaTest(TestCase):
         # Counter unchanged when rejected pre-call.
         self.assertEqual(self._used(), free_limit)
 
-    @patch("api.views.actionitem.SumAI.ActionContent", return_value=None)
+    @patch(
+        "scripts.summary.SumAI.ActionContent",
+        return_value={"isSuccess": False, "content": None},
+    )
     def test_action_item_hard_failure_refunds_slot(self, _mock):
-        response = self.client.post(self.url, data=json.dumps(self._flashcards_payload()), content_type="application/json")
+        response = self.client.post(
+            self.url,
+            data=json.dumps(_webpage_payload("flashcards")),
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 502)
         self.assertEqual(self._used(), 0)
 
     @patch(
-        "api.views.actionitem.SumAI.SummarizeContent",
+        "scripts.summary.SumAI.SummarizeContent",
         return_value={"isSuccess": False, "content": _summary_document_json()},
     )
     def test_summary_soft_failure_refunds_slot(self, _mock):
-        response = self.client.post(self.url, data=json.dumps(self._summary_payload()), content_type="application/json")
+        response = self.client.post(
+            self.url,
+            data=json.dumps(_webpage_payload("summary")),
+            content_type="application/json",
+        )
 
         # Soft failures still return 200 with isSuccess=false; the slot is refunded.
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.json()["isSuccess"])
         self.assertEqual(self._used(), 0)
 
-    @patch("api.views.actionitem.SumAI.SummarizeContent", return_value={"isSuccess": False, "content": None})
+    @patch(
+        "scripts.summary.SumAI.SummarizeContent",
+        return_value={"isSuccess": False, "content": None},
+    )
     def test_summary_hard_failure_refunds_slot(self, _mock):
-        response = self.client.post(self.url, data=json.dumps(self._summary_payload()), content_type="application/json")
+        response = self.client.post(
+            self.url,
+            data=json.dumps(_webpage_payload("summary")),
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 502)
         self.assertEqual(self._used(), 0)
@@ -355,17 +365,14 @@ class ActionItemAnonymousQuotaTest(TestCase):
         self.client = Client()
         self.url = reverse("action-item")
 
-    @patch("api.views.actionitem.SumAI.ActionContent", return_value=_flashcards_document())
+    @patch(
+        "scripts.summary.SumAI.ActionContent",
+        return_value={"isSuccess": True, "content": _flashcards_document()},
+    )
     def test_anonymous_user_can_still_call_endpoint(self, _mock):
         response = self.client.post(
             self.url,
-            data=json.dumps(
-                {
-                    "type": "flashcards",
-                    "language": "english",
-                    "content": '{"title":"S","format":"paragraph","blocks":[]}',
-                }
-            ),
+            data=json.dumps(_webpage_payload("flashcards")),
             content_type="application/json",
         )
 

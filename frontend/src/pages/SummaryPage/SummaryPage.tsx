@@ -15,6 +15,7 @@ interface SummaryPageProps {
   onAddActionItem: (actionId: ActionId) => void;
   onRemoveActionItem: (actionItemId: string) => void;
   loadingActionId?: ActionId | null;
+  canGenerateActionItems?: boolean;
 }
 
 const renderDocumentBody = (document: SummaryDocument) => {
@@ -137,14 +138,18 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
   onAddActionItem,
   onRemoveActionItem,
   loadingActionId = null,
+  canGenerateActionItems = true,
 }) => {
 
   const isActionGridDisabled = useMemo(() => {
     if (content == null || !isSummarySuccess) {
       return true;
     }
+    if (!canGenerateActionItems) {
+      return true;
+    }
     return isDocumentEmpty(content);
-  }, [content, isSummarySuccess]);
+  }, [canGenerateActionItems, content, isSummarySuccess]);
 
   const renderActionItem = useCallback((actionItem: SummaryActionItem) => {
         if (actionItem.document.blocks.length === 0) {

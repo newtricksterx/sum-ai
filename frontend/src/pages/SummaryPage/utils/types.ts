@@ -1,5 +1,16 @@
 import type { Format, Language, Length } from "../../../utils/types";
 import type { SummaryActionItem } from "../../../types/summary";
+import type { PdfPayload } from "./pdf";
+
+export type SourceType = "webpage" | "pdf" | "youtube";
+export type SourceActionType = "summary" | "flashcards" | "quiz";
+
+export type SourcePayload = {
+  sourceType: SourceType;
+  sourceUrl: string | undefined;
+  sourceContent: string;
+  pdf?: PdfPayload;
+};
 
 export type TranslateFn = (key: string, options?: Record<string, unknown>) => string;
 
@@ -73,7 +84,8 @@ export type ActionItemResponse = {
 export type UseActionItemOptions = {
   baseUrl: string;
   language: Language;
-  summarizedContent: string | null;
+  sourcePayload: SourcePayload | null;
   initialActionItems?: SummaryActionItem[];
   onActionItemsChange?: (nextActionItems: SummaryActionItem[]) => void;
+  onActionItemSuccess?: () => void;
 };

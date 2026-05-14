@@ -6,16 +6,22 @@ import type {
 import { coerceActionItemDocument } from "../../types/summary";
 import type { Language } from "../../utils/types";
 import type { SummaryDocument } from "./utils/types";
-import type { ActionItemErrorPayload, ActionItemResponse, UseActionItemOptions } from "./utils/types";
+import type {
+  ActionItemErrorPayload,
+  ActionItemResponse,
+  SourcePayload,
+  UseActionItemOptions,
+} from "./utils/types";
 import { MOCK_FLASHCARDS_DOCUMENT, MOCK_QUIZ_DOCUMENT, isMockActionItemModeEnabled } from "./utils/mocks";
 import { readErrorBody } from "./utils/sources";
+import { buildSourceActionRequest } from "./useSummarizeActiveTab";
 
 
 const requestActionItem = async (
   baseUrl: string,
   language: Language,
   type: SummaryActionId,
-  summaryJson: string,
+  sourcePayload: SourcePayload,
   mockDocument: SummaryDocument,
 ): Promise<SummaryDocument | null> => {
   if (isMockActionItemModeEnabled()) {
@@ -23,11 +29,12 @@ const requestActionItem = async (
   }
 
   try {
+    const { body, headers } = buildSourceActionRequest(type, sourcePayload, { language });
     const response = await fetch(`${baseUrl}/api/action-item`, {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, language, content: summaryJson }),
+      headers,
+      body,
     });
 
     if (!response.ok) {
@@ -52,9 +59,10 @@ const requestActionItem = async (
 export const useActionItem = ({
   baseUrl,
   language,
-  summarizedContent,
+  sourcePayload,
   initialActionItems = [],
   onActionItemsChange,
+  onActionItemSuccess,
 }: UseActionItemOptions) => {
   const [actionItems, setActionItems] = useState<SummaryActionItem[]>(initialActionItems);
   const [loadingActionId, setLoadingActionId] = useState<SummaryActionId | null>(null);
@@ -71,17 +79,17 @@ export const useActionItem = ({
         return;
       }
 
+      if (sourcePayload === null) {
+        return;
+      }
+
       actionRequestInFlightRef.current = true;
       setLoadingActionId(actionId);
 
       try {
-        if (summarizedContent === null) {
-          return;
-        }
-
         const actionItemId = `${actionId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
         const mockDocument = actionId === "flashcards" ? MOCK_FLASHCARDS_DOCUMENT : MOCK_QUIZ_DOCUMENT;
-        const document = await requestActionItem(baseUrl, language, actionId, summarizedContent, mockDocument);
+        const document = await requestActionItem(baseUrl, language, actionId, sourcePayload, mockDocument);
 
         if (!document || document.blocks.length === 0) {
           return;
@@ -95,12 +103,13 @@ export const useActionItem = ({
           onActionItemsChange?.(nextActionItems);
           return nextActionItems;
         });
+        onActionItemSuccess?.();
       } finally {
         actionRequestInFlightRef.current = false;
         setLoadingActionId(null);
       }
     },
-    [baseUrl, language, onActionItemsChange, summarizedContent],
+    [baseUrl, language, onActionItemSuccess, onActionItemsChange, sourcePayload],
   );
 
   const removeActionItem = useCallback(

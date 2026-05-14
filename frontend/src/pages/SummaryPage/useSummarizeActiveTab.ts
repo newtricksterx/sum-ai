@@ -21,7 +21,15 @@ import { extractTabContent, isYoutube, readErrorBody } from "./utils/sources";
 import { isPDF, fetchPdfBytes, PdfFileAccessDeniedError, type PdfPayload } from "./utils/pdf";
 import { MOCK_SUMMARY_DOCUMENT, isMockModeEnabled, getMockSourceUrl } from "./utils/mocks";
 import { isRestrictedPage, resolveCurrentTab } from "../FrontPage/frontpage.helpers";
-import type { SummarizeErrorPayload, SummarizeRequestParams, SummarizeResult, SummaryDocument } from "./utils/types";
+import type {
+  SourceActionType,
+  SourcePayload,
+  SourceType,
+  SummarizeErrorPayload,
+  SummarizeRequestParams,
+  SummarizeResult,
+  SummaryDocument,
+} from "./utils/types";
 
 const serializeSummaryContent = (value: SummaryDocument): string => JSON.stringify(value);
 
@@ -30,57 +38,48 @@ const deserializeSummaryContent = (value: string): SummaryDocument | null => {
   return parseSummaryDocument(value);
 };
 
-type SourceType = "webpage" | "pdf" | "youtube";
-
 const detectSourceType = (url: string | undefined): SourceType => {
   if (isPDF(url)) return "pdf";
   if (isYoutube(url)) return "youtube";
   return "webpage";
 };
 
-type PostSummarizeArgs = SummarizeRequestParams & {
-  sourceType: SourceType;
-  sourceUrl: string | undefined;
-  sourceContent: string;
-  pdf?: PdfPayload;
-};
+type PostSummarizeArgs = SummarizeRequestParams & SourcePayload;
 
-const buildSummarizeRequest = ({
-  sourceType,
-  sourceUrl,
-  sourceContent,
-  pdf,
-  length,
-  format,
-  language,
-}: Pick<PostSummarizeArgs, "sourceType" | "sourceUrl" | "sourceContent" | "pdf" | "length" | "format" | "language">): {
-  body: BodyInit;
-  headers?: HeadersInit;
-} => {
+export const buildSourceActionRequest = (
+  type: SourceActionType,
+  source: SourcePayload,
+  extras?: { length?: string; format?: string; language?: string },
+): { body: BodyInit; headers?: HeadersInit } => {
+  const { sourceType, sourceUrl, sourceContent, pdf } = source;
+  const { length, format, language } = extras ?? {};
+
   if (pdf) {
     const formData = new FormData();
     formData.append("pdf", new Blob([pdf.bytes], { type: pdf.mimeType }), pdf.filename);
     formData.append("source_url", sourceUrl ?? "");
     formData.append("source_type", sourceType);
-    formData.append("length", length);
-    formData.append("format", format);
-    formData.append("language", language);
-    formData.append("type", "summary");
+    formData.append("type", type);
+    if (length) formData.append("length", length);
+    if (format) formData.append("format", format);
+    if (language) formData.append("language", language);
     // Browser sets multipart Content-Type with boundary automatically.
     return { body: formData };
   }
 
+  const jsonBody: Record<string, unknown> = {
+    type,
+    source_content: sourceContent,
+    source_url: sourceUrl ?? null,
+    source_type: sourceType,
+  };
+  if (length !== undefined) jsonBody.length = length;
+  if (format !== undefined) jsonBody.format = format;
+  if (language !== undefined) jsonBody.language = language;
+
   return {
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      type: "summary",
-      source_content: sourceContent,
-      source_url: sourceUrl ?? null,
-      source_type: sourceType,
-      length,
-      format,
-      language,
-    }),
+    body: JSON.stringify(jsonBody),
   };
 };
 
@@ -96,15 +95,11 @@ const postSummarize = async ({
   isAuthenticated,
   t,
 }: PostSummarizeArgs): Promise<SummarizeResult> => {
-  const { body, headers } = buildSummarizeRequest({
-    sourceType,
-    sourceUrl,
-    sourceContent,
-    pdf,
-    length,
-    format,
-    language,
-  });
+  const { body, headers } = buildSourceActionRequest(
+    "summary",
+    { sourceType, sourceUrl, sourceContent, pdf },
+    { length, format, language },
+  );
 
   try {
     const response = await fetch(`${baseUrl}/api/action-item`, {
@@ -113,15 +108,6 @@ const postSummarize = async ({
       headers,
       body,
     });
-
-    /*
-        const response = await fetch(`${baseUrl}/api/action-item`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, language, content: summaryJson }),
-    });
-    */
 
     if (!response.ok) {
       const errorPayload = await readErrorBody<SummarizeErrorPayload>(response);
@@ -143,8 +129,6 @@ const postSummarize = async ({
 
     const result = await response.json() as { content?: unknown; isSuccess?: unknown };
     const hasSummaryData = typeof result?.content === "string" && result.content.trim().length > 0;
-
-    console.log(result?.content)
 
     if (!hasSummaryData) {
       return errorResult("Empty response", "The server returned an empty summary.");
@@ -168,6 +152,11 @@ const postSummarize = async ({
   }
 };
 
+type ActiveTabSummaryOutcome = {
+  result: SummarizeResult;
+  payload: SourcePayload | null;
+};
+
 const requestActiveTabSummary = async ({
   baseUrl,
   length,
@@ -175,26 +164,37 @@ const requestActiveTabSummary = async ({
   language,
   isAuthenticated,
   t,
-}: SummarizeRequestParams): Promise<SummarizeResult> => {
+}: SummarizeRequestParams): Promise<ActiveTabSummaryOutcome> => {
   if (isMockModeEnabled()) {
+    const mockSourceUrl = await getMockSourceUrl();
     return {
-      json: JSON.parse(MOCK_SUMMARY_DOCUMENT),
-      sourceUrl: await getMockSourceUrl(),
-      isSuccess: true,
+      result: {
+        json: JSON.parse(MOCK_SUMMARY_DOCUMENT),
+        sourceUrl: mockSourceUrl,
+        isSuccess: true,
+      },
+      payload: {
+        sourceType: "webpage",
+        sourceUrl: mockSourceUrl,
+        sourceContent: MOCK_SUMMARY_DOCUMENT,
+      },
     };
   }
 
   const tab = await resolveCurrentTab();
 
   if (!tab?.id) {
-    return errorResult("No active tab", "Could not find an active browser tab to summarize.");
+    return { result: errorResult("No active tab", "Could not find an active browser tab to summarize."), payload: null };
   }
 
   if (isRestrictedPage(tab.url)) {
-    return errorResult(
-      "Page not supported",
-      "Chrome internal pages (like chrome://settings) cannot be summarized. Open a normal website tab and try again.",
-    );
+    return {
+      result: errorResult(
+        "Page not supported",
+        "Chrome internal pages (like chrome://settings) cannot be summarized. Open a normal website tab and try again.",
+      ),
+      payload: null,
+    };
   }
 
   const sourceType = detectSourceType(tab.url);
@@ -209,14 +209,17 @@ const requestActiveTabSummary = async ({
       tabContent = await extractTabContent(tab.id);
     } catch (error) {
       console.error("Script Injection Error:", error);
-      return errorResult(
-        "Cannot summarize this page",
-        "This page blocks extension script access. Try another site tab and try again.",
-      );
+      return {
+        result: errorResult(
+          "Cannot summarize this page",
+          "This page blocks extension script access. Try another site tab and try again.",
+        ),
+        payload: null,
+      };
     }
 
     if (!tabContent.text) {
-      return errorResult("No readable content", "Could not extract readable text from this page.");
+      return { result: errorResult("No readable content", "Could not extract readable text from this page."), payload: null };
     }
     sourceContent = tabContent.text;
   } else if (sourceType === "pdf") {
@@ -225,30 +228,37 @@ const requestActiveTabSummary = async ({
     } catch (error) {
       console.error("PDF Fetch Error:", error);
       if (error instanceof PdfFileAccessDeniedError) {
-        return errorResult(
-          "Local PDF access blocked",
-          "Open chrome://extensions, find Super Simple Summarizer, and enable \"Allow access to file URLs\", then try again.",
-        );
+        return {
+          result: errorResult(
+            "Local PDF access blocked",
+            "Open chrome://extensions, find Super Simple Summarizer, and enable \"Allow access to file URLs\", then try again.",
+          ),
+          payload: null,
+        };
       }
-      return errorResult(
-        "Could not read PDF",
-        "Could not fetch this PDF. Try opening it in a fresh tab and reloading.",
-      );
+      return {
+        result: errorResult(
+          "Could not read PDF",
+          "Could not fetch this PDF. Try opening it in a fresh tab and reloading.",
+        ),
+        payload: null,
+      };
     }
   }
 
-  return postSummarize({
+  const payload: SourcePayload = { sourceType, sourceUrl: tab.url, sourceContent, pdf };
+
+  const result = await postSummarize({
     baseUrl,
-    sourceType,
-    sourceUrl: tab.url,
-    sourceContent,
-    pdf,
+    ...payload,
     length,
     format,
     language,
     isAuthenticated,
     t,
   });
+
+  return { result, payload };
 };
 
 export const useSummarizeActiveTab = () => {
@@ -262,9 +272,13 @@ export const useSummarizeActiveTab = () => {
   const language = useSettingsStore((state) => state.language);
   const length = useSettingsStore((state) => state.length);
   const format = useSettingsStore((state) => state.format);
+  const currency = useSettingsStore((state) => state.currency);
   const userProfile = useAuthProfileStore((state) => state.profile);
+  const hydrateProfile = useAuthProfileStore((state) => state.hydrateProfile);
   const addSummaryToHistory = useHistoryStore((state) => state.addSummary);
   const updateSummaryActionItems = useHistoryStore((state) => state.updateSummaryActionItems);
+
+  const [sourcePayload, setSourcePayload] = useState<SourcePayload | null>(null);
 
   const persistSummaryPayload = useCallback(
     (
@@ -281,9 +295,6 @@ export const useSummarizeActiveTab = () => {
     [updateSummaryActionItems],
   );
 
-  // Storage and the action-item endpoint speak strings; serialize the document at the boundary.
-  const summarizedContentString = summarizedContent === null ? null : serializeSummaryContent(summarizedContent);
-
   const {
     actionItems,
     setActionItems,
@@ -294,11 +305,16 @@ export const useSummarizeActiveTab = () => {
   } = useActionItem({
     baseUrl: import.meta.env.VITE_BASE_URL,
     language,
-    summarizedContent: summarizedContentString,
+    sourcePayload,
     initialActionItems,
     onActionItemsChange: (nextActionItems) => {
       if (summarizedContent !== null) {
         persistSummaryPayload(summarizedContent, currentSourceUrl, nextActionItems, isSummarySuccess);
+      }
+    },
+    onActionItemSuccess: () => {
+      if (userProfile) {
+        void hydrateProfile(true, currency);
       }
     },
   });
@@ -310,8 +326,9 @@ export const useSummarizeActiveTab = () => {
       setCurrentSourceUrl(null);
       setActionItems([]);
       setIsSummarySuccess(false);
+      setSourcePayload(null);
 
-      const result = await requestActiveTabSummary({
+      const { result, payload } = await requestActiveTabSummary({
         baseUrl: import.meta.env.VITE_BASE_URL,
         length,
         format,
@@ -327,6 +344,10 @@ export const useSummarizeActiveTab = () => {
       setIsSummarySuccess(result.isSuccess);
       UpdateSummaryStorage(serializedContent, nextSourceUrl, [], result.isSuccess);
 
+      if (result.isSuccess) {
+        setSourcePayload(payload);
+      }
+
       if (result.isSuccess && result.sourceUrl) {
         addSummaryToHistory({
           url: result.sourceUrl,
@@ -338,9 +359,13 @@ export const useSummarizeActiveTab = () => {
         });
       }
 
+      if (result.isSuccess && userProfile) {
+        void hydrateProfile(true, currency);
+      }
+
       return result;
     },
-    [addSummaryToHistory, format, language, length, resetActionItemRequestState, setActionItems, t, userProfile],
+    [addSummaryToHistory, currency, format, hydrateProfile, language, length, resetActionItemRequestState, setActionItems, t, userProfile],
   );
 
   const setSummaryFromHistory = useCallback((historyItem: HistorySummary) => {
@@ -356,6 +381,7 @@ export const useSummarizeActiveTab = () => {
     setCurrentSourceUrl(historyItem.url);
     setActionItems(historyActionItems);
     setIsSummarySuccess(historyIsSuccess);
+    setSourcePayload(null);
     UpdateSummaryStorage(serializeSummaryContent(parsedContent), historyItem.url, historyActionItems, historyIsSuccess);
   }, [resetActionItemRequestState, setActionItems]);
 
@@ -368,5 +394,6 @@ export const useSummarizeActiveTab = () => {
     removeActionItem,
     summarize,
     setSummaryFromHistory,
+    canGenerateActionItems: sourcePayload !== null,
   };
 };

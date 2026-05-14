@@ -4,8 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.throttling import AnonRateThrottle
 
 from api.quota import QuotaExceeded, release_request_slot, reserve_request_slot
-from scripts.SumAI import SumAI
-from scripts.summary import getSummary
+from scripts.summary import get_action_item, get_summary
 
 ACTION_ITEM_TYPES = {"flashcards", "quiz"}
 SUPPORTED_ACTION_TYPES = ACTION_ITEM_TYPES | {"summary"}
@@ -48,14 +47,13 @@ def _reserve_for(user):
     subscription, character_limit = reserve_request_slot(user)
     return subscription.pk, character_limit
 
-
 def _handle_summary(request):
     try:
         reservation_pk, character_limit = _reserve_for(request.user)
     except QuotaExceeded as exc:
         return _quota_response(exc)
 
-    result = getSummary(request, character_limit=character_limit) or {}
+    result = get_summary(request, character_limit=character_limit) or {}
     content = result.get("content")
     is_success = bool(result.get("isSuccess"))
 
@@ -76,29 +74,30 @@ def _handle_summary(request):
     return _success_response(content, is_success=is_success)
 
 
-def _handle_action_item(action_type, request):
-    content = request.data.get("content")
-    if not isinstance(content, str) or not content.strip():
-        return _error_response(
-            "Missing required field: 'content'",
-            status.HTTP_400_BAD_REQUEST,
-        )
-
+def _handle_action_item(request):
     try:
-        reservation_pk, _ = _reserve_for(request.user)
+        reservation_pk, character_limit = _reserve_for(request.user)
     except QuotaExceeded as exc:
         return _quota_response(exc)
 
-    language = request.data.get("language")
-    document = SumAI.ActionContent(action_type, language, content)
-    if not isinstance(document, dict) or not document.get("blocks"):
+    result = get_action_item(request, character_limit=character_limit) or {}
+    content = result.get("content")
+    is_success = bool(result.get("isSuccess"))
+
+    if content is None:
         if reservation_pk is not None:
             release_request_slot(reservation_pk)
         return _error_response(
             "Could not generate action content.",
             status.HTTP_502_BAD_GATEWAY,
         )
-    return _success_response(document)
+
+    # Soft failures (invalid request / extraction fail) flow through at 200 with isSuccess=False.
+    # Refund the slot since no real LLM-generated content was produced.
+    if not is_success and reservation_pk is not None:
+        release_request_slot(reservation_pk)
+
+    return _success_response(content, is_success=is_success)
 
 
 class ActionItem(APIView):
@@ -122,4 +121,4 @@ class ActionItem(APIView):
 
         if normalized_action_type == "summary":
             return _handle_summary(request)
-        return _handle_action_item(normalized_action_type, request)
+        return _handle_action_item(request)
