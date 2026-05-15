@@ -371,6 +371,9 @@ export const isMockActionItemModeEnabled = () =>
   import.meta.env.VITE_DEV === "true" ||
   import.meta.env.VITE_USE_MOCK_ACTION_ITEM === "true";
 
+export const isAnyActionItemMockEnabled = () =>
+  isMockModeEnabled() || isMockActionItemModeEnabled();
+
 // In dev/mock mode, returns the active tab's URL when it's a real page; otherwise synthesizes a sentinel mock URL.
 export const getMockSourceUrl = async () => {
   const tab = await resolveCurrentTab();

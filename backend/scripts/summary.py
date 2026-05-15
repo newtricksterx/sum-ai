@@ -27,8 +27,8 @@ def isValidRequest(source_url, source_type, source_content, pdf_file):
     if source_type not in ("webpage", "youtube", "pdf"):
         return False
     if source_type == "pdf":
-        return False
-    elif not source_content:
+        return pdf_file is not None
+    if not source_content:
         return False
 
     return True

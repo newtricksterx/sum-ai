@@ -11,6 +11,9 @@ export type SummaryActionItem = {
   document: SummaryDocument;
 };
 
+export const createActionItemId = (type: ActionId): string =>
+  `${type}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
 const SUMMARY_ACTION_ID_SET = new Set<string>(SUMMARY_ACTION_IDS);
 
 export const isSummaryActionId = (value: unknown): value is ActionId => {

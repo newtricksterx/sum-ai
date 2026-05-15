@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.test import override_settings
 from django.urls import reverse
@@ -77,6 +78,24 @@ def _webpage_payload(action_type, **overrides):
     return payload
 
 
+def _pdf_payload(action_type, **overrides):
+    payload = {
+        "type": action_type,
+        "language": "english",
+        "source_url": "https://example.com/document.pdf",
+        "source_type": "pdf",
+        "length": "short",
+        "format": "bullet-point",
+        "pdf": SimpleUploadedFile(
+            "document.pdf",
+            b"%PDF-1.4 fake test pdf bytes",
+            content_type="application/pdf",
+        ),
+    }
+    payload.update(overrides)
+    return payload
+
+
 @override_settings(REST_FRAMEWORK=TEST_REST_FRAMEWORK)
 class ActionItemEndpointTest(TestCase):
     def setUp(self):
@@ -134,6 +153,40 @@ class ActionItemEndpointTest(TestCase):
         body = response.json()
         self.assertFalse(body["isSuccess"])
         self.assertEqual(body["content"], "Error: Invalid request.")
+
+    def test_pdf_source_without_file_returns_soft_failure(self):
+        response = self.client.post(
+            self.url,
+            data={
+                "type": "flashcards",
+                "language": "english",
+                "source_url": "https://example.com/document.pdf",
+                "source_type": "pdf",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertFalse(body["isSuccess"])
+        self.assertEqual(body["content"], "Error: Invalid request.")
+
+    @patch(
+        "scripts.summary.SumAI.ActionContent",
+        return_value={"isSuccess": True, "content": _flashcards_document()},
+    )
+    @patch(
+        "scripts.summary._handle_pdf",
+        return_value={"isSuccess": True, "content": "Raw PDF source"},
+    )
+    def test_flashcards_accepts_pdf_upload(self, mock_handle_pdf, mock_action_content):
+        response = self.client.post(self.url, data=_pdf_payload("flashcards"))
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertTrue(body["isSuccess"])
+        self.assertEqual(body["content"], _flashcards_document())
+        mock_handle_pdf.assert_called_once()
+        mock_action_content.assert_called_once_with("flashcards", "english", "Raw PDF source")
 
     @patch(
         "scripts.summary.SumAI.ActionContent",

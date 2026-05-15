@@ -1,0 +1,63 @@
+.sessionmismatch {
+    background-color: var(--color-background-warning);
+    border: 1px solid var(--color-border-warning);
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.5rem;
+}
+
+.sessionmismatch-main {
+    display: flex;
+    flex-direction: row;
+    gap: 0.6rem;
+    font-size: 12px;
+    padding: 0.6rem 0.6rem 0 0.6rem;
+    border-bottom: 1px solid var(--color-border-warning);
+    color: var(--color-text-warning);
+}
+
+.sessionmismatch-title {
+    font-weight: 700;
+    color: var(--color-text-warning);
+}
+
+.sessionmismatch-desc {
+    color: var(--color-text-warning);
+}
+
+.sessionmismatch-tooltip {
+    display: flex;
+    flex-direction: row;
+    font-size: 10px;
+    padding: 0 10px 0 0;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--color-text-warning);
+}
+
+.sessionmismatch-footer {
+    padding: 0.6rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: space-between;
+}
+
+.return-session-btn {
+  background-color: var(--color-background-warning);
+  color: var(--color-text-warning);
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border-warning);
+  padding: 8px;
+  transition: background-color 0.15s ease;
+  font-weight: 700;
+  font-size: 12px;
+  display: flex;
+  flex-direction: row;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.return-session-btn:hover {
+  text-decoration: none;
+  background-color: color-mix(in srgb, var(--color-background-warning) 84%, var(--color-border-warning));
+}

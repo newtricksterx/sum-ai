@@ -377,6 +377,7 @@
   outline: none;
 }
 
+
 @media (max-width: 420px) {
   .summary-shell {
     padding: 0.32rem 0.25rem;

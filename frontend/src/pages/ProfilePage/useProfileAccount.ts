@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { authInstance } from "../../services/axiosService";
-import { useHistoryStore } from "../../stores/historyStore";
 import { useAuthProfileStore } from "../../stores/authProfileStore";
 
 const DEFAULT_REQUEST_ERROR = "We could not complete that request. Please try again.";
@@ -46,15 +45,6 @@ const parseApiErrorMessage = (error: unknown) => {
   return DEFAULT_REQUEST_ERROR;
 };
 
-const getHistoryOwnerKeyFromEmail = (email: string | null | undefined) => {
-  if (typeof email !== "string") {
-    return "anonymous";
-  }
-
-  const normalizedEmail = email.trim().toLowerCase();
-  return normalizedEmail.length > 0 ? `user:${normalizedEmail}` : "anonymous";
-};
-
 export const useProfileAccount = () => {
   const userProfile = useAuthProfileStore((state) => state.profile);
   const profileStatus = useAuthProfileStore((state) => state.status);
@@ -62,18 +52,9 @@ export const useProfileAccount = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
-  const setHistoryOwner = useHistoryStore((state) => state.setHistoryOwner);
-
-  const resetHistoryOwner = useCallback(() => {
-    setHistoryOwner("anonymous", 1);
-  }, [setHistoryOwner]);
 
   useEffect(() => {
     if (userProfile) {
-      setHistoryOwner(
-        getHistoryOwnerKeyFromEmail(userProfile.email),
-        userProfile.subscription?.history_limit ?? 1,
-      );
       setErrorMessage(null);
       return;
     }
@@ -81,8 +62,7 @@ export const useProfileAccount = () => {
     if (profileStatus === "error") {
       setErrorMessage(DEFAULT_REQUEST_ERROR);
     }
-    resetHistoryOwner();
-  }, [profileStatus, resetHistoryOwner, setHistoryOwner, userProfile]);
+  }, [profileStatus, userProfile]);
 
   const handleLogout = useCallback(async () => {
     setIsSubmitting(true);
@@ -96,10 +76,9 @@ export const useProfileAccount = () => {
     } catch (error) {
       setErrorMessage(parseApiErrorMessage(error));
     } finally {
-      resetHistoryOwner();
       setIsSubmitting(false);
     }
-  }, [clearProfile, resetHistoryOwner]);
+  }, [clearProfile]);
 
   return {
     userProfile,

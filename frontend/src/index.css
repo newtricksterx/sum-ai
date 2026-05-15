@@ -66,7 +66,7 @@
   --color-text-info: light-dark(rgba(50, 102, 173, 1), rgba(128, 170, 221, 1));
   --color-text-danger: light-dark(rgba(127, 44, 40, 1), rgba(238, 136, 132, 1));
   --color-text-success: light-dark(rgba(38, 91, 25, 1), rgba(122, 185, 72, 1));
-  --color-text-warning: light-dark(rgba(90, 72, 21, 1), rgba(209, 160, 65, 1));
+  --color-text-warning: light-dark(rgba(90, 72, 21, 1), rgb(244, 213, 152));
   --color-text-disabled: light-dark(rgba(20, 20, 19, 0.5), rgba(250, 249, 245, 0.5));
   --color-text-ghost: light-dark(rgba(115, 114, 108, 0.5), rgba(156, 154, 146, 0.5));
   

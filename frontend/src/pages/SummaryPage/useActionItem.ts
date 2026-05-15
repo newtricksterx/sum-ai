@@ -1,88 +1,92 @@
 import { useCallback, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useAuthProfileStore } from "../../stores/authProfileStore";
+import { useSettingsStore } from "../../stores/settingsStore";
+import { useCurrentSessionState } from "../../stores/sessionStorage";
+import type { ActionId } from "../../types/summary";
+import { createActionItemId } from "../../types/summary";
 import type {
-  ActionId,
-  SummaryActionItem,
-} from "../../types/summary";
-import { coerceActionItemDocument } from "../../types/summary";
-import type { Language } from "../../utils/types";
-import type { SummaryDocument } from "./utils/types";
-import type {
-  ActionItemErrorPayload,
-  ActionItemResponse,
+  AddActionItemOptions,
+  ResolveSourcePayloadOptions,
   SourcePayload,
-  UseActionItemOptions,
+  SourcePayloadResolution,
 } from "./utils/types";
+import { isAnyActionItemMockEnabled } from "./utils/mocks";
+import { errorDocument } from "./utils/document";
 import {
-  MOCK_FLASHCARDS_DOCUMENT,
-  MOCK_QUIZ_DOCUMENT,
-  MOCK_SUMMARY_ACTION_ITEM_DOCUMENT,
-  isMockActionItemModeEnabled,
-} from "./utils/mocks";
-import { readErrorBody } from "./utils/sources";
-import { buildSourceActionRequest } from "./useSummarizeActiveTab";
+  buildMockSourcePayload,
+  buildSourcePayloadFromTab,
+  sourcePayloadError,
+} from "./utils/sourcePayload";
+import { requestActionItem } from "./utils/actionItemRequest";
+import { isRestrictedPage, resolveCurrentTab } from "../FrontPage/frontpage.helpers";
 
+export const useActionItem = () => {
+  const { t } = useTranslation();
+  const baseUrl = import.meta.env.VITE_BASE_URL;
+  const language = useSettingsStore((state) => state.language);
+  const length = useSettingsStore((state) => state.length);
+  const format = useSettingsStore((state) => state.format);
+  const currency = useSettingsStore((state) => state.currency);
+  const userProfile = useAuthProfileStore((state) => state.profile);
+  const hydrateProfile = useAuthProfileStore((state) => state.hydrateProfile);
 
-const MOCK_BY_ACTION_ID: Record<ActionId, SummaryDocument> = {
-  flashcards: MOCK_FLASHCARDS_DOCUMENT,
-  quiz: MOCK_QUIZ_DOCUMENT,
-  summary: MOCK_SUMMARY_ACTION_ITEM_DOCUMENT,
-};
-
-const requestActionItem = async (
-  baseUrl: string,
-  language: Language,
-  type: ActionId,
-  sourcePayload: SourcePayload,
-  mockDocument: SummaryDocument,
-): Promise<SummaryDocument | null> => {
-  if (isMockActionItemModeEnabled()) {
-    return mockDocument;
-  }
-
-  try {
-    const { body, headers } = buildSourceActionRequest(type, sourcePayload, { language });
-    const response = await fetch(`${baseUrl}/api/action-item`, {
-      method: "POST",
-      credentials: "include",
-      headers,
-      body,
-    });
-
-    if (!response.ok) {
-      const errorPayload = await readErrorBody<ActionItemErrorPayload>(response);
-      const fallbackMessage = errorPayload?.message || errorPayload?.error || "Could not generate action item.";
-      console.error("Action Item Error:", fallbackMessage);
-      return null;
-    }
-
-    const result = (await response.json()) as ActionItemResponse;
-    if (result.isSuccess !== true) {
-      return null;
-    }
-
-    return coerceActionItemDocument(result.content);
-  } catch (error) {
-    console.error("Fetch Action Item Error:", error);
-    return null;
-  }
-};
-
-export const useActionItem = ({
-  baseUrl,
-  language,
-  resolveSourcePayload,
-  initialActionItems = [],
-  onActionItemsChange,
-  onActionItemSuccess,
-}: UseActionItemOptions) => {
-  const [actionItems, setActionItemsState] = useState<SummaryActionItem[]>(initialActionItems);
-  const actionItemsRef = useRef<SummaryActionItem[]>(initialActionItems);
-  const setActionItems = useCallback((next: SummaryActionItem[]) => {
-    actionItemsRef.current = next;
-    setActionItemsState(next);
-  }, []);
+  const actionItems = useCurrentSessionState((state) => state.action_items);
+  const startSession = useCurrentSessionState((state) => state.startSession);
+  const addSessionActionItem = useCurrentSessionState((state) => state.addActionItem);
+  const removeSessionActionItem = useCurrentSessionState((state) => state.removeActionItem);
+  const resetSession = useCurrentSessionState((state) => state.resetSession);
+  const [sourcePayload, setSourcePayload] = useState<SourcePayload | null>(null);
+  const lastSourceErrorRef = useRef<SourcePayloadResolution | null>(null);
   const [loadingActionId, setLoadingActionId] = useState<ActionId | null>(null);
   const actionRequestInFlightRef = useRef(false);
+
+  // For restored sessions, re-extract the live source when the user is still on that page.
+  const resolveSourcePayload = useCallback(async (
+    options?: ResolveSourcePayloadOptions,
+  ): Promise<SourcePayload | null> => {
+    lastSourceErrorRef.current = null;
+
+    if (isAnyActionItemMockEnabled()) {
+      return !options?.forceActiveTab && sourcePayload ? sourcePayload : buildMockSourcePayload();
+    }
+
+    const tab = await resolveCurrentTab();
+    if (!tab?.id) {
+      if (sourcePayload) return sourcePayload;
+      lastSourceErrorRef.current = sourcePayloadError(
+        "No active tab",
+        "Could not find an active browser tab.",
+      );
+      return null;
+    }
+
+    if (isRestrictedPage(tab.url)) {
+      if (sourcePayload) return sourcePayload;
+      lastSourceErrorRef.current = sourcePayloadError(
+        "Page not supported",
+        "Chrome internal pages (like chrome://settings) are not supported. Open a normal website tab and try again.",
+        tab.url,
+      );
+      return null;
+    }
+
+    if (!options?.forceActiveTab && sourcePayload !== null && tab.url !== sourcePayload.sourceUrl) {
+      return sourcePayload;
+    }
+
+    const result = await buildSourcePayloadFromTab(tab);
+    if (result.payload) {
+      return result.payload;
+    }
+
+    if (!options?.forceActiveTab && sourcePayload) {
+      return sourcePayload;
+    }
+
+    lastSourceErrorRef.current = result;
+    return null;
+  }, [sourcePayload]);
 
   const resetActionItemRequestState = useCallback(() => {
     actionRequestInFlightRef.current = false;
@@ -90,7 +94,7 @@ export const useActionItem = ({
   }, []);
 
   const addActionItem = useCallback(
-    async (actionId: ActionId) => {
+    async (actionId: ActionId, options: AddActionItemOptions = {}) => {
       if (actionRequestInFlightRef.current) {
         return;
       }
@@ -99,46 +103,87 @@ export const useActionItem = ({
       setLoadingActionId(actionId);
 
       try {
-        const sourcePayload = await resolveSourcePayload();
+        if (options.resetSession) {
+          resetSession();
+          setSourcePayload(null);
+        }
+
+        const sourcePayload = await resolveSourcePayload({ forceActiveTab: options.forceActiveTab });
         if (sourcePayload === null) {
+          const sourceError = lastSourceErrorRef.current;
+          if (options.resetSession) {
+            startSession(sourceError?.sourceUrl ?? "");
+          }
+          addSessionActionItem({
+            id: createActionItemId(actionId),
+            type: actionId,
+            document: sourceError?.errorDocument ?? errorDocument(
+              "Could not read source",
+              "Could not read the current tab. Try reloading the page and trying again.",
+            ),
+          });
           return;
         }
 
-        const actionItemId = `${actionId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-        const mockDocument = MOCK_BY_ACTION_ID[actionId];
-        const document = await requestActionItem(baseUrl, language, actionId, sourcePayload, mockDocument);
+        const actionItemId = createActionItemId(actionId);
+        const result = await requestActionItem({
+          baseUrl,
+          language,
+          format,
+          length,
+          type: actionId,
+          sourcePayload,
+          isAuthenticated: Boolean(userProfile),
+          t,
+        });
 
-        if (!document || document.blocks.length === 0) {
+        if (options.resetSession) {
+          startSession(result.sourceUrl ?? sourcePayload.sourceUrl ?? "");
+        }
+
+        if (!result.document || result.document.blocks.length === 0) {
           return;
         }
 
-        const nextActionItems: SummaryActionItem[] = [
-          ...actionItemsRef.current,
-          { id: actionItemId, type: actionId, document },
-        ];
-        setActionItems(nextActionItems);
-        onActionItemsChange?.(nextActionItems);
-        onActionItemSuccess?.();
+        addSessionActionItem({ id: actionItemId, type: actionId, document: result.document });
+        if (!result.isSuccess) {
+          return;
+        }
+
+        setSourcePayload(sourcePayload);
+        if (userProfile) {
+          void hydrateProfile(true, currency);
+        }
       } finally {
         actionRequestInFlightRef.current = false;
         setLoadingActionId(null);
       }
     },
-    [baseUrl, language, onActionItemSuccess, onActionItemsChange, resolveSourcePayload, setActionItems],
+    [
+      addSessionActionItem,
+      baseUrl,
+      currency,
+      format,
+      hydrateProfile,
+      language,
+      length,
+      resetSession,
+      resolveSourcePayload,
+      startSession,
+      t,
+      userProfile,
+    ],
   );
 
   const removeActionItem = useCallback(
     (actionItemId: string) => {
-      const nextActionItems = actionItemsRef.current.filter((item) => item.id !== actionItemId);
-      setActionItems(nextActionItems);
-      onActionItemsChange?.(nextActionItems);
+      removeSessionActionItem(actionItemId);
     },
-    [onActionItemsChange, setActionItems],
+    [removeSessionActionItem],
   );
 
   return {
     actionItems,
-    setActionItems,
     loadingActionId,
     addActionItem,
     removeActionItem,

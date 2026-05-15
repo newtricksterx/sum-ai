@@ -1,29 +1,33 @@
 import React from 'react';
-import { useHistoryStore, type HistorySummary } from '../../stores/historyStore';
-import { getSummaryIntroFromHtml } from '../../utils/html';
 import HistoryCard from './HistoryCard/HistoryCard';
 import AlertPopup from '../../components/AlertPopup/AlertPopup';
 import { useTranslation } from 'react-i18next';
 import '../../i18n';
-import { HistoryPageProps, truncateText, getHostName } from './historypage.utils';
+import { truncateText, getHostName } from './historypage.utils';
 
-const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
+// Static placeholder data — the history store/implementation was removed; this page
+// now only renders the UI shell.
+const PLACEHOLDER_HISTORY: { url: string; previewText: string }[] = [
+  {
+    url: 'https://en.wikipedia.org/wiki/Photosynthesis',
+    previewText:
+      'Photosynthesis is the process used by plants, algae, and some bacteria to convert light energy into chemical energy stored in glucose.',
+  },
+  {
+    url: 'https://www.nytimes.com/section/technology',
+    previewText:
+      'A roundup of the latest developments in technology, covering AI research, consumer hardware, and policy debates shaping the industry.',
+  },
+  {
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    previewText:
+      'Transcript summary of the video, highlighting the main talking points and key takeaways discussed by the presenter.',
+  },
+];
+
+const HistoryPage: React.FC = () => {
   const { t } = useTranslation();
-  const cache = useHistoryStore((state) => state.cache);
-  const clearHistory = useHistoryStore((state) => state.clearHistory);
-  const removeSummary = useHistoryStore((state) => state.removeSummary);
-
-  const onClickOpen = (item: HistorySummary) => {
-    onSelectHistory(item);
-  };
-
-  const onClickRemove = (item: HistorySummary) => {
-    removeSummary(item.url);
-  };
-
-  const onConfirmClearAll = () => {
-    clearHistory();
-  };
+  const cache = PLACEHOLDER_HISTORY;
 
   return (
     <div className="relative px-2 py-2 font-google">
@@ -48,7 +52,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
           previewText={`${cache.length} ${cache.length === 1 ? t("history.summary") : t("history.summaries")} ${t("history.willBeDeleted")}`}
           confirmLabel={t("history.clearAll")}
           cancelLabel={t("profile.cancel", "Cancel")}
-          onConfirm={onConfirmClearAll}
+          onConfirm={() => {}}
         />
       </div>
 
@@ -62,9 +66,9 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onSelectHistory }) => {
             <HistoryCard
               key={`${item.url}`}
               hostName={truncateText(getHostName(item.url), 40)}
-              previewText={truncateText(getSummaryIntroFromHtml(item.document_content["title"]), 120)}
-              onOpen={() => onClickOpen(item)}
-              onRemove={() => onClickRemove(item)}
+              previewText={truncateText(item.previewText, 120)}
+              onOpen={() => {}}
+              onRemove={() => {}}
             />
           ))}
         </div>

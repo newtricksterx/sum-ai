@@ -1,5 +1,5 @@
 .summary-actions {
-  margin-top: 0.7rem;
+  margin-bottom: 0.7rem;
   border-radius: 0.95rem;
   padding: 5px 0px;
   --ag-tone-teal-bg: color-mix(in srgb, var(--color-status-success-bg) 42%, var(--color-surface-primary));

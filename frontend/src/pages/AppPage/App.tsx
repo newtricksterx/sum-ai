@@ -5,19 +5,14 @@ import MenuBar from '../../components/MenuBar/MenuBar'
 import ToolBar from '../../components/ToolBar/ToolBar'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { GetPageFromStorage, UpdatePageStorage } from '../../utils/storage'
-import LoaderCircle from '../../components/LoaderCircle'
 import FrontPage from '../FrontPage/FrontPage'
 import SummaryPage from '../SummaryPage/SummaryPage'
-import { documentToText } from '../SummaryPage/utils/document'
 import { getPlainTextFromHtml } from '../../utils/html'
 import HistoryPage from '../HistoryPage/HistoryPage'
-import { type HistorySummary } from '../../stores/historyStore'
 import ProfilePage from '../ProfilePage/ProfilePage'
 import { useCopySuccessTimer } from '../../components/ToolBar/useCopySuccessTimer'
-import { useHistoryOwnerSync } from '../HistoryPage/useHistoryOwnerSync'
-import { useSummarizeActiveTab } from '../SummaryPage/useSummarizeActiveTab'
+import { useActionItem } from '../SummaryPage/useActionItem'
 import { useAuthProfileStore } from '../../stores/authProfileStore'
-import { useHistoryStore } from '../../stores/historyStore'
 import { useAppLanguageEffect } from './useAppLanguageEffect'
 import { useHydrateProfileAfterLogin } from './useHydrateProfileAfterLogin'
 import { useAuthLogoutReset } from './useAuthLogoutReset'
@@ -38,15 +33,11 @@ function App() {
     return { [initialPage]: true };
   });
   const {
-    summarizedContent,
-    isSummarySuccess,
     actionItems,
     loadingActionId,
     addActionItem,
     removeActionItem,
-    summarize,
-    setSummaryFromHistory,
-  } = useSummarizeActiveTab();
+  } = useActionItem();
   const { isCopySuccess, showCopySuccess, resetCopySuccess } = useCopySuccessTimer();
 
   const fontSize = useSettingsStore((state) => state.fontSize)
@@ -55,13 +46,12 @@ function App() {
   const hydrateProfile = useAuthProfileStore((state) => state.hydrateProfile)
   const authProfile = useAuthProfileStore((state) => state.profile)
   const clearProfile = useAuthProfileStore((state) => state.clearProfile)
-  const setHistoryOwner = useHistoryStore((state) => state.setHistoryOwner)
 
   useAppLanguageEffect(language);
   useHydrateProfileAfterLogin(hydrateProfile, currency);
-  useAuthLogoutReset(clearProfile, setHistoryOwner);
+  useAuthLogoutReset(clearProfile);
 
-  useHistoryOwnerSync();
+  
   useHydrateProfileOnAuthChange(authProfile, currency, hydrateProfile);
   useTrackMountedPages(currentPage, setMountedPages);
 
@@ -137,49 +127,29 @@ function App() {
   }, [setPage]);
 
   const onClickDownload = async () => {
-    const summaryString = summarizedContent == null ? "" : documentToText(summarizedContent);
-    if (!summaryString.trim()) return;
-    await savePDF(summaryString);
+    await savePDF("test pdf");
   }
 
-  const onClickGenerate = useCallback(async () => {
-    if (loadingActionId !== null) {
-      return;
-    }
-    await summarize();
-  }, [loadingActionId, summarize]);
 
-  const onClickStartGenerate = useCallback(async () => {
+  const onClickStartSession = useCallback(async () => {
     if (loadingActionId !== null) {
       return;
     }
     setPage(1);
-    await summarize();
-  }, [loadingActionId, setPage, summarize]);
+    await addActionItem("summary", { resetSession: true, forceActiveTab: true });
+  }, [addActionItem, loadingActionId, setPage]);
 
-  const onSelectHistory = useCallback((historyItem: HistorySummary) => {
-    setSummaryFromHistory(historyItem);
-    setPage(1);
-  }, [setPage, setSummaryFromHistory]);
-
-  const isSummarizing = currentPage === 1 && summarizedContent == null
   const isActionItemLoading = loadingActionId !== null;
-  const summarizedContentString = useMemo(
-    () => (summarizedContent == null ? null : documentToText(summarizedContent)),
-    [summarizedContent],
-  );
   const canUseSummaryActions = useMemo(() => {
-    if (currentPage !== 1 || isSummarizing || !isSummarySuccess || summarizedContentString == null) {
+    if (currentPage !== 1) {
       return false;
     }
-    return summarizedContentString.trim().length > 0;
-  }, [currentPage, isSummarizing, isSummarySuccess, summarizedContentString]);
+    return true;
+  }, [currentPage]);
 
   const onClickCopy = async () => {
-    if (!summarizedContentString) return;
-
     try {
-      await navigator.clipboard.writeText(getPlainTextFromHtml(summarizedContentString));
+      await navigator.clipboard.writeText(getPlainTextFromHtml("test copy"));
       showCopySuccess();
     } catch (error) {
       console.error("Copy Error:", error);
@@ -188,35 +158,22 @@ function App() {
   }
 
   const summaryPageContent = useMemo(() => {
-    if (summarizedContent == null) {
-      return (
-        <div className="flex-1 flex relative justify-center items-center min-h-75 z-40">
-          <LoaderCircle />
-        </div>
-      );
-    }
 
     return (
       <SummaryPage
-        content={summarizedContent}
-        isSummarySuccess={isSummarySuccess}
         fontSize={fontSize}
         actionItems={actionItems}
         onAddActionItem={addActionItem}
         onRemoveActionItem={removeActionItem}
-        loadingActionId={loadingActionId}
-      />
+        loadingActionId={loadingActionId} isSummarySuccess={false}      />
     );
-  }, [actionItems, addActionItem, fontSize, isSummarySuccess, loadingActionId, removeActionItem, summarizedContent]);
+  }, [actionItems, addActionItem, fontSize, loadingActionId, removeActionItem]);
 
   const frontPageContent = useMemo(
-    () => <FrontPage onClickGenerate={onClickStartGenerate} isGenerateDisabled={isActionItemLoading} />,
-    [isActionItemLoading, onClickStartGenerate],
+    () => <FrontPage onClickGenerate={onClickStartSession} isGenerateDisabled={isActionItemLoading} />,
+    [isActionItemLoading, onClickStartSession],
   );
-  const historyPageContent = useMemo(
-    () => <HistoryPage onSelectHistory={onSelectHistory} />,
-    [onSelectHistory],
-  );
+  const historyPageContent = useMemo(() => <HistoryPage />, []);
   const profilePageContent = useMemo(() => <ProfilePage />, []);
   const settingsPageContent = useMemo(() => <SettingsPage />, []);
 
@@ -265,9 +222,9 @@ function App() {
         <ToolBar
           onClickCopy={onClickCopy}
           onClickDownload={onClickDownload}
-          isSummarizing={isSummarizing}
+          isSummarizing={false}
           isGenerateDisabled={isActionItemLoading}
-          onClickGenerate={onClickGenerate}
+          onClickGenerate={onClickStartSession}
           isCopySuccess={isCopySuccess}
           canUseSummaryActions={canUseSummaryActions}
         />

@@ -1,6 +1,5 @@
 import type {
-  SummarizeErrorPayload,
-  SummarizeResult,
+  ActionItemThrottlePayload,
   SummaryBlock,
   SummaryDocument,
   InlineItems,
@@ -176,12 +175,6 @@ export const errorDocument = (title: string, message: string): SummaryDocument =
   ],
 });
 
-// Wraps an errorDocument as a SummarizeResult for callers that return the hook's result type.
-export const errorResult = (title: string, message: string): SummarizeResult => ({
-  json: errorDocument(title, message),
-  isSuccess: false,
-});
-
 const PERIOD_LABEL_DEFAULTS: Record<string, string> = {
   sec: "second",
   min: "minute",
@@ -204,7 +197,7 @@ const formatRetryTime = (t: TranslateFn, retryAfterSeconds?: number) => {
   });
 };
 
-export const throttleMessage = (payload: SummarizeErrorPayload, t: TranslateFn) => {
+export const throttleMessage = (payload: ActionItemThrottlePayload, t: TranslateFn) => {
   const summariesLimit = payload.summaries_limit;
   const periodKey = payload.limit_period ?? "";
   const periodLabel =
@@ -243,7 +236,7 @@ export const throttleMessage = (payload: SummarizeErrorPayload, t: TranslateFn) 
   return `${limitText}${retryMessage}`;
 };
 
-export const anonymousThrottleMessage = (payload: SummarizeErrorPayload, t: TranslateFn) => {
+export const anonymousThrottleMessage = (payload: ActionItemThrottlePayload, t: TranslateFn) => {
   const limitMessage = throttleMessage(payload, t);
   const signInMessage = t("summaryErrors.signInForMore", {
     defaultValue: "Sign in to receive additional summaries.",

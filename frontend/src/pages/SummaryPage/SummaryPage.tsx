@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import PageCard from '../../components/PageCard/PageCard';
 import AlertPopup from '../../components/AlertPopup/AlertPopup';
@@ -9,9 +9,11 @@ import type { SummaryActionItem } from '../../types/summary';
 import type { SummaryDocument } from "./utils/types";
 import { renderInlineSegment } from "./utils/renderInline";
 import { ActionId } from '../../types/summary';
+import { useCurrentSessionState } from '../../stores/sessionStorage';
+import { useActiveTabUrl } from './useActiveTabUrl';
+import { SessionMismatch } from './components/SessionMismatch/SessionMismatch';
 
 interface SummaryPageProps {
-  content: SummaryDocument | null;
   isSummarySuccess: boolean;
   fontSize: number;
   actionItems: SummaryActionItem[];
@@ -129,30 +131,61 @@ const SummaryDocumentView: React.FC<{ document: SummaryDocument }> = ({ document
 
 
 const SummaryPage: React.FC<SummaryPageProps> = ({
-  content,
-  isSummarySuccess,
   fontSize,
   actionItems,
   onAddActionItem,
   onRemoveActionItem,
   loadingActionId = null,
 }) => {
-  const isActionGridDisabled = useMemo(() => {
-    if (content === null) return true;
-    if (!isSummarySuccess) return true;
-    if (content.blocks.length === 0) return true;
-    if (content.format === "error") return true;
-    return false;
-  }, [content, isSummarySuccess]);
+  const sessionUrl = useCurrentSessionState((state) => state.url);
+  const activeTabUrl = useActiveTabUrl();
+  // While activeTabUrl is still resolving we treat it as "on session" to avoid flicker;
+  // the return link only renders once we have both URLs and they differ.
+  const shouldShowReturnLink =
+    Boolean(sessionUrl) && activeTabUrl !== undefined && sessionUrl !== activeTabUrl;
+
 
   const renderActionItem = useCallback((actionItem: SummaryActionItem) => {
         if (actionItem.document.blocks.length === 0) {
             return null;
         }
 
+        if (actionItem.document.format === "error") {
+            return (
+              <div key={actionItem.id} className='mb-4!'>
+                <div className='flex flex-row justify-end'>
+                  <AlertPopup
+                        trigger={
+                            <button
+                                type="button"
+                                className="qz-close"
+                                aria-label="Close error"
+                            >
+                                <Cross2Icon className="qz-close-icon" aria-hidden="true" />
+                                <span>Close</span>
+                            </button>
+                        }
+                        title="Close message?"
+                        description="This message will be removed from the summary page."
+                        onConfirm={() => onRemoveActionItem(actionItem.id)}
+                        confirmLabel="Close"
+                        cancelLabel="Cancel"
+                    />
+                  </div>
+                <PageCard
+                    as="article"
+                    style={{ fontSize: `${fontSize}px` }}
+                    className="summary-card summary-content summary-container relative"
+                >
+                    <SummaryDocumentView document={actionItem.document} />
+                </PageCard>
+              </div>
+            );
+        }
+
         if (actionItem.type === 'flashcards') {
             return (
-              <div key={actionItem.id} className='mt-4'>
+              <div key={actionItem.id} className='mb-4!'>
                 <div className='flex flex-row justify-end'>
                   <AlertPopup
                         trigger={
@@ -183,7 +216,7 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
 
         if (actionItem.type === 'quiz') {
             return (
-              <div key={actionItem.id} className='mt-4'>
+              <div key={actionItem.id} className='mb-4!'>
                 <div className='flex flex-row justify-end'>
                   <AlertPopup
                         trigger={
@@ -214,7 +247,7 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
 
         if (actionItem.type === 'summary') {
             return (
-              <div key={actionItem.id} className='mt-4'>
+              <div key={actionItem.id} className='mb-4!'>
                 <div className='flex flex-row justify-end'>
                   <AlertPopup
                         trigger={
@@ -251,20 +284,19 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
   );
 
   return (
+
+    
     <section className={`summary-shell px-2! py-2!`}>
-        <PageCard
-          as="article"
-          style={{ fontSize: `${fontSize}px` }}
-          className="summary-card summary-content summary-container min-h-[210px] h-max"
-        >
-          {content !== null && <SummaryDocumentView document={content} />}
-        </PageCard>
       {actionItems.map(renderActionItem)}
-      <ActionGrid
-        onClickAction={onAddActionItem}
-        isDisabled={isActionGridDisabled}
-        loadingActionId={loadingActionId}
-      />
+      { true ? (
+        <SessionMismatch sessionUrl={sessionUrl} />
+      ) : (
+        <ActionGrid
+          onClickAction={onAddActionItem}
+          isDisabled={false}
+          loadingActionId={loadingActionId}
+        />
+      )}
     </section>
   );
 };

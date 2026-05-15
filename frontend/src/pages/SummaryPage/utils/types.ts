@@ -1,9 +1,8 @@
+import type { ActionId } from "../../../types/summary";
 import type { Format, Language, Length } from "../../../utils/types";
-import type { SummaryActionItem } from "../../../types/summary";
 import type { PdfPayload } from "./pdf";
 
 export type SourceType = "webpage" | "pdf" | "youtube";
-export type SourceActionType = "summary" | "flashcards" | "quiz";
 
 export type SourcePayload = {
   sourceType: SourceType;
@@ -13,15 +12,6 @@ export type SourcePayload = {
 };
 
 export type TranslateFn = (key: string, options?: Record<string, unknown>) => string;
-
-export type SummarizeRequestParams = {
-  baseUrl: string;
-  length: Length;
-  format: Format;
-  language: Language;
-  isAuthenticated: boolean;
-  t: TranslateFn;
-};
 
 export type InlineItems = {
   link?: string;
@@ -57,14 +47,7 @@ export type SummaryDocument = {
   blocks: SummaryBlock[];
 };
 
-export type SummarizeResult = {
-  // Always a SummaryDocument. Errors are represented as documents with format: "error".
-  json: SummaryDocument;
-  sourceUrl?: string;
-  isSuccess: boolean;
-};
-
-export type SummarizeErrorPayload = {
+export type ActionItemThrottlePayload = {
   message?: string;
   summaries_limit?: number;
   limit_period?: string;
@@ -81,11 +64,46 @@ export type ActionItemResponse = {
   content?: unknown;
 };
 
-export type UseActionItemOptions = {
+export type ResolveSourcePayloadOptions = {
+  forceActiveTab?: boolean;
+};
+
+export type AddActionItemOptions = ResolveSourcePayloadOptions & {
+  resetSession?: boolean;
+};
+
+export type SourcePayloadResolution = {
+  payload: SourcePayload | null;
+  errorDocument: SummaryDocument | null;
+  sourceUrl?: string;
+};
+
+export type ActionItemRequestResult = {
+  document: SummaryDocument | null;
+  sourceUrl?: string;
+  isSuccess: boolean;
+};
+
+export type ActionItemRequestErrorPayload = ActionItemErrorPayload & ActionItemThrottlePayload;
+
+export type ActionItemPostResult<TErrorPayload> =
+  | { ok: true; result: ActionItemResponse }
+  | { ok: false; status: number; errorPayload: TErrorPayload | null };
+
+export type PostActionItemArgs = {
+  baseUrl: string;
+  type: ActionId;
+  sourcePayload: SourcePayload;
+  extras?: { length?: Length; format?: Format; language?: Language };
+};
+
+export type RequestActionItemArgs = {
   baseUrl: string;
   language: Language;
-  resolveSourcePayload: () => Promise<SourcePayload | null>;
-  initialActionItems?: SummaryActionItem[];
-  onActionItemsChange?: (nextActionItems: SummaryActionItem[]) => void;
-  onActionItemSuccess?: () => void;
+  type: ActionId;
+  sourcePayload: SourcePayload;
+  format?: Format;
+  length?: Length;
+  isAuthenticated?: boolean;
+  t?: TranslateFn;
 };

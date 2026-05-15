@@ -27,6 +27,15 @@ const base64ToUint8Array = (base64: string): Uint8Array<ArrayBuffer> => {
   return bytes;
 };
 
+const fetchPdfPayload = async (url: string, filename: string): Promise<PdfPayload> => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Could not read PDF (${response.status}).`);
+  }
+  const buffer = await response.arrayBuffer();
+  return { bytes: new Uint8Array(buffer), filename, mimeType: "application/pdf" };
+};
+
 // Sentinel error so the caller can show a "toggle file:// access" hint.
 export class PdfFileAccessDeniedError extends Error {
   constructor() {
@@ -43,17 +52,17 @@ export const fetchPdfBytes = async (tab: chrome.tabs.Tab): Promise<PdfPayload> =
   const filename = derivePdfFilename(url);
 
   if (url.startsWith("file://")) {
-    let response: Response;
     try {
-      response = await fetch(url);
+      return await fetchPdfPayload(url, filename);
     } catch {
       throw new PdfFileAccessDeniedError();
     }
-    if (!response.ok) {
-      throw new Error(`Could not read local PDF (${response.status}).`);
-    }
-    const buffer = await response.arrayBuffer();
-    return { bytes: new Uint8Array(buffer), filename, mimeType: "application/pdf" };
+  }
+
+  try {
+    return await fetchPdfPayload(url, filename);
+  } catch (error) {
+    console.warn("Extension-context PDF fetch failed; falling back to page-context fetch.", error);
   }
 
   // For http(s), fetch from the page's own context so we don't need <all_urls> host permission.
