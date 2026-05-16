@@ -6,7 +6,7 @@ import { ActionGrid } from './components/ActionGrid/ActionGrid';
 import { FlashcardContainer } from './components/Flashcards/FlashcardContainer';
 import { Quiz } from './components/Quiz/Quiz';
 import type { SummaryActionItem } from '../../types/summary';
-import type { SummaryDocument } from "./utils/types";
+import type { AddActionItemOptions, SummaryDocument } from "./utils/types";
 import { renderInlineSegment } from "./utils/renderInline";
 import { ActionId } from '../../types/summary';
 import { useCurrentSessionState } from '../../stores/sessionStorage';
@@ -18,7 +18,7 @@ interface SummaryPageProps {
   isSummarySuccess: boolean;
   fontSize: number;
   actionItems: SummaryActionItem[];
-  onAddActionItem: (actionId: ActionId) => void;
+  onAddActionItem: (actionId: ActionId, options?: AddActionItemOptions) => void;
   onRemoveActionItem: (actionItemId: string) => void;
   loadingActionId?: ActionId | null;
 }
@@ -146,6 +146,18 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
   const shouldShowReturnLink =
     Boolean(sessionUrl) && activeTabUrl !== undefined && sessionUrl !== activeTabUrl;
 
+  const handleAddActionItem = useCallback(
+    (actionId: ActionId) => {
+      // No active session: treat the grid click as a session-start so the action
+      // item attaches to the active tab's URL instead of an empty session.
+      if (!sessionUrl) {
+        onAddActionItem(actionId, { resetSession: true, forceActiveTab: true });
+        return;
+      }
+      onAddActionItem(actionId);
+    },
+    [onAddActionItem, sessionUrl],
+  );
 
   const renderActionItem = useCallback((actionItem: SummaryActionItem) => {
         if (actionItem.document.blocks.length === 0) {
@@ -294,7 +306,7 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
         <SessionMismatch sessionUrl={sessionUrl} />
       ) : (
         <ActionGrid
-          onClickAction={onAddActionItem}
+          onClickAction={handleAddActionItem}
           title={t("summaryActions.whatsNext")}
           isDisabled={false}
           loadingActionId={loadingActionId}
