@@ -130,35 +130,17 @@ const SummaryDocumentView: React.FC<{ document: SummaryDocument }> = ({ document
   );
 };
 
+interface SummaryActionItemListProps {
+  actionItems: SummaryActionItem[];
+  fontSize: number;
+  onRemoveActionItem: (actionItemId: string) => void;
+}
 
-const SummaryPage: React.FC<SummaryPageProps> = ({
-  fontSize,
+const SummaryActionItemList = React.memo(({
   actionItems,
-  onAddActionItem,
   onRemoveActionItem,
-  loadingActionId = null,
-}) => {
-  const { t } = useTranslation();
-  const sessionUrl = useCurrentSessionState((state) => state.session.url);
-  const activeTabUrl = useActiveTabUrl();
-  // While activeTabUrl is still resolving we treat it as "on session" to avoid flicker;
-  // the return link only renders once we have both URLs and they differ.
-  const shouldShowReturnLink =
-    Boolean(sessionUrl) && activeTabUrl !== undefined && sessionUrl !== activeTabUrl;
-
-  const handleAddActionItem = useCallback(
-    (actionId: ActionId) => {
-      // No active session: treat the grid click as a session-start so the action
-      // item attaches to the active tab's URL instead of an empty session.
-      if (!sessionUrl) {
-        onAddActionItem(actionId, { resetSession: true, forceActiveTab: true });
-        return;
-      }
-      onAddActionItem(actionId);
-    },
-    [onAddActionItem, sessionUrl],
-  );
-
+  fontSize,
+}: SummaryActionItemListProps) => {
   const renderActionItem = useCallback((actionItem: SummaryActionItem) => {
         if (actionItem.document.blocks.length === 0) {
             return null;
@@ -297,11 +279,46 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
     [fontSize, onRemoveActionItem],
   );
 
+  return <>{actionItems.map(renderActionItem)}</>;
+});
+
+const SummaryPage: React.FC<SummaryPageProps> = ({
+  fontSize,
+  actionItems,
+  onAddActionItem,
+  onRemoveActionItem,
+  loadingActionId = null,
+}) => {
+  const { t } = useTranslation();
+  const sessionUrl = useCurrentSessionState((state) => state.session.url);
+  const activeTabUrl = useActiveTabUrl();
+  // While activeTabUrl is still resolving we treat it as "on session" to avoid flicker;
+  // the return link only renders once we have both URLs and they differ.
+  const shouldShowReturnLink =
+    Boolean(sessionUrl) && activeTabUrl !== undefined && sessionUrl !== activeTabUrl;
+
+  const handleAddActionItem = useCallback(
+    (actionId: ActionId) => {
+      // No active session: treat the grid click as a session-start so the action
+      // item attaches to the active tab's URL instead of an empty session.
+      if (!sessionUrl) {
+        onAddActionItem(actionId, { resetSession: true, forceActiveTab: true });
+        return;
+      }
+      onAddActionItem(actionId);
+    },
+    [onAddActionItem, sessionUrl],
+  );
+
   return (
 
     
     <section className={`summary-shell px-2! py-2!`}>
-      {actionItems.map(renderActionItem)}
+      <SummaryActionItemList
+        actionItems={actionItems}
+        fontSize={fontSize}
+        onRemoveActionItem={onRemoveActionItem}
+      />
       { shouldShowReturnLink ? (
         <SessionMismatch sessionUrl={sessionUrl} />
       ) : (

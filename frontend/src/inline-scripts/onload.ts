@@ -1,10 +1,7 @@
-const theme = localStorage.getItem("theme");
-const htmlElement = document.querySelector('html')
+const storedTheme = localStorage.getItem("theme");
+const theme = storedTheme === "dark" ? "dark" : "light";
+const htmlElement = document.documentElement;
 
-if(theme){
-  htmlElement?.classList.add(theme);
-}
-else{
-  htmlElement?.classList.add("light");
-}
-
+htmlElement.classList.toggle("dark", theme === "dark");
+htmlElement.classList.toggle("light", theme === "light");
+htmlElement.style.colorScheme = theme;

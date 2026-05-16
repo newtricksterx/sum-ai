@@ -22,6 +22,18 @@ import {
 import { requestActionItem } from "./utils/actionItemRequest";
 import { isRestrictedPage, resolveCurrentTab } from "../FrontPage/frontpage.helpers";
 
+const waitForNextPaintTask = (): Promise<void> =>
+  new Promise((resolve) => {
+    if (typeof window === "undefined" || typeof window.requestAnimationFrame !== "function") {
+      setTimeout(resolve, 0);
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      window.setTimeout(resolve, 0);
+    });
+  });
+
 export const useActionItem = () => {
   const { t } = useTranslation();
   const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -111,6 +123,8 @@ export const useActionItem = () => {
       setLoadingActionId(actionId);
 
       try {
+        await waitForNextPaintTask();
+
         if (options.resetSession) {
           resetSession();
           setSourcePayload(null);
