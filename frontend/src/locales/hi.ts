@@ -44,7 +44,7 @@ const hi = {
       clearAll: "सब साफ करें",
       clearAllTitle: "सभी सत्र साफ करें?",
       clearAllDescription: "क्या आप सचमुच सभी सहेजे गए सत्र स्थायी रूप से हटाना चाहते हैं?",
-      emptyNotSignedIn: "आप साइन इन नहीं हैं। इतिहास सत्र स्लॉट पाने के लिए कृपया साइन इन करें।",
+      emptyNotSignedIn: "आप साइन इन नहीं हैं। इतिहास सत्र स्लॉट पाने के लिए कृपया <signIn>साइन इन करें</signIn>।",
       session: "सत्र",
       sessions: "सत्र",
       willBeDeleted: "हटा दिए जाएंगे।",

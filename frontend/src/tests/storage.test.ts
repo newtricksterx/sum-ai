@@ -82,27 +82,29 @@ describe("storage utils", () => {
     });
 
     it("stores and retrieves page", () => {
-      UpdatePageStorage(3);
-      expect(localStorage.getItem("page")).toBe("3");
-      expect(GetPageFromStorage()).toBe(3);
+      UpdatePageStorage("session");
+      expect(localStorage.getItem("page")).toBe("session");
+      expect(GetPageFromStorage()).toBe("session");
+    });
+
+    it("round-trips each PageType value", () => {
+      const pages = ["home", "session", "history", "settings", "profile"] as const;
+      for (const page of pages) {
+        UpdatePageStorage(page);
+        expect(GetPageFromStorage()).toBe(page);
+      }
     });
   });
 
   describe("numeric parsing", () => {
-    it("parses zero values for page and font size", () => {
+    it("parses zero font size", () => {
       localStorage.setItem("fontSize", "0");
-      localStorage.setItem("page", "0");
-
       expect(GetFontSizeFromStorage()).toBe(0);
-      expect(GetPageFromStorage()).toBe(0);
     });
 
-    it("returns NaN for invalid numeric strings", () => {
+    it("returns NaN for invalid font size string", () => {
       localStorage.setItem("fontSize", "abc");
-      localStorage.setItem("page", "page-1");
-
       expect(GetFontSizeFromStorage()).toBeNaN();
-      expect(GetPageFromStorage()).toBeNaN();
     });
   });
 });

@@ -44,7 +44,7 @@ const fr = {
       clearAll: "Tout effacer",
       clearAllTitle: "Effacer toutes les sessions ?",
       clearAllDescription: "Voulez-vous vraiment supprimer definitivement toutes les sessions enregistrees ?",
-      emptyNotSignedIn: "Vous n'etes pas connecte. Connectez-vous pour obtenir des emplacements de session dans l'historique.",
+      emptyNotSignedIn: "Vous n'etes pas connecte. <signIn>Connectez-vous</signIn> pour obtenir des emplacements de session dans l'historique.",
       session: "session",
       sessions: "sessions",
       willBeDeleted: "seront supprimees.",

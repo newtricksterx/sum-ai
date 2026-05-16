@@ -44,7 +44,7 @@ const es = {
       clearAll: "Borrar todo",
       clearAllTitle: "Borrar todas las sesiones?",
       clearAllDescription: "Estas seguro de que quieres eliminar permanentemente todas las sesiones guardadas?",
-      emptyNotSignedIn: "No has iniciado sesion. Inicia sesion para obtener espacios de sesion en el historial.",
+      emptyNotSignedIn: "No has iniciado sesion. <signIn>Inicia sesion</signIn> para obtener espacios de sesion en el historial.",
       session: "sesion",
       sessions: "sesiones",
       willBeDeleted: "se eliminaran.",

@@ -44,7 +44,7 @@
       clearAll: "Clear All",
       clearAllTitle: "Clear All Sessions?",
       clearAllDescription: "Are you sure you want to permanently remove all saved sessions?",
-      emptyNotSignedIn: "You are not signed in. Please sign in to receive history session slots.",
+      emptyNotSignedIn: "You are not signed in. Please <signIn>sign in</signIn> to receive history session slots.",
       session: "session",
       sessions: "sessions",
       willBeDeleted: "will be deleted.",

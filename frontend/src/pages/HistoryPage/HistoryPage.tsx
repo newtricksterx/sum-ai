@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import HistoryCard from './HistoryCard/HistoryCard';
 import AlertPopup from '../../components/AlertPopup/AlertPopup';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import '../../i18n';
 import { truncateText, getHostName } from './historypage.utils';
 import {
@@ -15,6 +15,7 @@ import { useAuthProfileStore } from '../../stores/authProfileStore';
 
 interface HistoryPageProps {
   onOpenSession: (session: SessionState) => void;
+  onClickSignInPage: () => void;
 }
 
 const getHistoryPreview = (item: HistoryItem): string => {
@@ -23,7 +24,7 @@ const getHistoryPreview = (item: HistoryItem): string => {
   return first.document.title || item.url;
 };
 
-const HistoryPage: React.FC<HistoryPageProps> = ({ onOpenSession }) => {
+const HistoryPage: React.FC<HistoryPageProps> = ({ onOpenSession, onClickSignInPage }) => {
   const { t } = useTranslation();
   const userKey = useCurrentUserHistoryKey();
   const items = useCurrentUserHistory();
@@ -63,9 +64,24 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onOpenSession }) => {
       </div>
 
       {items.length === 0 ? (
-        <p className="text-[13px]">
-          {profile ? t("history.empty") : t("history.emptyNotSignedIn")}
-        </p>
+        <div className="text-[13px]">
+          {profile ? t("history.empty") : (
+            <p>
+              <Trans
+                i18nKey="history.emptyNotSignedIn"
+                components={{
+                  signIn: (
+                    <button
+                      type="button"
+                      className='text-blue-600 hover:text-blue-400 hover:underline transition-colors'
+                      onClick={onClickSignInPage}
+                    />
+                  ),
+                }}
+              />
+            </p>
+          )}
+        </div>
       ) : (
         <div className="flex flex-col gap-2">
           {items.map((item) => (

@@ -1,4 +1,4 @@
-import { Currency, Format, Language, Length, QuizDifficulty, Theme } from "./types"
+import { Currency, Format, Language, Length, QuizDifficulty, Theme, PageType } from "./types"
 
 export const UpdateLanguageStorage = (currentLang: Language) => {
     localStorage.setItem('language', currentLang)
@@ -28,8 +28,8 @@ export const UpdateQuizDifficultyStorage = (currentQuizDifficulty: QuizDifficult
     localStorage.setItem('quizDifficulty', currentQuizDifficulty)
 }
 
-export const UpdatePageStorage = (currentPage: number) => {
-    localStorage.setItem('page', currentPage.toString());
+export const UpdatePageStorage = (currentPage: PageType) => {
+    localStorage.setItem('page', currentPage);
 }
 
 export const GetLangFromStorage = () => {
@@ -56,8 +56,9 @@ export const GetFormatFromStorage = () => {
     return localStorage && localStorage.getItem('format') ? localStorage.getItem('format') as Format : null
 }
 
+
 export const GetPageFromStorage = () => {
-    return localStorage && localStorage.getItem('page') ? Number(localStorage.getItem('page')) : null
+    return localStorage && localStorage.getItem('page') ? (localStorage.getItem('page') as PageType) : null
 }
 
 export const GetQuizDifficultyFromStorage = () => {

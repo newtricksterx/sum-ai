@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import type { Dispatch, SetStateAction } from "react";
+import { PageType } from "../../utils/types";
 
 export const useTrackMountedPages = (
-  currentPage: number,
-  setMountedPages: Dispatch<SetStateAction<Record<number, true>>>,
+  currentPage: PageType,
+  setMountedPages: Dispatch<SetStateAction<Partial<Record<PageType, true>>>>,
 ) => {
   useEffect(() => {
     setMountedPages((previousPages) => {

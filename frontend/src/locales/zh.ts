@@ -44,7 +44,7 @@
       clearAll: "全部清除",
       clearAllTitle: "清除全部会话？",
       clearAllDescription: "你确定要永久删除所有已保存会话吗？",
-      emptyNotSignedIn: "您未登录。请登录以获取历史会话名额。",
+      emptyNotSignedIn: "您未登录。请<signIn>登录</signIn>以获取历史会话名额。",
       session: "个会话",
       sessions: "个会话",
       willBeDeleted: "将被删除。",

@@ -40,3 +40,5 @@ export type Settings = {
         format: Format, 
         quizDifficulty: QuizDifficulty }) => void;
 }
+
+export type PageType = "home" | "session" | "history" | "settings" | "profile"

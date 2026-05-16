@@ -23,16 +23,17 @@ import { useTrackMountedPages } from './useTrackMountedPages'
 import { usePageSwitchCleanup } from './usePageSwitchCleanup'
 import { SettingsPage } from '../SettingsPage/SettingsPage'
 import { ActionId } from '../../types/summary'
+import { PageType } from '../../utils/types'
 // import { savePDF } from '../../utils/functions'
 
 
 function App() {
-  const [currentPage, setCurrentPage] = useState(() => GetPageFromStorage() ?? 0);
-  const pendingPageRef = useRef<number | null>(null);
+  const [currentPage, setCurrentPage] = useState<PageType>(() => GetPageFromStorage() ?? "home");
+  const pendingPageRef = useRef<PageType | null>(null);
   const pageFrameRef = useRef<number | null>(null);
   const pageStorageTimeoutRef = useRef<number | null>(null);
-  const [mountedPages, setMountedPages] = useState<Record<number, true>>(() => {
-    const initialPage = GetPageFromStorage() ?? 0;
+  const [mountedPages, setMountedPages] = useState<Partial<Record<PageType, true>>>(() => {
+    const initialPage: PageType = GetPageFromStorage() ?? "home";
     return { [initialPage]: true };
   });
   const {
@@ -60,7 +61,7 @@ function App() {
   useRestoreSessionOnLogin(authProfile);
   useTrackMountedPages(currentPage, setMountedPages);
 
-  const schedulePageStorageWrite = useCallback((nextPage: number) => {
+  const schedulePageStorageWrite = useCallback((nextPage: PageType) => {
     if (typeof window === "undefined") {
       UpdatePageStorage(nextPage);
       return;
@@ -77,21 +78,21 @@ function App() {
     }, 120);
   }, []);
 
-  const commitPage = useCallback((nextPage: number) => {
+  const commitPage = useCallback((nextPage: PageType) => {
     startTransition(() => {
       setCurrentPage((prevPage) => (prevPage === nextPage ? prevPage : nextPage));
     });
     schedulePageStorageWrite(nextPage);
   }, [schedulePageStorageWrite]);
 
-  const setPage = useCallback((nextPage: number) => {
+  const setPage = useCallback((nextPage: PageType) => {
     // If we believe the user is logged in but the persisted profile blob is
     // missing or tampered, force a real (backend cookie revocation) logout
     // and route to FrontPage instead of wherever they were trying to go.
     const authState = useAuthProfileStore.getState();
     if (authState.profile && !isPersistedAuthProfileIntact()) {
       void authState.logout();
-      nextPage = 0;
+      nextPage = "home";
     }
 
     pendingPageRef.current = nextPage;
@@ -111,7 +112,7 @@ function App() {
       const scheduledPage = pendingPageRef.current;
       pendingPageRef.current = null;
 
-      if (typeof scheduledPage !== "number") {
+      if (scheduledPage === null) {
         return;
       }
 
@@ -125,30 +126,30 @@ function App() {
     const authState = useAuthProfileStore.getState();
     if (authState.profile && !isPersistedAuthProfileIntact()) {
       void authState.logout();
-      setPage(0);
+      setPage("home");
     }
     // Intentionally run once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onClickReturn = useCallback(() => {
-    setPage(0);
+    setPage("home");
   }, [setPage]);
 
   const onClickForward = useCallback(() => {
-    setPage(1);
+    setPage("session");
   }, [setPage]);
 
   const onClickHistory = useCallback(() => {
-    setPage(2);
+    setPage("history");
   }, [setPage]);
 
   const onClickProfile = useCallback(() => {
-    setPage(3);
+    setPage("profile");
   }, [setPage]);
 
   const onClickSettings = useCallback(() => {
-    setPage(4);
+    setPage("settings");
   }, [setPage]);
 
   const onClickClose = () => {
@@ -166,12 +167,12 @@ function App() {
       return;
     }
     await addActionItem(actionId, { resetSession: true, forceActiveTab: true });
-    setPage(1);
+    setPage("session");
   }, [addActionItem, loadingActionId, setPage]);
 
   const onOpenHistorySession = useCallback((session: SessionState) => {
     useCurrentSessionState.getState().restoreSession(session);
-    setPage(1);
+    setPage("session");
   }, [setPage]);
 
   const isActionItemLoading = loadingActionId !== null;
@@ -211,21 +212,21 @@ function App() {
     [isActionItemLoading, loadingActionId, onClickStartSession],
   );
   const historyPageContent = useMemo(
-    () => <HistoryPage onOpenSession={onOpenHistorySession} />,
-    [onOpenHistorySession],
+    () => <HistoryPage onOpenSession={onOpenHistorySession} onClickSignInPage={() => setPage("profile")}/>,
+    [onOpenHistorySession, setPage],
   );
   const profilePageContent = useMemo(() => <ProfilePage />, []);
   const settingsPageContent = useMemo(() => <SettingsPage />, []);
 
-  const renderPagePanel = (pageIndex: number, content: ReactNode) => {
-    if (!mountedPages[pageIndex] && currentPage !== pageIndex) {
+  const renderPagePanel = (pageKey: PageType, content: ReactNode) => {
+    if (!mountedPages[pageKey] && currentPage !== pageKey) {
       return null;
     }
 
-    const isActivePage = currentPage === pageIndex;
+    const isActivePage = currentPage === pageKey;
     return (
       <section
-        key={pageIndex}
+        key={pageKey}
         hidden={!isActivePage}
         className="app-page-panel"
       >
@@ -237,11 +238,11 @@ function App() {
   const renderUserInterface = () => {
     return (
       <>
-        {renderPagePanel(0, frontPageContent)}
-        {renderPagePanel(1, summaryPageContent)}
-        {renderPagePanel(2, historyPageContent)}
-        {renderPagePanel(3, profilePageContent)}
-        {renderPagePanel(4, settingsPageContent)}
+        {renderPagePanel("home", frontPageContent)}
+        {renderPagePanel("session", summaryPageContent)}
+        {renderPagePanel("history", historyPageContent)}
+        {renderPagePanel("profile", profilePageContent)}
+        {renderPagePanel("settings", settingsPageContent)}
       </>
     );
   };
@@ -259,7 +260,7 @@ function App() {
       <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar">
         {renderUserInterface()}
       </div>
-      {currentPage === 1 && (
+      {currentPage === "session" && (
         <ToolBar
           isSummarizing={false}
           isGenerateDisabled={isActionItemLoading}
