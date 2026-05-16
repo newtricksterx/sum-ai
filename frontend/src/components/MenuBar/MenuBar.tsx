@@ -1,6 +1,6 @@
 import { MenuIconSize } from '../../utils/constants'
 import { GoHistory, GoHome  } from "react-icons/go";
-import { ReaderIcon, PersonIcon, GearIcon } from "@radix-ui/react-icons";
+import { ReaderIcon, PersonIcon, GearIcon, Cross1Icon } from "@radix-ui/react-icons";
 import "./MenuBar.css";
 import { useTranslation } from "react-i18next";
 import "../../i18n";
@@ -13,6 +13,7 @@ export interface MenuBarProps {
     onClickProfile: React.MouseEventHandler;
     onClickHistory: React.MouseEventHandler;
     onClickSettings: React.MouseEventHandler;
+    onClickClose: React.MouseEventHandler;
 }
 
 function MenuBar({ 
@@ -20,7 +21,8 @@ function MenuBar({
     onClickForward, 
     onClickProfile, 
     onClickHistory, 
-    onClickSettings } : MenuBarProps) 
+    onClickSettings,
+    onClickClose } : MenuBarProps) 
   {
 
   const { t } = useTranslation();
@@ -33,7 +35,7 @@ function MenuBar({
         <button className='menubar-btn' onClick={onClickForward} title={t("menu.summary")}>
             <ReaderIcon width={MenuIconSize} height={MenuIconSize}/>
         </button>
-        <button className='menubar-btn' onClick={onClickSettings} title={t("menu.summary")}>
+        <button className='menubar-btn' onClick={onClickSettings} title={t("menu.settings")}>
             <GearIcon width={MenuIconSize} height={MenuIconSize}/>
         </button>
         <button className='menubar-btn' onClick={onClickHistory} title={t("menu.history")}>
@@ -41,6 +43,9 @@ function MenuBar({
         </button>
         <button className='menubar-btn' onClick={onClickProfile} title={t("menu.profile")}>
           <PersonIcon width={MenuIconSize} height={MenuIconSize}/>
+        </button>
+        <button className='menubar-btn hover:bg-red-500!' onClick={onClickClose} title={t("menu.close")}>
+          <Cross1Icon width={MenuIconSize} height={MenuIconSize}/>
         </button>
     </nav>
   )

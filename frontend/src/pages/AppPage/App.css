@@ -30,3 +30,18 @@
   width: 100%;
   min-height: 100%;
 }
+
+@keyframes app-page-panel-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Fires every time a panel transitions from hidden (display: none) → visible.
+   Opacity-only on purpose: an earlier translateY variant briefly extended the
+   element past its layout bounds and flashed a scrollbar in the outer
+   overflow-y:auto container. */
+@media (prefers-reduced-motion: no-preference) {
+  .app-page-panel:not([hidden]) {
+    animation: app-page-panel-enter 220ms ease-out both;
+  }
+}

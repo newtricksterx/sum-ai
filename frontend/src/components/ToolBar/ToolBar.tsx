@@ -1,39 +1,41 @@
-import { Check, Download } from 'lucide-react';
-import { GoCopy } from "react-icons/go";
 import "./ToolBar.css";
 import { useTranslation } from "react-i18next";
 import "../../i18n";
+import { useCurrentSessionState } from "../../stores/sessionStorage";
 
 
 export interface ToolBarProps {
-    onClickCopy: React.MouseEventHandler;
-    onClickDownload: React.MouseEventHandler;
-    onClickGenerate?: React.MouseEventHandler;
-    isCopySuccess?: boolean;
+    onClickNewSession?: React.MouseEventHandler;
     isSummarizing?: boolean;
     isGenerateDisabled?: boolean;
-    canUseSummaryActions?: boolean;
 }
 
 function ToolBar({
-  onClickCopy,
-  onClickDownload,
   isSummarizing = false,
   isGenerateDisabled = false,
-  onClickGenerate = () => {},
-  isCopySuccess = false,
-  canUseSummaryActions = true,
+  onClickNewSession = () => {},
 } : ToolBarProps) {
   const { t } = useTranslation();
   const disableGenerate = isSummarizing || isGenerateDisabled;
-  const areSummaryActionsEnabled = canUseSummaryActions && !isSummarizing;
-  
+  // Subscribe directly so URL updates aren't lost when the parent App re-render
+  // pushing the prop is deferred by startTransition.
+  const currentSessionUrl = useCurrentSessionState((state) => state.session.url);
+
   return (
-    <nav className="toolbar-shell m-1 flex flex-row items-center justify-between">
-        <span className={`toolbar-generate-shell ${disableGenerate ? "is-disabled" : ""}`}>
+    <nav className="toolbar-shell">
+      <div className="toolbar-sessionurl">
+        <div>
+          <span className={`green-dot ${currentSessionUrl ? "bg-green-500" : "bg-red-500"}`}></span>
+        </div>
+        <div>
+            <header className="toolbar-sessionurl-header">{t("toolbar.sessionLabel")}</header>
+            <p className="toolbar-sessionurl-url">{currentSessionUrl || t("toolbar.noSession")}</p>
+        </div>
+      </div>
+      <span className={`toolbar-generate-shell ${disableGenerate ? "is-disabled" : ""}`}>
         <button
           type="button"
-          onClick={onClickGenerate}
+          onClick={onClickNewSession}
           disabled={disableGenerate}
           title={t("toolbar.generateTitle")}
           className={`toolbar-generate-btn ${
@@ -42,9 +44,17 @@ function ToolBar({
               : "toolbar-generate-btn-active cursor-pointer"
           }`}
         >
-          {t("toolbar.generate")}
+          {t("toolbar.startNewSession")}
         </button>
-        </span>
+      </span>
+    </nav>
+  )
+}
+
+export default ToolBar;
+
+
+/*
         <div id="tools" className="ml-auto flex flex-row items-center gap-1">
           <button className={`toolbar-btn p-2 rounded-md ${areSummaryActionsEnabled ? "" : "opacity-50"}`} disabled={!areSummaryActionsEnabled} onClick={onClickDownload} title={t("toolbar.downloadTitle")}>
             <Download size={12}/>
@@ -60,8 +70,4 @@ function ToolBar({
             {isCopySuccess ? <Check size={12}/> : <GoCopy size={12}/>}
           </button>
         </div>
-    </nav>
-  )
-}
-
-export default ToolBar;
+*/

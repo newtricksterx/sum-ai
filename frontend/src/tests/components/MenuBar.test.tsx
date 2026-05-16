@@ -16,6 +16,7 @@ describe("MenuBar", () => {
     const onClickProfile = vi.fn();
     const onClickHistory = vi.fn();
     const onClickSettings = vi.fn();
+    const onClickClose = vi.fn();
 
     render(
       <MenuBar
@@ -24,22 +25,20 @@ describe("MenuBar", () => {
         onClickProfile={onClickProfile}
         onClickHistory={onClickHistory}
         onClickSettings={onClickSettings}
+        onClickClose={onClickClose}
       />
     );
 
     const menuButtons = screen.getAllByRole("button");
-    expect(menuButtons).toHaveLength(5);
+    expect(menuButtons).toHaveLength(6);
 
-    fireEvent.click(menuButtons[0]);
-    fireEvent.click(menuButtons[1]);
-    fireEvent.click(menuButtons[2]);
-    fireEvent.click(menuButtons[3]);
-    fireEvent.click(menuButtons[4]);
+    menuButtons.forEach((button) => fireEvent.click(button));
 
     expect(onClickReturn).toHaveBeenCalledTimes(1);
     expect(onClickForward).toHaveBeenCalledTimes(1);
     expect(onClickSettings).toHaveBeenCalledTimes(1);
     expect(onClickHistory).toHaveBeenCalledTimes(1);
     expect(onClickProfile).toHaveBeenCalledTimes(1);
+    expect(onClickClose).toHaveBeenCalledTimes(1);
   });
 });

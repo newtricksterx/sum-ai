@@ -5,12 +5,17 @@ const es = {
       summary: "Ir al resumen",
       history: "Ver historial",
       profile: "Pagina de perfil",
+      settings: "Abrir ajustes",
+      close: "Cerrar extension",
     },
     toolbar: {
       generateTitle: "Generar un nuevo resumen para la pestana actual",
       generate: "Generar resumen",
       downloadTitle: "Descargar resumen en PDF",
       copyTitle: "Copiar resumen",
+      sessionLabel: "URL de la sesion actual",
+      noSession: "Sin sesion",
+      startNewSession: "Iniciar nueva sesion",
     },
     loader: {
       drafting: "Preparando resumen",

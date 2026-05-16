@@ -12,6 +12,7 @@ import { ActionId } from '../../types/summary';
 import { useCurrentSessionState } from '../../stores/sessionStorage';
 import { useActiveTabUrl } from './useActiveTabUrl';
 import { SessionMismatch } from './components/SessionMismatch/SessionMismatch';
+import { useTranslation } from 'react-i18next';
 
 interface SummaryPageProps {
   isSummarySuccess: boolean;
@@ -137,7 +138,8 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
   onRemoveActionItem,
   loadingActionId = null,
 }) => {
-  const sessionUrl = useCurrentSessionState((state) => state.url);
+  const { t } = useTranslation();
+  const sessionUrl = useCurrentSessionState((state) => state.session.url);
   const activeTabUrl = useActiveTabUrl();
   // While activeTabUrl is still resolving we treat it as "on session" to avoid flicker;
   // the return link only renders once we have both URLs and they differ.
@@ -288,11 +290,12 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
     
     <section className={`summary-shell px-2! py-2!`}>
       {actionItems.map(renderActionItem)}
-      { true ? (
+      { shouldShowReturnLink ? (
         <SessionMismatch sessionUrl={sessionUrl} />
       ) : (
         <ActionGrid
           onClickAction={onAddActionItem}
+          title={t("summaryActions.whatsNext")}
           isDisabled={false}
           loadingActionId={loadingActionId}
         />

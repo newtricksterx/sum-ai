@@ -5,12 +5,17 @@ const hi = {
       summary: "सारांश पेज पर जाएँ",
       history: "इतिहास देखें",
       profile: "प्रोफ़ाइल पेज",
+      settings: "सेटिंग्स खोलें",
+      close: "एक्सटेंशन बंद करें",
     },
     toolbar: {
       generateTitle: "वर्तमान टैब के लिए नया सारांश बनाएं",
       generate: "सारांश बनाएं",
       downloadTitle: "सारांश को PDF के रूप में डाउनलोड करें",
       copyTitle: "सारांश कॉपी करें",
+      sessionLabel: "वर्तमान सत्र URL",
+      noSession: "कोई सत्र नहीं",
+      startNewSession: "नया सत्र शुरू करें",
     },
     loader: {
       drafting: "सारांश तैयार किया जा रहा है",

@@ -5,12 +5,17 @@ const fr = {
       summary: "Aller au resume",
       history: "Voir l'historique",
       profile: "Page profil",
+      settings: "Ouvrir les parametres",
+      close: "Fermer l'extension",
     },
     toolbar: {
       generateTitle: "Generer un nouveau resume pour l'onglet actuel",
       generate: "Generer le resume",
       downloadTitle: "Telecharger le resume en PDF",
       copyTitle: "Copier le resume",
+      sessionLabel: "URL de la session actuelle",
+      noSession: "Aucune session",
+      startNewSession: "Demarrer une nouvelle session",
     },
     loader: {
       drafting: "Preparation du resume",

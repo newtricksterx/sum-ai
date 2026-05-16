@@ -7,20 +7,23 @@ import { useSettingsStore } from '../../stores/settingsStore'
 import { GetPageFromStorage, UpdatePageStorage } from '../../utils/storage'
 import FrontPage from '../FrontPage/FrontPage'
 import SummaryPage from '../SummaryPage/SummaryPage'
-import { getPlainTextFromHtml } from '../../utils/html'
+// import { getPlainTextFromHtml } from '../../utils/html'
 import HistoryPage from '../HistoryPage/HistoryPage'
 import ProfilePage from '../ProfilePage/ProfilePage'
-import { useCopySuccessTimer } from '../../components/ToolBar/useCopySuccessTimer'
+// import { useCopySuccessTimer } from '../../components/ToolBar/useCopySuccessTimer'
 import { useActionItem } from '../SummaryPage/useActionItem'
 import { useAuthProfileStore } from '../../stores/authProfileStore'
+import { useCurrentSessionState, type SessionState } from '../../stores/sessionStorage'
 import { useAppLanguageEffect } from './useAppLanguageEffect'
 import { useHydrateProfileAfterLogin } from './useHydrateProfileAfterLogin'
 import { useAuthLogoutReset } from './useAuthLogoutReset'
 import { useHydrateProfileOnAuthChange } from './useHydrateProfileOnAuthChange'
+import { useRestoreSessionOnLogin } from './useRestoreSessionOnLogin'
 import { useTrackMountedPages } from './useTrackMountedPages'
 import { usePageSwitchCleanup } from './usePageSwitchCleanup'
 import { SettingsPage } from '../SettingsPage/SettingsPage'
-import { savePDF } from '../../utils/functions'
+import { ActionId } from '../../types/summary'
+// import { savePDF } from '../../utils/functions'
 
 
 function App() {
@@ -38,7 +41,7 @@ function App() {
     addActionItem,
     removeActionItem,
   } = useActionItem();
-  const { isCopySuccess, showCopySuccess, resetCopySuccess } = useCopySuccessTimer();
+  // const { isCopySuccess, showCopySuccess, resetCopySuccess } = useCopySuccessTimer();
 
   const fontSize = useSettingsStore((state) => state.fontSize)
   const language = useSettingsStore((state) => state.language)
@@ -46,6 +49,7 @@ function App() {
   const hydrateProfile = useAuthProfileStore((state) => state.hydrateProfile)
   const authProfile = useAuthProfileStore((state) => state.profile)
   const clearProfile = useAuthProfileStore((state) => state.clearProfile)
+  const resetSession = useCurrentSessionState((state) => state.resetSession)
 
   useAppLanguageEffect(language);
   useHydrateProfileAfterLogin(hydrateProfile, currency);
@@ -53,6 +57,7 @@ function App() {
 
   
   useHydrateProfileOnAuthChange(authProfile, currency, hydrateProfile);
+  useRestoreSessionOnLogin(authProfile);
   useTrackMountedPages(currentPage, setMountedPages);
 
   const schedulePageStorageWrite = useCallback((nextPage: number) => {
@@ -126,20 +131,32 @@ function App() {
     setPage(4);
   }, [setPage]);
 
-  const onClickDownload = async () => {
-    await savePDF("test pdf");
+  const onClickClose = () => {
+    window.close()
   }
 
+  /*
+  const onClickDownload = async () => {
+    await savePDF("test pdf");
+  } */
 
-  const onClickStartSession = useCallback(async () => {
+
+  const onClickStartSession = useCallback(async (actionId: ActionId) => {
     if (loadingActionId !== null) {
       return;
     }
+    await addActionItem(actionId, { resetSession: true, forceActiveTab: true });
     setPage(1);
-    await addActionItem("summary", { resetSession: true, forceActiveTab: true });
   }, [addActionItem, loadingActionId, setPage]);
 
+  const onOpenHistorySession = useCallback((session: SessionState) => {
+    useCurrentSessionState.getState().restoreSession(session);
+    setPage(1);
+  }, [setPage]);
+
   const isActionItemLoading = loadingActionId !== null;
+
+  /*
   const canUseSummaryActions = useMemo(() => {
     if (currentPage !== 1) {
       return false;
@@ -155,7 +172,7 @@ function App() {
       console.error("Copy Error:", error);
       resetCopySuccess();
     }
-  }
+  }*/
 
   const summaryPageContent = useMemo(() => {
 
@@ -173,7 +190,10 @@ function App() {
     () => <FrontPage onClickGenerate={onClickStartSession} isGenerateDisabled={isActionItemLoading} />,
     [isActionItemLoading, onClickStartSession],
   );
-  const historyPageContent = useMemo(() => <HistoryPage />, []);
+  const historyPageContent = useMemo(
+    () => <HistoryPage onOpenSession={onOpenHistorySession} />,
+    [onOpenHistorySession],
+  );
   const profilePageContent = useMemo(() => <ProfilePage />, []);
   const settingsPageContent = useMemo(() => <SettingsPage />, []);
 
@@ -214,19 +234,16 @@ function App() {
         onClickProfile={onClickProfile}
         onClickHistory={onClickHistory}
         onClickSettings={onClickSettings}
+        onClickClose={onClickClose}
       />
       <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar">
         {renderUserInterface()}
       </div>
       {currentPage === 1 && (
         <ToolBar
-          onClickCopy={onClickCopy}
-          onClickDownload={onClickDownload}
           isSummarizing={false}
           isGenerateDisabled={isActionItemLoading}
-          onClickGenerate={onClickStartSession}
-          isCopySuccess={isCopySuccess}
-          canUseSummaryActions={canUseSummaryActions}
+          onClickNewSession={resetSession}
         />
       )}
     </section>

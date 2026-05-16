@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuthProfileStore } from "../../stores/authProfileStore";
 import { useSettingsStore } from "../../stores/settingsStore";
 import { useCurrentSessionState } from "../../stores/sessionStorage";
+import { useCurrentUserHistoryKey, useHistoryStorage } from "../../stores/historyStorage";
 import type { ActionId } from "../../types/summary";
 import { createActionItemId } from "../../types/summary";
 import type {
@@ -30,12 +31,19 @@ export const useActionItem = () => {
   const currency = useSettingsStore((state) => state.currency);
   const userProfile = useAuthProfileStore((state) => state.profile);
   const hydrateProfile = useAuthProfileStore((state) => state.hydrateProfile);
+  const historyLimit = useAuthProfileStore((state) => state.profile?.subscription?.history_limit ?? null);
+  const userHistoryKey = useCurrentUserHistoryKey();
+  const upsertHistoryItem = useHistoryStorage((state) => state.upsertHistoryItem);
 
-  const actionItems = useCurrentSessionState((state) => state.action_items);
+  const actionItems = useCurrentSessionState((state) => state.session.action_items);
   const startSession = useCurrentSessionState((state) => state.startSession);
   const addSessionActionItem = useCurrentSessionState((state) => state.addActionItem);
   const removeSessionActionItem = useCurrentSessionState((state) => state.removeActionItem);
   const resetSession = useCurrentSessionState((state) => state.resetSession);
+
+  const syncHistory = useCallback(() => {
+    upsertHistoryItem(userHistoryKey, useCurrentSessionState.getState().session, historyLimit);
+  }, [historyLimit, upsertHistoryItem, userHistoryKey]);
   const [sourcePayload, setSourcePayload] = useState<SourcePayload | null>(null);
   const lastSourceErrorRef = useRef<SourcePayloadResolution | null>(null);
   const [loadingActionId, setLoadingActionId] = useState<ActionId | null>(null);
@@ -122,6 +130,7 @@ export const useActionItem = () => {
               "Could not read the current tab. Try reloading the page and trying again.",
             ),
           });
+          syncHistory();
           return;
         }
 
@@ -142,10 +151,12 @@ export const useActionItem = () => {
         }
 
         if (!result.document || result.document.blocks.length === 0) {
+          syncHistory();
           return;
         }
 
         addSessionActionItem({ id: actionItemId, type: actionId, document: result.document });
+        syncHistory();
         if (!result.isSuccess) {
           return;
         }
@@ -170,6 +181,7 @@ export const useActionItem = () => {
       resetSession,
       resolveSourcePayload,
       startSession,
+      syncHistory,
       t,
       userProfile,
     ],
@@ -178,8 +190,9 @@ export const useActionItem = () => {
   const removeActionItem = useCallback(
     (actionItemId: string) => {
       removeSessionActionItem(actionItemId);
+      syncHistory();
     },
-    [removeSessionActionItem],
+    [removeSessionActionItem, syncHistory],
   );
 
   return {

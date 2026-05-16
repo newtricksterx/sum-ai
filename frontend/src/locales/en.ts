@@ -5,12 +5,17 @@
       summary: "Go to summary page",
       history: "View history",
       profile: "Profile page",
+      settings: "Open settings",
+      close: "Close extension",
     },
     toolbar: {
       generateTitle: "Generate a new summary for the current tab",
       generate: "Generate Summary",
       downloadTitle: "Download summary as PDF",
       copyTitle: "Copy summary",
+      sessionLabel: "Current Session URL",
+      noSession: "No Session",
+      startNewSession: "Start New Session",
     },
     loader: {
       drafting: "Drafting Summary",

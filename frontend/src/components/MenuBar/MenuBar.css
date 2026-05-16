@@ -1,10 +1,10 @@
 .menubar-btn {
-  padding: 12px;
   background-color: var(--color-background-secondary);
-  border-radius: var(--radius-3xl);
-  padding: calc(var(--spacing) * 2);
-  margin: calc(var(--spacing) * 1);
+  padding: calc(var(--spacing) * 3);
   transition: background-color 0.15s ease;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .menubar-btn:hover {

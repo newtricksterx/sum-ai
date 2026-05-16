@@ -14,8 +14,10 @@ import type { ActionId } from '../../../../types/summary';
 
 interface ActionGridProps {
     onClickAction: (actionId: ActionId) => void | Promise<void>;
+    title: string;
     isDisabled?: boolean;
     loadingActionId?: ActionId | null;
+    className?: string;
 }
 
 const ACTION_ITEMS: ReadonlyArray<{
@@ -41,7 +43,7 @@ const ACTION_ITEMS: ReadonlyArray<{
 ];
 
 
-export const ActionGrid = ({ onClickAction, isDisabled = false, loadingActionId = null } : ActionGridProps) => {
+export const ActionGrid = ({ onClickAction, title, isDisabled = false, loadingActionId = null, className = "" } : ActionGridProps) => {
   const { t } = useTranslation();
 
   if (isDisabled) {
@@ -51,9 +53,9 @@ export const ActionGrid = ({ onClickAction, isDisabled = false, loadingActionId 
   const isAnyActionLoading = loadingActionId !== null;
 
   return (
-    <section className="summary-actions" aria-label={t('summaryActions.regionAriaLabel')}>
+    <section className={`summary-actions ${className}`} aria-label={t('summaryActions.regionAriaLabel')}>
       <header className="summary-actions-header">
-        <p className="summary-actions-label">{t('summaryActions.whatsNext')}</p>
+        <p className="summary-actions-label">{title}</p>
         <p className="summary-actions-hint">{t('summaryActions.pickAction')}</p>
       </header>
 
@@ -69,7 +71,7 @@ export const ActionGrid = ({ onClickAction, isDisabled = false, loadingActionId 
             <button
               key={item.id}
               type="button"
-              className={`summary-action-card${isActionLoading ? ' is-loading' : ''}`}
+              className={`summary-action-card ${isActionLoading ? ' is-loading' : ''}`}
               onClick={() => {
                 if (!isActionDisabled) {
                   void onClickAction(item.id);

@@ -5,12 +5,17 @@
       summary: "前往摘要页",
       history: "查看历史",
       profile: "个人资料页",
+      settings: "打开设置",
+      close: "关闭扩展",
     },
     toolbar: {
       generateTitle: "为当前标签页生成新的摘要",
       generate: "生成摘要",
       downloadTitle: "将摘要下载为 PDF",
       copyTitle: "复制摘要",
+      sessionLabel: "当前会话 URL",
+      noSession: "无会话",
+      startNewSession: "开始新会话",
     },
     loader: {
       drafting: "正在生成摘要",

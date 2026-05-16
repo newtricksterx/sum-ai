@@ -1,3 +1,18 @@
+@keyframes front-page-shell-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Opacity-only on purpose: an earlier translateY animation briefly extended the
+   element past its layout bounds, which made the outer overflow-y:auto container
+   in App.tsx flash a scrollbar for one frame on mount. Only run when the user
+   hasn't asked for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .front-page-shell {
+    animation: front-page-shell-enter 220ms ease-out both;
+  }
+}
+
 .front-page-shell {
   min-height: 100%;
 }

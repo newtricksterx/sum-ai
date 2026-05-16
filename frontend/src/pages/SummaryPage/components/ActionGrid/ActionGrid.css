@@ -18,7 +18,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  margin: 0.2rem 0.5rem 0.3rem 0.5rem;
+  margin: 0.3rem 0 0.3rem 0;
 }
 
 .summary-actions-label {
@@ -44,14 +44,14 @@
 
 .summary-action-card {
   border: 1px solid color-mix(in srgb, var(--color-border-secondary) 90%, transparent);
-  border-radius: 0.78rem;
+  border-radius: 0.3rem;
   background: var(--color-background-primary);
   color: var(--color-text-primary);
   text-align: left;
-  display: flex;
-  flex-direction: column;
-  gap: 0.56rem;
-  padding: 0.62rem 0.64rem;
+  display: grid;
+  grid-template-rows: 1fr 2fr 1fr;
+  align-items: center;
+  padding: 0.62rem 0.64rem 0 0.64rem;
   font: inherit;
   transition: border-color 130ms ease, background-color 130ms ease, transform 100ms ease;
 }
