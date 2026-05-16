@@ -3,9 +3,16 @@ import { Cross2Icon, TriangleLeftIcon, TriangleRightIcon, ExitIcon, CheckIcon } 
 import type { SummaryBlock, SummaryDocument } from "../../utils/types";
 import { renderInlineSegment } from "../../utils/renderInline";
 import "./Quiz.css";
+import { QuizDifficulty } from "../../../../utils/types";
+import { capitalizeFirstLetter } from "../../../../utils/functions";
 
 interface QuizProps {
     document: SummaryDocument;
+    difficulty?: QuizDifficulty | null
+}
+
+interface DifficultyColor {
+  [key: string]: string;
 }
 
 const createInitialAnswers = (length: number): Array<number | null> => {
@@ -18,7 +25,7 @@ const findCorrectIndex = (block: SummaryBlock): number => {
   return correctIndex;
 };
 
-export const Quiz = ({ document } : QuizProps) => {
+export const Quiz = ({ document, difficulty = null } : QuizProps) => {
   const questionBlocks = useMemo(
     () => document.blocks.filter((block) => block.type === "question"),
     [document.blocks],
@@ -112,10 +119,20 @@ export const Quiz = ({ document } : QuizProps) => {
 
   const isSelectedCorrect = selectedOptionIndex === currentCorrectIndex;
 
+  const colors: DifficultyColor = {
+    "easy": "qz-diff-easy",
+    "medium": "qz-diff-medium",
+    "hard": "qz-diff-hard",
+  }
+
   return (
     <section>
         <header className="qz-title">
-            {document.title || "Quiz"}
+          <div>{document.title || "Quiz"}</div>
+          <div 
+          className={`qz-difficulty ${difficulty ? colors[difficulty] : colors["easy"]}`}>
+            {difficulty ? capitalizeFirstLetter(difficulty) : "Easy"}
+          </div>
         </header>
         <div className="qz-content" aria-label="Summary quiz">
             <div id="qz-screen">

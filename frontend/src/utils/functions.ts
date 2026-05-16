@@ -39,3 +39,8 @@ export async function savePDF(content : string): Promise<void> {
       console.log("PDF export error:", error);
     }
 }
+
+export function capitalizeFirstLetter(str: string): string {
+    if (!str) return str;
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}

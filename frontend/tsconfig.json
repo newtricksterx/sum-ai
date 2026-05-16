@@ -3,5 +3,10 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "compilerOptions": {
+    "types": ["node"],
+    "module": "NodeNext",          // Recommended for modern Node.js
+    "moduleResolution": "NodeNext"  // Implied when module is NodeNext
+  }
 }

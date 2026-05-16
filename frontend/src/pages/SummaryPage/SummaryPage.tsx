@@ -235,6 +235,7 @@ const SummaryActionItemList = React.memo(({
                 <PageCard key={actionItem.id} className="summary-card">
                     <Quiz
                       document={actionItem.document}
+                      difficulty={actionItem.quizDifficulty ?? null}
                     />
                 </PageCard>
               </div>

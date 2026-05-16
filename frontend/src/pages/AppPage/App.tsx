@@ -1,6 +1,6 @@
 ﻿import './App.css'
 import '../SummaryPage/Summary.css'
-import { startTransition, useCallback, useMemo, useRef, useState, type ReactNode } from "react"
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import MenuBar from '../../components/MenuBar/MenuBar'
 import ToolBar from '../../components/ToolBar/ToolBar'
 import { useSettingsStore } from '../../stores/settingsStore'
@@ -12,7 +12,7 @@ import HistoryPage from '../HistoryPage/HistoryPage'
 import ProfilePage from '../ProfilePage/ProfilePage'
 // import { useCopySuccessTimer } from '../../components/ToolBar/useCopySuccessTimer'
 import { useActionItem } from '../SummaryPage/useActionItem'
-import { useAuthProfileStore } from '../../stores/authProfileStore'
+import { isPersistedAuthProfileIntact, useAuthProfileStore } from '../../stores/authProfileStore'
 import { useCurrentSessionState, type SessionState } from '../../stores/sessionStorage'
 import { useAppLanguageEffect } from './useAppLanguageEffect'
 import { useHydrateProfileAfterLogin } from './useHydrateProfileAfterLogin'
@@ -85,6 +85,15 @@ function App() {
   }, [schedulePageStorageWrite]);
 
   const setPage = useCallback((nextPage: number) => {
+    // If we believe the user is logged in but the persisted profile blob is
+    // missing or tampered, force a real (backend cookie revocation) logout
+    // and route to FrontPage instead of wherever they were trying to go.
+    const authState = useAuthProfileStore.getState();
+    if (authState.profile && !isPersistedAuthProfileIntact()) {
+      void authState.logout();
+      nextPage = 0;
+    }
+
     pendingPageRef.current = nextPage;
 
     if (typeof window === "undefined") {
@@ -110,6 +119,17 @@ function App() {
     });
   }, [commitPage]);
   usePageSwitchCleanup(pageFrameRef, pageStorageTimeoutRef);
+
+  // Catch tampering that happened while the extension was closed.
+  useEffect(() => {
+    const authState = useAuthProfileStore.getState();
+    if (authState.profile && !isPersistedAuthProfileIntact()) {
+      void authState.logout();
+      setPage(0);
+    }
+    // Intentionally run once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onClickReturn = useCallback(() => {
     setPage(0);

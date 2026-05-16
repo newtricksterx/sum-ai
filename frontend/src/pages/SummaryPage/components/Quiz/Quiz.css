@@ -395,4 +395,34 @@
     font-weight: 700;
     line-height: 1.25;
     letter-spacing: -0.01em;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.qz-difficulty {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.6rem;
+  border: 1px solid transparent;
+}
+
+.qz-difficulty.qz-diff-easy {
+  background: color-mix(in srgb, var(--color-status-success-bg) 70%, var(--color-surface-secondary));
+  border-color: color-mix(in srgb, var(--color-status-success-border) 60%, transparent);
+  color: var(--color-status-success-text);
+}
+
+.qz-difficulty.qz-diff-medium {
+  background: color-mix(in srgb, var(--color-status-warning-bg) 70%, var(--color-surface-secondary));
+  border-color: color-mix(in srgb, var(--color-status-warning-border) 60%, transparent);
+  color: var(--color-status-warning-text);
+}
+
+.qz-difficulty.qz-diff-hard {
+  background: color-mix(in srgb, var(--color-status-danger-bg) 70%, var(--color-surface-secondary));
+  border-color: color-mix(in srgb, var(--color-status-danger-border) 60%, transparent);
+  color: var(--color-status-danger-text);
 }

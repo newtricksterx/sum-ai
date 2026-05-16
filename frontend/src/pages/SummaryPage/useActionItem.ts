@@ -44,7 +44,7 @@ export const useActionItem = () => {
   const quizDifficulty = useSettingsStore((state) => state.quizDifficulty);
   const userProfile = useAuthProfileStore((state) => state.profile);
   const hydrateProfile = useAuthProfileStore((state) => state.hydrateProfile);
-  const historyLimit = useAuthProfileStore((state) => state.profile?.subscription?.history_limit ?? null);
+  const historyLimit = useAuthProfileStore((state) => state.profile?.subscription?.history_limit ?? 0);
   const userHistoryKey = useCurrentUserHistoryKey();
   const upsertHistoryItem = useHistoryStorage((state) => state.upsertHistoryItem);
 
@@ -123,6 +123,9 @@ export const useActionItem = () => {
       actionRequestInFlightRef.current = true;
       setLoadingActionId(actionId);
 
+      // Snapshot at click time so later setting changes don't retroactively alter this item.
+      const clickQuizDifficulty = actionId === "quiz" ? quizDifficulty : undefined;
+
       try {
         await waitForNextPaintTask();
 
@@ -144,6 +147,7 @@ export const useActionItem = () => {
               "Could not read source",
               "Could not read the current tab. Try reloading the page and trying again.",
             ),
+            ...(clickQuizDifficulty ? { quizDifficulty: clickQuizDifficulty } : {}),
           });
           syncHistory();
           return;
@@ -155,7 +159,7 @@ export const useActionItem = () => {
           language,
           format,
           length,
-          quizDifficulty,
+          quizDifficulty: clickQuizDifficulty,
           type: actionId,
           sourcePayload,
           isAuthenticated: Boolean(userProfile),
@@ -171,7 +175,12 @@ export const useActionItem = () => {
           return;
         }
 
-        addSessionActionItem({ id: actionItemId, type: actionId, document: result.document });
+        addSessionActionItem({
+          id: actionItemId,
+          type: actionId,
+          document: result.document,
+          ...(clickQuizDifficulty ? { quizDifficulty: clickQuizDifficulty } : {}),
+        });
         syncHistory();
         if (!result.isSuccess) {
           return;

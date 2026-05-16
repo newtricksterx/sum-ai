@@ -16,6 +16,15 @@
     color: var(--color-text-warning);
 }
 
+.sessionmismatch-main > svg {
+    flex: 0 0 auto;
+}
+
+.sessionmismatch-main > div {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
 .sessionmismatch-title {
     font-weight: 700;
     color: var(--color-text-warning);
@@ -23,6 +32,10 @@
 
 .sessionmismatch-desc {
     color: var(--color-text-warning);
+    margin: 0.2rem 0 0.6rem;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .sessionmismatch-tooltip {

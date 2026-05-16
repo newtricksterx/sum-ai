@@ -32,7 +32,7 @@ export const useHistoryStorage = create<HistoryStorageState>()(
                     { url: session.url, updatedAt: Date.now(), session },
                     ...filtered,
                 ];
-                const trimmed = limit != null && limit > 0 ? next.slice(0, limit) : next;
+                const trimmed = limit != null ? next.slice(0, limit) : next;
                 set({ histories: { ...get().histories, [userKey]: trimmed } });
             },
             removeHistoryItem: (userKey, url) => {

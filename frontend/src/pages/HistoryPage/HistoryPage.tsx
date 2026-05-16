@@ -11,6 +11,7 @@ import {
   useHistoryStorage,
 } from '../../stores/historyStorage';
 import { SessionState } from '../../stores/sessionStorage';
+import { useAuthProfileStore } from '../../stores/authProfileStore';
 
 interface HistoryPageProps {
   onOpenSession: (session: SessionState) => void;
@@ -28,6 +29,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onOpenSession }) => {
   const items = useCurrentUserHistory();
   const removeHistoryItem = useHistoryStorage((state) => state.removeHistoryItem);
   const clearHistory = useHistoryStorage((state) => state.clearHistory);
+  const profile = useAuthProfileStore((state) => state.profile)
 
   const handleClearAll = useCallback(() => {
     clearHistory(userKey);
@@ -53,7 +55,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onOpenSession }) => {
           }
           title={t("history.clearAllTitle")}
           description={t("history.clearAllDescription")}
-          previewText={`${items.length} ${items.length === 1 ? t("history.summary") : t("history.summaries")} ${t("history.willBeDeleted")}`}
+          previewText={`${items.length} ${items.length === 1 ? t("history.session") : t("history.sessions")} ${t("history.willBeDeleted")}`}
           confirmLabel={t("history.clearAll")}
           cancelLabel={t("profile.cancel", "Cancel")}
           onConfirm={handleClearAll}
@@ -62,7 +64,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ onOpenSession }) => {
 
       {items.length === 0 ? (
         <p className="text-[13px]">
-          {t("history.empty")}
+          {profile ? t("history.empty") : t("history.emptyNotSignedIn")}
         </p>
       ) : (
         <div className="flex flex-col gap-2">

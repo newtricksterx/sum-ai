@@ -380,5 +380,5 @@ export const getMockSourceUrl = async () => {
   if (tab?.url && !isRestrictedPage(tab.url)) {
     return tab.url;
   }
-  return `mock://dev-summary/${Date.now()}`;
+  return `mock://dev-summary/12121212124343431212121${Date.now()}`;
 };

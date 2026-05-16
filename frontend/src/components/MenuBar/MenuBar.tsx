@@ -32,7 +32,7 @@ function MenuBar({
         <button className='menubar-btn' onClick={onClickReturn}  title={t("menu.home")}>
             <GoHome size={MenuIconSize}/>
         </button>
-        <button className='menubar-btn' onClick={onClickForward} title={t("menu.summary")}>
+        <button className='menubar-btn' onClick={onClickForward} title={t("menu.session")}>
             <ReaderIcon width={MenuIconSize} height={MenuIconSize}/>
         </button>
         <button className='menubar-btn' onClick={onClickHistory} title={t("menu.history")}>

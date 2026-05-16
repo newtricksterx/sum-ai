@@ -1,14 +1,21 @@
 import type { SummaryDocument } from "../pages/SummaryPage/utils/types";
 import { isSummaryDocument, parseSummaryDocument } from "../pages/SummaryPage/utils/document";
+import type { QuizDifficulty } from "../utils/types";
 
 export const SUMMARY_ACTION_IDS = ["flashcards", "quiz", "summary"] as const;
 
 export type ActionId = (typeof SUMMARY_ACTION_IDS)[number];
 
+const QUIZ_DIFFICULTY_SET = new Set<string>(["easy", "medium", "hard"]);
+
+const isQuizDifficulty = (value: unknown): value is QuizDifficulty =>
+  typeof value === "string" && QUIZ_DIFFICULTY_SET.has(value);
+
 export type SummaryActionItem = {
   id: string;
   type: ActionId;
   document: SummaryDocument;
+  quizDifficulty?: QuizDifficulty;
 };
 
 export const createActionItemId = (type: ActionId): string =>
@@ -41,7 +48,7 @@ export const normalizeSummaryActionItems = (value: unknown): SummaryActionItem[]
       return [];
     }
 
-    const candidate = item as { id?: unknown; type?: unknown; document?: unknown };
+    const candidate = item as { id?: unknown; type?: unknown; document?: unknown; quizDifficulty?: unknown };
     if (typeof candidate.id !== "string") {
       return [];
     }
@@ -55,6 +62,10 @@ export const normalizeSummaryActionItems = (value: unknown): SummaryActionItem[]
       return [];
     }
 
-    return [{ id: candidate.id, type: candidate.type, document }];
+    const normalized: SummaryActionItem = { id: candidate.id, type: candidate.type, document };
+    if (candidate.type === "quiz" && isQuizDifficulty(candidate.quizDifficulty)) {
+      normalized.quizDifficulty = candidate.quizDifficulty;
+    }
+    return [normalized];
   });
 };

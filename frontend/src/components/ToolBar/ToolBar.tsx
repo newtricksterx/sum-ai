@@ -24,12 +24,12 @@ function ToolBar({
   return (
     <nav className="toolbar-shell">
       <div className="toolbar-sessionurl">
-        <div className="ml-1 mr-1">
+        <div className="toolbar-status">
           <span className={`green-dot ${currentSessionUrl ? "bg-green-500" : "bg-red-500"}`}></span>
         </div>
-        <div>
+        <div className="toolbar-info">
             <header className="toolbar-sessionurl-header">{t("toolbar.sessionLabel")}</header>
-            <p className="toolbar-sessionurl-url">{currentSessionUrl || t("toolbar.noSession")}</p>
+            <section className="toolbar-sessionurl-url">{currentSessionUrl || t("toolbar.noSession")}</section>
         </div>
       </div>
       <span className={`toolbar-generate-shell ${disableGenerate ? "is-disabled" : ""}`}>
