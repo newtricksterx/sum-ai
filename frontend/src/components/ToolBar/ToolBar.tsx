@@ -24,7 +24,7 @@ function ToolBar({
   return (
     <nav className="toolbar-shell">
       <div className="toolbar-sessionurl">
-        <div>
+        <div className="ml-1 mr-1">
           <span className={`green-dot ${currentSessionUrl ? "bg-green-500" : "bg-red-500"}`}></span>
         </div>
         <div>

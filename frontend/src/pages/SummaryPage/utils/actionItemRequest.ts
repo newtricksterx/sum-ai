@@ -1,6 +1,6 @@
 import type { ActionId } from "../../../types/summary";
 import { coerceActionItemDocument } from "../../../types/summary";
-import type { Format, Language, Length } from "../../../utils/types";
+import type { Format, Language, Length, QuizDifficulty } from "../../../utils/types";
 import type { SummaryDocument } from "./types";
 import type {
   ActionItemPostResult,
@@ -43,10 +43,10 @@ const actionItemErrorResult = (
 export const buildSourceActionRequest = (
   type: ActionId,
   source: SourcePayload,
-  extras?: { length?: Length; format?: Format; language?: Language },
+  extras?: { length?: Length; format?: Format; language?: Language; quizDifficulty?: QuizDifficulty },
 ): { body: BodyInit; headers?: HeadersInit } => {
   const { sourceType, sourceUrl, sourceContent, pdf } = source;
-  const { length, format, language } = extras ?? {};
+  const { length, format, language, quizDifficulty } = extras ?? {};
 
   if (pdf) {
     const formData = new FormData();
@@ -57,6 +57,7 @@ export const buildSourceActionRequest = (
     if (length) formData.append("length", length);
     if (format) formData.append("format", format);
     if (language) formData.append("language", language);
+    if (quizDifficulty) formData.append("quiz_difficulty", quizDifficulty);
     // Browser sets multipart Content-Type with boundary automatically.
     return { body: formData };
   }
@@ -70,6 +71,7 @@ export const buildSourceActionRequest = (
   if (length !== undefined) jsonBody.length = length;
   if (format !== undefined) jsonBody.format = format;
   if (language !== undefined) jsonBody.language = language;
+  if (quizDifficulty !== undefined) jsonBody.quiz_difficulty = quizDifficulty;
 
   return {
     headers: { "Content-Type": "application/json" },
@@ -112,6 +114,7 @@ export const requestActionItem = async ({
   sourcePayload,
   format,
   length,
+  quizDifficulty,
   isAuthenticated = false,
   t,
 }: RequestActionItemArgs): Promise<ActionItemRequestResult> => {
@@ -128,7 +131,7 @@ export const requestActionItem = async ({
       baseUrl,
       type,
       sourcePayload,
-      extras: { language, format, length },
+      extras: { language, format, length, quizDifficulty },
     });
 
     if (!response.ok) {

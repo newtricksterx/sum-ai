@@ -325,7 +325,6 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
         <ActionGrid
           onClickAction={handleAddActionItem}
           title={t("summaryActions.whatsNext")}
-          isDisabled={false}
           loadingActionId={loadingActionId}
         />
       )}

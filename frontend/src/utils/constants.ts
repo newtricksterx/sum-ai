@@ -1,4 +1,4 @@
-import { Currency, Format, Language, Length } from "./types"
+import { Currency, Format, Language, Length, QuizDifficulty } from "./types"
 
 export const all_languages: Language[] = [
     "english",
@@ -26,6 +26,12 @@ export const all_currencies: Currency[] = [
     "USD",
     "CAD",
     "EUR",
+]
+
+export const all_quizDifficulties: QuizDifficulty[] = [
+    "easy",
+    "medium",
+    "hard",
 ]
 
 export const MenuIconSize = 20;

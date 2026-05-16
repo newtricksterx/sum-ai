@@ -35,11 +35,11 @@ function MenuBar({
         <button className='menubar-btn' onClick={onClickForward} title={t("menu.summary")}>
             <ReaderIcon width={MenuIconSize} height={MenuIconSize}/>
         </button>
-        <button className='menubar-btn' onClick={onClickSettings} title={t("menu.settings")}>
-            <GearIcon width={MenuIconSize} height={MenuIconSize}/>
-        </button>
         <button className='menubar-btn' onClick={onClickHistory} title={t("menu.history")}>
           <GoHistory size={MenuIconSize}/>
+        </button>
+        <button className='menubar-btn' onClick={onClickSettings} title={t("menu.settings")}>
+            <GearIcon width={MenuIconSize} height={MenuIconSize}/>
         </button>
         <button className='menubar-btn' onClick={onClickProfile} title={t("menu.profile")}>
           <PersonIcon width={MenuIconSize} height={MenuIconSize}/>

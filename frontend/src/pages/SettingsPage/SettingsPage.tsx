@@ -11,14 +11,14 @@ import {
 import PageCard from "../../components/PageCard/PageCard";
 import "../../i18n";
 import { useTranslation } from "react-i18next";
-import { all_currencies, all_formats, all_languages, all_lengths } from "../../utils/constants";
-import { Currency, Format, Language, Length } from "../../utils/types";
+import { all_currencies, all_formats, all_languages, all_lengths, all_quizDifficulties } from "../../utils/constants";
+import { Currency, Format, Language, Length, QuizDifficulty } from "../../utils/types";
 import { useSettingsStore } from "../../stores/settingsStore";
 import { useShallow } from "zustand/react/shallow";
 import { SettingsPageDropdown } from "./SettingsPageDropdown";
 import { SettingsPageDropdownOption } from "./settingspage.utils";
 import "./SettingsPage.css";
-import { SunIcon, MoonIcon, GearIcon } from "@radix-ui/react-icons";
+import { SunIcon, MoonIcon, GearIcon, QuestionMarkCircledIcon } from "@radix-ui/react-icons";
 import { MIN_FONT_SIZE, MAX_FONT_SIZE, SaveTimeoutHandle, clampFontSize, humanizeOption } from "./settingspage.utils";
 
 function SettingsRow({
@@ -73,6 +73,7 @@ export const SettingsPage: React.FC = () => {
     length: settingsLength,
     fontSize: settingsFontSize,
     format: settingsFormat,
+    quizDifficulty: settingsQuizDifficulty,
     saveSettings,
   } = useSettingsStore(
     useShallow((state) => ({
@@ -81,6 +82,7 @@ export const SettingsPage: React.FC = () => {
       length: state.length,
       fontSize: state.fontSize,
       format: state.format,
+      quizDifficulty: state.quizDifficulty,
       saveSettings: state.saveSettings,
     }))
   );
@@ -90,6 +92,7 @@ export const SettingsPage: React.FC = () => {
   const [length, setLength] = useState<Length>(settingsLength);
   const [fontSize, setFontSize] = useState<number>(settingsFontSize);
   const [format, setFormat] = useState<Format>(settingsFormat);
+  const [quizDifficulty, setQuizDifficulty] = useState<QuizDifficulty>(settingsQuizDifficulty);
   const [hasSavedFeedback, setHasSavedFeedback] = useState(false);
   const saveTimeoutRef = useRef<SaveTimeoutHandle | null>(null);
 
@@ -152,6 +155,15 @@ export const SettingsPage: React.FC = () => {
     [getOptionLabel],
   );
 
+  const quizDifficultyOptions = useMemo<ReadonlyArray<SettingsPageDropdownOption<QuizDifficulty>>>(
+    () =>
+      all_quizDifficulties.map((value) => ({
+        value,
+        label: getOptionLabel(value),
+      })),
+    [getOptionLabel],
+  );
+
   const clampedFontSize = useMemo(() => clampFontSize(fontSize), [fontSize]);
 
   const hasUnsavedChanges = useMemo(
@@ -160,6 +172,7 @@ export const SettingsPage: React.FC = () => {
       currency !== settingsCurrency ||
       length !== settingsLength ||
       format !== settingsFormat ||
+      quizDifficulty !== settingsQuizDifficulty ||
       clampedFontSize !== settingsFontSize,
     [
       clampedFontSize,
@@ -167,11 +180,13 @@ export const SettingsPage: React.FC = () => {
       format,
       language,
       length,
+      quizDifficulty,
       settingsCurrency,
       settingsFontSize,
       settingsFormat,
       settingsLanguage,
       settingsLength,
+      settingsQuizDifficulty,
     ],
   );
 
@@ -234,27 +249,12 @@ export const SettingsPage: React.FC = () => {
     />
   ), [length, lengthOptions, t]);
 
-  const currencyRow = useMemo(() => (
-    <SettingsRow
-      icon={<Coins size={15} />}
-      label={t("settings.currency")}
-      control={
-        <SettingsPageDropdown
-          id="settings-currency"
-          value={currency}
-          options={currencyOptions}
-          ariaLabel={t("settings.currency")}
-          onValueChange={setCurrency}
-        />
-      }
-    />
-  ), [currency, currencyOptions, t]);
+
 
   const fontSizeRow = useMemo(() => (
     <SettingsRow
       icon={<Type size={15} />}
       label={<label htmlFor="settings-font-size">{t("settings.fontSize")}</label>}
-      hint={t("settings.fontSizeHint", { defaultValue: "Summary output text" })}
       control={
         <div className="settings-fontsize-wrap">
           <input
@@ -273,6 +273,41 @@ export const SettingsPage: React.FC = () => {
       }
     />
   ), [fontSize, onFontSizeBlur, onFontSizeChange, t]);
+
+  const currencyRow = useMemo(() => (
+    <SettingsRow
+      icon={<Coins size={15} />}
+      label={t("settings.currency")}
+      control={
+        <SettingsPageDropdown
+          id="settings-currency"
+          value={currency}
+          options={currencyOptions}
+          ariaLabel={t("settings.currency")}
+          onValueChange={setCurrency}
+        />
+      }
+    />
+  ), [currency, currencyOptions, t]);
+
+  const quizDifficultyRow = useMemo(() => (
+    <SettingsRow
+      icon={<QuestionMarkCircledIcon width={15} height={15} />}
+      label={t("settings.quizDifficulty")}
+      control={
+        <SettingsPageDropdown
+          id="settings-quiz-difficulty"
+          value={quizDifficulty}
+          options={quizDifficultyOptions}
+          ariaLabel={t("settings.quizDifficulty")}
+          onValueChange={setQuizDifficulty}
+        />
+      }
+    />
+  ), [quizDifficulty, quizDifficultyOptions, t]);
+
+  // row for quiz questions amount
+  // row for flashcards amount
 
   const onSaveSettings = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
@@ -293,7 +328,7 @@ export const SettingsPage: React.FC = () => {
       // Defer synchronous store/localStorage work to the next task so the
       // click interaction can paint immediately and reduce INP processing time.
       saveTimeoutRef.current = window.setTimeout(() => {
-        saveSettings({ language, currency, length, fontSize: clampedFontSize, format });
+        saveSettings({ language, currency, length, fontSize: clampedFontSize, format, quizDifficulty });
         saveTimeoutRef.current = null;
       }, 0);
     },
@@ -305,6 +340,7 @@ export const SettingsPage: React.FC = () => {
       hasUnsavedChanges,
       language,
       length,
+      quizDifficulty,
     ],
   );
 
@@ -320,15 +356,35 @@ export const SettingsPage: React.FC = () => {
         </header>
 
         <form onSubmit={onSaveSettings} className="settings-form">
+
           <section className="settings-section">
             <p className="settings-section-label">
-              {t("settings.sectionContent", { defaultValue: "Content" })}
+              {t("settings.sectionAppearance", { defaultValue: "Appearance" })}
+            </p>
+            <div className="settings-card">
+              {fontSizeRow}
+              {languageRow}
+            </div>
+          </section>
+
+          <section className="settings-section">
+            <p className="settings-section-label">
+              {t("settings.sectionSummary", { defaultValue: "Summary Preferences" })}
             </p>
             
             <div className="settings-card">
-              {languageRow}
               {formatRow}
               {lengthRow}
+            </div>
+          </section>
+
+          <section className="settings-section">
+            <p className="settings-section-label">
+              {t("settings.sectionLearn", { defaultValue: "Learn Actions" })}
+            </p>
+
+            <div className="settings-card">
+              {quizDifficultyRow}
             </div>
           </section>
 
@@ -338,15 +394,6 @@ export const SettingsPage: React.FC = () => {
             </p>
             <div className="settings-card">
               {currencyRow}
-            </div>
-          </section>
-
-          <section className="settings-section">
-            <p className="settings-section-label">
-              {t("settings.sectionAppearance", { defaultValue: "Appearance" })}
-            </p>
-            <div className="settings-card">
-              {fontSizeRow}
             </div>
           </section>
 

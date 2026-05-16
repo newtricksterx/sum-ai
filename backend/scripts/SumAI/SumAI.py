@@ -50,18 +50,19 @@ def CreateSummaryQuery(page_content, length, format, language, max_input_chars=M
     normalized_language = utils._normalize_language(language)
 
     query = f"""\
-ROLE: Summarization engine producing rich-text JSON.
-TASK: Summarize SOURCE_TEXT in {normalized_language}.
-PARAMETERS:
-- Length: {normalized_length} ({_LENGTH_GUIDANCE[normalized_length]})
+            ROLE: Summarization engine producing rich-text JSON.
 
-Schema:
-{_JSON_FORMAT_GUIDANCE[normalized_format]}
+            INLINE_MARKS_RULES: {_INLINE_MARKS_RULES}
 
-{_INLINE_MARKS_RULES}
+            TASK: Summarize SOURCE_TEXT in {normalized_language}.
+            PARAMETERS:
+            - Length: {normalized_length} ({_LENGTH_GUIDANCE[normalized_length]})
 
-SOURCE_TEXT:
-{text}
+            Schema:
+            {_JSON_FORMAT_GUIDANCE[normalized_format]}
+
+            SOURCE_TEXT:
+            {text}
 """
 
     return query
@@ -148,31 +149,36 @@ def SummarizeContent(content, length, format, language, max_input_chars=MAX_INPU
         )
     
 
-def CreateActionQuery(type, language, content):
+def CreateActionQuery(type, language, content, quizDifficulty):
     if not content:
         return ""
     
     query = f"""\
-ROLE: Engine that generates {type} content from a source summary.
-TASK: Produce {type} based on SOURCE_CONTENT, in {language}.
+            INLINE_MARKS_RULES: {_INLINE_MARKS_RULES}
 
-Schema:
-{_TYPE_FORMAT_GUIDANCE[type]}
+            ROLE: Engine that generates {type} content from a source summary.
 
-{_INLINE_MARKS_RULES}
+            TASK: Produce {type} based on SOURCE_CONTENT, in {language}.
 
-SOURCE_CONTENT:
-{content}
-"""
+            Schema:
+            {_TYPE_FORMAT_GUIDANCE[type]}
+
+            SOURCE_CONTENT:
+            {content}
+
+            """
+    
+    if quizDifficulty:
+        query += f"DIFFICULTY: Generate quiz with {quizDifficulty} difficulty."
     return query
 
 
-def CreateActionContent(type, language, content):
+def CreateActionContent(type, language, content, quizDifficulty):
     normalized_type = utils._to_text(type).lower()
     if normalized_type not in {"flashcards", "quiz"}:
         raise ValueError("CreateActionContent currently supports only flashcards and quiz.")
 
-    query = CreateActionQuery(normalized_type, language, content)
+    query = CreateActionQuery(normalized_type, language, content, quizDifficulty)
     if not query:
         return None
 
@@ -182,12 +188,12 @@ def CreateActionContent(type, language, content):
     return parsers._parse_action_document(result)
 
 
-def ActionContent(type, language, content):
+def ActionContent(type, language, content, quizDifficulty):
     normalized_type = utils._to_text(type).lower()
     logger.debug(f'Action type: {normalized_type}, Received at: {time.time()}')
 
     try:
-        document = CreateActionContent(normalized_type, language, content)
+        document = CreateActionContent(normalized_type, language, content, quizDifficulty)
         if not isinstance(document, dict) or not document.get("blocks"):
             return {"isSuccess": False, "content": None}
         return {"isSuccess": True, "content": document}

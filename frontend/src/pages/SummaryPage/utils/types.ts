@@ -1,5 +1,5 @@
 import type { ActionId } from "../../../types/summary";
-import type { Format, Language, Length } from "../../../utils/types";
+import type { Format, Language, Length, QuizDifficulty } from "../../../utils/types";
 import type { PdfPayload } from "./pdf";
 
 export type SourceType = "webpage" | "pdf" | "youtube";
@@ -94,7 +94,7 @@ export type PostActionItemArgs = {
   baseUrl: string;
   type: ActionId;
   sourcePayload: SourcePayload;
-  extras?: { length?: Length; format?: Format; language?: Language };
+  extras?: { length?: Length; format?: Format; language?: Language; quizDifficulty?: QuizDifficulty };
 };
 
 export type RequestActionItemArgs = {
@@ -104,6 +104,7 @@ export type RequestActionItemArgs = {
   sourcePayload: SourcePayload;
   format?: Format;
   length?: Length;
+  quizDifficulty?: QuizDifficulty;
   isAuthenticated?: boolean;
   t?: TranslateFn;
 };

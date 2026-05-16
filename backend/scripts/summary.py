@@ -133,6 +133,7 @@ def get_action_item(request, character_limit=None):
         request.data.get("type"),
         request.data.get("language"),
         text,
+        request.data.get("quiz_difficulty"),
     )
 
     return {

@@ -41,6 +41,7 @@ export const useActionItem = () => {
   const length = useSettingsStore((state) => state.length);
   const format = useSettingsStore((state) => state.format);
   const currency = useSettingsStore((state) => state.currency);
+  const quizDifficulty = useSettingsStore((state) => state.quizDifficulty);
   const userProfile = useAuthProfileStore((state) => state.profile);
   const hydrateProfile = useAuthProfileStore((state) => state.hydrateProfile);
   const historyLimit = useAuthProfileStore((state) => state.profile?.subscription?.history_limit ?? null);
@@ -154,6 +155,7 @@ export const useActionItem = () => {
           language,
           format,
           length,
+          quizDifficulty,
           type: actionId,
           sourcePayload,
           isAuthenticated: Boolean(userProfile),
@@ -192,6 +194,7 @@ export const useActionItem = () => {
       hydrateProfile,
       language,
       length,
+      quizDifficulty,
       resetSession,
       resolveSourcePayload,
       startSession,

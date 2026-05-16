@@ -186,7 +186,7 @@ class ActionItemEndpointTest(TestCase):
         self.assertTrue(body["isSuccess"])
         self.assertEqual(body["content"], _flashcards_document())
         mock_handle_pdf.assert_called_once()
-        mock_action_content.assert_called_once_with("flashcards", "english", "Raw PDF source")
+        mock_action_content.assert_called_once_with("flashcards", "english", "Raw PDF source", None)
 
     @patch(
         "scripts.summary.SumAI.ActionContent",
@@ -204,7 +204,7 @@ class ActionItemEndpointTest(TestCase):
         self.assertTrue(body["isSuccess"])
         self.assertEqual(body["content"], _flashcards_document())
         # Source text (not a pre-summarized JSON) is what reaches the LLM helper.
-        mock_action_content.assert_called_once_with("flashcards", "english", "Raw source")
+        mock_action_content.assert_called_once_with("flashcards", "english", "Raw source", None)
 
     @patch(
         "scripts.summary.SumAI.ActionContent",
@@ -221,7 +221,7 @@ class ActionItemEndpointTest(TestCase):
         body = response.json()
         self.assertFalse(body["isSuccess"])
         self.assertEqual(body["error"], "Could not generate action content.")
-        mock_action_content.assert_called_once_with("flashcards", "english", "Raw source")
+        mock_action_content.assert_called_once_with("flashcards", "english", "Raw source", None)
 
     @patch(
         "scripts.summary.SumAI.ActionContent",
@@ -239,7 +239,7 @@ class ActionItemEndpointTest(TestCase):
         self.assertTrue(body["isSuccess"])
         self.assertEqual(body["content"]["format"], "quiz")
         self.assertEqual(len(body["content"]["blocks"]), 1)
-        mock_action_content.assert_called_once_with("quiz", "english", "Raw source")
+        mock_action_content.assert_called_once_with("quiz", "english", "Raw source", None)
 
     @patch(
         "scripts.summary.SumAI.SummarizeContent",

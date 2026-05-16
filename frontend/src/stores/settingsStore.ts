@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { Settings } from "../utils/types";
-import { GetCurrencyFromStorage, GetFontSizeFromStorage, GetFormatFromStorage, GetLangFromStorage, GetLengthFromStorage, GetThemeFromStorage, UpdateCurrencyStorage, UpdateFontSizeStorage, UpdateFormatStorage, UpdateLanguageStorage, UpdateLengthStorage, UpdateThemeStorage } from "../utils/storage";
+import { GetCurrencyFromStorage, GetFontSizeFromStorage, GetFormatFromStorage, GetLangFromStorage, GetLengthFromStorage, GetQuizDifficultyFromStorage, GetThemeFromStorage, UpdateCurrencyStorage, UpdateFontSizeStorage, UpdateFormatStorage, UpdateLanguageStorage, UpdateLengthStorage, UpdateQuizDifficultyStorage, UpdateThemeStorage } from "../utils/storage";
 
 function applyThemeToDocument(theme: "light" | "dark") {
     if (typeof document === "undefined") {
@@ -44,6 +44,7 @@ export const useSettingsStore = create<Settings>()((set) => ({
     theme: GetThemeFromStorage() ?? "light",
     fontSize: GetFontSizeFromStorage() ?? 12,
     format: GetFormatFromStorage() ?? "paragraph",
+    quizDifficulty: GetQuizDifficultyFromStorage() ?? "easy",
     UpdateLanguage: (lang) => set(() => {
         UpdateLanguageStorage(lang)
         return {language: lang}
@@ -64,13 +65,18 @@ export const useSettingsStore = create<Settings>()((set) => ({
         UpdateFormatStorage(format)
         return {format: format}
     }),
-    saveSettings: ({ language, currency, length, fontSize, format }) => set(() => {
+    UpdateQuizDifficulty: (quizDifficulty) => set(() => {
+        UpdateQuizDifficultyStorage(quizDifficulty)
+        return {quizDifficulty: quizDifficulty}
+    }),
+    saveSettings: ({ language, currency, length, fontSize, format, quizDifficulty }) => set(() => {
         UpdateLanguageStorage(language);
         UpdateCurrencyStorage(currency);
         UpdateLengthStorage(length);
         UpdateFontSizeStorage(fontSize);
         UpdateFormatStorage(format);
-        return { language, currency, length, fontSize, format };
+        UpdateQuizDifficultyStorage(quizDifficulty);
+        return { language, currency, length, fontSize, format, quizDifficulty };
     }),
     UpdateTheme: () => set((state) => {
         const newTheme = state.theme === "light" ? "dark" : "light";

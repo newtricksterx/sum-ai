@@ -11,9 +11,10 @@ import { ActionId } from '../../types/summary';
 interface FrontPageProps {
   onClickGenerate: (actionId: ActionId) => void;
   isGenerateDisabled?: boolean;
+  loadingActionId?: ActionId | null;
 }
 
-const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate, isGenerateDisabled = false }) => {
+const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate, loadingActionId = null }) => {
   const { t } = useTranslation();
   const activeTabMeta = useTabChange();
 
@@ -36,7 +37,11 @@ const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate, isGenerateDisabl
 
         <section className="front-action-section" aria-label="Generate summary">
           
-          <ActionGrid onClickAction={onClickGenerate} title={'Click to start a Session'} isDisabled={isGenerateDisabled} className='mb-0!'/>
+          <ActionGrid 
+            onClickAction={onClickGenerate} 
+            title={'Click to start a Session'} 
+            loadingActionId={loadingActionId} 
+            className='mb-0!'/>
         </section>
       </PageCard>
     </main>

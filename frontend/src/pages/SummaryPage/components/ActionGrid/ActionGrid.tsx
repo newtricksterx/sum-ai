@@ -15,7 +15,6 @@ import type { ActionId } from '../../../../types/summary';
 interface ActionGridProps {
     onClickAction: (actionId: ActionId) => void | Promise<void>;
     title: string;
-    isDisabled?: boolean;
     loadingActionId?: ActionId | null;
     className?: string;
 }
@@ -43,12 +42,8 @@ const ACTION_ITEMS: ReadonlyArray<{
 ];
 
 
-export const ActionGrid = ({ onClickAction, title, isDisabled = false, loadingActionId = null, className = "" } : ActionGridProps) => {
+export const ActionGrid = ({ onClickAction, title, loadingActionId = null, className = "" } : ActionGridProps) => {
   const { t } = useTranslation();
-
-  if (isDisabled) {
-    return null;
-  }
 
   const isAnyActionLoading = loadingActionId !== null;
 
@@ -65,7 +60,7 @@ export const ActionGrid = ({ onClickAction, title, isDisabled = false, loadingAc
           const itemDescription = t(`summaryActions.items.${item.id}.description`);
           const itemTag = t(`summaryActions.items.${item.id}.tag`);
           const isActionLoading = loadingActionId === item.id;
-          const isActionDisabled = isDisabled || isAnyActionLoading;
+          const isActionDisabled = isAnyActionLoading;
 
           return (
             <button

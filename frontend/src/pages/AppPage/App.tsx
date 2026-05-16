@@ -187,8 +187,8 @@ function App() {
   }, [actionItems, addActionItem, fontSize, loadingActionId, removeActionItem]);
 
   const frontPageContent = useMemo(
-    () => <FrontPage onClickGenerate={onClickStartSession} isGenerateDisabled={isActionItemLoading} />,
-    [isActionItemLoading, onClickStartSession],
+    () => <FrontPage onClickGenerate={onClickStartSession} isGenerateDisabled={isActionItemLoading} loadingActionId={loadingActionId} />,
+    [isActionItemLoading, loadingActionId, onClickStartSession],
   );
   const historyPageContent = useMemo(
     () => <HistoryPage onOpenSession={onOpenHistorySession} />,
