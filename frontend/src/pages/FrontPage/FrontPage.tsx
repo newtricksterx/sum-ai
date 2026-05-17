@@ -12,11 +12,14 @@ import type { SettingsPageDropdownOption } from '../SettingsPage/settingspage.ut
 import { all_languages } from '../../utils/constants';
 import type { Language } from '../../utils/types';
 import { useSettingsStore } from '../../stores/settingsStore';
+import { ToastErrorMessage } from '../../components/ToastErrorMessage/ToastErrorMessage';
 
 interface FrontPageProps {
   onClickGenerate: (actionId: ActionId) => void;
   isGenerateDisabled?: boolean;
   loadingActionId?: ActionId | null;
+  errorMessage: string | null;
+  onDismissError: () => void;
 }
 
 const LANGUAGE_OPTION_LABEL: Record<Language, string> = {
@@ -30,7 +33,12 @@ const LANGUAGE_OPTION_LABEL: Record<Language, string> = {
 const LANGUAGE_OPTIONS: ReadonlyArray<SettingsPageDropdownOption<Language>> =
   all_languages.map((value) => ({ value, label: LANGUAGE_OPTION_LABEL[value] }));
 
-const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate, loadingActionId = null }) => {
+const FrontPage: React.FC<FrontPageProps> = ({
+  onClickGenerate,
+  loadingActionId = null,
+  errorMessage,
+  onDismissError,
+}) => {
   const { t } = useTranslation();
   const activeTabMeta = useTabChange();
   const language = useSettingsStore((state) => state.language);
@@ -76,6 +84,9 @@ const FrontPage: React.FC<FrontPageProps> = ({ onClickGenerate, loadingActionId 
           />
         </section>
       </PageCard>
+      <ToastErrorMessage
+        errorMessage={errorMessage}
+        onDismissError={onDismissError}/>
     </main>
   );
 };

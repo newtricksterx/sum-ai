@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 import PageCard from '../../components/PageCard/PageCard';
 import "./ProfilePage.css";
 import AlertPopup from '../../components/AlertPopup/AlertPopup';
+import { ToastErrorMessage } from '../../components/ToastErrorMessage/ToastErrorMessage';
 import { useProfileAccount } from "./useProfileAccount";
 import { deriveBillingInterval, deriveSubscriptionPrice, deriveWordLimit, formatLimit, formatDate, getInitials, getUsageClass, deriveDisplayName } from './profilepage.helpers';
 import { FcGoogle } from "react-icons/fc";
@@ -20,6 +21,7 @@ const ProfilePage: React.FC = () => {
     errorMessage,
     infoMessage,
     handleLogout,
+    dismissError,
   } = useProfileAccount();
 
   const googleSignInUrl = useMemo(() => {
@@ -106,12 +108,6 @@ const ProfilePage: React.FC = () => {
             {infoMessage && (
               <p className="profile-status-message profile-status-message--success">
                 {infoMessage}
-              </p>
-            )}
-
-            {errorMessage && (
-              <p className="profile-status-message profile-status-message--error">
-                {errorMessage}
               </p>
             )}
 
@@ -254,6 +250,7 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
         </PageCard>
+        <ToastErrorMessage errorMessage={errorMessage} onDismissError={dismissError} />
       </main>
     );
   }
@@ -273,12 +270,6 @@ const ProfilePage: React.FC = () => {
           </p>
         )}
 
-        {errorMessage && (
-          <p className="profile-status-message profile-status-message--error">
-            {errorMessage}
-          </p>
-        )}
-
           <button
             type="button"
             onClick={handleGoogleSignIn}
@@ -288,6 +279,7 @@ const ProfilePage: React.FC = () => {
             {t("profile.signInGoogle")}
           </button>
       </PageCard>
+      <ToastErrorMessage errorMessage={errorMessage} onDismissError={dismissError} />
     </main>
   );
 };

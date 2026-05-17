@@ -80,6 +80,8 @@ export const useProfileAccount = () => {
     }
   }, [clearProfile]);
 
+  const dismissError = useCallback(() => setErrorMessage(null), []);
+
   return {
     userProfile,
     isInitializing: profileStatus === "loading",
@@ -87,5 +89,6 @@ export const useProfileAccount = () => {
     errorMessage,
     infoMessage,
     handleLogout,
+    dismissError,
   };
 };

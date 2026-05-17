@@ -10,35 +10,27 @@ describe("MenuBar", () => {
     cleanup();
   });
 
-  it("renders menu buttons and calls provided handlers", () => {
-    const onClickReturn = vi.fn();
-    const onClickForward = vi.fn();
-    const onClickProfile = vi.fn();
-    const onClickHistory = vi.fn();
-    const onClickSettings = vi.fn();
+  it("renders six buttons and routes nav clicks through onMenuClick", () => {
+    const onMenuClick = vi.fn();
     const onClickClose = vi.fn();
 
-    render(
-      <MenuBar
-        onClickReturn={onClickReturn}
-        onClickForward={onClickForward}
-        onClickProfile={onClickProfile}
-        onClickHistory={onClickHistory}
-        onClickSettings={onClickSettings}
-        onClickClose={onClickClose}
-      />
-    );
+    render(<MenuBar onMenuClick={onMenuClick} onClickClose={onClickClose} />);
 
     const menuButtons = screen.getAllByRole("button");
     expect(menuButtons).toHaveLength(6);
 
-    menuButtons.forEach((button) => fireEvent.click(button));
+    // Order is defined by MENU_ITEMS in MenuBar.tsx; the close button is last.
+    const expectedPages = ["home", "session", "history", "settings", "profile"] as const;
 
-    expect(onClickReturn).toHaveBeenCalledTimes(1);
-    expect(onClickForward).toHaveBeenCalledTimes(1);
-    expect(onClickSettings).toHaveBeenCalledTimes(1);
-    expect(onClickHistory).toHaveBeenCalledTimes(1);
-    expect(onClickProfile).toHaveBeenCalledTimes(1);
+    menuButtons.slice(0, 5).forEach((button, index) => {
+      fireEvent.click(button);
+      expect(onMenuClick).toHaveBeenNthCalledWith(index + 1, expectedPages[index]);
+    });
+    expect(onMenuClick).toHaveBeenCalledTimes(5);
+    expect(onClickClose).not.toHaveBeenCalled();
+
+    fireEvent.click(menuButtons[5]);
     expect(onClickClose).toHaveBeenCalledTimes(1);
+    expect(onMenuClick).toHaveBeenCalledTimes(5);
   });
 });

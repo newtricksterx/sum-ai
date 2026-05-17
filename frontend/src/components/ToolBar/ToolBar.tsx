@@ -29,7 +29,9 @@ function ToolBar({
         </div>
         <div className="toolbar-info">
             <header className="toolbar-sessionurl-header">{t("toolbar.sessionLabel")}</header>
-            <section className="toolbar-sessionurl-url">{currentSessionUrl || t("toolbar.noSession")}</section>
+            <section className="toolbar-sessionurl-url" title={currentSessionUrl || ""}>
+              {currentSessionUrl || t("toolbar.noSession")}
+            </section>
         </div>
       </div>
       <span className={`toolbar-generate-shell ${disableGenerate ? "is-disabled" : ""}`}>

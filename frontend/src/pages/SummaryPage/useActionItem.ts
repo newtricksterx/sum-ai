@@ -11,6 +11,7 @@ import type {
   ResolveSourcePayloadOptions,
   SourcePayload,
   SourcePayloadResolution,
+  SummaryDocument,
 } from "./utils/types";
 import { isAnyActionItemMockEnabled } from "./utils/mocks";
 import { errorDocument } from "./utils/document";
@@ -33,6 +34,19 @@ const waitForNextPaintTask = (): Promise<void> =>
       window.setTimeout(resolve, 0);
     });
   });
+
+export type AddActionItemResult =
+  | { success: true }
+  | { success: false; errorMessage: string };
+
+const extractErrorMessage = (
+  doc: SummaryDocument | null | undefined,
+  fallback: string,
+): string => {
+  if (!doc) return fallback;
+  const text = doc.blocks?.[0]?.children?.[0]?.text;
+  return typeof text === "string" && text.length > 0 ? text : fallback;
+};
 
 export const useActionItem = () => {
   const { t } = useTranslation();
@@ -115,9 +129,12 @@ export const useActionItem = () => {
   }, []);
 
   const addActionItem = useCallback(
-    async (actionId: ActionId, options: AddActionItemOptions = {}) => {
+    async (
+      actionId: ActionId,
+      options: AddActionItemOptions = {},
+    ): Promise<AddActionItemResult> => {
       if (actionRequestInFlightRef.current) {
-        return;
+        return { success: false, errorMessage: "An action is already in progress." };
       }
 
       actionRequestInFlightRef.current = true;
@@ -140,17 +157,16 @@ export const useActionItem = () => {
           if (options.resetSession) {
             startSession(sourceError?.sourceUrl ?? "");
           }
-          addSessionActionItem({
-            id: createActionItemId(actionId),
-            type: actionId,
-            document: sourceError?.errorDocument ?? errorDocument(
-              "Could not read source",
-              "Could not read the current tab. Try reloading the page and trying again.",
-            ),
-            ...(clickQuizDifficulty ? { quizDifficulty: clickQuizDifficulty } : {}),
-          });
+          const fallbackDoc = errorDocument(
+            "Could not read source",
+            "Could not read the current tab. Try reloading the page and trying again.",
+          );
+          const usedDoc = sourceError?.errorDocument ?? fallbackDoc;
           syncHistory();
-          return;
+          return {
+            success: false,
+            errorMessage: extractErrorMessage(usedDoc, "Could not read the current tab."),
+          };
         }
 
         const actionItemId = createActionItemId(actionId);
@@ -170,9 +186,20 @@ export const useActionItem = () => {
           startSession(result.sourceUrl ?? sourcePayload.sourceUrl ?? "");
         }
 
+        if (!result.isSuccess) {
+          syncHistory();
+          return {
+            success: false,
+            errorMessage: extractErrorMessage(result.document, "Could not generate action item."),
+          };
+        }
+
         if (!result.document || result.document.blocks.length === 0) {
           syncHistory();
-          return;
+          return {
+            success: false,
+            errorMessage: "The backend returned an empty response.",
+          };
         }
 
         addSessionActionItem({
@@ -182,14 +209,12 @@ export const useActionItem = () => {
           ...(clickQuizDifficulty ? { quizDifficulty: clickQuizDifficulty } : {}),
         });
         syncHistory();
-        if (!result.isSuccess) {
-          return;
-        }
 
         setSourcePayload(sourcePayload);
         if (userProfile) {
           void hydrateProfile(true, currency);
         }
+        return { success: true };
       } finally {
         actionRequestInFlightRef.current = false;
         setLoadingActionId(null);

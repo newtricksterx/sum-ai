@@ -30,6 +30,10 @@ export const Quiz = ({ document, difficulty = null } : QuizProps) => {
     () => document.blocks.filter((block) => block.type === "question"),
     [document.blocks],
   );
+  const correctIndices = useMemo(
+    () => questionBlocks.map(findCorrectIndex),
+    [questionBlocks],
+  );
   const totalQuestions = questionBlocks.length;
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Array<number | null>>(() => createInitialAnswers(totalQuestions));
@@ -59,7 +63,7 @@ export const Quiz = ({ document, difficulty = null } : QuizProps) => {
   }
 
   const currentOptions = currentQuestion.options ?? [];
-  const currentCorrectIndex = findCorrectIndex(currentQuestion);
+  const currentCorrectIndex = correctIndices[currentQuestionIndex];
 
   const handleSelectOption = (optionIndex: number) => {
     if (isAnswered) {
@@ -106,7 +110,7 @@ export const Quiz = ({ document, difficulty = null } : QuizProps) => {
   const getDotClassName = (index: number) => {
     const answeredOption = answers[index];
     if (answeredOption !== null) {
-      const wasCorrect = answeredOption === findCorrectIndex(questionBlocks[index]);
+      const wasCorrect = answeredOption === correctIndices[index];
       return `qz-dot ${wasCorrect ? "correct" : "wrong"}`;
     }
 

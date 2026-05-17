@@ -56,9 +56,8 @@ export const GetFormatFromStorage = () => {
     return localStorage && localStorage.getItem('format') ? localStorage.getItem('format') as Format : null
 }
 
-
 export const GetPageFromStorage = () => {
-    return localStorage && localStorage.getItem('page') ? (localStorage.getItem('page') as PageType) : null
+    return localStorage && localStorage.getItem('page') ? (localStorage.getItem('page') as PageType) : "home" as PageType
 }
 
 export const GetQuizDifficultyFromStorage = () => {

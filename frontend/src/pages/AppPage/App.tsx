@@ -7,10 +7,8 @@ import { useSettingsStore } from '../../stores/settingsStore'
 import { GetPageFromStorage, UpdatePageStorage } from '../../utils/storage'
 import FrontPage from '../FrontPage/FrontPage'
 import SummaryPage from '../SummaryPage/SummaryPage'
-// import { getPlainTextFromHtml } from '../../utils/html'
 import HistoryPage from '../HistoryPage/HistoryPage'
 import ProfilePage from '../ProfilePage/ProfilePage'
-// import { useCopySuccessTimer } from '../../components/ToolBar/useCopySuccessTimer'
 import { useActionItem } from '../SummaryPage/useActionItem'
 import { isPersistedAuthProfileIntact, useAuthProfileStore } from '../../stores/authProfileStore'
 import { useCurrentSessionState, type SessionState } from '../../stores/sessionStorage'
@@ -24,8 +22,18 @@ import { usePageSwitchCleanup } from './usePageSwitchCleanup'
 import { SettingsPage } from '../SettingsPage/SettingsPage'
 import { ActionId } from '../../types/summary'
 import { PageType } from '../../utils/types'
-// import { savePDF } from '../../utils/functions'
+import * as Toast from '@radix-ui/react-toast'
 
+// Returns true if the persisted auth blob is intact. When tampered, forces
+// a real logout and returns false so the caller can route to FrontPage.
+function enforceAuthIntegrity(): boolean {
+  const authState = useAuthProfileStore.getState();
+  if (authState.profile && !isPersistedAuthProfileIntact()) {
+    void authState.logout();
+    return false;
+  }
+  return true;
+}
 
 function App() {
   const [currentPage, setCurrentPage] = useState<PageType>(() => GetPageFromStorage() ?? "home");
@@ -42,7 +50,6 @@ function App() {
     addActionItem,
     removeActionItem,
   } = useActionItem();
-  // const { isCopySuccess, showCopySuccess, resetCopySuccess } = useCopySuccessTimer();
 
   const fontSize = useSettingsStore((state) => state.fontSize)
   const language = useSettingsStore((state) => state.language)
@@ -79,19 +86,21 @@ function App() {
   }, []);
 
   const commitPage = useCallback((nextPage: PageType) => {
+    let didChange = false;
     startTransition(() => {
-      setCurrentPage((prevPage) => (prevPage === nextPage ? prevPage : nextPage));
+      setCurrentPage((prevPage) => {
+        if (prevPage === nextPage) return prevPage;
+        didChange = true;
+        return nextPage;
+      });
     });
-    schedulePageStorageWrite(nextPage);
+    if (didChange) {
+      schedulePageStorageWrite(nextPage);
+    }
   }, [schedulePageStorageWrite]);
 
   const setPage = useCallback((nextPage: PageType) => {
-    // If we believe the user is logged in but the persisted profile blob is
-    // missing or tampered, force a real (backend cookie revocation) logout
-    // and route to FrontPage instead of wherever they were trying to go.
-    const authState = useAuthProfileStore.getState();
-    if (authState.profile && !isPersistedAuthProfileIntact()) {
-      void authState.logout();
+    if (!enforceAuthIntegrity()) {
       nextPage = "home";
     }
 
@@ -123,51 +132,39 @@ function App() {
 
   // Catch tampering that happened while the extension was closed.
   useEffect(() => {
-    const authState = useAuthProfileStore.getState();
-    if (authState.profile && !isPersistedAuthProfileIntact()) {
-      void authState.logout();
+    if (!enforceAuthIntegrity()) {
       setPage("home");
     }
     // Intentionally run once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onClickReturn = useCallback(() => {
-    setPage("home");
+  const onMenuClick = useCallback((page: PageType) => {
+    setPage(page);
   }, [setPage]);
 
-  const onClickForward = useCallback(() => {
-    setPage("session");
-  }, [setPage]);
-
-  const onClickHistory = useCallback(() => {
-    setPage("history");
-  }, [setPage]);
-
-  const onClickProfile = useCallback(() => {
+  const onClickSignInPage = useCallback(() => {
     setPage("profile");
   }, [setPage]);
 
-  const onClickSettings = useCallback(() => {
-    setPage("settings");
-  }, [setPage]);
+  const onClickClose = useCallback(() => {
+    window.close();
+  }, []);
 
-  const onClickClose = () => {
-    window.close()
-  }
-
-  /*
-  const onClickDownload = async () => {
-    await savePDF("test pdf");
-  } */
-
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const dismissError = useCallback(() => setErrorMessage(null), []);
 
   const onClickStartSession = useCallback(async (actionId: ActionId) => {
     if (loadingActionId !== null) {
       return;
     }
-    await addActionItem(actionId, { resetSession: true, forceActiveTab: true });
-    setPage("session");
+    const result = await addActionItem(actionId, { resetSession: true, forceActiveTab: true });
+
+    if (result.success) {
+      setPage("session");
+    } else {
+      setErrorMessage(result.errorMessage);
+    }
   }, [addActionItem, loadingActionId, setPage]);
 
   const onOpenHistorySession = useCallback((session: SessionState) => {
@@ -177,24 +174,6 @@ function App() {
 
   const isActionItemLoading = loadingActionId !== null;
 
-  /*
-  const canUseSummaryActions = useMemo(() => {
-    if (currentPage !== 1) {
-      return false;
-    }
-    return true;
-  }, [currentPage]);
-
-  const onClickCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(getPlainTextFromHtml("test copy"));
-      showCopySuccess();
-    } catch (error) {
-      console.error("Copy Error:", error);
-      resetCopySuccess();
-    }
-  }*/
-
   const summaryPageContent = useMemo(() => {
 
     return (
@@ -203,20 +182,37 @@ function App() {
         actionItems={actionItems}
         onAddActionItem={addActionItem}
         onRemoveActionItem={removeActionItem}
-        loadingActionId={loadingActionId} isSummarySuccess={false}      />
+        loadingActionId={loadingActionId}
+      />
     );
   }, [actionItems, addActionItem, fontSize, loadingActionId, removeActionItem]);
 
   const frontPageContent = useMemo(
-    () => <FrontPage onClickGenerate={onClickStartSession} isGenerateDisabled={isActionItemLoading} loadingActionId={loadingActionId} />,
-    [isActionItemLoading, loadingActionId, onClickStartSession],
+    () => (
+      <FrontPage
+        onClickGenerate={onClickStartSession}
+        isGenerateDisabled={isActionItemLoading}
+        loadingActionId={loadingActionId}
+        errorMessage={errorMessage}
+        onDismissError={dismissError}
+      />
+    ),
+    [isActionItemLoading, loadingActionId, onClickStartSession, errorMessage, dismissError],
   );
   const historyPageContent = useMemo(
-    () => <HistoryPage onOpenSession={onOpenHistorySession} onClickSignInPage={() => setPage("profile")}/>,
-    [onOpenHistorySession, setPage],
+    () => <HistoryPage onOpenSession={onOpenHistorySession} onClickSignInPage={onClickSignInPage}/>,
+    [onOpenHistorySession, onClickSignInPage],
   );
   const profilePageContent = useMemo(() => <ProfilePage />, []);
   const settingsPageContent = useMemo(() => <SettingsPage />, []);
+
+  const pages: ReadonlyArray<{ key: PageType; content: ReactNode }> = [
+    { key: "home", content: frontPageContent },
+    { key: "session", content: summaryPageContent },
+    { key: "history", content: historyPageContent },
+    { key: "profile", content: profilePageContent },
+    { key: "settings", content: settingsPageContent },
+  ];
 
   const renderPagePanel = (pageKey: PageType, content: ReactNode) => {
     if (!mountedPages[pageKey] && currentPage !== pageKey) {
@@ -235,38 +231,25 @@ function App() {
     );
   };
 
-  const renderUserInterface = () => {
-    return (
-      <>
-        {renderPagePanel("home", frontPageContent)}
-        {renderPagePanel("session", summaryPageContent)}
-        {renderPagePanel("history", historyPageContent)}
-        {renderPagePanel("profile", profilePageContent)}
-        {renderPagePanel("settings", settingsPageContent)}
-      </>
-    );
-  };
-
   return (
     <section className="app-shell flex flex-col w-90 max-h-137.5">
       <MenuBar
-        onClickReturn={onClickReturn}
-        onClickForward={onClickForward}
-        onClickProfile={onClickProfile}
-        onClickHistory={onClickHistory}
-        onClickSettings={onClickSettings}
+        onMenuClick={onMenuClick}
         onClickClose={onClickClose}
       />
-      <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar">
-        {renderUserInterface()}
-      </div>
-      {currentPage === "session" && (
-        <ToolBar
-          isSummarizing={false}
-          isGenerateDisabled={isActionItemLoading}
-          onClickNewSession={resetSession}
-        />
-      )}
+      <Toast.Provider>
+        <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar">
+          {pages.map(({ key, content }) => renderPagePanel(key, content))}
+        </div>
+        {currentPage === "session" && (
+          <ToolBar
+            isSummarizing={false}
+            isGenerateDisabled={isActionItemLoading}
+            onClickNewSession={resetSession}
+          />
+        )}
+        <Toast.Viewport className="fixed bottom-3 right-3 z-50 flex flex-col gap-2 outline-none" />
+      </Toast.Provider>
     </section>
   )
 }

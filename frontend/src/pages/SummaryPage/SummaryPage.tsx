@@ -1,134 +1,23 @@
-import React, { useCallback } from 'react';
-import { Cross2Icon } from '@radix-ui/react-icons';
-import PageCard from '../../components/PageCard/PageCard';
-import AlertPopup from '../../components/AlertPopup/AlertPopup';
+import React, { useCallback, useState } from 'react';
+import { ToastErrorMessage } from '../../components/ToastErrorMessage/ToastErrorMessage';
 import { ActionGrid } from './components/ActionGrid/ActionGrid';
-import { FlashcardContainer } from './components/Flashcards/FlashcardContainer';
-import { Quiz } from './components/Quiz/Quiz';
+import { ActionItemCard } from './components/ActionItemCard/ActionItemCard';
 import type { SummaryActionItem } from '../../types/summary';
-import type { AddActionItemOptions, SummaryDocument } from "./utils/types";
-import { renderInlineSegment } from "./utils/renderInline";
+import type { AddActionItemOptions } from "./utils/types";
 import { ActionId } from '../../types/summary';
 import { useCurrentSessionState } from '../../stores/sessionStorage';
 import { useActiveTabUrl } from './useActiveTabUrl';
 import { SessionMismatch } from './components/SessionMismatch/SessionMismatch';
 import { useTranslation } from 'react-i18next';
+import type { AddActionItemResult } from './useActionItem';
 
 interface SummaryPageProps {
-  isSummarySuccess: boolean;
   fontSize: number;
   actionItems: SummaryActionItem[];
-  onAddActionItem: (actionId: ActionId, options?: AddActionItemOptions) => void;
+  onAddActionItem: (actionId: ActionId, options?: AddActionItemOptions) => Promise<AddActionItemResult>;
   onRemoveActionItem: (actionItemId: string) => void;
   loadingActionId?: ActionId | null;
 }
-
-const renderDocumentBody = (document: SummaryDocument) => {
-
-  if (document.format === "error") {
-    return (
-      <div className="summary-error" role="alert">
-        {document.blocks.map((block, blockIndex) => (
-          <p key={blockIndex}>{block.children.map(renderInlineSegment)}</p>
-        ))}
-      </div>
-    );
-  }
-
-  if(document.format == "bullet-point"){
-    return (
-      <ul>
-        {document.blocks.map((block, blockIndex) => (
-          <li key={blockIndex}>
-            {block.children.map(renderInlineSegment)}
-          </li>
-        ))}
-      </ul>
-    )
-  }
-
-  if (document.format == "paragraph"){
-    return (
-      <section>
-        {document.blocks.map((block, blockIndex) => {
-          if (block.type === "heading") {
-            return <h3 key={blockIndex}>{block.children.map(renderInlineSegment)}</h3>;
-          }
-          return (
-            <p key={blockIndex}>
-              {block.children.map(renderInlineSegment)}
-            </p>
-          );
-        })}
-      </section>
-    )
-  }
-
-  if (document.format == "tl-dr"){
-    return (
-      <section>
-        <h3>tl;dr: </h3>
-          {document.blocks.map((block, blockIndex) => {
-            return (
-              <p key={blockIndex}>{block.children.map(renderInlineSegment)}</p>
-            )
-          })}
-
-      </section>
-    )
-  }
-
-  if (document.format == "q-and-a"){
-    return (
-      <section>
-        {document.blocks.map((block, blockIndex) => (
-          <div key={blockIndex}>
-            <p><strong>Q: </strong>{(block.question ?? []).map(renderInlineSegment)}</p>
-            <p><strong>A: </strong>{(block.answer ?? []).map(renderInlineSegment)}</p>
-          </div>
-        ))}
-      </section>
-    )
-  }
-
-  if (document.format == "pros-cons"){
-    const pros = document.blocks.filter((block) => block.type === "pro");
-    const cons = document.blocks.filter((block) => block.type === "con");
-    return (
-      <section>
-        <h3>Pros</h3>
-        <ul>
-          {pros.map((block, i) => (
-            <li key={`pro-${i}`}>{block.children.map(renderInlineSegment)}</li>
-          ))}
-        </ul>
-        <h3>Cons</h3>
-        <ul>
-          {cons.map((block, i) => (
-            <li key={`con-${i}`}>{block.children.map(renderInlineSegment)}</li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
-
-  return (
-    <div></div>
-  )
-
-}
-
-const SummaryDocumentView: React.FC<{ document: SummaryDocument }> = ({ document }) => {
-  if (document.blocks.length === 0) {
-    return null;
-  }
-  return (
-    <div>
-      <h1 className='summary-title'>{document.title}</h1>
-      {renderDocumentBody(document)}
-    </div>
-  );
-};
 
 interface SummaryActionItemListProps {
   actionItems: SummaryActionItem[];
@@ -140,148 +29,18 @@ const SummaryActionItemList = React.memo(({
   actionItems,
   onRemoveActionItem,
   fontSize,
-}: SummaryActionItemListProps) => {
-  const renderActionItem = useCallback((actionItem: SummaryActionItem) => {
-        if (actionItem.document.blocks.length === 0) {
-            return null;
-        }
-
-        if (actionItem.document.format === "error") {
-            return (
-              <div key={actionItem.id} className='mb-4!'>
-                <div className='flex flex-row justify-end'>
-                  <AlertPopup
-                        trigger={
-                            <button
-                                type="button"
-                                className="qz-close"
-                                aria-label="Close error"
-                            >
-                                <Cross2Icon className="qz-close-icon" aria-hidden="true" />
-                                <span>Close</span>
-                            </button>
-                        }
-                        title="Close message?"
-                        description="This message will be removed from the summary page."
-                        onConfirm={() => onRemoveActionItem(actionItem.id)}
-                        confirmLabel="Close"
-                        cancelLabel="Cancel"
-                    />
-                  </div>
-                <PageCard
-                    as="article"
-                    style={{ fontSize: `${fontSize}px` }}
-                    className="summary-card summary-content summary-container relative"
-                >
-                    <SummaryDocumentView document={actionItem.document} />
-                </PageCard>
-              </div>
-            );
-        }
-
-        if (actionItem.type === 'flashcards') {
-            return (
-              <div key={actionItem.id} className='mb-4!'>
-                <div className='flex flex-row justify-end'>
-                  <AlertPopup
-                        trigger={
-                            <button
-                                type="button"
-                                className="qz-close"
-                                aria-label="Close flashcard"
-                            >
-                                <Cross2Icon className="qz-close-icon" aria-hidden="true" />
-                                <span>Close</span>
-                            </button>
-                        }
-                        title="Close flashcard?"
-                        description="This flashcard will be removed from the page."
-                        onConfirm={() => onRemoveActionItem(actionItem.id)}
-                        confirmLabel="Close"
-                        cancelLabel="Cancel"
-                    />
-                  </div>
-                <PageCard key={actionItem.id} className="summary-card">
-                    <FlashcardContainer
-                    document={actionItem.document}
-                    />
-                </PageCard>
-              </div>
-            );
-        }
-
-        if (actionItem.type === 'quiz') {
-            return (
-              <div key={actionItem.id} className='mb-4!'>
-                <div className='flex flex-row justify-end'>
-                  <AlertPopup
-                        trigger={
-                            <button
-                                type="button"
-                                className="qz-close"
-                                aria-label="Close quiz"
-                            >
-                                <Cross2Icon className="qz-close-icon" aria-hidden="true" />
-                                <span>Close</span>
-                            </button>
-                        }
-                        title="Close flashcard?"
-                        description="This quiz will be removed from the page."
-                        onConfirm={() => onRemoveActionItem(actionItem.id)}
-                        confirmLabel="Close"
-                        cancelLabel="Cancel"
-                    />
-                  </div>
-                <PageCard key={actionItem.id} className="summary-card">
-                    <Quiz
-                      document={actionItem.document}
-                      difficulty={actionItem.quizDifficulty ?? null}
-                    />
-                </PageCard>
-              </div>
-            );
-        }
-
-        if (actionItem.type === 'summary') {
-            return (
-              <div key={actionItem.id} className='mb-4!'>
-                <div className='flex flex-row justify-end'>
-                  <AlertPopup
-                        trigger={
-                            <button
-                                type="button"
-                                className="qz-close"
-                                aria-label="Close summary"
-                            >
-                                <Cross2Icon className="qz-close-icon" aria-hidden="true" />
-                                <span>Close</span>
-                            </button>
-                        }
-                        title="Close summary?"
-                        description="This summary action item will be removed from the summary page."
-                        onConfirm={() => onRemoveActionItem(actionItem.id)}
-                        confirmLabel="Close"
-                        cancelLabel="Cancel"
-                    />
-                  </div>
-                <PageCard
-                    as="article"
-                    style={{ fontSize: `${fontSize}px` }}
-                    className="summary-card summary-content summary-container relative"
-                >
-                    <SummaryDocumentView document={actionItem.document} />
-                </PageCard>
-              </div>
-            );
-        }
-
-        return null;
-    },
-    [fontSize, onRemoveActionItem],
-  );
-
-  return <>{actionItems.map(renderActionItem)}</>;
-});
+}: SummaryActionItemListProps) => (
+  <>
+    {actionItems.map((actionItem) => (
+      <ActionItemCard
+        key={actionItem.id}
+        actionItem={actionItem}
+        fontSize={fontSize}
+        onRemove={onRemoveActionItem}
+      />
+    ))}
+  </>
+));
 
 const SummaryPage: React.FC<SummaryPageProps> = ({
   fontSize,
@@ -298,22 +57,25 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
   const shouldShowReturnLink =
     Boolean(sessionUrl) && activeTabUrl !== undefined && sessionUrl !== activeTabUrl;
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const dismissError = useCallback(() => setErrorMessage(null), []);
+
   const handleAddActionItem = useCallback(
-    (actionId: ActionId) => {
+    async (actionId: ActionId) => {
       // No active session: treat the grid click as a session-start so the action
       // item attaches to the active tab's URL instead of an empty session.
-      if (!sessionUrl) {
-        onAddActionItem(actionId, { resetSession: true, forceActiveTab: true });
-        return;
+      const result = !sessionUrl
+        ? await onAddActionItem(actionId, { resetSession: true, forceActiveTab: true })
+        : await onAddActionItem(actionId);
+
+      if (!result.success) {
+        setErrorMessage(result.errorMessage);
       }
-      onAddActionItem(actionId);
     },
     [onAddActionItem, sessionUrl],
   );
 
   return (
-
-    
     <section className={`summary-shell px-2! py-2!`}>
       <SummaryActionItemList
         actionItems={actionItems}
@@ -329,6 +91,7 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
           loadingActionId={loadingActionId}
         />
       )}
+      <ToastErrorMessage errorMessage={errorMessage} onDismissError={dismissError} />
     </section>
   );
 };

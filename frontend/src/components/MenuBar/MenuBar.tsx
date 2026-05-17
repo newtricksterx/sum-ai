@@ -4,46 +4,40 @@ import { ReaderIcon, PersonIcon, GearIcon, Cross1Icon } from "@radix-ui/react-ic
 import "./MenuBar.css";
 import { useTranslation } from "react-i18next";
 import "../../i18n";
-import { memo } from 'react';
+import { memo, type ReactNode } from 'react';
+import type { PageType } from '../../utils/types';
 
+type MenuItem = { page: PageType; icon: ReactNode; titleKey: string };
+
+const MENU_ITEMS: ReadonlyArray<MenuItem> = [
+  { page: "home", icon: <GoHome size={MenuIconSize} />, titleKey: "menu.home" },
+  { page: "session", icon: <ReaderIcon width={MenuIconSize} height={MenuIconSize} />, titleKey: "menu.session" },
+  { page: "history", icon: <GoHistory size={MenuIconSize} />, titleKey: "menu.history" },
+  { page: "settings", icon: <GearIcon width={MenuIconSize} height={MenuIconSize} />, titleKey: "menu.settings" },
+  { page: "profile", icon: <PersonIcon width={MenuIconSize} height={MenuIconSize} />, titleKey: "menu.profile" },
+];
 
 export interface MenuBarProps {
-    onClickReturn: React.MouseEventHandler;
-    onClickForward: React.MouseEventHandler;
-    onClickProfile: React.MouseEventHandler;
-    onClickHistory: React.MouseEventHandler;
-    onClickSettings: React.MouseEventHandler;
+    onMenuClick: (page: PageType) => void;
     onClickClose: React.MouseEventHandler;
 }
 
-function MenuBar({ 
-    onClickReturn, 
-    onClickForward, 
-    onClickProfile, 
-    onClickHistory, 
-    onClickSettings,
-    onClickClose } : MenuBarProps) 
-  {
-
+function MenuBar({ onMenuClick, onClickClose }: MenuBarProps) {
   const { t } = useTranslation();
 
   return (
-    <nav className="menu-bar-shell flex flex-row gap-1 justify-between items-center border-b-gray-500 border-b-[0.25px]">
-        <button className='menubar-btn' onClick={onClickReturn}  title={t("menu.home")}>
-            <GoHome size={MenuIconSize}/>
-        </button>
-        <button className='menubar-btn' onClick={onClickForward} title={t("menu.session")}>
-            <ReaderIcon width={MenuIconSize} height={MenuIconSize}/>
-        </button>
-        <button className='menubar-btn' onClick={onClickHistory} title={t("menu.history")}>
-          <GoHistory size={MenuIconSize}/>
-        </button>
-        <button className='menubar-btn' onClick={onClickSettings} title={t("menu.settings")}>
-            <GearIcon width={MenuIconSize} height={MenuIconSize}/>
-        </button>
-        <button className='menubar-btn' onClick={onClickProfile} title={t("menu.profile")}>
-          <PersonIcon width={MenuIconSize} height={MenuIconSize}/>
-        </button>
+    <nav className="menu-bar-shell">
+        {MENU_ITEMS.map(({ page, icon, titleKey }) => (
+            <button
+                key={page}
+                type="button"
+                className='menubar-btn'
+                onClick={() => onMenuClick(page)}
+                title={t(titleKey)}
+            >
+                {icon}
+            </button>
+        ))}
         <button className='menubar-btn hover:bg-red-500!' onClick={onClickClose} title={t("menu.close")}>
           <Cross1Icon width={MenuIconSize} height={MenuIconSize}/>
         </button>

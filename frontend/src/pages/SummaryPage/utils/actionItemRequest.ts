@@ -24,6 +24,8 @@ import {
   throttleMessage,
 } from "./document";
 
+const DEBUG_ERROR_MESSAGE = false
+
 const MOCK_BY_ACTION_ID: Record<ActionId, SummaryDocument> = {
   flashcards: MOCK_FLASHCARDS_DOCUMENT,
   quiz: MOCK_QUIZ_DOCUMENT,
@@ -119,6 +121,14 @@ export const requestActionItem = async ({
   t,
 }: RequestActionItemArgs): Promise<ActionItemRequestResult> => {
   if (isMockActionItemModeEnabled()) {
+    if (DEBUG_ERROR_MESSAGE){
+      return {
+        document: null,
+        sourceUrl: sourcePayload.sourceUrl,
+        isSuccess: false,
+      }
+    }
+
     return {
       document: MOCK_BY_ACTION_ID[type],
       sourceUrl: sourcePayload.sourceUrl,
@@ -157,7 +167,7 @@ export const requestActionItem = async ({
     if (result.isSuccess !== true) {
       return actionItemErrorResult(
         "Request failed",
-        "Could not generate action item.",
+        "Could not generate action item",
         sourcePayload.sourceUrl,
       );
     }
