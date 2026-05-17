@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from scripts.SumAI.utils.parsers import _parse_action_document
+from scripts.SumAI.response import parse_action_document
 
 
 class ParseActionDocumentTest(SimpleTestCase):
@@ -21,7 +21,7 @@ class ParseActionDocumentTest(SimpleTestCase):
         ```
         """
 
-        parsed = _parse_action_document(raw_output)
+        parsed = parse_action_document(raw_output)
 
         self.assertIsNotNone(parsed)
         self.assertEqual(parsed["format"], "flashcards")
@@ -47,22 +47,22 @@ class ParseActionDocumentTest(SimpleTestCase):
         }
         """
 
-        parsed = _parse_action_document(raw_output)
+        parsed = parse_action_document(raw_output)
 
         self.assertIsNotNone(parsed)
         self.assertEqual(parsed["format"], "quiz")
         self.assertEqual(parsed["blocks"][0]["options"][0]["correct"], True)
 
     def test_rejects_non_dict_payload(self):
-        self.assertIsNone(_parse_action_document("[1, 2, 3]"))
+        self.assertIsNone(parse_action_document("[1, 2, 3]"))
 
     def test_rejects_missing_blocks(self):
         raw_output = '{"title": "X", "format": "flashcards"}'
-        self.assertIsNone(_parse_action_document(raw_output))
+        self.assertIsNone(parse_action_document(raw_output))
 
     def test_rejects_empty_blocks(self):
         raw_output = '{"title": "X", "format": "flashcards", "blocks": []}'
-        self.assertIsNone(_parse_action_document(raw_output))
+        self.assertIsNone(parse_action_document(raw_output))
 
     def test_rejects_unparseable_text(self):
-        self.assertIsNone(_parse_action_document("not json at all"))
+        self.assertIsNone(parse_action_document("not json at all"))

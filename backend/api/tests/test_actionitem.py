@@ -11,6 +11,7 @@ from rest_framework.test import APIClient
 
 from api.models import Subscription
 from api.plans import get_summary_limit
+from scripts.sources import ExtractionResult
 
 
 User = get_user_model()
@@ -175,17 +176,17 @@ class ActionItemEndpointTest(TestCase):
         return_value={"isSuccess": True, "content": _flashcards_document()},
     )
     @patch(
-        "scripts.summary._handle_pdf",
-        return_value={"isSuccess": True, "content": "Raw PDF source"},
+        "scripts.sources.pdf.PdfExtractor.extract",
+        return_value=ExtractionResult(is_success=True, content="Raw PDF source"),
     )
-    def test_flashcards_accepts_pdf_upload(self, mock_handle_pdf, mock_action_content):
+    def test_flashcards_accepts_pdf_upload(self, mock_pdf_extract, mock_action_content):
         response = self.client.post(self.url, data=_pdf_payload("flashcards"))
 
         self.assertEqual(response.status_code, 200)
         body = response.json()
         self.assertTrue(body["isSuccess"])
         self.assertEqual(body["content"], _flashcards_document())
-        mock_handle_pdf.assert_called_once()
+        mock_pdf_extract.assert_called_once()
         mock_action_content.assert_called_once_with("flashcards", "english", "Raw PDF source", None)
 
     @patch(
@@ -261,8 +262,6 @@ class ActionItemEndpointTest(TestCase):
             "short",
             "bullet-point",
             "english",
-            max_input_chars=mock_summarize.call_args.kwargs["max_input_chars"],
-            source_url="https://example.com/article",
         )
 
     @patch(

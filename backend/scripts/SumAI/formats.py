@@ -1,12 +1,10 @@
-_LENGTH_GUIDANCE = {
+LENGTH_GUIDANCE = {
     "short": "Target 50 to 100 words total.",
     "medium": "Target 150 to 250 words total.",
     "long": "Target 400 to 700 words total.",
 }
 
-# Shared rules for inline marks and JSON output. Embedded into both summary
-# and action-item prompts, so brevity here directly enlarges SOURCE_TEXT room.
-_INLINE_MARKS_RULES = """\
+INLINE_MARKS_RULES = """\
 Output rules:
 - Return ONE valid JSON object. No markdown fences, no commentary, no fields outside the schema.
 - "title" is concise and derived from the source.
@@ -31,7 +29,7 @@ Math inside "var" (write the formatted form directly in "text"):
 Marks may combine when both genuinely apply (e.g. {"text": "Ax = b", "var": true, "italic": true}). Never combine "code" and "var" on the same segment. Do not invent URLs or facts not present in the source."""
 
 
-_JSON_FORMAT_GUIDANCE = {
+JSON_FORMAT_GUIDANCE = {
     "bullet-point": """\
 {
   "title": "...",
@@ -88,7 +86,7 @@ Rules: flat list of "pro" and "con" blocks (do not group). Each is one distinct 
 }
 
 
-_LANGUAGE_DISPLAY = {
+LANGUAGE_DISPLAY = {
     "english": "English",
     "french": "French",
     "spanish": "Spanish",
@@ -97,7 +95,7 @@ _LANGUAGE_DISPLAY = {
 }
 
 
-_TYPE_FORMAT_GUIDANCE = {
+ACTION_FORMAT_GUIDANCE = {
     "flashcards": """\
 {
   "title": "...",
@@ -127,4 +125,18 @@ Rules: each block is "flashcard". "front" is plain text only — a focused quest
   ]
 }
 Rules: each block is "question" with plain-text "question" (no marks), exactly 4 options keyed A-D, and "explanation". Exactly ONE option has "correct": true; vary which key is correct across questions. Wrong options must be plausible (common misconceptions, not absurd filler). Up to 10 questions.""",
+}
+
+
+SUMMARY_ERROR_DOCUMENT = {
+    "title": "Summary unavailable",
+    "format": "error",
+    "blocks": [
+        {
+            "type": "paragraph",
+            "children": [
+                {"text": "We could not generate a summary right now. Please try again."},
+            ],
+        },
+    ],
 }

@@ -4,13 +4,13 @@ from unittest.mock import MagicMock, patch
 
 from django.test import SimpleTestCase
 
-from backend.scripts.SumAI import SumAI
+from scripts.SumAI import SumAI
+from scripts.SumAI.llm import get_default_provider, reset_default_provider
 
 
 class SumAIScriptTest(SimpleTestCase):
     def setUp(self):
-        SumAI.utils._GEMINI_CLIENT = None
-        SumAI.utils._GEMINI_CLIENT_API_KEY = None
+        reset_default_provider()
 
     @patch.dict(
         os.environ,
@@ -19,7 +19,7 @@ class SumAIScriptTest(SimpleTestCase):
             "GEMINI_API_MODEL": "gemini-2.5-flash-lite",
         },
     )
-    @patch("scripts.SumAI.genai.Client")
+    @patch("scripts.SumAI.llm.gemini.genai.Client")
     def test_query_ai_returns_response_text(self, mock_client_ctor):
         response = SimpleNamespace(text="Recovered summary text")
         mock_client = MagicMock()
@@ -38,7 +38,7 @@ class SumAIScriptTest(SimpleTestCase):
             "GEMINI_API_MODEL": "gemini-2.5-flash-lite",
         },
     )
-    @patch("scripts.SumAI.genai.Client")
+    @patch("scripts.SumAI.llm.gemini.genai.Client")
     def test_query_ai_raises_runtime_error_for_empty_response(self, mock_client_ctor):
         empty_response = SimpleNamespace(text=None)
         mock_client = MagicMock()
@@ -51,14 +51,23 @@ class SumAIScriptTest(SimpleTestCase):
         self.assertEqual(str(context.exception), "Gemini summary request failed.")
         self.assertEqual(mock_client.models.generate_content.call_count, 1)
 
-    @patch("scripts.SumAI.genai.Client")
-    def test_get_gemini_client_reuses_singleton_for_same_api_key(self, mock_client_ctor):
+    @patch("scripts.SumAI.llm.gemini.genai.Client")
+    def test_default_provider_caches_per_api_key(self, mock_client_ctor):
         mock_client_ctor.side_effect = [MagicMock(name="client_one"), MagicMock(name="client_two")]
 
-        first_client = SumAI.utils._get_gemini_client("same-key")
-        second_client = SumAI.utils._get_gemini_client("same-key")
-        third_client = SumAI.utils._get_gemini_client("different-key")
+        with patch.dict(
+            os.environ,
+            {"GEMINI_API_KEY": "same-key", "GEMINI_API_MODEL": "gemini-2.5-flash-lite"},
+        ):
+            first_provider = get_default_provider()
+            second_provider = get_default_provider()
 
-        self.assertIs(first_client, second_client)
-        self.assertIsNot(first_client, third_client)
+        with patch.dict(
+            os.environ,
+            {"GEMINI_API_KEY": "different-key", "GEMINI_API_MODEL": "gemini-2.5-flash-lite"},
+        ):
+            third_provider = get_default_provider()
+
+        self.assertIs(first_provider, second_provider)
+        self.assertIsNot(first_provider, third_provider)
         self.assertEqual(mock_client_ctor.call_count, 2)
