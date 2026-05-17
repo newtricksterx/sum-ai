@@ -1,9 +1,3 @@
-import axios from "axios";
-
-export const PLAN_TOOLTIP = "Your current subscription tier. It controls usage limits and available features.";
-export const WORD_LIMIT_TOOLTIP = "The approximate maximum amount of text you can summarize in one request.";
-export const HISTORY_CAPACITY_TOOLTIP = "The number of summaries this account can keep in saved history.";
-
 export const formatDate = (rawDate: string) => {
   const parsedDate = new Date(rawDate);
   if (Number.isNaN(parsedDate.getTime())) {
@@ -131,54 +125,20 @@ export const getInitials = (name: string) => {
     .join("");
 };
 
+export const deriveUsageMetrics = (
+  summaryLimit: number | null | undefined,
+  rawSummariesUsed: number | null | undefined,
+) => {
+  const summariesUsed = Math.max(0, rawSummariesUsed ?? 0);
+  const isUnlimited = summaryLimit === null;
+  const boundedLimit =
+    typeof summaryLimit === "number" ? Math.max(0, summaryLimit) : null;
+  const percentage =
+    boundedLimit && boundedLimit > 0
+      ? Math.min(100, (Math.min(summariesUsed, boundedLimit) / boundedLimit) * 100)
+      : 0;
+  const displayUsed = Math.min(summariesUsed, boundedLimit ?? summariesUsed);
+  const usageClass = getUsageClass(percentage);
 
-export const DEFAULT_REQUEST_ERROR = "We could not complete that request. Please try again.";
-
-export const parseApiErrorMessage = (error: unknown) => {
-  if (axios.isAxiosError(error)) {
-    const responseData = error.response?.data;
-
-    if (typeof responseData === "string") {
-      return responseData;
-    }
-
-    if (responseData && typeof responseData === "object") {
-      const data = responseData as Record<string, unknown>;
-      const detail = data.detail;
-      if (typeof detail === "string" && detail.trim().length > 0) {
-        return detail;
-      }
-
-      const messages: string[] = [];
-      Object.values(data).forEach((value) => {
-        if (Array.isArray(value)) {
-          value.forEach((item) => {
-            if (typeof item === "string" && item.trim().length > 0) {
-              messages.push(item);
-            }
-          });
-          return;
-        }
-
-        if (typeof value === "string" && value.trim().length > 0) {
-          messages.push(value);
-        }
-      });
-
-      if (messages.length > 0) {
-        return messages.join(" ");
-      }
-    }
-  }
-
-  return DEFAULT_REQUEST_ERROR;
-};
-
-export const getHistoryOwnerKeyFromEmail = (email: string | null | undefined) => {
-  if (typeof email !== "string") {
-    return "anonymous";
-  }
-
-  const normalizedEmail = email.trim().toLowerCase();
-  return normalizedEmail.length > 0 ? `user:${normalizedEmail}` : "anonymous";
+  return { isUnlimited, boundedLimit, summariesUsed, displayUsed, percentage, usageClass };
 };

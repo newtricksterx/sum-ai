@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import './ProfilePageStatRow.css'
 
 interface StatProp {
-    badge_id?: string;
+    highlightAsBadge?: boolean;
     title: string;
     titleDefault?: string;
     content: string;
@@ -15,7 +15,7 @@ interface StatProp {
 }
 
 export const ProfilePageStatRow = ({
-    badge_id,
+    highlightAsBadge,
     title,
     titleDefault,
     content,
@@ -25,6 +25,7 @@ export const ProfilePageStatRow = ({
     value,
 } : StatProp) => {
     const { t } = useTranslation();
+    const valueClassName = `pp-stat-value-content${highlightAsBadge ? " pp-stat-value-content--badge" : ""}`;
 
     return (
         <div className="pp-stat-row">
@@ -38,7 +39,7 @@ export const ProfilePageStatRow = ({
                 />
             </span>
             <span className="pp-stat-value">
-                <span id={badge_id || ""} className="pp-plan-badge">{value}</span>
+                <span className={valueClassName}>{value}</span>
             </span>
         </div>
     );

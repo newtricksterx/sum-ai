@@ -33,7 +33,7 @@
   text-align: right;
 }
 
-#plan {
+.pp-stat-value-content--badge {
   display: inline-block;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--pp-accent) 52%, var(--color-border-primary));
@@ -44,6 +44,6 @@
   letter-spacing: 0.02em;
 }
 
-.dark .pp-plan-badge {
+.dark .pp-stat-value-content--badge {
   color: var(--pp-accent);
 }
