@@ -142,7 +142,7 @@
       items: {
         summary: {
           title: "摘要",
-          description: "生成摘要",
+          description: "使用此标签页的内容生成摘要",
           tag: "阅读",
           hoverTitle: "生成本页的简明摘要",
         },
@@ -159,6 +159,13 @@
           hoverTitle: "进行测验以检验你的理解",
         },
       },
+    },
+    sessionMismatch: {
+      title: "会话属于不同的 URL",
+      description: "此会话是从该页面创建的:",
+      tooltip: "你必须在原始页面才能生成新操作。",
+      opensNewTab: "在新标签页打开: {{url}}",
+      goToOriginal: "前往原始页面",
     },
     summaryErrors: {
       rateLimitTitle: "已达到速率限制",

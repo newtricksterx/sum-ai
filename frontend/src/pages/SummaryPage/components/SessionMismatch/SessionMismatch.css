@@ -16,26 +16,26 @@
     color: var(--color-text-warning);
 }
 
-.sessionmismatch-main > svg {
-    flex: 0 0 auto;
+.sessionmismatch-maintext {
+    min-width: 0;
 }
 
-.sessionmismatch-main > div {
-    flex: 1 1 auto;
+.sessionmismatch-icon {
     min-width: 0;
 }
 
 .sessionmismatch-title {
     font-weight: 700;
-    color: var(--color-text-warning);
 }
 
 .sessionmismatch-desc {
-    color: var(--color-text-warning);
     margin: 0.2rem 0 0.6rem;
-    max-width: 100%;
-    overflow-wrap: anywhere;
-    word-break: break-word;
+    min-width: 0;
+}
+
+.sessionmismatch-desc span {
+    overflow-wrap: break-word;
+    min-width: 0;
 }
 
 .sessionmismatch-tooltip {
@@ -76,7 +76,11 @@
 }
 
 .sessionmismatch-url {
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: bottom;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: light-dark(rgb(137, 137, 44), rgb(215, 215, 75));
 }

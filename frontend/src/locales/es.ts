@@ -142,7 +142,7 @@ const es = {
       items: {
         summary: {
           title: "Resumen",
-          description: "Genera un resumen",
+          description: "Genera un resumen usando el contenido de esta pestana",
           tag: "Lectura",
           hoverTitle: "Genera un resumen conciso de esta pagina",
         },
@@ -159,6 +159,13 @@ const es = {
           hoverTitle: "Haz un quiz para poner a prueba tu comprension",
         },
       },
+    },
+    sessionMismatch: {
+      title: "La sesion pertenece a una URL diferente",
+      description: "Esta sesion fue creada desde esta pagina:",
+      tooltip: "Debes estar en la pagina original para generar una nueva accion.",
+      opensNewTab: "abre una nueva pestana en: {{url}}",
+      goToOriginal: "Ir a la pagina original",
     },
     summaryErrors: {
       rateLimitTitle: "Limite alcanzado",

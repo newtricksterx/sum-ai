@@ -142,7 +142,7 @@ const hi = {
       items: {
         summary: {
           title: "सारांश",
-          description: "सारांश बनाएं",
+          description: "इस टैब की सामग्री से सारांश बनाएं",
           tag: "पठन",
           hoverTitle: "इस पृष्ठ का संक्षिप्त सारांश बनाएं",
         },
@@ -159,6 +159,13 @@ const hi = {
           hoverTitle: "अपनी समझ की जांच के लिए क्विज लें",
         },
       },
+    },
+    sessionMismatch: {
+      title: "सत्र किसी अन्य URL से संबंधित है",
+      description: "यह सत्र इस पृष्ठ से बनाया गया था:",
+      tooltip: "नई कार्रवाई बनाने के लिए आपको मूल पृष्ठ पर होना चाहिए।",
+      opensNewTab: "नया टैब यहाँ खुलेगा: {{url}}",
+      goToOriginal: "मूल पृष्ठ पर जाएं",
     },
     summaryErrors: {
       rateLimitTitle: "रेट लिमिट पहुँच गई",

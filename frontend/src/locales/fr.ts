@@ -142,7 +142,7 @@ const fr = {
       items: {
         summary: {
           title: "Resume",
-          description: "Generer un resume",
+          description: "Generer un resume a partir du contenu de cet onglet",
           tag: "Lecture",
           hoverTitle: "Generer un resume concis de cette page",
         },
@@ -159,6 +159,13 @@ const fr = {
           hoverTitle: "Passer un quiz pour tester votre comprehension",
         },
       },
+    },
+    sessionMismatch: {
+      title: "La session appartient a une URL differente",
+      description: "Cette session a ete creee depuis cette page :",
+      tooltip: "Vous devez etre sur la page d'origine pour generer une nouvelle action.",
+      opensNewTab: "ouvre un nouvel onglet a : {{url}}",
+      goToOriginal: "Aller a la page d'origine",
     },
     summaryErrors: {
       rateLimitTitle: "Limite atteinte",

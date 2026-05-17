@@ -1,38 +1,40 @@
 import './SessionMismatch.css'
-import { ExclamationTriangleIcon, ExternalLinkIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
+import { ExclamationTriangleIcon, ExternalLinkIcon } from '@radix-ui/react-icons';
+import { useTranslation } from 'react-i18next';
+import '../../../../i18n';
 
 interface SessionMismatchProps {
     sessionUrl: string;
 }
 
 export const SessionMismatch = ({ sessionUrl }: SessionMismatchProps) => {
+    const { t } = useTranslation();
     return (
         <section className='sessionmismatch'>
             <div className='sessionmismatch-main'>
-                <ExclamationTriangleIcon width={18} height={18} />
-                <div>
-                    <header className='sessionmismatch-title'>Session loaded on a different URL</header>
-                    <p className='sessionmismatch-desc'>This session was started on 
+                <ExclamationTriangleIcon width={24} height={24} className='sessionmismatch-icon' />
+                <div className='sessionmismatch-maintext'>
+                    <header className='sessionmismatch-title'>{t('sessionMismatch.title')}</header>
+                    <p className='sessionmismatch-desc'>
+                        <span>{t('sessionMismatch.description')}</span>
                         <span className='sessionmismatch-url'>{sessionUrl}</span>
-                        Go there to continue it.
                     </p>
                 </div>
-                
+
             </div>
             <div className='sessionmismatch-footer'>
                 <div className='sessionmismatch-tooltip'>
-                    <QuestionMarkCircledIcon width={20} height={20}/>
-                    <span className=''>This session belongs to a different page.</span>
+                    <span className=''>{t('sessionMismatch.tooltip')}</span>
                 </div>
                 <button>
                     <a
                     href={sessionUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title={`opens a new tab at: ${sessionUrl}`}
+                    title={t('sessionMismatch.opensNewTab', { url: sessionUrl })}
                     className="return-session-btn">
                     <ExternalLinkIcon width={20} height={20}/>
-                    Go to session page
+                    {t('sessionMismatch.goToOriginal')}
                     </a>
                 </button>
 

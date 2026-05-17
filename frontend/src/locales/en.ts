@@ -140,7 +140,7 @@
       items: {
         summary: {
           title: "Summary",
-          description: "Generate a summary from this tab",
+          description: "Generate a summary using content from this tab",
           tag: "Read",
           hoverTitle: "Generate a concise summary of this page",
         },
@@ -157,6 +157,13 @@
           hoverTitle: "Take a quiz to test your understanding using the content from the active tab",
         },
       },
+    },
+    sessionMismatch: {
+      title: "Session belongs to a different URL",
+      description: "This session was created from this page:",
+      tooltip: "You must be on the original page to generate a new action.",
+      opensNewTab: "opens a new tab at: {{url}}",
+      goToOriginal: "Go to original page",
     },
     summaryErrors: {
       rateLimitTitle: "Rate limit reached",
