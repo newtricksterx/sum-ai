@@ -21,7 +21,7 @@ import {
   sourcePayloadError,
 } from "./utils/sourcePayload";
 import { requestActionItem } from "./utils/actionItemRequest";
-import { isRestrictedPage, resolveCurrentTab } from "../FrontPage/frontpage.helpers";
+import { isRestrictedPage, resolveCurrentTab } from "../FrontPage/utils/chromeTabs";
 
 const waitForNextPaintTask = (): Promise<void> =>
   new Promise((resolve) => {

@@ -167,9 +167,9 @@
 }
 
 .qz-q {
-  margin: 0 0 0.95rem;
+  margin: 0.1rem 0;
   color: var(--color-text-primary);
-  font-size: 1rem;
+  font-size: 13px;
   line-height: 1.45;
   font-family: var(--font-google), "Times New Roman", serif;
   min-height: 2.8rem;

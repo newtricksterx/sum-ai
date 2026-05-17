@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { resolveCurrentTab } from "../FrontPage/frontpage.helpers";
+import { resolveCurrentTab } from "../FrontPage/utils/chromeTabs";
 
 // Tracks the URL of the active browser tab and keeps it in sync with tab/window focus changes.
 // Mirrors the listener set used by useTabChange but only surfaces the URL.

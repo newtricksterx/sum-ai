@@ -1,15 +1,10 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "../../i18n";
-import {
-  type ActiveTabMeta,
-  FALLBACK_TAB_META,
-  WORDS_PER_MINUTE,
-  getDomainFromUrl,
-  getTabWordCount,
-  isRestrictedPage,
-  resolveCurrentTab,
-} from "./frontpage.helpers";
+import { type ActiveTabMeta, FALLBACK_TAB_META, getDomainFromUrl } from "./utils/activeTabMeta";
+import { getTabWordCount, isRestrictedPage, resolveCurrentTab } from "./utils/chromeTabs";
+
+const WORDS_PER_MINUTE = 225;
 
 export const useTabChange = () => {
   const { t } = useTranslation();

@@ -59,6 +59,7 @@ export const ActionGrid = ({ onClickAction, title, loadingActionId = null, class
           const itemTitle = t(`summaryActions.items.${item.id}.title`);
           const itemDescription = t(`summaryActions.items.${item.id}.description`);
           const itemTag = t(`summaryActions.items.${item.id}.tag`);
+          const itemHoverTitle = t(`summaryActions.items.${item.id}.hoverTitle`)
           const isActionLoading = loadingActionId === item.id;
           const isActionDisabled = isAnyActionLoading;
 
@@ -75,6 +76,7 @@ export const ActionGrid = ({ onClickAction, title, loadingActionId = null, class
               disabled={isActionDisabled}
               aria-disabled={isActionDisabled}
               aria-busy={isActionLoading}
+              title={itemHoverTitle}
             >
               <div
                 className={`summary-action-icon summary-action-icon--${item.tone}`}

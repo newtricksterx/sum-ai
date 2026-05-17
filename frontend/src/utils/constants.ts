@@ -8,6 +8,14 @@ export const all_languages: Language[] = [
     "hindi",
 ]
 
+export const LANGUAGE_NATIVE_LABEL: Record<Language, string> = {
+    english: "English",
+    french: "Français",
+    spanish: "Español",
+    mandarin: "普通话",
+    hindi: "हिन्दी",
+}
+
 export const all_lengths: Length[] = [
     "short",
     "medium",

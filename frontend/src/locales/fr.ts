@@ -9,7 +9,7 @@ const fr = {
       close: "Fermer l'extension",
     },
     toolbar: {
-      generateTitle: "Generer un nouveau resume pour l'onglet actuel",
+      generateTitle: "Generer une nouvelle session pour l'onglet actuel",
       generate: "Generer le resume",
       downloadTitle: "Telecharger le resume en PDF",
       copyTitle: "Copier le resume",
@@ -38,6 +38,8 @@ const fr = {
       estimating: "Estimation...",
       readTimeUnavailable: "Temps de lecture indisponible",
       minRead: "min de lecture",
+      startSession: "Cliquez pour demarrer une session",
+      actionRegionAria: "Generer un resume",
     },
     history: {
       title: "Historique des sessions",
@@ -106,6 +108,10 @@ const fr = {
       save: "Enregistrer",
       saved: "Enregistre",
       languageChangeHint: "Regenerez le resume pour appliquer la langue.",
+      sectionAppearance: "Apparence",
+      sectionSummary: "Preferences de resume",
+      sectionLearn: "Actions d'apprentissage",
+      sectionRegional: "Regional",
       option: {
         english: "Anglais",
         french: "Francais",
@@ -138,16 +144,19 @@ const fr = {
           title: "Resume",
           description: "Generer un resume",
           tag: "Lecture",
+          hoverTitle: "Generer un resume concis de cette page",
         },
         flashcards: {
           title: "Fiches",
           description: "Generer des fiches d'etude",
           tag: "Etude",
+          hoverTitle: "Creer des fiches d'etude a partir de ce resume",
         },
         quiz: {
           title: "Quiz",
           description: "Testez vos connaissances.",
           tag: "Test",
+          hoverTitle: "Passer un quiz pour tester votre comprehension",
         },
       },
     },

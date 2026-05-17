@@ -9,7 +9,7 @@ const es = {
       close: "Cerrar extension",
     },
     toolbar: {
-      generateTitle: "Generar un nuevo resumen para la pestana actual",
+      generateTitle: "Generar una nueva sesion para la pestana actual",
       generate: "Generar resumen",
       downloadTitle: "Descargar resumen en PDF",
       copyTitle: "Copiar resumen",
@@ -38,6 +38,8 @@ const es = {
       estimating: "Estimando...",
       readTimeUnavailable: "Tiempo de lectura no disponible",
       minRead: "min de lectura",
+      startSession: "Haz clic para iniciar una sesion",
+      actionRegionAria: "Generar resumen",
     },
     history: {
       title: "Historial de sesiones",
@@ -106,6 +108,10 @@ const es = {
       save: "Guardar",
       saved: "Guardado",
       languageChangeHint: "Regenera el resumen para aplicar el idioma.",
+      sectionAppearance: "Apariencia",
+      sectionSummary: "Preferencias de resumen",
+      sectionLearn: "Acciones de aprendizaje",
+      sectionRegional: "Regional",
       option: {
         english: "Ingles",
         french: "Frances",
@@ -138,16 +144,19 @@ const es = {
           title: "Resumen",
           description: "Genera un resumen",
           tag: "Lectura",
+          hoverTitle: "Genera un resumen conciso de esta pagina",
         },
         flashcards: {
           title: "Tarjetas",
           description: "Genera tarjetas de estudio",
           tag: "Estudio",
+          hoverTitle: "Crea tarjetas de estudio a partir de este resumen",
         },
         quiz: {
           title: "Quiz",
           description: "Pon a prueba tus conocimientos.",
           tag: "Prueba",
+          hoverTitle: "Haz un quiz para poner a prueba tu comprension",
         },
       },
     },

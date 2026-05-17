@@ -1,399 +1,157 @@
-import { ChangeEvent, FormEvent, ReactNode, memo, useCallback, useMemo, useRef, useState } from "react";
-import {
-  Check,
-  Coins,
-  Languages,
-  List,
-  Ruler,
-  Save,
-  Type,
-} from "lucide-react";
+import { FormEvent } from "react";
+import { Check, Coins, Languages, List, Ruler, Save, Type } from "lucide-react";
+import { GearIcon, QuestionMarkCircledIcon } from "@radix-ui/react-icons";
+import { useTranslation } from "react-i18next";
 import PageCard from "../../components/PageCard/PageCard";
 import "../../i18n";
-import { useTranslation } from "react-i18next";
-import { all_currencies, all_formats, all_languages, all_lengths, all_quizDifficulties } from "../../utils/constants";
-import { Currency, Format, Language, Length, QuizDifficulty } from "../../utils/types";
-import { useSettingsStore } from "../../stores/settingsStore";
-import { useShallow } from "zustand/react/shallow";
-import { SettingsPageDropdown } from "./SettingsPageDropdown";
-import { SettingsPageDropdownOption } from "./settingspage.utils";
 import "./SettingsPage.css";
-import { SunIcon, MoonIcon, GearIcon, QuestionMarkCircledIcon } from "@radix-ui/react-icons";
-import { MIN_FONT_SIZE, MAX_FONT_SIZE, SaveTimeoutHandle, clampFontSize, humanizeOption } from "./settingspage.utils";
-
-function SettingsRow({
-  icon,
-  label,
-  hint,
-  control,
-}: {
-  icon: ReactNode;
-  label: ReactNode;
-  hint?: ReactNode;
-  control: ReactNode;
-}) {
-  return (
-    <div className="settings-row">
-      <div className="settings-row-icon" aria-hidden="true">
-        {icon}
-      </div>
-      <div className="settings-row-body">
-        <div className="settings-row-label">{label}</div>
-        {hint ? <div className="settings-row-hint">{hint}</div> : null}
-      </div>
-      <div className="settings-row-control">{control}</div>
-    </div>
-  );
-}
-
-const SettingsThemeToggleButton = memo(function SettingsThemeToggleButton() {
-  const { t } = useTranslation();
-  const theme = useSettingsStore((state) => state.theme);
-  const UpdateTheme = useSettingsStore((state) => state.UpdateTheme);
-
-  return (
-    <button
-      type="button"
-      onClick={UpdateTheme}
-      title={theme === "light" ? t("settings.switchToDark") : t("settings.switchToLight")}
-      aria-label={theme === "light" ? t("settings.switchToDark") : t("settings.switchToLight")}
-      className="settings-theme-button"
-    >
-      {theme === "light" ? <SunIcon width={16} height={16} /> : <MoonIcon width={16} height={16} />}
-    </button>
-  );
-});
+import {
+  LANGUAGE_NATIVE_LABEL,
+  all_currencies,
+  all_formats,
+  all_languages,
+  all_lengths,
+  all_quizDifficulties,
+} from "../../utils/constants";
+import { SettingsPageDropdown } from "./SettingsPageDropdown";
+import { SettingsRow } from "./components/SettingsRow";
+import { SettingsThemeToggleButton } from "./components/SettingsThemeToggleButton";
+import { SettingsFontSizeField } from "./components/SettingsFontSizeField";
+import { useSettingsForm } from "./hooks/useSettingsForm";
 
 export const SettingsPage: React.FC = () => {
   const { t } = useTranslation();
+  const { values, setters, showSavedState, clampFontSizeOnBlur, save } = useSettingsForm();
 
-  const {
-    language: settingsLanguage,
-    currency: settingsCurrency,
-    length: settingsLength,
-    fontSize: settingsFontSize,
-    format: settingsFormat,
-    quizDifficulty: settingsQuizDifficulty,
-    saveSettings,
-  } = useSettingsStore(
-    useShallow((state) => ({
-      language: state.language,
-      currency: state.currency,
-      length: state.length,
-      fontSize: state.fontSize,
-      format: state.format,
-      quizDifficulty: state.quizDifficulty,
-      saveSettings: state.saveSettings,
-    }))
-  );
+  const translateOption = (value: string) => t(`settings.option.${value}`);
 
-  const [language, setLanguage] = useState<Language>(settingsLanguage);
-  const [currency, setCurrency] = useState<Currency>(settingsCurrency);
-  const [length, setLength] = useState<Length>(settingsLength);
-  const [fontSize, setFontSize] = useState<number>(settingsFontSize);
-  const [format, setFormat] = useState<Format>(settingsFormat);
-  const [quizDifficulty, setQuizDifficulty] = useState<QuizDifficulty>(settingsQuizDifficulty);
-  const [hasSavedFeedback, setHasSavedFeedback] = useState(false);
-  const saveTimeoutRef = useRef<SaveTimeoutHandle | null>(null);
+  const languageOptions = all_languages.map((value) => ({
+    value,
+    label: LANGUAGE_NATIVE_LABEL[value],
+  }));
+  const formatOptions = all_formats.map((value) => ({ value, label: translateOption(value) }));
+  const lengthOptions = all_lengths.map((value) => ({ value, label: translateOption(value) }));
+  const currencyOptions = all_currencies.map((value) => ({ value, label: translateOption(value) }));
+  const quizDifficultyOptions = all_quizDifficulties.map((value) => ({
+    value,
+    label: translateOption(value),
+  }));
 
-  const languageOptionLabel: Record<Language, string> = useMemo(
-    () => ({
-      english: "English",
-      french: "Français",
-      spanish: "Español",
-      mandarin: "普通话",
-      hindi: "हिन्दी",
-    }),
-    [],
-  );
-
-  const getOptionLabel = useCallback(
-    (value: string) => {
-      const key = `settings.option.${value}`;
-      const translated = t(key);
-      if (translated !== key) {
-        return translated;
-      }
-      return humanizeOption(value);
-    },
-    [t],
-  );
-
-  const languageOptions = useMemo<ReadonlyArray<SettingsPageDropdownOption<Language>>>(
-    () =>
-      all_languages.map((value) => ({
-        value,
-        label: languageOptionLabel[value] ?? humanizeOption(value),
-      })),
-    [languageOptionLabel],
-  );
-
-  const formatOptions = useMemo<ReadonlyArray<SettingsPageDropdownOption<Format>>>(
-    () =>
-      all_formats.map((value) => ({
-        value,
-        label: getOptionLabel(value),
-      })),
-    [getOptionLabel],
-  );
-
-  const lengthOptions = useMemo<ReadonlyArray<SettingsPageDropdownOption<Length>>>(
-    () =>
-      all_lengths.map((value) => ({
-        value,
-        label: getOptionLabel(value),
-      })),
-    [getOptionLabel],
-  );
-
-  const currencyOptions = useMemo<ReadonlyArray<SettingsPageDropdownOption<Currency>>>(
-    () =>
-      all_currencies.map((value) => ({
-        value,
-        label: getOptionLabel(value),
-      })),
-    [getOptionLabel],
-  );
-
-  const quizDifficultyOptions = useMemo<ReadonlyArray<SettingsPageDropdownOption<QuizDifficulty>>>(
-    () =>
-      all_quizDifficulties.map((value) => ({
-        value,
-        label: getOptionLabel(value),
-      })),
-    [getOptionLabel],
-  );
-
-  const clampedFontSize = useMemo(() => clampFontSize(fontSize), [fontSize]);
-
-  const hasUnsavedChanges = useMemo(
-    () =>
-      language !== settingsLanguage ||
-      currency !== settingsCurrency ||
-      length !== settingsLength ||
-      format !== settingsFormat ||
-      quizDifficulty !== settingsQuizDifficulty ||
-      clampedFontSize !== settingsFontSize,
-    [
-      clampedFontSize,
-      currency,
-      format,
-      language,
-      length,
-      quizDifficulty,
-      settingsCurrency,
-      settingsFontSize,
-      settingsFormat,
-      settingsLanguage,
-      settingsLength,
-      settingsQuizDifficulty,
-    ],
-  );
-
-  const showSavedState = hasSavedFeedback && !hasUnsavedChanges;
-
-  const onFontSizeChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    const next = Number(event.target.value);
-    setFontSize(Number.isFinite(next) ? next : 12);
-  }, []);
-
-  const onFontSizeBlur = useCallback(() => {
-    setFontSize((current) => clampFontSize(current));
-  }, []);
-
-  const languageRow = useMemo(() => (
-    <SettingsRow
-      icon={<Languages size={15} />}
-      label={t("settings.language")}
-      control={
-        <SettingsPageDropdown
-          id="settings-language"
-          value={language}
-          options={languageOptions}
-          ariaLabel={t("settings.language")}
-          onValueChange={setLanguage}
-        />
-      }
-    />
-  ), [language, languageOptions, t]);
-
-  const formatRow = useMemo(() => (
-    <SettingsRow
-      icon={<List size={15} />}
-      label={t("settings.summaryFormat")}
-      control={
-        <SettingsPageDropdown
-          id="settings-format"
-          value={format}
-          options={formatOptions}
-          ariaLabel={t("settings.summaryFormat")}
-          onValueChange={setFormat}
-        />
-      }
-    />
-  ), [format, formatOptions, t]);
-
-  const lengthRow = useMemo(() => (
-    <SettingsRow
-      icon={<Ruler size={15} />}
-      label={t("settings.summaryLength")}
-      control={
-        <SettingsPageDropdown
-          id="settings-length"
-          value={length}
-          options={lengthOptions}
-          ariaLabel={t("settings.summaryLength")}
-          onValueChange={setLength}
-        />
-      }
-    />
-  ), [length, lengthOptions, t]);
-
-
-
-  const fontSizeRow = useMemo(() => (
-    <SettingsRow
-      icon={<Type size={15} />}
-      label={<label htmlFor="settings-font-size">{t("settings.fontSize")}</label>}
-      control={
-        <div className="settings-fontsize-wrap">
-          <input
-            id="settings-font-size"
-            type="number"
-            min={MIN_FONT_SIZE}
-            max={MAX_FONT_SIZE}
-            step={1}
-            value={fontSize}
-            onChange={onFontSizeChange}
-            onBlur={onFontSizeBlur}
-            className="settings-fontsize-input"
-          />
-          <span className="settings-fontsize-unit">px</span>
-        </div>
-      }
-    />
-  ), [fontSize, onFontSizeBlur, onFontSizeChange, t]);
-
-  const currencyRow = useMemo(() => (
-    <SettingsRow
-      icon={<Coins size={15} />}
-      label={t("settings.currency")}
-      control={
-        <SettingsPageDropdown
-          id="settings-currency"
-          value={currency}
-          options={currencyOptions}
-          ariaLabel={t("settings.currency")}
-          onValueChange={setCurrency}
-        />
-      }
-    />
-  ), [currency, currencyOptions, t]);
-
-  const quizDifficultyRow = useMemo(() => (
-    <SettingsRow
-      icon={<QuestionMarkCircledIcon width={15} height={15} />}
-      label={t("settings.quizDifficulty")}
-      control={
-        <SettingsPageDropdown
-          id="settings-quiz-difficulty"
-          value={quizDifficulty}
-          options={quizDifficultyOptions}
-          ariaLabel={t("settings.quizDifficulty")}
-          onValueChange={setQuizDifficulty}
-        />
-      }
-    />
-  ), [quizDifficulty, quizDifficultyOptions, t]);
-
-  // row for quiz questions amount
-  // row for flashcards amount
-
-  const onSaveSettings = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      if (!hasUnsavedChanges) {
-        setHasSavedFeedback(true);
-        return;
-      }
-
-      setFontSize(clampedFontSize);
-      setHasSavedFeedback(true);
-
-      const pendingTimeout = saveTimeoutRef.current;
-      if (pendingTimeout !== null) {
-        window.clearTimeout(pendingTimeout);
-      }
-
-      // Defer synchronous store/localStorage work to the next task so the
-      // click interaction can paint immediately and reduce INP processing time.
-      saveTimeoutRef.current = window.setTimeout(() => {
-        saveSettings({ language, currency, length, fontSize: clampedFontSize, format, quizDifficulty });
-        saveTimeoutRef.current = null;
-      }, 0);
-    },
-    [
-      saveSettings,
-      clampedFontSize,
-      currency,
-      format,
-      hasUnsavedChanges,
-      language,
-      length,
-      quizDifficulty,
-    ],
-  );
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    save();
+  };
 
   return (
     <main className="settings-page-shell h-full overflow-y-auto custom-scrollbar px-2 py-2 font-google">
       <PageCard as="section" className="settings-page-card">
         <header className="settings-page-header">
-            <h1 className="settings-page-title">
-                <GearIcon width={16} height={16} />
-                {t("settings.title")}
-            </h1>
-            <SettingsThemeToggleButton />
+          <h1 className="settings-page-title">
+            <GearIcon width={16} height={16} />
+            {t("settings.title")}
+          </h1>
+          <SettingsThemeToggleButton />
         </header>
 
-        <form onSubmit={onSaveSettings} className="settings-form">
-
+        <form onSubmit={onSubmit} className="settings-form">
           <section className="settings-section">
-            <p className="settings-section-label">
-              {t("settings.sectionAppearance", { defaultValue: "Appearance" })}
-            </p>
+            <p className="settings-section-label">{t("settings.sectionAppearance")}</p>
             <div className="settings-card">
-              {fontSizeRow}
-              {languageRow}
+              <SettingsRow
+                icon={<Type size={15} />}
+                label={<label htmlFor="settings-font-size">{t("settings.fontSize")}</label>}
+                control={
+                  <SettingsFontSizeField
+                    id="settings-font-size"
+                    value={values.fontSize}
+                    onChange={setters.setFontSize}
+                    onBlur={clampFontSizeOnBlur}
+                  />
+                }
+              />
+              <SettingsRow
+                icon={<Languages size={15} />}
+                label={t("settings.language")}
+                control={
+                  <SettingsPageDropdown
+                    id="settings-language"
+                    value={values.language}
+                    options={languageOptions}
+                    ariaLabel={t("settings.language")}
+                    onValueChange={setters.setLanguage}
+                  />
+                }
+              />
             </div>
           </section>
 
           <section className="settings-section">
-            <p className="settings-section-label">
-              {t("settings.sectionSummary", { defaultValue: "Summary Preferences" })}
-            </p>
-            
+            <p className="settings-section-label">{t("settings.sectionSummary")}</p>
             <div className="settings-card">
-              {formatRow}
-              {lengthRow}
+              <SettingsRow
+                icon={<List size={15} />}
+                label={t("settings.summaryFormat")}
+                control={
+                  <SettingsPageDropdown
+                    id="settings-format"
+                    value={values.format}
+                    options={formatOptions}
+                    ariaLabel={t("settings.summaryFormat")}
+                    onValueChange={setters.setFormat}
+                  />
+                }
+              />
+              <SettingsRow
+                icon={<Ruler size={15} />}
+                label={t("settings.summaryLength")}
+                control={
+                  <SettingsPageDropdown
+                    id="settings-length"
+                    value={values.length}
+                    options={lengthOptions}
+                    ariaLabel={t("settings.summaryLength")}
+                    onValueChange={setters.setLength}
+                  />
+                }
+              />
             </div>
           </section>
 
           <section className="settings-section">
-            <p className="settings-section-label">
-              {t("settings.sectionLearn", { defaultValue: "Learn Actions" })}
-            </p>
-
+            <p className="settings-section-label">{t("settings.sectionLearn")}</p>
             <div className="settings-card">
-              {quizDifficultyRow}
+              <SettingsRow
+                icon={<QuestionMarkCircledIcon width={15} height={15} />}
+                label={t("settings.quizDifficulty")}
+                control={
+                  <SettingsPageDropdown
+                    id="settings-quiz-difficulty"
+                    value={values.quizDifficulty}
+                    options={quizDifficultyOptions}
+                    ariaLabel={t("settings.quizDifficulty")}
+                    onValueChange={setters.setQuizDifficulty}
+                  />
+                }
+              />
             </div>
           </section>
 
           <section className="settings-section">
-            <p className="settings-section-label">
-              {t("settings.sectionRegional", { defaultValue: "Regional" })}
-            </p>
+            <p className="settings-section-label">{t("settings.sectionRegional")}</p>
             <div className="settings-card">
-              {currencyRow}
+              <SettingsRow
+                icon={<Coins size={15} />}
+                label={t("settings.currency")}
+                control={
+                  <SettingsPageDropdown
+                    id="settings-currency"
+                    value={values.currency}
+                    options={currencyOptions}
+                    ariaLabel={t("settings.currency")}
+                    onValueChange={setters.setCurrency}
+                  />
+                }
+              />
             </div>
           </section>
 

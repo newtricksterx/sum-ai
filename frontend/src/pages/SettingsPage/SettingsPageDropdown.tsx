@@ -17,14 +17,12 @@ function SettingsPageDropdownInner<T extends string>({
 
 
   return (
-    <select name="" id={id} onChange={handleValueChange} value={value} className="settings-page-dropdown">
-      {
-        options.map((item, index) => (
-          <option key={index} value={item.value} className="settings-page-dropdown-item" aria-label={ariaLabel}>
-            {item.label}
-          </option>
-        ))
-      }
+    <select id={id} onChange={handleValueChange} value={value} className="settings-page-dropdown">
+      {options.map((item) => (
+        <option key={item.value} value={item.value} className="settings-page-dropdown-item" aria-label={ariaLabel}>
+          {item.label}
+        </option>
+      ))}
     </select>
   )
 }

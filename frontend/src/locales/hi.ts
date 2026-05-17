@@ -9,7 +9,7 @@ const hi = {
       close: "एक्सटेंशन बंद करें",
     },
     toolbar: {
-      generateTitle: "वर्तमान टैब के लिए नया सारांश बनाएं",
+      generateTitle: "वर्तमान टैब के लिए नया सत्र बनाएं",
       generate: "सारांश बनाएं",
       downloadTitle: "सारांश को PDF के रूप में डाउनलोड करें",
       copyTitle: "सारांश कॉपी करें",
@@ -38,6 +38,8 @@ const hi = {
       estimating: "अनुमान लगाया जा रहा है...",
       readTimeUnavailable: "पढ़ने का समय उपलब्ध नहीं है",
       minRead: "मिनट पढ़ें",
+      startSession: "सत्र शुरू करने के लिए क्लिक करें",
+      actionRegionAria: "सारांश बनाएं",
     },
     history: {
       title: "सत्र इतिहास",
@@ -106,6 +108,10 @@ const hi = {
       save: "सेव करें",
       saved: "सेव हो गया",
       languageChangeHint: "भाषा लागू करने के लिए सारांश फिर बनाएं।",
+      sectionAppearance: "दिखावट",
+      sectionSummary: "सारांश प्राथमिकताएं",
+      sectionLearn: "सीखने की क्रियाएं",
+      sectionRegional: "क्षेत्रीय",
       option: {
         english: "English",
         french: "Français",
@@ -138,16 +144,19 @@ const hi = {
           title: "सारांश",
           description: "सारांश बनाएं",
           tag: "पठन",
+          hoverTitle: "इस पृष्ठ का संक्षिप्त सारांश बनाएं",
         },
         flashcards: {
           title: "फ्लैशकार्ड",
           description: "अध्ययन कार्ड बनाएं",
           tag: "अध्ययन",
+          hoverTitle: "इस सारांश से अध्ययन के लिए फ्लैशकार्ड बनाएं",
         },
         quiz: {
           title: "क्विज",
           description: "अपनी समझ की जांच करें।",
           tag: "परीक्षण",
+          hoverTitle: "अपनी समझ की जांच के लिए क्विज लें",
         },
       },
     },

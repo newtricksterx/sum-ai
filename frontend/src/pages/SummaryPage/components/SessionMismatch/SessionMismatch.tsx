@@ -9,10 +9,13 @@ export const SessionMismatch = ({ sessionUrl }: SessionMismatchProps) => {
     return (
         <section className='sessionmismatch'>
             <div className='sessionmismatch-main'>
-                <ExclamationTriangleIcon width={20} height={20} />
+                <ExclamationTriangleIcon width={18} height={18} />
                 <div>
                     <header className='sessionmismatch-title'>Session loaded on a different URL</header>
-                    <p className='sessionmismatch-desc'>This session was started on <span>{sessionUrl}</span>. Go there to continue it.</p>
+                    <p className='sessionmismatch-desc'>This session was started on 
+                        <span className='sessionmismatch-url'>{sessionUrl}</span>
+                        Go there to continue it.
+                    </p>
                 </div>
                 
             </div>

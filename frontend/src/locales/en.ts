@@ -9,9 +9,7 @@
       close: "Close extension",
     },
     toolbar: {
-      generateTitle: "Generate a new summary for the current tab",
-      generate: "Generate Summary",
-      downloadTitle: "Download summary as PDF",
+      generateTitle: "Generate a new session for the current tab",
       copyTitle: "Copy summary",
       sessionLabel: "Current Session URL",
       noSession: "No Session",
@@ -38,6 +36,8 @@
       estimating: "Estimating...",
       readTimeUnavailable: "Read time unavailable",
       minRead: "min read",
+      startSession: "Click to start a session",
+      actionRegionAria: "Generate summary",
     },
     history: {
       title: "Session History",
@@ -106,6 +106,10 @@
       save: "Save",
       saved: "Saved",
       languageChangeHint: "Regenerate summary to apply language.",
+      sectionAppearance: "Appearance",
+      sectionSummary: "Summary Preferences",
+      sectionLearn: "Learn Actions",
+      sectionRegional: "Regional",
       option: {
         english: "English",
         french: "French",
@@ -136,18 +140,21 @@
       items: {
         summary: {
           title: "Summary",
-          description: "Generate a summary",
+          description: "Generate a summary from this tab",
           tag: "Read",
+          hoverTitle: "Generate a concise summary of this page",
         },
         flashcards: {
           title: "Flashcards",
-          description: "Generate study cards",
+          description: "Generate study cards using content from this tab",
           tag: "Study",
+          hoverTitle: "Create flashcards from the active tab to study",
         },
         quiz: {
           title: "Quiz",
-          description: "Test your knowledge.",
+          description: "Test your knowledge using content from this tab.",
           tag: "Test",
+          hoverTitle: "Take a quiz to test your understanding using the content from the active tab",
         },
       },
     },

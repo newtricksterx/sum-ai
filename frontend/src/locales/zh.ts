@@ -9,7 +9,7 @@
       close: "关闭扩展",
     },
     toolbar: {
-      generateTitle: "为当前标签页生成新的摘要",
+      generateTitle: "为当前标签页生成新的会话",
       generate: "生成摘要",
       downloadTitle: "将摘要下载为 PDF",
       copyTitle: "复制摘要",
@@ -38,6 +38,8 @@
       estimating: "正在估算...",
       readTimeUnavailable: "阅读时间不可用",
       minRead: "分钟阅读",
+      startSession: "点击以开始会话",
+      actionRegionAria: "生成摘要",
     },
     history: {
       title: "会话历史",
@@ -106,6 +108,10 @@
       save: "保存",
       saved: "已保存",
       languageChangeHint: "重新生成摘要以应用语言。",
+      sectionAppearance: "外观",
+      sectionSummary: "摘要偏好",
+      sectionLearn: "学习操作",
+      sectionRegional: "区域",
       option: {
         english: "English",
         french: "Français",
@@ -138,16 +144,19 @@
           title: "摘要",
           description: "生成摘要",
           tag: "阅读",
+          hoverTitle: "生成本页的简明摘要",
         },
         flashcards: {
           title: "闪卡",
           description: "生成学习卡片",
           tag: "学习",
+          hoverTitle: "根据本摘要生成学习闪卡",
         },
         quiz: {
           title: "测验",
           description: "测试你的掌握程度。",
           tag: "测试",
+          hoverTitle: "进行测验以检验你的理解",
         },
       },
     },

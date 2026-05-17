@@ -191,13 +191,12 @@ function App() {
     () => (
       <FrontPage
         onClickGenerate={onClickStartSession}
-        isGenerateDisabled={isActionItemLoading}
         loadingActionId={loadingActionId}
         errorMessage={errorMessage}
         onDismissError={dismissError}
       />
     ),
-    [isActionItemLoading, loadingActionId, onClickStartSession, errorMessage, dismissError],
+    [loadingActionId, onClickStartSession, errorMessage, dismissError],
   );
   const historyPageContent = useMemo(
     () => <HistoryPage onOpenSession={onOpenHistorySession} onClickSignInPage={onClickSignInPage}/>,

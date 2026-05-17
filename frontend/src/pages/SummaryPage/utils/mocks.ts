@@ -1,6 +1,6 @@
 import type { SummaryDocument } from "./types";
 import { parseSummaryDocument } from "./document";
-import { isRestrictedPage, resolveCurrentTab } from "../../FrontPage/frontpage.helpers";
+import { isRestrictedPage, resolveCurrentTab } from "../../FrontPage/utils/chromeTabs";
 
 // Dev-mode summary fixture: a serialized SummaryDocument (JSON string, NOT HTML despite legacy variable name).
 export const MOCK_SUMMARY_DOCUMENT = `

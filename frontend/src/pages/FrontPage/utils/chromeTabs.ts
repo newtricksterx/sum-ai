@@ -1,51 +1,3 @@
-// TYPES:
-
-export type ActiveTabMeta = {
-  title: string;
-  domain: string;
-  readTime: string;
-};
-
-// NON-EXPORT CONST:
-
-export const FALLBACK_TAB_META: ActiveTabMeta = {
-  title: "Summarize the page you are viewing",
-  domain: "Uses the current browser tab",
-  readTime: "Read time unavailable",
-};
-
-export const WORDS_PER_MINUTE = 225;
-
-export const QUICK_STEPS = [
-  {
-    text: 'We read the content from your current browser tab.',
-  },
-  {
-    text: 'The summary format will depend on your preferences saved in Settings.',
-  },
-  {
-    text: 'Click the "Summarize this tab" button to start summarizing the current tab.',
-  },
-];
-
-const SETTING_LABELS: Record<string, string> = {
-  english: 'English',
-  french: 'French',
-  spanish: 'Spanish',
-  mandarin: 'Mandarin',
-  hindi: 'Hindi',
-  short: 'Short',
-  medium: 'Medium',
-  long: 'Long',
-  paragraph: 'Paragraph',
-  'bullet-point': 'Bullet Points',
-  'tl-dr': 'TL;DR',
-  'q-and-a': 'Q&A',
-  'pros-cons': 'Pros & Cons',
-};
-
-// EXPORT CONST:
-
 export const isRestrictedPage = (url?: string) => {
   if (!url) return true;
   return (
@@ -55,35 +7,6 @@ export const isRestrictedPage = (url?: string) => {
     url.startsWith("view-source:") ||
     url.startsWith("chrome-extension://")
   );
-};
-
-export const getDomainFromUrl = (url?: string) => {
-  if (!url) {
-    return FALLBACK_TAB_META.domain;
-  }
-
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return FALLBACK_TAB_META.domain;
-  }
-};
-
-export const getSettingLabel = (value: string) => {
-  if (SETTING_LABELS[value]) {
-    return SETTING_LABELS[value];
-  }
-
-  return value.replace(/-/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
-};
-
-export const formatReadTime = (wordCount: number) => {
-  if (wordCount <= 0) {
-    return FALLBACK_TAB_META.readTime;
-  }
-
-  const minutes = Math.max(1, Math.ceil(wordCount / WORDS_PER_MINUTE));
-  return `${minutes} min read`;
 };
 
 export const queryTabsSafe = async (queryInfo: chrome.tabs.QueryInfo) => {
