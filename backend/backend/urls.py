@@ -24,6 +24,7 @@ urlpatterns = [
     path("api-auth/", include("rest_framework.urls")),
     path("accounts/", include("allauth.socialaccount.providers.google.urls")),
     path("accounts/social/", include("allauth.socialaccount.urls")),
+    path("payments/", html.payments, name="payments"),
     path("", html.index, name="index")
 
 ]

@@ -7,6 +7,10 @@ import { SignInView, LogoutAction } from './components/AuthenticationActions';
 import { PlanLimits, Usage } from './components/SubscriptionSection';
 import { IdentityCard, AccountDates } from './components/ProfileSummary';
 import "./ProfilePage.css";
+import { useState } from 'react';
+import { PricingPage } from './components/PricingPage/PricingPage';
+
+type ProfilePageTypes = "profile" | "pricing"
 
 const ProfilePage: React.FC = () => {
   const {
@@ -18,6 +22,12 @@ const ProfilePage: React.FC = () => {
     handleLogout,
     dismissError,
   } = useProfileAccount();
+
+  const [page, setPage] = useState<ProfilePageTypes>("profile")
+
+  const onClickUpgrade = () => {
+    setPage("pricing")
+  }
 
   if (isInitializing) {
     return (
@@ -45,6 +55,12 @@ const ProfilePage: React.FC = () => {
     );
   }
 
+  if (page == "pricing"){
+    return (
+      <PricingPage />
+    )
+  }
+
   const displayName = deriveDisplayName(userProfile);
 
   return (
@@ -61,13 +77,14 @@ const ProfilePage: React.FC = () => {
             displayName={displayName}
             email={userProfile.email}
             avatarUrl={userProfile.avatar_url}
+            onClickUpgrade={onClickUpgrade}
           />
 
           <PlanLimits subscription={userProfile.subscription} />
 
           <Usage
-            summaryLimit={userProfile.subscription?.summary_limit}
-            summariesUsed={userProfile.subscription?.summaries_used}
+            actionLimit={userProfile.subscription?.action_limit}
+            actionsUsed={userProfile.subscription?.actions_used}
           />
 
           <AccountDates

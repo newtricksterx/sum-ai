@@ -12,9 +12,10 @@ PLANS = {
             "EUR": 0,
         },
         "billing_interval": "monthly",
-        "summary_limit": 10,
+        "action_limit": 10,
         "history_limit": 3,
         "character_limit": 10000,
+        "payment_url": ""
     },
     "standard": {
         "name": "Standard",
@@ -24,9 +25,10 @@ PLANS = {
             "EUR": 399,
         },
         "billing_interval": "monthly",
-        "summary_limit": 300,
+        "action_limit": 300,
         "history_limit": 5,
         "character_limit": 30000,
+        "payment_url": "https://buy.stripe.com/test_8x27sNgHXdRs3kebXHb3q00"
     },
     "pro": {
         "name": "Pro",
@@ -36,9 +38,10 @@ PLANS = {
             "EUR": 999,
         },
         "billing_interval": "monthly",
-        "summary_limit": None,
+        "action_limit": 1200,
         "history_limit": 10, 
         "character_limit": None,
+        "payment_url": "https://buy.stripe.com/test_28E14pfDT9Bc5sme5Pb3q01"
     },
 }
 
@@ -67,8 +70,8 @@ def get_plan(slug: str) -> dict:
     return PLANS[slug]
 
 
-def get_summary_limit(slug: str) -> int | None:
-    return get_plan(slug)["summary_limit"]
+def get_action_limit(slug: str) -> int | None:
+    return get_plan(slug)["action_limit"]
 
 
 def get_history_limit(slug: str) -> int | None:

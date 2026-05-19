@@ -77,14 +77,14 @@ export const PlanLimits = ({ subscription }: PlanLimitsProps) => {
 };
 
 interface UsageProps {
-  summaryLimit: number | null | undefined;
-  summariesUsed: number | null | undefined;
+  actionLimit: number | null | undefined;
+  actionsUsed: number | null | undefined;
 }
 
-export const Usage = ({ summaryLimit, summariesUsed }: UsageProps) => {
+export const Usage = ({ actionLimit, actionsUsed }: UsageProps) => {
   const { t } = useTranslation();
-  const { isUnlimited, boundedLimit, summariesUsed: normalizedUsed, displayUsed, percentage, usageClass } =
-    deriveUsageMetrics(summaryLimit, summariesUsed);
+  const { isUnlimited, boundedLimit, actionsUsed: normalizedUsed, displayUsed, percentage, usageClass } =
+    deriveUsageMetrics(actionLimit, actionsUsed);
 
   return (
     <section className="pp-card pp-section" aria-label="Usage this cycle">

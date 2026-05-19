@@ -13,10 +13,10 @@ class SubscriptionReadSerializer(serializers.ModelSerializer):
     billing_interval = serializers.CharField(read_only=True)
     price_minor = serializers.SerializerMethodField()
     currency = serializers.SerializerMethodField()
-    summary_limit = serializers.IntegerField(read_only=True, allow_null=True)
+    action_limit = serializers.IntegerField(read_only=True, allow_null=True)
     history_limit = serializers.IntegerField(read_only=True, allow_null=True)
     character_limit = serializers.IntegerField(read_only=True, allow_null=True)
-    summaries_used = serializers.IntegerField(read_only=True)
+    actions_used = serializers.IntegerField(read_only=True)
     current_period_start = serializers.DateTimeField(read_only=True)
     current_period_end = serializers.DateTimeField(read_only=True, allow_null=True)
 
@@ -43,10 +43,10 @@ class SubscriptionReadSerializer(serializers.ModelSerializer):
             "billing_interval",
             "price_minor",
             "currency",
-            "summary_limit",
+            "action_limit",
             "history_limit",
             "character_limit",
-            "summaries_used",
+            "actions_used",
             "current_period_start",
             "current_period_end",
             "created_at",

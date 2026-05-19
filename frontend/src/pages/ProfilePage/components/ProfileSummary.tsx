@@ -6,9 +6,10 @@ interface IdentityCardProps {
   displayName: string;
   email: string;
   avatarUrl?: string | null;
+  onClickUpgrade?: () => void;
 }
 
-export const IdentityCard = ({ displayName, email, avatarUrl }: IdentityCardProps) => {
+export const IdentityCard = ({ displayName, email, avatarUrl, onClickUpgrade }: IdentityCardProps) => {
   const { t } = useTranslation();
   const initials = getInitials(displayName || "User") || "U";
 
@@ -35,6 +36,12 @@ export const IdentityCard = ({ displayName, email, avatarUrl }: IdentityCardProp
           <span className="pp-status-dot" />
           {t("profile.active")}
         </span>
+      </div>
+
+      <div>
+        <button onClick={onClickUpgrade}>
+          Upgrade Plan
+        </button>
       </div>
     </div>
   );

@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(db_index=True, max_length=32, unique=True)),
                 ('name', models.CharField(max_length=64)),
-                ('summary_limit', models.PositiveIntegerField(blank=True, help_text='Maximum summaries per billing period. Null means unlimited.', null=True)),
+                ('action_limit', models.PositiveIntegerField(blank=True, help_text='Maximum actions per billing period. Null means unlimited.', null=True)),
                 ('history_limit', models.PositiveIntegerField(blank=True, help_text='Maximum history items retained. Null means unlimited.', null=True)),
                 ('price_cents', models.PositiveIntegerField(default=0)),
                 ('billing_interval', models.CharField(choices=[('month', 'Month'), ('year', 'Year')], default='month', max_length=16)),

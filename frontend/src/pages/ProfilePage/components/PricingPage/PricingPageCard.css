@@ -1,0 +1,73 @@
+.pricingpage-card {
+    padding: 0.5rem;
+}
+
+.plan_name {
+    color: var(--color-text-primary);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.plan_desc {
+    color: var(--color-text-tertiary);
+    font-size: 12px;
+}
+
+.pricingpage-card-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.price {
+     color: var(--color-text-primary);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.frequency {
+    color: var(--color-text-tertiary);
+    font-size: 12px;
+}
+
+li::marker {
+    content: "✔";
+    color: rgb(33, 207, 33);
+    font-size: 12px;
+}
+
+li {
+    margin-left: 10px;
+    padding-left: 10px;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    font-weight: 300;
+}
+
+strong {
+    color: var(--color-text-primary);
+    font-weight: 500;
+}
+
+
+.points-section {
+    margin-bottom: 10px;
+}
+
+a {
+    color: var(--color-text-primary);
+    cursor: pointer;
+    padding: 0.6rem;
+    border: 1px solid var(--color-border-secondary);
+    border-radius: 0.3rem;
+    display: block;
+    width: 100%;
+    text-align: center;
+    background-color: var(--color-background-secondary);
+    font-weight: 600;
+}
+
+a:hover {
+    text-decoration: none;
+    background-color: var(--color-background-tertiary);
+}

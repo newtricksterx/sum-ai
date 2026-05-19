@@ -9,12 +9,14 @@ export const useHydrateProfileAfterLogin = (
 ) => {
   useEffect(() => {
     let isMounted = true;
+    let isHydrating = false;
 
     const hydrateAfterLoginIfNeeded = async () => {
-      if (!isLoginPending()) {
+      if (isHydrating || !isLoginPending()) {
         return;
       }
 
+      isHydrating = true;
       try {
         await hydrateProfile(true, currency);
       } catch {
@@ -23,6 +25,7 @@ export const useHydrateProfileAfterLogin = (
         if (isMounted) {
           clearLoginPending();
         }
+        isHydrating = false;
       }
     };
 

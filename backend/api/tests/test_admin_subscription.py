@@ -75,7 +75,7 @@ class AdminUserSubscriptionViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["subscription"]["plan_slug"], "pro")
-        self.assertIsNone(response.json()["subscription"]["summary_limit"])
+        self.assertIsNone(response.json()["subscription"]["action_limit"])
         self.assertIsNone(response.json()["subscription"]["character_limit"])
 
         target_subscription = Subscription.objects.get(user=self.target_user)

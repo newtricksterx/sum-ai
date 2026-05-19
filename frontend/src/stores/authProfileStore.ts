@@ -12,8 +12,8 @@ export type UserProfile = {
     billing_interval?: string | null;
     price_minor?: number | null;
     currency?: string | null;
-    summary_limit: number | null;
-    summaries_used?: number;
+    action_limit: number | null;
+    actions_used?: number;
     history_limit: number | null;
     character_limit: number | null;
   };

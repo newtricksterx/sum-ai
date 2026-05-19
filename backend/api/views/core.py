@@ -36,7 +36,7 @@ class ApiRootView(APIView):
 
 class MeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    throttle_scope = 'auth'
+    throttle_scope = "me"
 
     def get(self, request):
         requested_currency = request.query_params.get("currency")

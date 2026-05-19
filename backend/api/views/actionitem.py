@@ -29,10 +29,10 @@ def _quota_response(exc: QuotaExceeded) -> Response:
     return Response(
         {
             "isSuccess": False,
-            "error": "summary_limit_reached",
+            "error": "action_limit_reached",
             "message": "Summary limit reached for current billing period.",
-            "summary_limit": sub.summary_limit,
-            "summaries_used": sub.summaries_used,
+            "action_limit": sub.action_limit,
+            "actions_used": sub.actions_used,
             "billing_interval": sub.billing_interval,
         },
         status=status.HTTP_403_FORBIDDEN,

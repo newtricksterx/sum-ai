@@ -10,7 +10,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from api.models import Subscription
-from api.plans import get_summary_limit
+from api.plans import get_action_limit
 from api.tests.helpers import authenticate_client_with_jwt, get_csrf_headers
 from scripts.sources import ExtractionResult
 
@@ -429,7 +429,7 @@ class ActionItemQuotaTest(TestCase):
         self.client.force_authenticate(user=self.user)
 
     def _used(self):
-        return Subscription.objects.get(user=self.user).summaries_used
+        return Subscription.objects.get(user=self.user).actions_used
 
     @patch(
         "scripts.summary.SumAI.SummarizeContent",
@@ -461,8 +461,8 @@ class ActionItemQuotaTest(TestCase):
         self.assertEqual(self._used(), 1)
 
     def test_user_at_limit_returns_403(self):
-        free_limit = get_summary_limit("free")
-        Subscription.objects.filter(user=self.user).update(summaries_used=free_limit)
+        free_limit = get_action_limit("free")
+        Subscription.objects.filter(user=self.user).update(actions_used=free_limit)
 
         response = self.client.post(
             self.url,
@@ -473,8 +473,8 @@ class ActionItemQuotaTest(TestCase):
         self.assertEqual(response.status_code, 403)
         body = response.json()
         self.assertFalse(body["isSuccess"])
-        self.assertEqual(body["error"], "summary_limit_reached")
-        self.assertEqual(body["summary_limit"], free_limit)
+        self.assertEqual(body["error"], "action_limit_reached")
+        self.assertEqual(body["action_limit"], free_limit)
         # Counter unchanged when rejected pre-call.
         self.assertEqual(self._used(), free_limit)
 

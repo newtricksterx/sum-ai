@@ -14,6 +14,6 @@ export const useHydrateProfileOnAuthChange = (
       return;
     }
 
-    void hydrateProfile(true, currency);
+    void hydrateProfile(false, currency);
   }, [authProfile, currency, hydrateProfile]);
 };

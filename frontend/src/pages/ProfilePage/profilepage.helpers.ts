@@ -126,19 +126,19 @@ export const getInitials = (name: string) => {
 };
 
 export const deriveUsageMetrics = (
-  summaryLimit: number | null | undefined,
-  rawSummariesUsed: number | null | undefined,
+  actionLimit: number | null | undefined,
+  rawActionsUsed: number | null | undefined,
 ) => {
-  const summariesUsed = Math.max(0, rawSummariesUsed ?? 0);
-  const isUnlimited = summaryLimit === null;
+  const actionsUsed = Math.max(0, rawActionsUsed ?? 0);
+  const isUnlimited = actionLimit === null;
   const boundedLimit =
-    typeof summaryLimit === "number" ? Math.max(0, summaryLimit) : null;
+    typeof actionLimit === "number" ? Math.max(0, actionLimit) : null;
   const percentage =
     boundedLimit && boundedLimit > 0
-      ? Math.min(100, (Math.min(summariesUsed, boundedLimit) / boundedLimit) * 100)
+      ? Math.min(100, (Math.min(actionsUsed, boundedLimit) / boundedLimit) * 100)
       : 0;
-  const displayUsed = Math.min(summariesUsed, boundedLimit ?? summariesUsed);
+  const displayUsed = Math.min(actionsUsed, boundedLimit ?? actionsUsed);
   const usageClass = getUsageClass(percentage);
 
-  return { isUnlimited, boundedLimit, summariesUsed, displayUsed, percentage, usageClass };
+  return { isUnlimited, boundedLimit, actionsUsed, displayUsed, percentage, usageClass };
 };

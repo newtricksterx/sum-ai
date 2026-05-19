@@ -11,7 +11,7 @@ from api.plans import (
     get_character_limit,
     get_history_limit,
     get_plan,
-    get_summary_limit,
+    get_action_limit,
 )
 
 
@@ -33,7 +33,7 @@ class Subscription(models.Model):
         related_name="subscription",
     )
     plan_slug = models.CharField(max_length=32, choices=PLAN_CHOICES, default="free")
-    summaries_used = models.PositiveIntegerField(default=0)
+    actions_used = models.PositiveIntegerField(default=0)
     current_period_start = models.DateTimeField(default=timezone.now)
     current_period_end = models.DateTimeField(blank=True, null=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -50,8 +50,8 @@ class Subscription(models.Model):
         return get_plan(self.plan_slug)
 
     @property
-    def summary_limit(self) -> int | None:
-        return get_summary_limit(self.plan_slug)
+    def action_limit(self) -> int | None:
+        return get_action_limit(self.plan_slug)
 
     @property
     def history_limit(self) -> int | None:
@@ -92,7 +92,7 @@ class Subscription(models.Model):
         return now >= self.usage_period_ends_at()
 
     def reset_usage_period(self, reference_time: datetime | None = None) -> None:
-        self.summaries_used = 0
+        self.actions_used = 0
         self.current_period_start = reference_time or timezone.now()
         if self.billing_interval == "daily":
             # Keep free plan rolling interval derived from current_period_start.

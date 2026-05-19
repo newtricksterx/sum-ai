@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="subscription",
-            name="summaries_used",
+            name="actions_used",
             field=models.PositiveIntegerField(default=0),
         ),
         migrations.AddField(

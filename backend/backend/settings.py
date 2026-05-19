@@ -226,7 +226,8 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': f'{ANON_THROTTLE_SUMMARIES_COUNT}/{ANON_THROTTLE_SUMMARIES_PERIOD}',
-        'auth': '1/sec'
+        'auth': '1/sec',
+        'me': '20/min',
     },
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'api.authentication.CookieJWTAuthentication',
