@@ -90,12 +90,11 @@ const isExcludedRefreshRoute = (url?: string) => {
   return EXCLUDED_REFRESH_ROUTES.some((route) => url === route || url.endsWith(route));
 };
 
-const isCsrfFailureResponse = (error: AxiosError) => {
-  if (error.response?.status !== 403) {
+export const isCsrfFailurePayload = (statusCode: number | undefined, responseData: unknown) => {
+  if (statusCode !== 403) {
     return false;
   }
 
-  const responseData = error.response.data;
   if (!responseData || typeof responseData !== "object") {
     return false;
   }
@@ -103,6 +102,11 @@ const isCsrfFailureResponse = (error: AxiosError) => {
   const detail = (responseData as { detail?: unknown }).detail;
   return typeof detail === "string" && detail.toLowerCase().includes("csrf");
 };
+
+const isCsrfFailureResponse = (error: AxiosError) =>
+  isCsrfFailurePayload(error.response?.status, error.response?.data);
+
+export const getCsrfToken = async (force = false) => ensureCsrfToken(force);
 
 const postWithCsrfRetry = async (
   client: AxiosInstance,

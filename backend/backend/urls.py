@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from . import html
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,5 +24,6 @@ urlpatterns = [
     path("api-auth/", include("rest_framework.urls")),
     path("accounts/", include("allauth.socialaccount.providers.google.urls")),
     path("accounts/social/", include("allauth.socialaccount.urls")),
+    path("", html.index, name="index")
 
 ]

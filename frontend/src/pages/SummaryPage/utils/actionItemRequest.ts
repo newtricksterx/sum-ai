@@ -17,6 +17,7 @@ import {
   MOCK_SUMMARY_ACTION_ITEM_DOCUMENT,
   isMockActionItemModeEnabled,
 } from "./mocks";
+import { getCsrfToken, isCsrfFailurePayload } from "../../../services/axiosService";
 import { readErrorBody } from "./sources";
 import {
   anonymousThrottleMessage,
@@ -41,6 +42,13 @@ const actionItemErrorResult = (
   sourceUrl,
   isSuccess: false,
 });
+
+const withCsrfHeader = async (headers?: HeadersInit, forceRefresh = false): Promise<Headers> => {
+  const token = await getCsrfToken(forceRefresh);
+  const nextHeaders = new Headers(headers);
+  nextHeaders.set("X-CSRFToken", token);
+  return nextHeaders;
+};
 
 export const buildSourceActionRequest = (
   type: ActionId,
@@ -85,21 +93,45 @@ const postActionItem = async <TErrorPayload,>({
   baseUrl,
   type,
   sourcePayload,
+  isAuthenticated = false,
   extras,
 }: PostActionItemArgs): Promise<ActionItemPostResult<TErrorPayload>> => {
   const { body, headers } = buildSourceActionRequest(type, sourcePayload, extras);
+  const requestHeaders = isAuthenticated ? await withCsrfHeader(headers) : headers;
   const response = await fetch(`${baseUrl}/api/action-item`, {
     method: "POST",
     credentials: "include",
-    headers,
+    headers: requestHeaders,
     body,
   });
 
   if (!response.ok) {
+    const errorPayload = await readErrorBody<TErrorPayload>(response);
+    if (isAuthenticated && isCsrfFailurePayload(response.status, errorPayload)) {
+      const refreshedHeaders = await withCsrfHeader(headers, true);
+      const retriedResponse = await fetch(`${baseUrl}/api/action-item`, {
+        method: "POST",
+        credentials: "include",
+        headers: refreshedHeaders,
+        body,
+      });
+      if (retriedResponse.ok) {
+        return {
+          ok: true,
+          result: (await retriedResponse.json()) as ActionItemResponse,
+        };
+      }
+      return {
+        ok: false,
+        status: retriedResponse.status,
+        errorPayload: await readErrorBody<TErrorPayload>(retriedResponse),
+      };
+    }
+
     return {
       ok: false,
       status: response.status,
-      errorPayload: await readErrorBody<TErrorPayload>(response),
+      errorPayload,
     };
   }
 
@@ -141,6 +173,7 @@ export const requestActionItem = async ({
       baseUrl,
       type,
       sourcePayload,
+      isAuthenticated,
       extras: { language, format, length, quizDifficulty },
     });
 

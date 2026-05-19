@@ -1,15 +1,15 @@
 {
     "manifest_version": 3,
-    "name": "Super Simple Summarizer",
+    "name": "ReadToRecall",
     "icons": {
-        "16": "sss_icon16.png",
-        "32": "sss_icon32.png",
-        "48": "sss_icon48.png",
-        "128": "sss_icon128.png"
+        "16": "icon16.png",
+        "32": "icon32.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
     },
     "version": "1.0.1",
     "action": {
-        "default_title": "Open Super Simple Summarizer",
+        "default_title": "Open ReadToRecall",
         "default_popup": "index.html"
     },
     "permissions": [

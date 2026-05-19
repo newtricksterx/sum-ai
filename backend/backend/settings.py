@@ -139,7 +139,12 @@ LOGGING = {
     "loggers": {"": {"handlers": ["console"], "level": "DEBUG" if DEBUG else "INFO"}},
 }
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+TRUST_X_FORWARDED_PROTO = env.bool("TRUST_X_FORWARDED_PROTO", default=False) # type: ignore
+# Only trust X-Forwarded-Proto when running behind a trusted proxy that strips
+# incoming spoofed forwarded headers and sets this value itself.
+SECURE_PROXY_SSL_HEADER = (
+    ("HTTP_X_FORWARDED_PROTO", "https") if TRUST_X_FORWARDED_PROTO else None
+)
 SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=IS_PRODUCTION) # type: ignore
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = env.str("SECURE_REFERRER_POLICY", default="same-origin") # type: ignore
@@ -211,6 +216,8 @@ ANON_THROTTLE_SUMMARIES_COUNT = env.int("THROTTLE_SUMMARIES_COUNT", default=1) #
 ANON_THROTTLE_SUMMARIES_PERIOD = env.str("THROTTLE_SUMMARIES_PERIOD", default="day").lower() # type: ignore
 if ANON_THROTTLE_SUMMARIES_PERIOD not in {"sec", "min", "hour", "day"}:
     ANON_THROTTLE_SUMMARIES_PERIOD = "day"
+
+PDF_MAX_UPLOAD_SIZE_BYTES = env.int("PDF_MAX_UPLOAD_SIZE_BYTES", default=10 * 1024 * 1024) # type: ignore
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'api.exception_handlers.custom_exception_handler',

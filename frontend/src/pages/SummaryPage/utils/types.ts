@@ -94,6 +94,7 @@ export type PostActionItemArgs = {
   baseUrl: string;
   type: ActionId;
   sourcePayload: SourcePayload;
+  isAuthenticated?: boolean;
   extras?: { length?: Length; format?: Format; language?: Language; quizDifficulty?: QuizDifficulty };
 };
 

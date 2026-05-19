@@ -11,6 +11,7 @@ from rest_framework.test import APIClient
 
 from api.models import Subscription
 from api.plans import get_summary_limit
+from api.tests.helpers import authenticate_client_with_jwt, get_csrf_headers
 from scripts.sources import ExtractionResult
 
 
@@ -18,6 +19,9 @@ User = get_user_model()
 
 TEST_REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "api.exception_handlers.custom_exception_handler",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "api.authentication.CookieJWTAuthentication",
+    ],
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
     ],
@@ -101,8 +105,12 @@ def _pdf_payload(action_type, **overrides):
 class ActionItemEndpointTest(TestCase):
     def setUp(self):
         cache.clear()
-        self.client = Client()
+        self.client = Client(enforce_csrf_checks=True)
         self.url = reverse("action-item")
+        self.user = User.objects.create_user(  # type: ignore
+            email="action-item-user@example.com",
+            password="StrongPassword123!",
+        )
 
     def test_missing_type_returns_400(self):
         response = self.client.post(
@@ -170,6 +178,113 @@ class ActionItemEndpointTest(TestCase):
         body = response.json()
         self.assertFalse(body["isSuccess"])
         self.assertEqual(body["content"], "Error: Invalid request.")
+
+    @patch(
+        "scripts.summary.SumAI.ActionContent",
+        return_value={"isSuccess": True, "content": _flashcards_document()},
+    )
+    def test_authenticated_cookie_request_without_csrf_returns_403(self, _mock_action_content):
+        authenticate_client_with_jwt(self.client, self.user)
+
+        response = self.client.post(
+            self.url,
+            data=json.dumps(_webpage_payload("flashcards")),
+            content_type="application/json",
+            secure=True,
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("detail", response.json())
+        self.assertIn("csrf", str(response.json()["detail"]).lower())
+
+    @patch(
+        "scripts.summary.SumAI.ActionContent",
+        return_value={"isSuccess": True, "content": _flashcards_document()},
+    )
+    def test_authenticated_cookie_request_with_csrf_returns_200(self, _mock_action_content):
+        authenticate_client_with_jwt(self.client, self.user)
+
+        response = self.client.post(
+            self.url,
+            data=json.dumps(_webpage_payload("flashcards")),
+            content_type="application/json",
+            secure=True,
+            **get_csrf_headers(self.client),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["isSuccess"])
+
+    @patch(
+        "scripts.summary.SumAI.ActionContent",
+        return_value={"isSuccess": True, "content": _flashcards_document()},
+    )
+    @patch("scripts.sources.pdf.fitz.open")
+    def test_pdf_under_limit_is_accepted(self, mock_fitz_open, _mock_action_content):
+        class _Page:
+            def get_text(self):
+                return "Page text"
+
+        class _Document:
+            def pages(self, stop=None):
+                return [_Page()]
+
+        class _DocumentContext:
+            def __enter__(self):
+                return _Document()
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+        mock_fitz_open.return_value = _DocumentContext()
+        authenticate_client_with_jwt(self.client, self.user)
+
+        with self.settings(PDF_MAX_UPLOAD_SIZE_BYTES=20):
+            response = self.client.post(
+                self.url,
+                data={
+                    "type": "flashcards",
+                    "language": "english",
+                    "source_url": "https://example.com/document.pdf",
+                    "source_type": "pdf",
+                    "pdf": SimpleUploadedFile(
+                        "small.pdf",
+                        b"%PDF-1.4\nsmall\n",
+                        content_type="application/pdf",
+                    ),
+                },
+                secure=True,
+                **get_csrf_headers(self.client),
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["isSuccess"])
+
+    def test_pdf_over_limit_returns_clear_error(self):
+        authenticate_client_with_jwt(self.client, self.user)
+
+        with self.settings(PDF_MAX_UPLOAD_SIZE_BYTES=8):
+            response = self.client.post(
+                self.url,
+                data={
+                    "type": "flashcards",
+                    "language": "english",
+                    "source_url": "https://example.com/document.pdf",
+                    "source_type": "pdf",
+                    "pdf": SimpleUploadedFile(
+                        "too-large.pdf",
+                        b"%PDF-1.4-too-large",
+                        content_type="application/pdf",
+                    ),
+                },
+                secure=True,
+                **get_csrf_headers(self.client),
+            )
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertFalse(body["isSuccess"])
+        self.assertIn("Maximum allowed size", body["content"])
 
     @patch(
         "scripts.summary.SumAI.ActionContent",

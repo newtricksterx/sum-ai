@@ -5,6 +5,7 @@ import { renderInlineSegment } from "../../utils/renderInline";
 import "./Quiz.css";
 import { QuizDifficulty } from "../../../../utils/types";
 import { capitalizeFirstLetter } from "../../../../utils/functions";
+import { QuizResetPage } from "./QuizResetPage";
 
 interface QuizProps {
     document: SummaryDocument;
@@ -39,6 +40,7 @@ export const Quiz = ({ document, difficulty = null } : QuizProps) => {
   const [answers, setAnswers] = useState<Array<number | null>>(() => createInitialAnswers(totalQuestions));
   const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const [isQuizResetPage, setIsQuizResetPage] = useState(false)
 
   const currentQuestion = questionBlocks[currentQuestionIndex];
   const isFirstQuestion = currentQuestionIndex === 0;
@@ -56,6 +58,7 @@ export const Quiz = ({ document, difficulty = null } : QuizProps) => {
     setAnswers(createInitialAnswers(totalQuestions));
     setSelectedOptionIndex(null);
     setIsAnswered(false);
+    setIsQuizResetPage(false)
   };
 
   if (totalQuestions === 0 || !currentQuestion) {
@@ -84,7 +87,8 @@ export const Quiz = ({ document, difficulty = null } : QuizProps) => {
     }
 
     if (isLastQuestion) {
-      resetQuiz();
+      // resetQuiz();
+      setIsQuizResetPage(true)
       return;
     }
 
@@ -129,6 +133,12 @@ export const Quiz = ({ document, difficulty = null } : QuizProps) => {
     "hard": "qz-diff-hard",
   }
 
+  const correctCount = answers.reduce<number>(
+    (sum, answer, index) =>
+      answer !== null && answer === correctIndices[index] ? sum + 1 : sum,
+    0,
+  );
+
   return (
     <section>
         <header className="qz-title">
@@ -138,6 +148,8 @@ export const Quiz = ({ document, difficulty = null } : QuizProps) => {
             {difficulty ? capitalizeFirstLetter(difficulty) : "Easy"}
           </div>
         </header>
+        {isQuizResetPage ? <QuizResetPage correctQuestions={correctCount} totalQuestions={totalQuestions} onClickReset={resetQuiz}/> :
+
         <div className="qz-content" aria-label="Summary quiz">
             <div id="qz-screen">
                 <div className="qz-dots" aria-hidden="true">
@@ -230,6 +242,7 @@ export const Quiz = ({ document, difficulty = null } : QuizProps) => {
                 </footer>
             </div>
         </div>
+        }
     </section>
     );
 };

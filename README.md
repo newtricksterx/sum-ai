@@ -1,7 +1,7 @@
-# **Summary.AI** — Chrome Extension
+# **ReadToRecall** — Chrome Extension
 Summarize any webpage in seconds.
 
-Summary.AI is a lightweight, easy-to-use Chrome extension that uses AI to summarize the contents of your current tab instantly. Get the key points without the fluff, whether it’s a long article, research paper, news story, or blog post.
+ReadToRecall is a lightweight, easy-to-use Chrome extension that uses AI to summarize the contents of your current tab instantly. Get the key points without the fluff, whether it’s a long article, research paper, news story, or blog post.
 
 ## Features
 + Summarize Any Webpage — Instantly condense the content of the active tab.
@@ -17,10 +17,10 @@ Summary.AI is a lightweight, easy-to-use Chrome extension that uses AI to summar
 ## Step-by-Step Guide:
 
 ### Step 1: Install the Extension
-Add Summary.AI to your Chrome browser from the Chrome Web Store (Coming Soon).
+Add ReadToRecall to your Chrome browser from the Chrome Web Store (Coming Soon).
 
 ### Step 2: Open the Extension
-Navigate to any webpage you’d like to summarize. Click the Summary.AI icon in your Chrome toolbar to open the extension.
+Navigate to any webpage you’d like to summarize. Click the ReadToRecall icon in your Chrome toolbar to open the extension.
 
 ### Step 3: Customize Settings
 Click on the settings button and customize how you;d like to view your summarized content.

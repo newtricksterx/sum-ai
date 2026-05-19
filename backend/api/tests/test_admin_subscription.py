@@ -6,7 +6,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from api.models import Subscription
-from api.tests.helpers import authenticate_client_with_jwt
+from api.tests.helpers import authenticate_client_with_jwt, get_csrf_headers
 
 
 User = get_user_model()
@@ -15,9 +15,9 @@ User = get_user_model()
 class AdminUserSubscriptionViewTest(TestCase):
     def setUp(self):
         cache.clear()
-        self.anonymous_client = Client()
-        self.admin_client = Client()
-        self.non_admin_client = Client()
+        self.anonymous_client = Client(enforce_csrf_checks=True)
+        self.admin_client = Client(enforce_csrf_checks=True)
+        self.non_admin_client = Client(enforce_csrf_checks=True)
 
         self.target_user = User.objects.create_user(  # type: ignore
             email="target-user@example.com",
@@ -55,6 +55,8 @@ class AdminUserSubscriptionViewTest(TestCase):
             self.url,
             data=json.dumps({"plan_slug": "pro"}),
             content_type="application/json",
+            secure=True,
+            **get_csrf_headers(self.non_admin_client),
         )
 
         self.assertEqual(response.status_code, 403)
@@ -67,6 +69,8 @@ class AdminUserSubscriptionViewTest(TestCase):
             self.url,
             data=json.dumps({"plan_slug": "pro"}),
             content_type="application/json",
+            secure=True,
+            **get_csrf_headers(self.admin_client),
         )
 
         self.assertEqual(response.status_code, 200)
@@ -85,6 +89,8 @@ class AdminUserSubscriptionViewTest(TestCase):
             missing_url,
             data=json.dumps({"plan_slug": "pro"}),
             content_type="application/json",
+            secure=True,
+            **get_csrf_headers(self.admin_client),
         )
 
         self.assertEqual(response.status_code, 404)
@@ -96,7 +102,23 @@ class AdminUserSubscriptionViewTest(TestCase):
             self.url,
             data=json.dumps({"plan_slug": "Pro"}),
             content_type="application/json",
+            secure=True,
+            **get_csrf_headers(self.admin_client),
         )
 
         self.assertEqual(response.status_code, 400)
         self.assertIn("plan_slug", response.json())
+
+    def test_patch_rejects_missing_csrf_for_authenticated_admin(self):
+        authenticate_client_with_jwt(self.admin_client, self.admin_user)
+
+        response = self.admin_client.patch(
+            self.url,
+            data=json.dumps({"plan_slug": "pro"}),
+            content_type="application/json",
+            secure=True,
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("detail", response.json())
+        self.assertIn("csrf", str(response.json()["detail"]).lower())

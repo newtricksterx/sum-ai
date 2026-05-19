@@ -1,0 +1,125 @@
+.qz-reset-page {
+    border: 1px solid var(--color-border-secondary);
+    background-color: var(--color-background-secondary);
+    border-radius: 0.3rem;
+    padding: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.qz-reset-cards-section {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.qz-reset-card {
+    border: 1px solid var(--color-border-secondary);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--color-background-tertiary);    
+    width: 100%;
+    border-radius: 0.3rem;
+    gap: 0.3rem;
+}
+
+.qz-reset-btn {
+    display: flex;
+    flex-direction: row;
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-border-secondary);
+    border-radius: 0.3rem;
+    padding: 0.4rem 0.7rem;
+    align-items: center;
+    gap: 0.3rem;
+    transition: background-color 0.3s ease;
+    font-weight: 700;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+
+}
+
+.qz-reset-btn:hover {
+    background-color: var(--color-background-tertiary);
+}
+
+.qz-reset-check {
+    color: var(--color-text-success);
+    background-color: var(--color-background-success);
+    padding: 0.4rem;
+    border-radius: 0.3rem;
+}
+
+.qz-reset-cross {
+    color: var(--color-text-danger);
+    background-color: var(--color-background-danger);
+    padding: 0.4rem;
+    border-radius: 0.3rem;
+}
+
+.qz-card-title {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+}
+
+.qz-ring {
+    width: 100px;
+    height: 100px;
+    position: relative;
+}
+
+.qz-ring-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.qz-ring-track {
+    fill: none;
+    stroke: var(--color-border-tertiary);
+    stroke-width: 8;
+}
+
+.qz-ring-progress {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 700ms ease-out;
+}
+
+.qz-ring-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.qz-ring-per {
+    color: var(--color-text-primary);
+    font-size: 22px;
+}
+
+.qz-ring-score {
+    color: var(--color-text-tertiary);
+    font-size: 12px;
+}
+
+.qz-ring-title {
+    font-weight: 700;
+}
+
+.qz-ring-desc {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}

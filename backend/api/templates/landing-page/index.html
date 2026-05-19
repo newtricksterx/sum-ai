@@ -1,0 +1,965 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ReadToRecall">
+<meta property="og:title" content="ReadToRecall - AI Summarizer Chrome Extension for Webpages, YouTube &amp; PDFs">
+<meta property="og:description" content="ReadToRecall is a free AI Chrome extension that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes so you remember what you read.">
+<meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
+<meta property="og:image:alt" content="ReadToRecall extension popup summarizing a webpage">
+<meta property="og:image:width" content="535">
+<meta property="og:image:height" content="649">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ReadToRecall - AI Summarizer Chrome Extension for Webpages, YouTube &amp; PDFs">
+<meta name="twitter:description" content="Summarize webpages, YouTube videos, and PDFs into flashcards and quizzes so you remember what you read.">
+<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
+<title>ReadToRecall — AI Summarizer Chrome Extension for Webpages, YouTube &amp; PDFs</title>
+<meta name="description" content="ReadToRecall is a free AI Chrome extension that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes — so you remember what you read.">
+
+<link rel="icon" type="image/png" sizes="16x16" href="{% static 'landing-page/icon16.png' %}">
+<link rel="icon" type="image/png" sizes="32x32" href="{% static 'landing-page/icon32.png' %}">
+<link rel="icon" type="image/png" sizes="48x48" href="{% static 'landing-page/icon48.png' %}">
+<link rel="icon" type="image/png" sizes="128x128" href="{% static 'landing-page/icon128.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "ReadToRecall",
+  "applicationCategory": "BrowserApplication",
+  "operatingSystem": "Windows, macOS, Linux, ChromeOS",
+  "browserRequirements": "Requires Chrome or any Chromium-based browser (Edge, Brave, Arc, Opera)",
+  "description": "AI Chrome extension that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes.",
+  "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+  "image": "{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is ReadToRecall?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ReadToRecall is a free AI Chrome extension that summarizes any webpage, YouTube video, or PDF, then generates flashcards and quizzes from the summary so you remember what you read."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is ReadToRecall free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The Free plan covers 10 summaries per month with 3 saved sessions. Standard and Pro plans unlock more summaries, larger inputs, and longer history."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which languages are supported?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "English, Spanish, French, Hindi, and Mandarin."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What can it summarize?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Any webpage, YouTube video transcript, or PDF you open in the browser."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which browsers are supported?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Chrome and Chromium browsers including Edge, Brave, Arc, and Opera."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What data do you collect?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Pages you summarize are not stored. Summaries are saved to your account only if you sign in, and you can clear them anytime."
+      }
+    }
+  ]
+}
+</script>
+
+<style>
+  :root {
+    --bg: #F4F1EA;
+    --bg-elev: #FBF9F4;
+    --ink: #141311;
+    --ink-2: #4A4742;
+    --ink-3: #8C877C;
+    --line: #E3DDD0;
+    --line-2: #EFEAE0;
+    --accent: #B8412A;
+    --accent-soft: #F2DED6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.55;
+    font-size: 16px;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ───────── NAV ───────── */
+  nav {
+    position: sticky;
+    top: 0;
+    background: rgba(244, 241, 234, 0.82);
+    backdrop-filter: saturate(140%) blur(14px);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+    border-bottom: 1px solid var(--line);
+    z-index: 100;
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 0;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .logo-mark {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    overflow: hidden;
+  }
+  .logo-mark img { width: 100%; height: 100%; display: block; object-fit: contain; }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color .15s ease;
+  }
+  .nav-links a:hover { color: var(--ink); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 11px 18px;
+    border-radius: 9px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: transform .15s ease, opacity .15s ease;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:hover { transform: translateY(-1px); opacity: 0.92; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .btn-ghost:hover { background: var(--bg-elev); opacity: 1; }
+
+  @media (max-width: 720px) {
+    .nav-links { display: none; }
+  }
+
+  /* ───────── HERO ───────── */
+  .hero {
+    padding: 20px 0 20px;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 56px;
+    align-items: center;
+  }
+  .hero-img {
+    width: 90%;
+    height: auto;
+    justify-self: end;
+    box-shadow: 0 40px 80px -40px rgba(20, 19, 17, 0.25);
+  }
+  @media (max-width: 860px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-3);
+    margin-bottom: 12px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(44px, 6.6vw, 84px);
+    line-height: 0.98;
+    letter-spacing: -0.028em;
+    font-weight: 400;
+    max-width: 900px;
+    margin-bottom: 28px;
+    font-variation-settings: 'opsz' 144;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+  }
+  .lede {
+    font-size: 19px;
+    color: var(--ink-2);
+    max-width: 520px;
+    margin-bottom: 36px;
+    line-height: 1.55;
+  }
+  .cta-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .meta-line {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+  .stars { color: var(--accent); letter-spacing: 1px; }
+
+  /* ───────── BROWSER MOCKUP ───────── */
+  .mockup-wrap {
+    margin-top: 72px;
+    position: relative;
+  }
+  .browser {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px -40px rgba(20, 19, 17, 0.25);
+  }
+  .browser-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--line); }
+  .url {
+    flex: 1;
+    margin: 0 12px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 6px 12px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .ext-icon {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    overflow: hidden;
+    position: relative;
+  }
+  .ext-icon img { width: 100%; height: 100%; display: block; object-fit: contain; }
+  .ext-icon::after {
+    content: '';
+    position: absolute;
+    top: -3px; right: -3px;
+    width: 8px; height: 8px;
+    background: var(--ink);
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+  }
+  .browser-content {
+    padding: 56px 40px;
+    min-height: 340px;
+    background-image:
+      linear-gradient(var(--line-2) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-2) 1px, transparent 1px);
+    background-size: 32px 32px;
+    background-color: var(--bg-elev);
+    position: relative;
+  }
+  .ext-popup {
+    position: absolute;
+    top: 16px;
+    right: 28px;
+    width: 300px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 24px 48px -18px rgba(20, 19, 17, 0.2);
+  }
+  .ext-popup-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .ext-popup-head .ext-icon { width: 24px; height: 24px; }
+  .ext-popup-head .ext-icon::after { display: none; }
+  .ext-popup-title {
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .ext-popup-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--line-2);
+    font-size: 12px;
+  }
+  .ext-popup-row:last-of-type { border-bottom: 0; }
+  .ext-popup-row span:first-child { color: var(--ink-2); }
+  .ext-popup-row span:last-child {
+    font-family: 'Geist Mono', monospace;
+    color: var(--ink);
+  }
+  .ext-popup-cta {
+    margin-top: 14px;
+    background: var(--ink);
+    color: var(--bg);
+    text-align: center;
+    padding: 8px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* ───────── LOGO STRIP ───────── */
+  .strip {
+    padding: 80px 0 40px;
+    border-top: 1px solid var(--line);
+    margin-top: 100px;
+  }
+  .strip-label {
+    text-align: center;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--ink-3);
+    margin-bottom: 28px;
+  }
+  .strip-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 28px;
+    opacity: 0.55;
+  }
+  .strip-row span {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    color: var(--ink-2);
+    letter-spacing: -0.01em;
+  }
+  .chrome-web-store-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  /* ───────── SECTIONS ───────── */
+  section.block { padding: 120px 0; }
+  .section-head {
+    margin-bottom: 72px;
+    max-width: 720px;
+  }
+  .section-head .eyebrow { margin-bottom: 24px; }
+  h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(36px, 4.4vw, 56px);
+    line-height: 1.03;
+    letter-spacing: -0.025em;
+    font-weight: 400;
+    margin-bottom: 18px;
+  }
+  h2 em { font-style: italic; color: var(--accent); }
+  .section-lede {
+    font-size: 17px;
+    color: var(--ink-2);
+    max-width: 540px;
+  }
+
+  /* Features */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .feature {
+    background: var(--bg);
+    padding: 40px 32px 44px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 280px;
+  }
+  .feature-num {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.1em;
+  }
+  .feature h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+  }
+  .feature-img {
+    width: 70%;
+    height: auto;
+    align-items: center;
+  }
+  .feature p {
+    color: var(--ink-2);
+    font-size: 15px;
+    line-height: 1.55;
+    margin-top: auto;
+  }
+  @media (max-width: 860px) {
+    .features-grid { grid-template-columns: 1fr; }
+  }
+
+  /* How it works */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    counter-reset: step;
+  }
+  .step {
+    padding-top: 24px;
+    border-top: 1px solid var(--ink);
+    counter-increment: step;
+  }
+  .step::before {
+    content: "0" counter(step);
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-3);
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 14px;
+  }
+  .step h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    margin-bottom: 12px;
+    line-height: 1.15;
+  }
+  .step p {
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+  @media (max-width: 860px) {
+    .steps { grid-template-columns: 1fr; gap: 32px; }
+  }
+
+  /* Testimonial */
+  .quote-block {
+    padding: 100px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .quote-block blockquote {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(28px, 3.6vw, 44px);
+    line-height: 1.18;
+    letter-spacing: -0.02em;
+    max-width: 920px;
+    font-weight: 400;
+  }
+  .quote-block blockquote em { font-style: italic; color: var(--accent); }
+  .attribution {
+    margin-top: 36px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--line);
+  }
+  .attribution-text { font-size: 14px; }
+  .attribution-text strong { font-weight: 500; }
+  .attribution-text span { color: var(--ink-3); display: block; margin-top: 2px; font-size: 13px; }
+
+  /* FAQ */
+  .faq-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 80px;
+  }
+  details {
+    border-top: 1px solid var(--line);
+    padding: 22px 0;
+  }
+  details:last-child { border-bottom: 1px solid var(--line); }
+  summary {
+    cursor: pointer;
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: '+';
+    font-family: 'Geist Mono', monospace;
+    color: var(--ink-3);
+    font-size: 22px;
+    font-weight: 300;
+    transition: transform .2s ease;
+  }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p {
+    margin-top: 14px;
+    color: var(--ink-2);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 640px;
+  }
+  @media (max-width: 860px) {
+    .faq-grid { grid-template-columns: 1fr; gap: 40px; }
+  }
+
+  /* Final CTA */
+  .final {
+    text-align: center;
+    padding: 140px 0;
+    border-top: 1px solid var(--line);
+  }
+  .final h2 {
+    margin: 0 auto 24px;
+    max-width: 760px;
+  }
+  .final .lede {
+    margin: 0 auto 36px;
+    max-width: 480px;
+    text-align: center;
+  }
+  .final .cta-row { justify-content: center; }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 56px 0 40px;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 56px;
+  }
+  .footer-grid h4 {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-3);
+    margin-bottom: 18px;
+    font-weight: 500;
+  }
+  .footer-grid ul { list-style: none; }
+  .footer-grid li { margin-bottom: 10px; }
+  .footer-grid a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .footer-grid a:hover { color: var(--ink); }
+  .footer-tag {
+    color: var(--ink-2);
+    font-size: 14px;
+    max-width: 280px;
+    margin-top: 14px;
+  }
+  .footer-bottom {
+    border-top: 1px solid var(--line);
+    padding-top: 28px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--ink-3);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  @media (max-width: 720px) {
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* Subtle entrance */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: none; }
+  }
+  .hero-text > *,
+  .hero-visual {
+    animation: rise 0.7s ease both;
+  }
+  .hero-text .eyebrow { animation-delay: 0.0s; }
+  .hero-text h1 { animation-delay: 0.08s; }
+  .hero-text .lede { animation-delay: 0.16s; }
+  .hero-text .cta-row { animation-delay: 0.24s; }
+  .hero-visual { animation-delay: 0.32s; }
+</style>
+</head>
+<body>
+
+<!-- ───────── NAV ───────── -->
+<nav>
+  <div class="container nav-inner">
+    <a href="/" class="logo">
+      <span class="logo-mark"><img src="{% static 'landing-page/icon128.png' %}" alt="" width="128" height="128"></span>
+      ReadToRecall
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#faq">Pricing</a></li>
+    </ul>
+    <a href="https://chromewebstore.google.com/detail/super-simple-summarizer/pcbnaokknjmejdfakjkglkpoflooafoe?authuser=0&amp;hl=en-AU" 
+        class="btn"
+        target="_blank"
+        rel="noopener noreferrer">
+        <svg class="chrome-web-store-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 223" width="48" height="48">
+            <defs>
+                <linearGradient id="SVGHPFpg7JP" x1="0%" x2="100%" y1="50%" y2="50%">
+                    <stop offset="0%" stop-color="#D93025" />
+                    <stop offset="100%" stop-color="#EA4335" />
+                </linearGradient><linearGradient id="SVGOMJglc4y" x1="74.943%" x2="19.813%" y1="95.826%" y2="-4.161%">
+                    <stop offset="0%" stop-color="#1E8E3E" />
+                    <stop offset="100%" stop-color="#34A853" />
+                </linearGradient><linearGradient id="SVG7xeYgbFl" x1="59.898%" x2="21.416%" y1="-.134%" y2="99.86%">
+                    <stop offset="0%" stop-color="#FBBC04" />
+                    <stop offset="100%" stop-color="#FCC934" />
+                </linearGradient>
+                <path id="SVGxfiKEebH" d="M255.983 0H0v204.837c0 9.633 7.814 17.464 17.464 17.464h221.072c9.633 0 17.464-7.814 17.464-17.464z" />
+            </defs>
+            <path fill="#F1F3F4" d="M255.983 0H0v204.837c0 9.633 7.814 17.464 17.464 17.464h221.072c9.633 0 17.464-7.814 17.464-17.464z" />
+            <path fill="#E8EAED" d="M0 0h255.983v111.74H0z" />
+            <path fill="#FFF" d="M157.076 47.727H98.907A11.63 11.63 0 0 1 87.27 36.09a11.63 11.63 0 0 1 11.637-11.637h58.169a11.63 11.63 0 0 1 11.637 11.637c0 6.417-5.204 11.637-11.637 11.637" />
+            <mask id="SVGzv8eNeik" fill="#fff">
+                <use href="#SVGxfiKEebH" />
+            </mask>
+            <g mask="url(#SVGzv8eNeik)">
+            <g transform="translate(17.455 94.293)">
+            <path fill="url(#SVGHPFpg7JP)" d="m14.812 55.255l15.241 46.498l32.638 36.427l47.845-82.908l95.724-.017C187.146 22.213 151.443 0 110.536 0s-76.61 22.213-95.724 55.255" />
+            <path fill="url(#SVGOMJglc4y)" d="m110.52 221.105l32.637-36.443l15.224-46.482H62.674L14.812 55.255c-19.047 33.076-20.445 75.128.017 110.561c20.445 35.434 57.545 55.256 95.69 55.29" />
+            <path fill="url(#SVG7xeYgbFl)" d="M206.26 55.272h-95.724l47.862 82.908l-47.862 82.925c38.162-.033 75.263-19.855 95.708-55.289c20.461-35.433 19.064-77.468.016-110.544" />
+            <ellipse cx="110.536" cy="110.544" fill="#F1F3F4" rx="55.255" ry="55.272" />
+            <ellipse cx="110.536" cy="110.544" fill="#1A73E8" rx="44.898" ry="44.915" />
+            </g>
+            </g>
+            <path fill="#BDC1C6" d="M0 111.74h255.983v1.448H0zm0-1.465h255.983v1.448H0z" opacity=".1" />
+        </svg>
+      Chrome Web Store
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </div>
+</nav>
+<main>
+
+<!-- ───────── HERO ───────── -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-text">
+        <div class="eyebrow">Now available</div>
+        <h1>The extension that helps you <em>read, recall, and retain</em> anything on the web.</h1>
+        <p class="lede">ReadToRecall is a free Chrome extension that uses AI to summarize any webpage, YouTube video, or PDF — then turns the summary into flashcards and a quiz so you remember what you read, without leaving the tab.</p>
+        <div class="cta-row">
+          <a href="https://chromewebstore.google.com/detail/super-simple-summarizer/pcbnaokknjmejdfakjkglkpoflooafoe?authuser=0&amp;hl=en-AU"
+            class="btn"
+            target="_blank"
+            rel="noopener noreferrer">
+            Add to Chrome — Free
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </div>
+        <img class="hero-img" src="{% static 'landing-page/front-page-linalg-light.png' %}" alt="ReadToRecall popup summarizing a linear algebra page" width="535" height="649" fetchpriority="high" decoding="async">
+    </div>
+  </div>
+</header>
+
+<!-- ───────── CONTENT-SOURCE STRIP ───────── -->
+<section class="container">
+  <div class="strip">
+    <div class="strip-label">Works on</div>
+    <div class="strip-row">
+      <span>Webpages</span>
+      <span>YouTube</span>
+      <span>PDFs</span>
+      <span>Articles</span>
+      <span>Docs</span>
+      <span>Research</span>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── FEATURES ───────── -->
+<section class="block" id="features">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Features</div>
+      <h2>Small surface, <em>deep utility</em>.</h2>
+      <p class="section-lede">Three AI tools, one toolbar icon. Summarize what you read, turn it into flashcards, and quiz yourself for active recall — no copy-paste, no switching tabs.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature">
+        <div class="feature-num">01 / Summarize</div>
+        <h3>One-click AI summaries.</h3>
+        <img class="feature-img" src="{% static 'landing-page/sumai-session-summary-light.png' %}" alt="Summary mode in the ReadToRecall extension popup" width="537" height="819" loading="lazy" decoding="async">
+        <p>Five formats — TL;DR, bullet, paragraph, Q&amp;A, pros &amp; cons — at three lengths. Pick what fits how you read.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-num">02 / Flashcards</div>
+        <h3>AI flashcards on demand.</h3>
+        <img class="feature-img" src="{% static 'landing-page/sumai-session-flashcards-light.png' %}" alt="Flashcards mode in the ReadToRecall extension popup" width="536" height="818" loading="lazy" decoding="async">
+        <p>Generate study-ready cards from anything you just read — built for spaced repetition, not one-and-done.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-num">03 / Quizzes</div>
+        <h3>AI quizzes that test what stuck.</h3>
+        <img class="feature-img" src="{% static 'landing-page/sumai-session-quiz-light.png' %}" alt="Quiz mode in the ReadToRecall extension popup" width="537" height="819" loading="lazy" decoding="async">
+        <p>Auto-generated quizzes at easy, medium, or hard — the fastest way to find what you actually understood.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── HOW READTORECALL WORKS ───────── -->
+<section class="block" id="how-it-works">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Under the hood</div>
+      <h2>How does <em>ReadToRecall</em> work?</h2>
+      <p class="section-lede">ReadToRecall is an AI Chrome extension that turns the page you're on into a study session in three steps: read, summarize, recall. Here's what happens after you click the icon.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <h3>The extension reads the page.</h3>
+        <p>ReadToRecall extracts the readable content from your active tab — article text from webpages, transcripts from YouTube videos, or parsed text from PDFs. Ads, sidebars, and navigation are stripped automatically so the AI only sees the meaningful content.</p>
+      </div>
+      <div class="step">
+        <h3>AI condenses it into a summary.</h3>
+        <p>The extracted text is sent to a large language model that returns a clean summary in your chosen format — TL;DR, bullets, paragraph, Q&amp;A, or pros &amp; cons — at the length you prefer. You can switch the output language to English, Spanish, French, Hindi, or Mandarin.</p>
+      </div>
+      <div class="step">
+        <h3>The summary becomes flashcards or a quiz.</h3>
+        <p>From the summary, ReadToRecall generates ready-to-study flashcards or a multiple-choice quiz at easy, medium, or hard difficulty. Both are built for active recall — the evidence-backed study method for moving information from short-term to long-term memory.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── GETTING STARTED ───────── -->
+<section class="block" id="how" style="padding-top: 40px;">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">How it works</div>
+      <h2>Install once. <em>Forget about it.</em></h2>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <h3>Add to Chrome</h3>
+        <p>One click from the Chrome Web Store. No account needed to try it.</p>
+      </div>
+      <div class="step">
+        <h3>Open any page</h3>
+        <p>Click the ReadToRecall icon on a webpage, YouTube video, or PDF.</p>
+      </div>
+      <div class="step">
+        <h3>Summarize, study, quiz</h3>
+        <p>Get a summary, then turn it into flashcards or a quiz with one more click.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── FAQ ───────── -->
+<section class="block" id="faq">
+  <div class="container">
+    <div class="faq-grid">
+      <div>
+        <div class="eyebrow">FAQ</div>
+        <h2>Questions, <em>answered</em>.</h2>
+      </div>
+      <div>
+        <details open>
+          <summary>What is ReadToRecall?</summary>
+          <p>ReadToRecall is a free AI Chrome extension that summarizes any webpage, YouTube video, or PDF, then generates flashcards and quizzes from the summary so you remember what you read. Built for students, researchers, and anyone who reads to learn.</p>
+        </details>
+        <details>
+          <summary>Is ReadToRecall free?</summary>
+          <p>Yes. The Free plan covers 10 summaries per month with 3 saved sessions. Standard ($3.99/mo) and Pro ($9.99/mo) unlock more summaries, larger inputs, and longer history.</p>
+        </details>
+        <details>
+          <summary>Which languages are supported?</summary>
+          <p>English, Spanish, French, Hindi, and Mandarin — pick your output language in settings.</p>
+        </details>
+        <details>
+          <summary>What can it summarize?</summary>
+          <p>Any webpage, YouTube video (it uses the transcript), or PDF you open in the browser.</p>
+        </details>
+        <details>
+          <summary>Which browsers are supported?</summary>
+          <p>Chrome and any Chromium browser — Edge, Brave, Arc, Opera.</p>
+        </details>
+        <details>
+          <summary>What data do you collect?</summary>
+          <p>We don't store the pages you summarize. Summaries are saved to your account only if you're signed in, and you can clear them any time.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── FINAL CTA ───────── -->
+<section class="final">
+  <div class="container">
+    <h2>Read once. <em>Recall forever.</em></h2>
+    <p class="lede">Free to install. Free to try. Two clicks to your first summary.</p>
+    <div class="cta-row">
+      <a href="https://chromewebstore.google.com/detail/super-simple-summarizer/pcbnaokknjmejdfakjkglkpoflooafoe?authuser=0&amp;hl=en-AU" class="btn" target="_blank" rel="noopener noreferrer">
+        Add to Chrome — Free
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── FOOTER ───────── -->
+</main>
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a href="/" class="logo">
+          <span class="logo-mark"><img src="{% static 'landing-page/icon128.png' %}" alt="" width="128" height="128"></span>
+          ReadToRecall
+        </a>
+        <p class="footer-tag">Summarize, flashcard, and quiz anything you read on the web.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#faq">Pricing</a></li>
+          <li><a href="#how">Changelog</a></li>
+          <li><a href="#features">Roadmap</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#how">About</a></li>
+          <li><a href="#features">Blog</a></li>
+          <li><a href="#faq">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#faq">Privacy</a></li>
+          <li><a href="#faq">Terms</a></li>
+          <li><a href="#faq">Security</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 ReadToRecall. All rights reserved.</span>
+      <span>Made with care.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
