@@ -29,6 +29,10 @@ const ProfilePage: React.FC = () => {
     setPage("pricing")
   }
 
+  const onClickReturn = () => {
+    setPage("profile")
+  }
+
   if (isInitializing) {
     return (
       <main className="h-full overflow-y-auto custom-scrollbar px-2 py-2 font-google">
@@ -57,7 +61,7 @@ const ProfilePage: React.FC = () => {
 
   if (page == "pricing"){
     return (
-      <PricingPage />
+      <PricingPage onClickReturn={onClickReturn} currentPlanSlug={userProfile.subscription?.plan_slug} />
     )
   }
 
@@ -77,10 +81,9 @@ const ProfilePage: React.FC = () => {
             displayName={displayName}
             email={userProfile.email}
             avatarUrl={userProfile.avatar_url}
-            onClickUpgrade={onClickUpgrade}
           />
 
-          <PlanLimits subscription={userProfile.subscription} />
+          <PlanLimits subscription={userProfile.subscription} onClickUpgrade={onClickUpgrade}/>
 
           <Usage
             actionLimit={userProfile.subscription?.action_limit}
@@ -96,6 +99,7 @@ const ProfilePage: React.FC = () => {
             email={userProfile.email}
             isSubmitting={isSubmitting}
             onConfirm={() => void handleLogout()}
+            cancelSubscription={() => {}}
           />
         </div>
       </PageCard>

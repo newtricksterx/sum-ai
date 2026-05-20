@@ -9,14 +9,16 @@ import {
   deriveWordLimit,
   formatLimit,
 } from "../profilepage.helpers";
+import '../ProfilePage.css'
 
 type Subscription = NonNullable<UserProfile["subscription"]>;
 
 interface PlanLimitsProps {
   subscription: Subscription | undefined;
+  onClickUpgrade: () => void;
 }
 
-export const PlanLimits = ({ subscription }: PlanLimitsProps) => {
+export const PlanLimits = ({ subscription, onClickUpgrade }: PlanLimitsProps) => {
   const { t } = useTranslation();
   const translate = (key: string, defaultValue: string) => t(key, { defaultValue });
 
@@ -72,6 +74,10 @@ export const PlanLimits = ({ subscription }: PlanLimitsProps) => {
         arialabelDefault="What does subscription price mean?"
         value={subscriptionPrice}
       />
+
+      <button className="upgrade-btn" onClick={onClickUpgrade}>
+        Upgrade Plan
+      </button>
     </section>
   );
 };

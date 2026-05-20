@@ -558,32 +558,21 @@
         <ul class="plan-features">
           <li>
             <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
-            {% if plan.action_limit %}<strong>{{ plan.action_limit }}</strong> summaries, flashcards &amp; quizzes per month{% else %}<strong>Unlimited</strong> summaries, flashcards &amp; quizzes{% endif %}
+            {% if plan.action_limit %}<strong>{{ plan.action_limit }}</strong> Summaries, Flashcards, Quizzes{% else %}<strong>Unlimited</strong> Summaries, Flashcards, Quizzes{% endif %}
           </li>
           <li>
             <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
-            <strong>{{ plan.history_limit }}</strong> saved sessions
+            <strong>{{ plan.history_limit }}</strong> Saved session slots
           </li>
           <li>
             <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
-            {% if plan.character_limit %}<strong>{{ plan.character_limit }}</strong> characters per input{% else %}<strong>Unlimited</strong> input length{% endif %}
+            {% if plan.character_limit %}<strong>{{ plan.character_limit }}</strong> Characters per input{% else %}<strong>Unlimited</strong> Characters per input{% endif %}
           </li>
           <li>
             <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
-            Webpages, YouTube, PDFs
-          </li>
-          <li>
-            <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
-            Flashcards &amp; quizzes
+            Works on Webpages, PDFs, Youtube Transcripts
           </li>
         </ul>
-        <a href="{% if plan.slug == 'free' %}https://chromewebstore.google.com/detail/super-simple-summarizer/pcbnaokknjmejdfakjkglkpoflooafoe?authuser=0&amp;hl=en-AU{% else %}{{ plan.payment_url }}{% endif %}"
-           class="btn plan-cta{% if plan.slug == 'free' %} btn-ghost{% endif %}"
-           target="_blank"
-           rel="noopener noreferrer">
-          {% if plan.slug == 'free' %}Add to Chrome — Free{% else %}Get {{ plan.name }}{% endif %}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
       </article>
       {% endfor %}
     </div>

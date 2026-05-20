@@ -11,10 +11,11 @@ interface PricingPageCardProps {
     plan_desc: string;
     price: string;
     pointsList: PointDescription[];
-    isCurrentPlan: boolean;
+    ctaLabel: string;
+    disabled?: boolean;
 }
 
-export const PricingPageCard = ({ plan_name, plan_desc, price, pointsList, isCurrentPlan } : PricingPageCardProps) => {
+export const PricingPageCard = ({ plan_name, plan_desc, price, pointsList, ctaLabel, disabled = false } : PricingPageCardProps) => {
     return (
         <PageCard className="pricingpage-card">
             <header className="pricingpage-card-header">
@@ -27,7 +28,7 @@ export const PricingPageCard = ({ plan_name, plan_desc, price, pointsList, isCur
                     <span className="price">{price}</span>
                     <p className="frequency">per month</p>
                 </div>
-                
+
             </header>
             <section className="points-section">
                 <ul>
@@ -39,7 +40,10 @@ export const PricingPageCard = ({ plan_name, plan_desc, price, pointsList, isCur
                 </ul>
             </section>
 
-            <a className="plan_btn">{isCurrentPlan ? "Current Plan" : "Upgrade Plan"}</a>
+            <a
+                className={`plan_btn${disabled ? " plan_btn--disabled" : ""}`}
+                aria-disabled={disabled || undefined}
+            >{ctaLabel}</a>
         </PageCard>
     )
 }

@@ -8,6 +8,7 @@ export type UserProfile = {
   email: string;
   avatar_url?: string | null;
   subscription?: {
+    plan_slug?: string;
     plan_name: string;
     billing_interval?: string | null;
     price_minor?: number | null;

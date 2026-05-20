@@ -66,7 +66,7 @@
 }
 
 .pp-card {
-  border: 1px solid var(--color-border-primary);
+  border: 1px solid var(--color-border-tertiary);
   border-radius: var(--pp-radius);
   background: color-mix(in srgb, var(--color-surface-secondary) 94%, transparent);
   padding: 0.62rem 0.68rem;
@@ -432,4 +432,24 @@
   .profile-google-btn {
     transition: none !important;
   }
+}
+
+.upgrade-btn {
+  border: 1px solid var(--color-border-secondary);
+  font-size: 12px;
+  padding: 0.3rem;
+  border-radius: 0.3rem;
+  background-color: rgb(62, 62, 203);
+  transition: background-color 0.3s ease;
+  margin-top: 0.3rem;
+}
+
+.upgrade-btn:hover {
+  background-color: rgb(68, 68, 255);
+}
+
+.pp-cancel-btn {
+  font-size: 14px;
+  color: rgb(188, 2, 2);
+  font-weight: 200;
 }
