@@ -33,12 +33,20 @@ class Subscription(models.Model):
         related_name="subscription",
     )
     plan_slug = models.CharField(max_length=32, choices=PLAN_CHOICES, default="free")
+    stripe_subscription_id = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=True,
+        null=True,
+        db_index=True,
+    )
     actions_used = models.PositiveIntegerField(default=0)
     current_period_start = models.DateTimeField(default=timezone.now)
     current_period_end = models.DateTimeField(blank=True, null=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    stripe_price_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    cancel_at_period_end = models.BooleanField(default=False)
     class Meta:
         ordering = ("-updated_at",)
 

@@ -40,3 +40,13 @@ def payments(request):
         "default_currency": "USD",
     }
     return HttpResponse(template.render(context, request))
+
+def billing_success(request):
+    status = request.GET.get("status")
+
+    template = loader.get_template('../templates/billing/cancel.html')
+
+    if status == "success":
+        template = loader.get_template('../templates/billing/success.html')
+        
+    return HttpResponse(template.render({}, request))

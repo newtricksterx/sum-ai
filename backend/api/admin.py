@@ -8,12 +8,13 @@ from .models.user import User
 @admin.register(User)
 class UserAdmin(DjangoUserAdmin):
     ordering = ("id",)
-    list_display = ("username", "email", "first_name", "last_name", "is_staff", "is_active")
-    search_fields = ("username", "email", "first_name", "last_name")
+    list_display = ("username", "email", "stripe_customer_id", "is_staff", "is_active")
+    search_fields = ("username", "email", "first_name", "last_name", "stripe_customer_id")
 
     fieldsets = (
         (None, {"fields": ("username", "email", "password")}),
         ("Personal info", {"fields": ("first_name", "last_name")}),
+        ("Stripe", {"fields": ("stripe_customer_id",)}),
         (
             "Permissions",
             {
@@ -42,6 +43,19 @@ class UserAdmin(DjangoUserAdmin):
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ("user", "plan_slug", "created_at", "updated_at")
-    search_fields = ("user__email", "plan_slug")
-    list_filter = ("plan_slug",)
+    list_display = (
+        "user",
+        "plan_slug",
+        "stripe_subscription_id",
+        "stripe_price_id",
+        "cancel_at_period_end",
+        "current_period_end",
+        "updated_at",
+    )
+    search_fields = (
+        "user__email",
+        "plan_slug",
+        "stripe_subscription_id",
+        "stripe_price_id",
+    )
+    list_filter = ("plan_slug", "cancel_at_period_end")

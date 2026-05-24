@@ -34,3 +34,9 @@
     color: var(--color-text-danger);
     background-color: var(--color-background-danger);
 }
+
+.pricingpage-error {
+    margin: 0.5rem;
+    color: var(--color-text-danger);
+    font-size: 12px;
+}

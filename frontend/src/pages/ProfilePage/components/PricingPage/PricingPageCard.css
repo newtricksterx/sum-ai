@@ -54,7 +54,7 @@ strong {
     margin-bottom: 10px;
 }
 
-a {
+.plan_btn {
     color: var(--color-text-primary);
     cursor: pointer;
     padding: 0.6rem;
@@ -67,12 +67,12 @@ a {
     font-weight: 600;
 }
 
-a:hover {
+.plan_btn:hover {
     text-decoration: none;
     background-color: var(--color-background-tertiary);
 }
 
-a.plan_btn--disabled {
+.plan_btn--disabled {
     color: var(--color-text-tertiary);
     cursor: not-allowed;
     background-color: transparent;

@@ -39,7 +39,6 @@
   border: 1px solid color-mix(in srgb, var(--pp-accent) 52%, var(--color-border-primary));
   background: var(--pp-accent-muted);
   color: var(--color-interactive-primary-text);
-  padding: 0.08rem 0.45rem;
   font-size: 10px;
   letter-spacing: 0.02em;
 }

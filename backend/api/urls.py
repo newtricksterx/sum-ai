@@ -11,6 +11,7 @@ from api.views import (
     LogoutUserView,
     CookieTokenRefreshView,
     MeView,
+    billing
 )
 
 urlpatterns = [
@@ -28,4 +29,6 @@ urlpatterns = [
         AdminUserSubscriptionView.as_view(),
         name="admin-user-subscription",
     ),
+    path("billing/webhook", billing.webhook_view, name="billing-webhook"),
+    path("billing/checkout-session", billing.session_action, name="billing-checkout-session"),
 ]

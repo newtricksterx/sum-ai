@@ -12,10 +12,13 @@ interface PricingPageCardProps {
     price: string;
     pointsList: PointDescription[];
     ctaLabel: string;
+    onClick: () => void;
     disabled?: boolean;
+    loading?: boolean;
 }
 
-export const PricingPageCard = ({ plan_name, plan_desc, price, pointsList, ctaLabel, disabled = false } : PricingPageCardProps) => {
+export const PricingPageCard = ({ plan_name, plan_desc, price, pointsList, ctaLabel, onClick, disabled = false, loading = false } : PricingPageCardProps) => {
+    const inactive = disabled || loading;
     return (
         <PageCard className="pricingpage-card">
             <header className="pricingpage-card-header">
@@ -40,10 +43,13 @@ export const PricingPageCard = ({ plan_name, plan_desc, price, pointsList, ctaLa
                 </ul>
             </section>
 
-            <a
-                className={`plan_btn${disabled ? " plan_btn--disabled" : ""}`}
-                aria-disabled={disabled || undefined}
-            >{ctaLabel}</a>
+            <button
+                type="button"
+                className={`plan_btn${inactive ? " plan_btn--disabled" : ""}`}
+                aria-disabled={inactive || undefined}
+                disabled={inactive}
+                onClick={onClick}
+            >{loading ? "Loading…" : ctaLabel}</button>
         </PageCard>
     )
 }

@@ -25,6 +25,7 @@ urlpatterns = [
     path("accounts/", include("allauth.socialaccount.providers.google.urls")),
     path("accounts/social/", include("allauth.socialaccount.urls")),
     path("payments/", html.payments, name="payments"),
+    path("billing/", html.billing_success, name="billing-success"),
     path("", html.index, name="index")
 
 ]
