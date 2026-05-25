@@ -4,7 +4,6 @@ import type { UserProfile } from "../../../stores/authProfileStore";
 import { ProfilePageStatRow } from "../StatRow/ProfilePageStatRow";
 import {
   deriveBillingInterval,
-  deriveSubscriptionPrice,
   deriveUsageMetrics,
   deriveWordLimit,
   formatLimit,
@@ -26,11 +25,6 @@ export const PlanLimits = ({ subscription, onClickUpgrade }: PlanLimitsProps) =>
   const wordLimit = deriveWordLimit(subscription?.character_limit);
   const historyLimit = formatLimit(subscription?.history_limit, " items");
   const billingInterval = deriveBillingInterval(subscription?.billing_interval, translate);
-  const subscriptionPrice = deriveSubscriptionPrice(
-    subscription?.price_minor,
-    subscription?.currency,
-    translate,
-  );
 
   return (
     <section className="pp-card pp-section" aria-label="Plan and limits">
@@ -63,16 +57,6 @@ export const PlanLimits = ({ subscription, onClickUpgrade }: PlanLimitsProps) =>
         content="profile.billingIntervalTooltip"
         arialabel="profile.billingIntervalTooltipAria"
         value={billingInterval}
-      />
-
-      <ProfilePageStatRow
-        title="profile.subscriptionPrice"
-        titleDefault="Subscription price"
-        content="profile.subscriptionPriceTooltip"
-        contentDefault="Current recurring cost for your active plan."
-        arialabel="profile.subscriptionPriceTooltipAria"
-        arialabelDefault="What does subscription price mean?"
-        value={subscriptionPrice}
       />
 
       <button className="upgrade-btn" onClick={onClickUpgrade}>

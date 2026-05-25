@@ -1,7 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
-from .models.subscription import Subscription
+from .models.subscription import (
+    PendingCheckoutSession,
+    ProcessedStripeEvent,
+    Subscription,
+)
 from .models.user import User
 
 
@@ -49,6 +53,8 @@ class SubscriptionAdmin(admin.ModelAdmin):
         "stripe_subscription_id",
         "stripe_price_id",
         "cancel_at_period_end",
+        "payment_problem_reason",
+        "payment_problem_at",
         "current_period_end",
         "updated_at",
     )
@@ -57,5 +63,29 @@ class SubscriptionAdmin(admin.ModelAdmin):
         "plan_slug",
         "stripe_subscription_id",
         "stripe_price_id",
+        "payment_problem_reason",
     )
-    list_filter = ("plan_slug", "cancel_at_period_end")
+    list_filter = ("plan_slug", "cancel_at_period_end", "payment_problem_reason")
+
+
+@admin.register(ProcessedStripeEvent)
+class ProcessedStripeEventAdmin(admin.ModelAdmin):
+    list_display = ("stripe_event_id", "event_type", "processed_at")
+    search_fields = ("stripe_event_id", "event_type")
+    list_filter = ("event_type",)
+    readonly_fields = ("stripe_event_id", "event_type", "processed_at")
+
+
+@admin.register(PendingCheckoutSession)
+class PendingCheckoutSessionAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "plan_slug",
+        "currency",
+        "stripe_session_id",
+        "expires_at",
+        "updated_at",
+    )
+    search_fields = ("user__email", "stripe_session_id", "plan_slug", "currency")
+    list_filter = ("plan_slug", "currency")
+    readonly_fields = ("created_at", "updated_at")

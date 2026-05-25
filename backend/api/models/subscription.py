@@ -47,6 +47,9 @@ class Subscription(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     stripe_price_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)
     cancel_at_period_end = models.BooleanField(default=False)
+    payment_problem_reason = models.CharField(max_length=255, blank=True, null=True)
+    payment_problem_at = models.DateTimeField(blank=True, null=True)
+
     class Meta:
         ordering = ("-updated_at",)
 
@@ -109,3 +112,45 @@ class Subscription(models.Model):
             self.current_period_end = self._calculate_period_end_from_start(
                 self.current_period_start
             )
+
+
+class ProcessedStripeEvent(models.Model):
+    stripe_event_id = models.CharField(max_length=255, unique=True, db_index=True)
+    event_type = models.CharField(max_length=255, blank=True)
+    processed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-processed_at",)
+
+    def __str__(self) -> str:
+        return f"{self.stripe_event_id} ({self.event_type})"
+
+
+class PendingCheckoutSession(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="pending_checkout_sessions",
+    )
+    plan_slug = models.CharField(max_length=32, choices=PLAN_CHOICES)
+    currency = models.CharField(max_length=3)
+    stripe_session_id = models.CharField(max_length=255, unique=True, db_index=True)
+    url = models.URLField(max_length=2048)
+    expires_at = models.DateTimeField(db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "plan_slug", "currency"],
+                name="unique_pending_checkout_per_plan_currency",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["user", "plan_slug", "currency", "expires_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user_id} {self.plan_slug} {self.currency} ({self.stripe_session_id})"

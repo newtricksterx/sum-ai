@@ -127,8 +127,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env.str("POSTGRES_NAME"),
+        "USER": env.str("POSTGRES_USER"),
+        "PASSWORD": env.str("POSTGRES_PASSWORD"),
+        "HOST": env.str("POSTGRES_HOST"),
+        "PORT": env.str("POSTGRES_PORT"),
     }
 }
 
@@ -274,5 +278,10 @@ SOCIALACCOUNT_PROVIDERS = {
             'profile',
             'email',
         ],
+        'APP': {
+            'client_id': env.str("GOOGLE_CLIENT_ID"),
+            'secret': env.str("GOOGLE_CLIENT_SECRET"),
+            'key': ''
+        }
     }
 }

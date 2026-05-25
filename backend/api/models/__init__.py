@@ -1,4 +1,10 @@
 from .user import User, UserManager
-from .subscription import Subscription
+from .subscription import PendingCheckoutSession, ProcessedStripeEvent, Subscription
 
-__all__ = ["User", "UserManager", "Subscription"]
+__all__ = [
+    "User",
+    "UserManager",
+    "Subscription",
+    "ProcessedStripeEvent",
+    "PendingCheckoutSession",
+]

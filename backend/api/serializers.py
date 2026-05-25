@@ -19,6 +19,9 @@ class SubscriptionReadSerializer(serializers.ModelSerializer):
     actions_used = serializers.IntegerField(read_only=True)
     current_period_start = serializers.DateTimeField(read_only=True)
     current_period_end = serializers.DateTimeField(read_only=True, allow_null=True)
+    cancel_at_period_end = serializers.BooleanField(read_only=True)
+    payment_problem_reason = serializers.CharField(read_only=True, allow_null=True)
+    payment_problem_at = serializers.DateTimeField(read_only=True, allow_null=True)
 
     def get_plan_name(self, obj: Subscription) -> str:
         return obj.plan["name"]
@@ -49,6 +52,9 @@ class SubscriptionReadSerializer(serializers.ModelSerializer):
             "actions_used",
             "current_period_start",
             "current_period_end",
+            "cancel_at_period_end",
+            "payment_problem_reason",
+            "payment_problem_at",
             "created_at",
             "updated_at",
         )
