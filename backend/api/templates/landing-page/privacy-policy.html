@@ -1,0 +1,793 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ReadToRecall">
+<meta property="og:title" content="Privacy Policy — ReadToRecall">
+<meta property="og:description" content="How ReadToRecall collects, uses, and protects your personal information.">
+<meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Privacy Policy — ReadToRecall">
+<meta name="twitter:description" content="How ReadToRecall collects, uses, and protects your personal information.">
+<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
+<title>Privacy Policy — ReadToRecall</title>
+<meta name="description" content="How ReadToRecall collects, uses, and protects your personal information.">
+
+<link rel="icon" type="image/svg+xml" href="{% static 'landing-page/favicon.svg' %}">
+<link rel="icon" type="image/png" sizes="16x16" href="{% static 'landing-page/icon16.png' %}">
+<link rel="icon" type="image/png" sizes="32x32" href="{% static 'landing-page/icon32.png' %}">
+<link rel="icon" type="image/png" sizes="48x48" href="{% static 'landing-page/icon48.png' %}">
+<link rel="icon" type="image/png" sizes="128x128" href="{% static 'landing-page/icon128.png' %}">
+<link rel="apple-touch-icon" sizes="128x128" href="{% static 'landing-page/icon128.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #F4F1EA;
+    --bg-elev: #FBF9F4;
+    --ink: #141311;
+    --ink-2: #4A4742;
+    --ink-3: #8C877C;
+    --line: #E3DDD0;
+    --line-2: #EFEAE0;
+    --accent: #B8412A;
+    --accent-soft: #F2DED6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.55;
+    font-size: 16px;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ───────── NAV ───────── */
+  nav {
+    position: sticky;
+    top: 0;
+    background: rgba(244, 241, 234, 0.82);
+    backdrop-filter: saturate(140%) blur(14px);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+    border-bottom: 1px solid var(--line);
+    z-index: 100;
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 0;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .logo-mark {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    overflow: hidden;
+  }
+  .logo-mark img { width: 100%; height: 100%; display: block; object-fit: contain; }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color .15s ease;
+  }
+  .nav-links a:hover { color: var(--ink); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 11px 18px;
+    border-radius: 9px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: transform .15s ease, opacity .15s ease;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:hover { transform: translateY(-1px); opacity: 0.92; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .btn-ghost:hover { background: var(--bg-elev); opacity: 1; }
+
+  @media (max-width: 720px) {
+    .nav-links { display: none; }
+  }
+
+  /* ───────── HERO ───────── */
+  .hero {
+    padding: 60px 0 20px;
+  }
+  .hero-narrow {
+    max-width: 820px;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-3);
+    margin-bottom: 12px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(40px, 5.6vw, 64px);
+    line-height: 1.02;
+    letter-spacing: -0.028em;
+    font-weight: 400;
+    max-width: 900px;
+    margin-bottom: 22px;
+    font-variation-settings: 'opsz' 144;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+  }
+  .lede {
+    font-size: 18px;
+    color: var(--ink-2);
+    max-width: 640px;
+    margin-bottom: 22px;
+    line-height: 1.6;
+  }
+
+  /* ───────── LEGAL BODY ───────── */
+  .legal-body {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 16px 0 100px;
+  }
+  .legal-meta {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    margin-bottom: 32px;
+  }
+  .legal-toc {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 32px 0 56px;
+  }
+  .legal-toc h2 {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-3);
+    margin: 0 0 14px;
+    font-weight: 500;
+  }
+  .legal-toc ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 24px;
+    counter-reset: toc;
+  }
+  @media (max-width: 720px) {
+    .legal-toc ol { grid-template-columns: 1fr; }
+  }
+  .legal-toc li { counter-increment: toc; }
+  .legal-toc a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.6;
+    display: flex;
+    gap: 10px;
+  }
+  .legal-toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    min-width: 22px;
+    padding-top: 2px;
+  }
+  .legal-toc a:hover { color: var(--accent); }
+
+  .legal-body h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    margin-top: 56px;
+    margin-bottom: 14px;
+    scroll-margin-top: 90px;
+  }
+  .legal-body h2:first-of-type { margin-top: 0; }
+  .legal-body h3 {
+    font-family: 'Geist', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-top: 24px;
+    margin-bottom: 8px;
+    letter-spacing: -0.005em;
+  }
+  .legal-body p,
+  .legal-body li {
+    color: var(--ink-2);
+    font-size: 15px;
+    line-height: 1.72;
+    margin-bottom: 14px;
+  }
+  .legal-body ul,
+  .legal-body ol {
+    padding-left: 22px;
+    margin-bottom: 14px;
+  }
+  .legal-body ul li,
+  .legal-body ol li {
+    margin-bottom: 6px;
+  }
+  .legal-body a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent-soft);
+    transition: border-color .15s ease;
+  }
+  .legal-body a:hover { border-bottom-color: var(--accent); }
+  .legal-body strong { color: var(--ink); font-weight: 500; }
+
+  .legal-callout {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin: 18px 0 22px;
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.6;
+  }
+
+  /* Data table */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 22px;
+    font-size: 14px;
+  }
+  .data-table th,
+  .data-table td {
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line-2);
+    vertical-align: top;
+    color: var(--ink-2);
+  }
+  .data-table th {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    font-weight: 500;
+    border-bottom: 1px solid var(--line);
+  }
+  .data-table td:first-child {
+    color: var(--ink);
+    font-weight: 500;
+    white-space: nowrap;
+    width: 32%;
+  }
+  @media (max-width: 720px) {
+    .data-table td:first-child { white-space: normal; }
+  }
+
+  /* ───────── FOOTER ───────── */
+  footer {
+    background: var(--bg-elev);
+    border-top: 1px solid var(--line);
+    padding: 72px 0 36px;
+    margin-top: 80px;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 56px;
+  }
+  .footer-grid h4 {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-3);
+    margin-bottom: 18px;
+    font-weight: 500;
+  }
+  .footer-grid ul { list-style: none; }
+  .footer-grid li { margin-bottom: 10px; }
+  .footer-grid a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .footer-grid a:hover { color: var(--ink); }
+  .footer-tag {
+    color: var(--ink-2);
+    font-size: 14px;
+    max-width: 280px;
+    margin-top: 14px;
+  }
+  .footer-bottom {
+    border-top: 1px solid var(--line);
+    padding-top: 28px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+  @media (max-width: 720px) {
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ───────── NAV ───────── -->
+<nav>
+  <div class="container nav-inner">
+    <a href="/" class="logo">
+      <span class="logo-mark"><img src="{% static 'landing-page/icon128.png' %}" alt="" width="128" height="128"></span>
+      ReadToRecall
+    </a>
+    <ul class="nav-links">
+      <li><a href="/#features">Features</a></li>
+      <li><a href="/#how">How it works</a></li>
+      <li><a href="/#faq">FAQ</a></li>
+      <li><a href="{% url 'payments' %}">Pricing</a></li>
+    </ul>
+    <a href="https://chromewebstore.google.com/detail/super-simple-summarizer/pcbnaokknjmejdfakjkglkpoflooafoe?authuser=0&amp;hl=en-AU"
+        class="btn"
+        target="_blank"
+        rel="noopener noreferrer">
+      Add to Chrome
+    </a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ───────── HERO ───────── -->
+<section class="hero">
+  <div class="container hero-narrow">
+    <div class="eyebrow">Legal</div>
+    <h1>Privacy <em>Policy</em>.</h1>
+    <p class="lede">How ReadToRecall collects, uses, stores, and protects your personal information &mdash; written to reflect how the product is actually built, not boilerplate.</p>
+  </div>
+</section>
+
+<!-- ───────── LEGAL BODY ───────── -->
+<section>
+  <div class="container">
+    <div class="legal-body">
+
+      <div class="legal-meta">Last updated: May 25, 2026 · Effective: May 25, 2026</div>
+
+      <p>This Privacy Policy explains what personal information <strong>ReadToRecall</strong> (the &ldquo;<strong>Service</strong>&rdquo;), operated by <strong>Daniel Li</strong> (&ldquo;<strong>we</strong>,&rdquo; &ldquo;<strong>us</strong>,&rdquo; or &ldquo;<strong>our</strong>&rdquo;), collects from you, why we collect it, who we share it with, and the choices you have. It applies to the ReadToRecall Chrome extension, the readtorecall.com website, and our backend APIs.</p>
+
+      <div class="legal-callout">
+        <strong>The short version.</strong> We collect the minimum we need to run the Service: your Google profile (name, email, picture), your subscription state, and usage counters. We do <strong>not</strong> store the pages, PDFs, videos, summaries, flashcards, or quizzes you generate &mdash; those live in your browser&rsquo;s local storage. The content of what you summarize passes through Google Gemini for AI processing and is then returned to your browser.
+      </div>
+
+      <!-- TOC -->
+      <div class="legal-toc">
+        <h2>Contents</h2>
+        <ol>
+          <li><a href="#s1">Overview and Scope</a></li>
+          <li><a href="#s2">Information We Collect</a></li>
+          <li><a href="#s3">How We Collect Information</a></li>
+          <li><a href="#s4">How We Use Information</a></li>
+          <li><a href="#s5">AI Processing (Google Gemini)</a></li>
+          <li><a href="#s6">Third-Party Services</a></li>
+          <li><a href="#s7">Cookies, Local Storage, and Tracking</a></li>
+          <li><a href="#s8">Chrome Extension Permissions</a></li>
+          <li><a href="#s9">What We Do Not Collect</a></li>
+          <li><a href="#s10">Data Retention</a></li>
+          <li><a href="#s11">Security</a></li>
+          <li><a href="#s12">Your Privacy Rights</a></li>
+          <li><a href="#s13">Children&rsquo;s Privacy</a></li>
+          <li><a href="#s14">International Data Transfers</a></li>
+          <li><a href="#s15">Changes to This Policy</a></li>
+          <li><a href="#s16">Contact Us</a></li>
+        </ol>
+      </div>
+
+      <!-- ───────── 1 ───────── -->
+      <h2 id="s1">1. Overview and Scope</h2>
+      <p>This Policy applies whenever you interact with ReadToRecall &mdash; for example, when you install the Chrome extension, sign in with Google, generate summaries or flashcards, subscribe to a paid plan, or visit our marketing pages. It does not apply to third-party websites or services we link to, or to content you summarize that comes from third parties.</p>
+      <p>By using ReadToRecall, you agree to the practices described here. If you do not agree, please do not install the extension or create an account.</p>
+
+      <!-- ───────── 2 ───────── -->
+      <h2 id="s2">2. Information We Collect</h2>
+      <p>We collect only the information we need to run the Service. The table below lists every category we store on our servers.</p>
+
+      <h3>Account information</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Field</th><th>Source</th><th>Why we have it</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Email address</td>
+            <td>Google Sign-In</td>
+            <td>Account identifier, login, billing receipts, account notifications.</td>
+          </tr>
+          <tr>
+            <td>Display name &amp; profile picture URL</td>
+            <td>Google Sign-In</td>
+            <td>Shown in the extension&rsquo;s profile area. The picture itself is loaded from Google&rsquo;s URL on demand; we store only the URL via the Django allauth library.</td>
+          </tr>
+          <tr>
+            <td>Username</td>
+            <td>Auto-generated from your email&rsquo;s local part (you can change it in settings)</td>
+            <td>Internal identifier; displayed in profile.</td>
+          </tr>
+          <tr>
+            <td>Google account identifier (&ldquo;sub&rdquo;)</td>
+            <td>Google Sign-In</td>
+            <td>Stable link between your Google identity and your ReadToRecall account.</td>
+          </tr>
+          <tr>
+            <td>Account created / last updated timestamps</td>
+            <td>Generated server-side</td>
+            <td>Operational records.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Subscription and billing information</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Field</th><th>Source</th><th>Why we have it</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Plan (free / standard / pro)</td>
+            <td>Stripe webhook</td>
+            <td>Determines what features and limits you can use.</td>
+          </tr>
+          <tr>
+            <td>Usage counters (e.g. summaries used this period)</td>
+            <td>Generated server-side</td>
+            <td>Enforces per-plan limits; reset each billing period.</td>
+          </tr>
+          <tr>
+            <td>Current billing period start / end</td>
+            <td>Stripe webhook</td>
+            <td>Drives quota resets and renewal display.</td>
+          </tr>
+          <tr>
+            <td>Stripe customer ID, subscription ID, price ID</td>
+            <td>Stripe</td>
+            <td>Links your account to Stripe so we can read your subscription state. These are opaque identifiers, not card data.</td>
+          </tr>
+          <tr>
+            <td>Cancellation flag, payment-problem reason, payment-problem timestamp</td>
+            <td>Stripe webhook</td>
+            <td>Surfaces in-app banners (&ldquo;your last payment failed&rdquo;, &ldquo;plan ends on date&rdquo;).</td>
+          </tr>
+          <tr>
+            <td>Pending checkout session (Stripe session ID + URL + expiry)</td>
+            <td>Generated when you start checkout</td>
+            <td>Lets us resume an in-progress checkout. Auto-expires.</td>
+          </tr>
+          <tr>
+            <td>Stripe event ID + event type (idempotency log)</td>
+            <td>Stripe webhook</td>
+            <td>Prevents us from processing the same webhook twice. We do <strong>not</strong> store the full webhook payload.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Your <strong>credit card number, expiry date, CVV, and billing address are collected and stored by Stripe, not by us</strong>. We never see or store full card details.</p>
+
+      <h3>Technical information</h3>
+      <p>When your browser talks to our servers we automatically receive:</p>
+      <ul>
+        <li>Your IP address, user-agent string, request method, path, status code, and timestamp &mdash; standard web-server log fields used for security, debugging, and abuse prevention.</li>
+        <li>Authentication cookies (see §7).</li>
+      </ul>
+      <p>We do not run third-party analytics, advertising trackers, fingerprinting scripts, or session-replay tools on the extension or backend.</p>
+
+      <!-- ───────── 3 ───────── -->
+      <h2 id="s3">3. How We Collect Information</h2>
+      <ul>
+        <li><strong>From Google</strong>, when you sign in with Google Sign-In and consent to share your <em>profile</em> and <em>email</em> scopes.</li>
+        <li><strong>From Stripe</strong>, via webhooks fired when you start a checkout, complete a payment, change a plan, or cancel.</li>
+        <li><strong>From your browser</strong>, when the extension calls our API to generate a summary, refresh authentication, or fetch your profile.</li>
+        <li><strong>From the page you are actively viewing</strong>, when you click the extension icon &mdash; the extension extracts the readable text of that page, that PDF, or that YouTube transcript and sends it to our backend for the duration of one request.</li>
+      </ul>
+
+      <!-- ───────── 4 ───────── -->
+      <h2 id="s4">4. How We Use Information</h2>
+      <p>We use the information described in §2 to:</p>
+      <ul>
+        <li>Authenticate you and keep your session active.</li>
+        <li>Generate summaries, flashcards, quizzes, and action items in response to your requests.</li>
+        <li>Enforce per-plan usage limits and surface your current usage in the UI.</li>
+        <li>Process subscriptions, renewals, and cancellations via Stripe; show you billing status and payment-problem alerts.</li>
+        <li>Keep the Service running &mdash; debug errors, defend against abuse, and respond to legal requests.</li>
+        <li>Communicate with you about your account, security issues, material changes to the Service, and billing.</li>
+      </ul>
+      <p>We do not use your information to build advertising profiles, sell to third parties, or train AI models.</p>
+
+      <!-- ───────── 5 ───────── -->
+      <h2 id="s5">5. AI Processing (Google Gemini)</h2>
+      <p>When you generate a summary, flashcards, a quiz, or action items, the extension extracts the relevant content from the page, PDF, or YouTube transcript you are viewing and sends it to our backend. Our backend then sends that text to <strong>Google Gemini</strong> through the official Gemini API to generate the AI output, which is returned to your browser.</p>
+      <p>We do not pass your account email, name, IP address, or any other personal identifier to Gemini along with the content. Gemini sees the text to be processed and an API key that identifies us, not you. Google&rsquo;s handling of API requests is governed by the <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener noreferrer">Gemini API Terms of Service</a> and Google&rsquo;s privacy policies, which may include short-term logging for abuse prevention and service quality. We do not control those practices.</p>
+      <p>The text you send for processing may include personal information (yours or other people&rsquo;s) if the page, PDF, or transcript contains it. Do not summarize content you do not have the right to process, and avoid sending sensitive information you would not want a third-party AI provider to see.</p>
+
+      <!-- ───────── 6 ───────── -->
+      <h2 id="s6">6. Third-Party Services</h2>
+      <p>The Service relies on these third parties. We disclose only the data necessary to use their service.</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Provider</th><th>Purpose</th><th>What it sees</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Google (Sign-In)</td>
+            <td>Authentication via OAuth</td>
+            <td>That you signed in. Returns your name, email, profile picture URL, and Google account ID to us.</td>
+          </tr>
+          <tr>
+            <td>Google (Gemini API)</td>
+            <td>AI processing for summaries, flashcards, quizzes, action items</td>
+            <td>The text content you submitted for that request, plus our API key. No user identity.</td>
+          </tr>
+          <tr>
+            <td>Stripe</td>
+            <td>Payments, subscriptions, billing portal</td>
+            <td>Your name, email, billing address, payment card details, and transaction history. Stripe is the payment data controller.</td>
+          </tr>
+          <tr>
+            <td>Google Chrome Web Store</td>
+            <td>Distribution of the extension</td>
+            <td>Install / uninstall events, aggregate usage and crash stats reported by Chrome.</td>
+          </tr>
+          <tr>
+            <td>YouTube</td>
+            <td>Access to public video transcripts</td>
+            <td>Standard request data when our backend fetches a public transcript URL.</td>
+          </tr>
+          <tr>
+            <td>Hosting / infrastructure providers</td>
+            <td>Run our servers and database</td>
+            <td>Encrypted traffic between you and our backend; database storage of the records in §2.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Each of these providers has its own privacy policy that governs how they handle your information.</p>
+
+      <!-- ───────── 7 ───────── -->
+      <h2 id="s7">7. Cookies, Local Storage, and Tracking</h2>
+
+      <h3>Cookies set by our backend</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Cookie</th><th>Purpose</th><th>Lifetime / properties</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>access_token</code></td>
+            <td>Short-lived JWT used to authenticate API calls.</td>
+            <td>15 minutes. HTTP-only, Secure (in production), SameSite=None.</td>
+          </tr>
+          <tr>
+            <td><code>refresh_token</code></td>
+            <td>Lets the extension renew your access token without re-logging in.</td>
+            <td>1 day. HTTP-only, Secure (in production), SameSite=None, path scoped to <code>/api/token/refresh</code>. Blacklisted on rotation and logout.</td>
+          </tr>
+          <tr>
+            <td><code>csrftoken</code></td>
+            <td>Django&rsquo;s Cross-Site Request Forgery token. Required to make mutating requests.</td>
+            <td>Set by Django. HTTP-only, Secure (in production), SameSite=Lax.</td>
+          </tr>
+          <tr>
+            <td><code>sessionid</code></td>
+            <td>Temporarily used during the Google Sign-In handshake, then immediately cleared once JWT cookies are issued.</td>
+            <td>Cleared at the end of the social-login flow.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>We do not use cookies for advertising, analytics, or cross-site tracking. We do not use Google Analytics, Meta Pixel, or any comparable tracker.</p>
+
+      <h3>Local storage in your browser</h3>
+      <p>The extension uses your browser&rsquo;s <code>localStorage</code> to keep the Service usable offline and to avoid sending data we don&rsquo;t need to. Items stored locally include:</p>
+      <ul>
+        <li><strong>Settings</strong> &mdash; theme, language, summary format and length, font size, currency, quiz difficulty, last page viewed.</li>
+        <li><strong>Auth profile cache</strong> (<code>auth-profile</code>) &mdash; a base64-encoded copy of your <code>/api/users/me</code> response (email, username, avatar URL, subscription state). This is a cache for performance; deleting it does not delete your account.</li>
+        <li><strong>Current session</strong> (<code>current-session</code>) &mdash; the URL you are currently summarizing and any flashcards / quiz already generated in this tab.</li>
+        <li><strong>History</strong> (<code>user-history</code>) &mdash; a map of past summaries, flashcards, and quizzes <strong>keyed by your email</strong> (or <code>anonymous</code> if you are not signed in). This is stored only in your browser. It is never transmitted to our backend.</li>
+      </ul>
+      <p>You can clear any of these at any time using your browser&rsquo;s &ldquo;Clear site data&rdquo; control, or by uninstalling the extension. Clearing local storage does not delete your account on our servers.</p>
+
+      <!-- ───────── 8 ───────── -->
+      <h2 id="s8">8. Chrome Extension Permissions</h2>
+      <p>The ReadToRecall Chrome extension requests the smallest set of permissions necessary to function:</p>
+      <ul>
+        <li><strong><code>activeTab</code></strong> &mdash; lets the extension read the current tab&rsquo;s content <em>only when you click the extension icon</em>. It does not give us access to other tabs, your browsing history, or your bookmarks.</li>
+        <li><strong><code>scripting</code></strong> &mdash; lets the extension inject the script that extracts readable text from the page you are summarizing.</li>
+        <li><strong>Host permissions</strong> &mdash; <code>https://super-summarizer.ddns.net/*</code> (our backend) and <code>file:///*</code> (so the extension can summarize local PDFs you open in Chrome).</li>
+      </ul>
+      <p>The extension does <strong>not</strong> request, and therefore cannot access, the <code>tabs</code>, <code>webNavigation</code>, <code>cookies</code>, <code>browsingHistory</code>, <code>bookmarks</code>, <code>storage</code> (extension-scoped), <code>nativeMessaging</code>, or <code>downloads</code> permissions.</p>
+
+      <!-- ───────── 9 ───────── -->
+      <h2 id="s9">9. What We Do Not Collect</h2>
+      <p>We have deliberately built the Service to minimize what we know about you. We do <strong>not</strong> collect or store:</p>
+      <ul>
+        <li>The full content of webpages, PDFs, or YouTube transcripts you summarize &mdash; that content is processed transiently in memory and not written to our database.</li>
+        <li>The summaries, flashcards, quizzes, or action items you generate &mdash; those are returned to your browser and stored only in your local storage.</li>
+        <li>The URLs you have visited or summarized, beyond the single request currently being served.</li>
+        <li>Your credit card number, expiry, CVV, or billing address (Stripe holds these).</li>
+        <li>Your contacts, calendar, files, location, microphone, or camera.</li>
+        <li>Browsing history outside of pages you actively summarize.</li>
+        <li>Behavioural analytics, advertising profiles, or biometric identifiers.</li>
+      </ul>
+
+      <!-- ───────── 10 ───────── -->
+      <h2 id="s10">10. Data Retention</h2>
+      <ul>
+        <li><strong>Account records</strong> (email, username, Google profile, Stripe IDs, subscription state) are kept for as long as your account exists, plus a short window after deletion for backup expiry and accounting/tax purposes.</li>
+        <li><strong>Stripe-related records</strong> are also retained by Stripe under its own policies and applicable financial-records laws.</li>
+        <li><strong>Usage counters</strong> reset at the start of each billing period; historical counters are not retained beyond the current period.</li>
+        <li><strong>Pending checkout sessions</strong> auto-expire shortly after creation.</li>
+        <li><strong>Server logs</strong> (request metadata, errors) are retained for a limited operational period (typically up to 90 days) and then rotated out.</li>
+        <li><strong>Locally stored data</strong> (settings, history, session) persists in your browser until you clear it or uninstall the extension. We have no copy.</li>
+      </ul>
+
+      <!-- ───────── 11 ───────── -->
+      <h2 id="s11">11. Security</h2>
+      <p>We take reasonable technical and organizational measures to protect your data:</p>
+      <ul>
+        <li>All traffic between your browser and our backend is encrypted in transit (HTTPS / TLS).</li>
+        <li>Authentication uses HTTP-only JWT cookies; access tokens are short-lived and refresh tokens are blacklisted on rotation and logout.</li>
+        <li>All state-changing API calls require a CSRF token.</li>
+        <li>Strict transport security, content-type sniffing protection, secure referrer policy, and same-origin opener policy are enforced in production.</li>
+        <li>Card data never reaches our servers &mdash; Stripe handles payment input directly.</li>
+        <li>Stripe webhook payloads are signature-verified, and webhook events are de-duplicated by event ID.</li>
+        <li>Access to production systems is limited to the operator (Daniel Li).</li>
+      </ul>
+      <p>No system is perfectly secure. If we become aware of a data breach affecting your information, we will notify you and applicable regulators as required by law.</p>
+
+      <!-- ───────── 12 ───────── -->
+      <h2 id="s12">12. Your Privacy Rights</h2>
+      <p>Depending on where you live, you may have some or all of the following rights regarding the personal information we hold about you:</p>
+      <ul>
+        <li><strong>Access</strong> &mdash; request a copy of the information we hold about you.</li>
+        <li><strong>Correction</strong> &mdash; correct inaccurate or incomplete information.</li>
+        <li><strong>Deletion</strong> &mdash; ask us to delete your account and the personal information tied to it. We may retain limited records where required by law (for example, transaction records for tax purposes).</li>
+        <li><strong>Portability</strong> &mdash; receive a machine-readable copy of your account information.</li>
+        <li><strong>Withdraw consent</strong> &mdash; revoke the Google permissions you granted from your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">Google Account settings</a>.</li>
+        <li><strong>Complaint</strong> &mdash; lodge a complaint with your local data protection authority.</li>
+      </ul>
+      <p>To exercise any of these rights, email us at <a href="mailto:readtorecall.business@gmail.com">readtorecall.business@gmail.com</a> from the email address tied to your account. We will respond within the timeframes required by applicable law (typically 30 days).</p>
+
+      <!-- ───────── 13 ───────── -->
+      <h2 id="s13">13. Children&rsquo;s Privacy</h2>
+      <p>ReadToRecall is not directed to children under 13, and we do not knowingly collect personal information from children under 13. Older minors may use the Service only if permitted by their local digital-consent law and, where required, with the involvement of a parent or guardian. If you believe a child under 13 has provided us with personal information, please contact us so we can delete it.</p>
+
+      <!-- ───────── 14 ───────── -->
+      <h2 id="s14">14. International Data Transfers</h2>
+      <p>Our backend is operated from Canada, our payment processor (Stripe) operates globally, and our AI provider (Google Gemini) operates from the United States and other regions. If you use the Service from outside these jurisdictions, your information will be transferred to and processed in countries whose data-protection laws may differ from those of your country. By using the Service you consent to those transfers.</p>
+
+      <!-- ───────── 15 ───────── -->
+      <h2 id="s15">15. Changes to This Policy</h2>
+      <p>We may update this Policy from time to time to reflect changes in the Service, our practices, or the law. The &ldquo;Last updated&rdquo; date at the top of this page reflects the most recent revision. For material changes, we will provide notice by email and/or via an in-app banner at least <strong>14 days</strong> before the new Policy takes effect. Continued use of the Service after that date constitutes acceptance.</p>
+
+      <!-- ───────── 16 ───────── -->
+      <h2 id="s16">16. Contact Us</h2>
+      <p>For privacy questions, data requests, or to report a concern, contact:</p>
+      <p><strong>Daniel Li &mdash; ReadToRecall</strong><br>
+      <a href="mailto:readtorecall.business@gmail.com">readtorecall.business@gmail.com</a></p>
+      <p>For our full legal terms, see the <a href="{% url 'terms' %}">Terms &amp; Conditions</a>.</p>
+
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ───────── FOOTER ───────── -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a href="/" class="logo">
+          <span class="logo-mark"><img src="{% static 'landing-page/icon128.png' %}" alt="" width="128" height="128"></span>
+          ReadToRecall
+        </a>
+        <p class="footer-tag">Summarize, flashcard, and quiz anything you read on the web.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/#features">Features</a></li>
+          <li><a href="{% url 'payments' %}">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="mailto:readtorecall.business@gmail.com">readtorecall.business@gmail.com</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="{% url 'privacy' %}">Privacy</a></li>
+          <li><a href="{% url 'terms' %}">Terms</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 ReadToRecall. All rights reserved.</span>
+      <span>Made with care.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

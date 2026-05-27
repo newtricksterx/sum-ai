@@ -167,9 +167,10 @@ class BaseUserWriteSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializer(BaseUserWriteSerializer):
-    is_active = serializers.BooleanField(required=False, default=True)
-    is_staff = serializers.BooleanField(required=False, default=False)
-
+    # is_staff and is_active are exposed read-only so the API response includes
+    # them, but they cannot be set via this endpoint. Staff promotion goes
+    # through Django admin (audited); is_active is governed by signup/lifecycle
+    # logic, not client input.
     class Meta:
         model = User
         fields = (
@@ -180,7 +181,7 @@ class UserCreateSerializer(BaseUserWriteSerializer):
             "is_active",
             "is_staff",
         )
-        read_only_fields = ("id",)
+        read_only_fields = ("id", "is_active", "is_staff")
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):

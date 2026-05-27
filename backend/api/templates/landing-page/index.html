@@ -8,10 +8,14 @@
 <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
 
 <meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="es_ES">
+<meta property="og:locale:alternate" content="fr_FR">
+<meta property="og:locale:alternate" content="hi_IN">
+<meta property="og:locale:alternate" content="zh_CN">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ReadToRecall">
-<meta property="og:title" content="ReadToRecall - AI Summarizer Chrome Extension for Webpages, YouTube &amp; PDFs">
-<meta property="og:description" content="ReadToRecall is a free AI Chrome extension that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes so you remember what you read.">
+<meta property="og:title" content="ReadToRecall — Free AI Study Tool for Webpages, YouTube &amp; PDFs (Chrome Extension)">
+<meta property="og:description" content="ReadToRecall is a free AI study tool that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes — built for active recall, the studying technique that actually sticks.">
 <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
 <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
 <meta property="og:image:alt" content="ReadToRecall extension popup summarizing a webpage">
@@ -19,16 +23,19 @@
 <meta property="og:image:height" content="649">
 
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="ReadToRecall - AI Summarizer Chrome Extension for Webpages, YouTube &amp; PDFs">
-<meta name="twitter:description" content="Summarize webpages, YouTube videos, and PDFs into flashcards and quizzes so you remember what you read.">
+<meta name="twitter:title" content="ReadToRecall — Free AI Study Tool for Webpages, YouTube &amp; PDFs (Chrome Extension)">
+<meta name="twitter:description" content="A free AI studying tool that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes — built for active recall.">
 <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
-<title>ReadToRecall — AI Summarizer Chrome Extension for Webpages, YouTube &amp; PDFs</title>
-<meta name="description" content="ReadToRecall is a free AI Chrome extension that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes — so you remember what you read.">
+<meta name="twitter:image:alt" content="ReadToRecall extension popup summarizing a webpage">
+<title>ReadToRecall — Free AI Study Tool for Webpages, YouTube &amp; PDFs (Chrome Extension)</title>
+<meta name="description" content="ReadToRecall is a free AI study tool that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes — built for active recall, the studying technique that actually sticks.">
 
+<link rel="icon" type="image/svg+xml" href="{% static 'landing-page/favicon.svg' %}">
 <link rel="icon" type="image/png" sizes="16x16" href="{% static 'landing-page/icon16.png' %}">
 <link rel="icon" type="image/png" sizes="32x32" href="{% static 'landing-page/icon32.png' %}">
 <link rel="icon" type="image/png" sizes="48x48" href="{% static 'landing-page/icon48.png' %}">
 <link rel="icon" type="image/png" sizes="128x128" href="{% static 'landing-page/icon128.png' %}">
+<link rel="apple-touch-icon" sizes="128x128" href="{% static 'landing-page/icon128.png' %}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -36,19 +43,88 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
+  "@type": ["SoftwareApplication", "EducationalApplication"],
   "name": "ReadToRecall",
   "applicationCategory": "BrowserApplication",
+  "applicationSubCategory": "Study Tool",
   "operatingSystem": "Windows, macOS, Linux, ChromeOS",
   "browserRequirements": "Requires Chrome or any Chromium-based browser (Edge, Brave, Arc, Opera)",
-  "description": "AI Chrome extension that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes.",
+  "softwareVersion": "1.0.1",
+  "inLanguage": ["en", "es", "fr", "hi", "zh"],
+  "audience": {"@type": "EducationalAudience", "educationalRole": "student"},
+  "learningResourceType": ["Summary", "Flashcard", "Quiz"],
+  "educationalUse": ["Active Recall", "Spaced Repetition", "Self-Study"],
+  "featureList": [
+    "Summarize webpages, PDFs, and YouTube transcripts",
+    "AI-generated flashcards for spaced repetition",
+    "AI-generated multiple-choice quizzes (easy / medium / hard)",
+    "5 summary formats: TL;DR, bullets, paragraph, Q&A, pros & cons",
+    "5 output languages: English, Spanish, French, Hindi, Mandarin",
+    "Per-account history with deletion controls"
+  ],
+  "description": "ReadToRecall is a free AI study tool — a Chrome extension that turns any webpage, PDF, or YouTube transcript into a summary, flashcards, and a quiz so you remember what you read. Built on active recall, the evidence-backed studying technique. Free plan: 10 summaries/month with 3 saved sessions. Standard plan: 300 summaries/month for $3.99/mo. Pro plan: 1,200 summaries/month for $9.99/mo. Supports Chrome and all Chromium browsers (Edge, Brave, Arc, Opera).",
   "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
   "image": "{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
+  "author":    {"@type": "Person",       "name": "Daniel Li"},
+  "publisher": {"@type": "Organization", "name": "ReadToRecall"},
+  "offers": [
+    {"@type": "Offer", "name": "Free",     "price": "0.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"},
+    {"@type": "Offer", "name": "Standard", "price": "3.99", "priceCurrency": "USD", "availability": "https://schema.org/InStock"},
+    {"@type": "Offer", "name": "Pro",      "price": "9.99", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "ReadToRecall",
+  "url": "{{ request.scheme }}://{{ request.get_host }}/",
+  "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/icon128.png' %}",
+  "founder": {"@type": "Person", "name": "Daniel Li"},
+  "email": "readtorecall.business@gmail.com",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "readtorecall.business@gmail.com",
+    "contactType": "customer support"
   }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "ReadToRecall",
+  "url": "{{ request.scheme }}://{{ request.get_host }}/"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to summarize and study any webpage with ReadToRecall",
+  "description": "Three-step workflow to turn a webpage, PDF, or YouTube video into a summary, flashcards, and a quiz using the ReadToRecall Chrome extension.",
+  "totalTime": "PT1M",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Install the extension",
+      "text": "Add ReadToRecall to Chrome (or any Chromium browser — Edge, Brave, Arc, Opera) from the Chrome Web Store. No account is required to try it."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Open the page you want to study",
+      "text": "Navigate to any webpage, YouTube video, or PDF in your browser. Click the ReadToRecall icon to open the extension popup."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Summarize, then flashcard or quiz",
+      "text": "Click Summarize to get a clean summary in your chosen format and language. From the summary, generate flashcards or a multiple-choice quiz with one more click."
+    }
+  ]
 }
 </script>
 <script type="application/ld+json">
@@ -61,7 +137,7 @@
       "name": "What is ReadToRecall?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "ReadToRecall is a free AI Chrome extension that summarizes any webpage, YouTube video, or PDF, then generates flashcards and quizzes from the summary so you remember what you read."
+        "text": "ReadToRecall is a free AI study tool — a Chrome extension that summarizes any webpage, YouTube video, or PDF, then turns the summary into flashcards and a quiz. It is built for students, researchers, and anyone who reads to learn, and uses active recall — the evidence-backed studying technique for moving information from short-term to long-term memory."
       }
     },
     {
@@ -69,23 +145,31 @@
       "name": "Is ReadToRecall free?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. The Free plan covers 10 summaries per month with 3 saved sessions. Standard and Pro plans unlock more summaries, larger inputs, and longer history."
+        "text": "Yes. The Free plan covers 10 summaries per month with 3 saved sessions and inputs up to 10,000 characters. Standard ($3.99/mo) raises that to 300 summaries with 30,000-character inputs and 5 saved sessions. Pro ($9.99/mo) gives you 1,200 summaries with unlimited input length and 10 saved sessions."
       }
     },
     {
       "@type": "Question",
-      "name": "Which languages are supported?",
+      "name": "What's the difference between Standard and Pro?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "English, Spanish, French, Hindi, and Mandarin."
+        "text": "Two things: volume and input size. Standard is 300 summaries per month with a 30,000-character cap per source — enough for most articles, papers, and short videos. Pro is 1,200 summaries per month with no character cap, so you can summarize long PDFs, entire books, and hour-long lectures without truncation."
       }
     },
     {
       "@type": "Question",
-      "name": "What can it summarize?",
+      "name": "What can ReadToRecall summarize?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Any webpage, YouTube video transcript, or PDF you open in the browser."
+        "text": "Any webpage, YouTube video (it uses the transcript), or PDF you open in your browser — including local PDFs opened from your computer. Ads, navigation, and sidebars are stripped automatically before the AI sees the content, so the summary stays focused on what matters."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which output languages are supported?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The interface is English, but you can choose your summary output language from English, Spanish, French, Hindi, or Mandarin. The setting lives in the extension popup and applies to summaries, flashcards, and quizzes."
       }
     },
     {
@@ -93,17 +177,50 @@
       "name": "Which browsers are supported?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Chrome and Chromium browsers including Edge, Brave, Arc, and Opera."
+        "text": "Chrome and any Chromium-based browser — Edge, Brave, Arc, and Opera. Firefox and Safari are not currently supported."
       }
     },
     {
       "@type": "Question",
-      "name": "What data do you collect?",
+      "name": "What AI model does ReadToRecall use?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Pages you summarize are not stored. Summaries are saved to your account only if you sign in, and you can clear them anytime."
+        "text": "ReadToRecall uses Google Gemini for all AI generation — summaries, flashcards, quizzes, and action items. Your content is sent to Gemini through Google's official API with no user identity attached."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What data do you collect? Is my data private?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Very little. We store your Google profile (name, email, profile picture URL) for sign-in, plus your subscription state from Stripe. Your summaries, flashcards, quizzes, and history live only in your browser's local storage — they are never written to our servers. The text you summarize is transmitted to Google Gemini for processing and then returned to your browser. Full details are in the Privacy Policy."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How accurate are the AI summaries?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AI-generated summaries, flashcards, and quizzes are usually good but not perfect. Like any large language model, ReadToRecall can occasionally omit details, misinterpret the source, or fabricate facts. Always verify before relying on output for academic, legal, medical, financial, or safety-critical decisions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I cancel anytime?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Cancel in the extension's profile area at any time — your subscription stays active until the end of the current billing period, then drops to the Free plan automatically. We don't offer routine refunds, but we will issue them for duplicate charges, clear billing errors, or material multi-day outages."
       }
     }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ request.scheme }}://{{ request.get_host }}/"}
   ]
 }
 </script>
@@ -749,8 +866,8 @@
     <div class="hero-grid">
       <div class="hero-text">
         <div class="eyebrow">Now available</div>
-        <h1>The extension that helps you <em>read, recall, and retain</em> anything on the web.</h1>
-        <p class="lede">ReadToRecall is a free Chrome extension that uses AI to summarize any webpage, YouTube video, or PDF — then turns the summary into flashcards and a quiz so you remember what you read, without leaving the tab.</p>
+        <h1>The AI study tool that helps you <em>read, recall, and retain</em> anything on the web.</h1>
+        <p class="lede">ReadToRecall is a free AI studying tool — a Chrome extension that turns any webpage, YouTube video, or PDF into a summary, flashcards, and a quiz built for active recall. <a href="{% url 'study-tools' %}" style="color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent-soft); text-underline-offset: 3px;">See how it compares to other study tools →</a></p>
         <div class="cta-row">
           <a href="https://chromewebstore.google.com/detail/super-simple-summarizer/pcbnaokknjmejdfakjkglkpoflooafoe?authuser=0&amp;hl=en-AU"
             class="btn"
@@ -875,27 +992,43 @@
       <div>
         <details open>
           <summary>What is ReadToRecall?</summary>
-          <p>ReadToRecall is a free AI Chrome extension that summarizes any webpage, YouTube video, or PDF, then generates flashcards and quizzes from the summary so you remember what you read. Built for students, researchers, and anyone who reads to learn.</p>
+          <p>ReadToRecall is a free AI study tool — a Chrome extension that summarizes any webpage, YouTube video, or PDF, then turns the summary into flashcards and a quiz. Built for students, researchers, and anyone who reads to learn — it leverages active recall, the evidence-backed studying technique for moving information from short-term to long-term memory.</p>
         </details>
         <details>
           <summary>Is ReadToRecall free?</summary>
-          <p>Yes. The Free plan covers 10 summaries per month with 3 saved sessions. Standard ($3.99/mo) and Pro ($9.99/mo) unlock more summaries, larger inputs, and longer history.</p>
+          <p>Yes. The Free plan covers 10 summaries per month with 3 saved sessions and inputs up to 10,000 characters. Standard ($3.99/mo) raises that to 300 summaries with 30,000-character inputs and 5 saved sessions. Pro ($9.99/mo) gives you 1,200 summaries with unlimited input length and 10 saved sessions.</p>
         </details>
         <details>
-          <summary>Which languages are supported?</summary>
-          <p>English, Spanish, French, Hindi, and Mandarin — pick your output language in settings.</p>
+          <summary>What&rsquo;s the difference between Standard and Pro?</summary>
+          <p>Two things: volume and input size. Standard is 300 summaries per month with a 30,000-character cap per source — enough for most articles, papers, and short videos. Pro is 1,200 summaries per month with no character cap, so you can summarize long PDFs, entire books, and hour-long lectures without truncation.</p>
         </details>
         <details>
-          <summary>What can it summarize?</summary>
-          <p>Any webpage, YouTube video (it uses the transcript), or PDF you open in the browser.</p>
+          <summary>What can ReadToRecall summarize?</summary>
+          <p>Any webpage, YouTube video (it uses the transcript), or PDF you open in your browser — including local PDFs opened from your computer. Ads, navigation, and sidebars are stripped automatically before the AI sees the content, so the summary stays focused on what matters.</p>
+        </details>
+        <details>
+          <summary>Which output languages are supported?</summary>
+          <p>The interface is English, but you can pick your <em>output</em> language from English, Spanish, French, Hindi, or Mandarin. The setting lives in the extension popup and applies to summaries, flashcards, and quizzes.</p>
         </details>
         <details>
           <summary>Which browsers are supported?</summary>
-          <p>Chrome and any Chromium browser — Edge, Brave, Arc, Opera.</p>
+          <p>Chrome and any Chromium-based browser — Edge, Brave, Arc, Opera. Firefox and Safari are not currently supported.</p>
         </details>
         <details>
-          <summary>What data do you collect?</summary>
-          <p>We don't store the pages you summarize. Summaries are saved to your account only if you're signed in, and you can clear them any time.</p>
+          <summary>What AI model does ReadToRecall use?</summary>
+          <p>ReadToRecall uses <strong>Google Gemini</strong> for all AI generation — summaries, flashcards, quizzes, and action items. Your content is sent to Gemini through Google&rsquo;s official API with no user identity attached.</p>
+        </details>
+        <details>
+          <summary>What data do you collect? Is my data private?</summary>
+          <p>Very little. We store your Google profile (name, email, profile picture URL) for sign-in, plus your subscription state from Stripe. Your summaries, flashcards, quizzes, and history live <strong>only in your browser&rsquo;s local storage</strong> — they are never written to our servers. The text you summarize is transmitted to Google Gemini for processing and then returned to your browser. Full details in our <a href="{% url 'privacy' %}">Privacy Policy</a>.</p>
+        </details>
+        <details>
+          <summary>How accurate are the AI summaries?</summary>
+          <p>AI-generated summaries, flashcards, and quizzes are usually good but not perfect. Like any large language model, ReadToRecall can occasionally omit details, misinterpret the source, or fabricate facts. Always verify before relying on output for academic, legal, medical, financial, or safety-critical decisions.</p>
+        </details>
+        <details>
+          <summary>Can I cancel anytime?</summary>
+          <p>Yes. Cancel in the extension&rsquo;s profile area at any time — your subscription stays active until the end of the current billing period, then drops to the Free plan automatically. We don&rsquo;t offer routine refunds, but we will issue them for duplicate charges, clear billing errors, or material outages. See our <a href="{% url 'terms' %}#s6">Refund Policy</a>.</p>
         </details>
       </div>
     </div>
@@ -933,24 +1066,19 @@
         <ul>
           <li><a href="#features">Features</a></li>
           <li><a href="{% url 'payments' %}">Pricing</a></li>
-          <li><a href="#how">Changelog</a></li>
-          <li><a href="#features">Roadmap</a></li>
         </ul>
       </div>
       <div>
-        <h4>Company</h4>
+        <h4>Contact</h4>
         <ul>
-          <li><a href="#how">About</a></li>
-          <li><a href="#features">Blog</a></li>
-          <li><a href="#faq">Contact</a></li>
+          <li><a href="mailto:readtorecall.business@gmail.com">readtorecall.business@gmail.com</a></li>
         </ul>
       </div>
       <div>
         <h4>Legal</h4>
         <ul>
-          <li><a href="#faq">Privacy</a></li>
-          <li><a href="#faq">Terms</a></li>
-          <li><a href="#faq">Security</a></li>
+          <li><a href="{% url 'privacy' %}">Privacy</a></li>
+          <li><a href="{% url 'terms' %}">Terms</a></li>
         </ul>
       </div>
     </div>

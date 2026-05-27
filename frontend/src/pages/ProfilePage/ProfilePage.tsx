@@ -20,6 +20,7 @@ const ProfilePage: React.FC = () => {
     errorMessage,
     infoMessage,
     handleLogout,
+    openBillingPortal,
     dismissError,
   } = useProfileAccount();
 
@@ -98,8 +99,9 @@ const ProfilePage: React.FC = () => {
           <LogoutAction
             email={userProfile.email}
             isSubmitting={isSubmitting}
+            plan_name={userProfile?.subscription?.plan_name}
             onConfirm={() => void handleLogout()}
-            cancelSubscription={() => {}}
+            cancelSubscription={openBillingPortal}
           />
         </div>
       </PageCard>

@@ -26,6 +26,12 @@ urlpatterns = [
     path("accounts/social/", include("allauth.socialaccount.urls")),
     path("payments/", html.payments, name="payments"),
     path("billing/", html.billing_success, name="billing-success"),
+    path("terms/", html.terms, name="terms"),
+    path("privacy/", html.privacy, name="privacy"),
+    path("study-tools/", html.study_tools, name="study-tools"),
+    path("robots.txt", html.robots, name="robots"),
+    path("sitemap.xml", html.sitemap_xml, name="sitemap"),
+    path("llms.txt", html.llms_txt, name="llms"),
     path("", html.index, name="index")
 
 ]

@@ -8,24 +8,34 @@
 <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
 
 <meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="es_ES">
+<meta property="og:locale:alternate" content="fr_FR">
+<meta property="og:locale:alternate" content="hi_IN">
+<meta property="og:locale:alternate" content="zh_CN">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ReadToRecall">
 <meta property="og:title" content="Pricing — ReadToRecall">
 <meta property="og:description" content="Free, Standard, and Pro plans for ReadToRecall — the AI Chrome extension that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes.">
 <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
 <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
+<meta property="og:image:alt" content="ReadToRecall extension popup summarizing a webpage">
+<meta property="og:image:width" content="535">
+<meta property="og:image:height" content="649">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Pricing — ReadToRecall">
 <meta name="twitter:description" content="Free, Standard, and Pro plans for ReadToRecall — summarize webpages, YouTube videos, and PDFs.">
 <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
+<meta name="twitter:image:alt" content="ReadToRecall extension popup summarizing a webpage">
 <title>Pricing — ReadToRecall</title>
 <meta name="description" content="Free, Standard, and Pro plans for ReadToRecall — the AI Chrome extension that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes.">
 
+<link rel="icon" type="image/svg+xml" href="{% static 'landing-page/favicon.svg' %}">
 <link rel="icon" type="image/png" sizes="16x16" href="{% static 'landing-page/icon16.png' %}">
 <link rel="icon" type="image/png" sizes="32x32" href="{% static 'landing-page/icon32.png' %}">
 <link rel="icon" type="image/png" sizes="48x48" href="{% static 'landing-page/icon48.png' %}">
 <link rel="icon" type="image/png" sizes="128x128" href="{% static 'landing-page/icon128.png' %}">
+<link rel="apple-touch-icon" sizes="128x128" href="{% static 'landing-page/icon128.png' %}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -35,12 +45,57 @@
   "@context": "https://schema.org",
   "@type": "Product",
   "name": "ReadToRecall",
-  "description": "AI Chrome extension that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes.",
+  "category": "BrowserExtension",
+  "description": "ReadToRecall is an AI Chrome extension with three plans. Free: 10 summaries/month with 3 saved sessions. Standard ($3.99/mo): 300 summaries/month, 30,000-character input, 5 saved sessions. Pro ($9.99/mo): 1,200 summaries/month, unlimited input length, 10 saved sessions. All plans bill monthly via Stripe in USD, CAD, or EUR.",
   "brand": { "@type": "Brand", "name": "ReadToRecall" },
+  "image": "{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}",
+  "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
   "offers": [
-    { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock" },
-    { "@type": "Offer", "name": "Standard", "price": "3.99", "priceCurrency": "USD", "availability": "https://schema.org/InStock" },
-    { "@type": "Offer", "name": "Pro", "price": "9.99", "priceCurrency": "USD", "availability": "https://schema.org/InStock" }
+    {
+      "@type": "Offer",
+      "name": "Free",
+      "price": "0.00",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": "0.00",
+        "priceCurrency": "USD",
+        "billingIncrement": 1,
+        "unitCode": "MON"
+      }
+    },
+    {
+      "@type": "Offer",
+      "name": "Standard",
+      "price": "3.99",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": "3.99",
+        "priceCurrency": "USD",
+        "billingIncrement": 1,
+        "unitCode": "MON"
+      }
+    },
+    {
+      "@type": "Offer",
+      "name": "Pro",
+      "price": "9.99",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": "9.99",
+        "priceCurrency": "USD",
+        "billingIncrement": 1,
+        "unitCode": "MON"
+      }
+    }
   ]
 }
 </script>
@@ -645,24 +700,19 @@
         <ul>
           <li><a href="/#features">Features</a></li>
           <li><a href="{% url 'payments' %}">Pricing</a></li>
-          <li><a href="/#how">Changelog</a></li>
-          <li><a href="/#features">Roadmap</a></li>
         </ul>
       </div>
       <div>
-        <h4>Company</h4>
+        <h4>Contact</h4>
         <ul>
-          <li><a href="/#how">About</a></li>
-          <li><a href="/#features">Blog</a></li>
-          <li><a href="/#faq">Contact</a></li>
+          <li><a href="mailto:readtorecall.business@gmail.com">readtorecall.business@gmail.com</a></li>
         </ul>
       </div>
       <div>
         <h4>Legal</h4>
         <ul>
-          <li><a href="/#faq">Privacy</a></li>
-          <li><a href="/#faq">Terms</a></li>
-          <li><a href="/#faq">Security</a></li>
+          <li><a href="{% url 'privacy' %}">Privacy</a></li>
+          <li><a href="{% url 'terms' %}">Terms</a></li>
         </ul>
       </div>
     </div>

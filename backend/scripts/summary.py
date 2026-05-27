@@ -7,15 +7,20 @@ from scripts.sources import ExtractionResult, default_registry
 
 logger = logging.getLogger(__name__)
 
+# Hard ceiling applied to every request regardless of plan. Bounds prompt size
+# sent to Gemini (cost / abuse / memory). Raise deliberately; do not remove.
+MAX_CONTENT_CHARACTERS = 250_000
 
-def _resolve_character_limit(character_limit: int | None) -> int | None:
+
+def _resolve_character_limit(character_limit: int | None) -> int:
     if character_limit is None:
-        return get_character_limit("free")
-    return character_limit
+        free_limit = get_character_limit("free")
+        return min(free_limit, MAX_CONTENT_CHARACTERS) if free_limit else MAX_CONTENT_CHARACTERS
+    return min(character_limit, MAX_CONTENT_CHARACTERS)
 
 
-def _truncate(text: str, character_limit: int | None) -> str:
-    if isinstance(character_limit, int) and character_limit > 0:
+def _truncate(text: str, character_limit: int) -> str:
+    if character_limit > 0:
         return text[:character_limit]
     return text
 

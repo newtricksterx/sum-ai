@@ -74,6 +74,34 @@ export const deriveBillingInterval = (
   return t("profile.unavailable", "Unavailable");
 };
 
+export const deriveSubscriptionPrice = (
+  priceMinor: number | null | undefined,
+  currency: string | null | undefined,
+  t: BillingIntervalTranslator,
+) => {
+  if (typeof priceMinor !== "number" || Number.isNaN(priceMinor) || priceMinor < 0) {
+    return t("profile.unavailable", "Unavailable");
+  }
+
+  if (priceMinor === 0) {
+    return t("profile.subscriptionPriceFree", "Free");
+  }
+
+  const normalizedCurrency = currency?.trim().toUpperCase();
+  if (!normalizedCurrency) {
+    return t("profile.unavailable", "Unavailable");
+  }
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: normalizedCurrency,
+    }).format(priceMinor / 100);
+  } catch {
+    return `${(priceMinor / 100).toFixed(2)} ${normalizedCurrency}`;
+  }
+};
+
 export const getUsageClass = (percentage: number): string => {
   if (percentage >= 80) return " pp-bar-fill--high";
   if (percentage >= 50) return " pp-bar-fill--mid";

@@ -4,10 +4,16 @@ from rest_framework.views import APIView
 from rest_framework.throttling import AnonRateThrottle
 
 from api.quota import QuotaExceeded, release_request_slot, reserve_request_slot
-from scripts.summary import get_action_item, get_summary
+from scripts.summary import MAX_CONTENT_CHARACTERS, get_action_item, get_summary
 
 ACTION_ITEM_TYPES = {"flashcards", "quiz"}
 SUPPORTED_ACTION_TYPES = ACTION_ITEM_TYPES | {"summary"}
+
+# Reject obviously oversized payloads before extraction / quota work.
+# 4× the per-request cap leaves room for slightly-over content the truncator
+# would handle, while still failing fast on attempts to fan multi-MB bodies
+# into the LLM pipeline.
+MAX_REQUEST_SOURCE_CONTENT_CHARS = MAX_CONTENT_CHARACTERS * 4
 
 
 def _error_response(message, status_code, **extra):
@@ -117,6 +123,13 @@ class ActionItem(APIView):
                 "Unsupported action type.",
                 status.HTTP_400_BAD_REQUEST,
                 supported_types=sorted(SUPPORTED_ACTION_TYPES),
+            )
+
+        source_content = request.data.get("source_content")
+        if isinstance(source_content, str) and len(source_content) > MAX_REQUEST_SOURCE_CONTENT_CHARS:
+            return _error_response(
+                "Source content exceeds maximum allowed size.",
+                status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             )
 
         if normalized_action_type == "summary":

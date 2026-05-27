@@ -2,7 +2,6 @@ import json
 import logging
 
 import stripe
-from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.http import HttpResponse
 from rest_framework import status
@@ -38,16 +37,13 @@ def _handle_webhook_event(event):
 
 def _construct_event(payload, sig_header):
     # Reads stripe_client.webhook_secret at call time so test patches work.
-    if settings.IS_PRODUCTION and not stripe_client.webhook_secret:
-        logger.error("STRIPE_WEBHOOK_SECRET must be set when DEBUG is False")
+    if not stripe_client.webhook_secret:
+        logger.error("STRIPE_WEBHOOK_SECRET must be set for webhook signature verification")
         raise ValueError("missing webhook secret")
 
-    if stripe_client.webhook_secret:
-        return stripe_client.client.construct_event(
-            payload, sig_header, stripe_client.webhook_secret
-        )
-
-    return stripe.Event.construct_from(json.loads(payload), stripe.api_key)
+    return stripe_client.client.construct_event(
+        payload, sig_header, stripe_client.webhook_secret
+    )
 
 
 @csrf_exempt

@@ -57,6 +57,7 @@ pillow==11.3.0
 placebo==0.9.0
 proto-plus==1.27.2
 protobuf==5.29.6
+psycopg2-binary==2.9.10
 pyasn1==0.6.3
 pyasn1_modules==0.4.2
 pycparser==3.0

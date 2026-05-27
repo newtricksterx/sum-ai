@@ -1,0 +1,840 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="es_ES">
+<meta property="og:locale:alternate" content="fr_FR">
+<meta property="og:locale:alternate" content="hi_IN">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ReadToRecall">
+<meta property="og:title" content="Best AI Study Tool for 2026: Summaries, Flashcards &amp; Quizzes — ReadToRecall">
+<meta property="og:description" content="The AI study tool that turns any webpage, YouTube video, or PDF into summaries, flashcards, and quizzes. Free, no signup. Active-recall studying built in.">
+<meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
+<meta property="og:image:alt" content="ReadToRecall extension popup summarizing a webpage">
+<meta property="og:image:width" content="535">
+<meta property="og:image:height" content="649">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Best AI Study Tool for 2026 — ReadToRecall">
+<meta name="twitter:description" content="The AI study tool that turns any webpage, YouTube video, or PDF into summaries, flashcards, and quizzes. Free, no signup.">
+<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
+<meta name="twitter:image:alt" content="ReadToRecall extension popup summarizing a webpage">
+<title>Best AI Study Tool for 2026: Summaries, Flashcards &amp; Quizzes — ReadToRecall</title>
+<meta name="description" content="The AI study tool that turns any webpage, YouTube video, or PDF into summaries, flashcards, and quizzes. Free, no signup. Active-recall studying built in.">
+
+<link rel="icon" type="image/svg+xml" href="{% static 'landing-page/favicon.svg' %}">
+<link rel="icon" type="image/png" sizes="16x16" href="{% static 'landing-page/icon16.png' %}">
+<link rel="icon" type="image/png" sizes="32x32" href="{% static 'landing-page/icon32.png' %}">
+<link rel="icon" type="image/png" sizes="48x48" href="{% static 'landing-page/icon48.png' %}">
+<link rel="icon" type="image/png" sizes="128x128" href="{% static 'landing-page/icon128.png' %}">
+<link rel="apple-touch-icon" sizes="128x128" href="{% static 'landing-page/icon128.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Best AI Study Tool for 2026: Summaries, Flashcards & Quizzes — ReadToRecall",
+  "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+  "description": "The AI study tool that turns any webpage, YouTube video, or PDF into summaries, flashcards, and quizzes. Free, no signup. Active-recall studying built in.",
+  "inLanguage": "en",
+  "about": {"@type": "Thing", "name": "AI study tools"},
+  "isPartOf": {"@type": "WebSite", "name": "ReadToRecall", "url": "{{ request.scheme }}://{{ request.get_host }}/"},
+  "primaryImageOfPage": "{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ request.scheme }}://{{ request.get_host }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Study Tools", "item": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}"}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": ["SoftwareApplication", "EducationalApplication"],
+  "name": "ReadToRecall",
+  "applicationCategory": "BrowserApplication",
+  "applicationSubCategory": "Study Tool",
+  "operatingSystem": "Windows, macOS, Linux, ChromeOS",
+  "browserRequirements": "Requires Chrome or any Chromium-based browser (Edge, Brave, Arc, Opera)",
+  "inLanguage": ["en", "es", "fr", "hi", "zh"],
+  "audience": {"@type": "EducationalAudience", "educationalRole": "student"},
+  "learningResourceType": ["Summary", "Flashcard", "Quiz"],
+  "educationalUse": ["Active Recall", "Spaced Repetition", "Self-Study"],
+  "description": "ReadToRecall is a free AI study tool built as a Chrome extension. It turns any webpage, YouTube video, or PDF into a summary, flashcards, and a quiz, using active recall to help students remember what they read.",
+  "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+  "image": "{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}",
+  "offers": [
+    {"@type": "Offer", "name": "Free",     "price": "0.00", "priceCurrency": "USD", "availability": "https://schema.org/InStock"},
+    {"@type": "Offer", "name": "Standard", "price": "3.99", "priceCurrency": "USD", "availability": "https://schema.org/InStock"},
+    {"@type": "Offer", "name": "Pro",      "price": "9.99", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the best AI study tool for college students?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The best AI study tool depends on what you're studying. For active reading and self-study from web sources, ReadToRecall is built specifically for the read-then-recall loop: it summarizes any webpage, YouTube video, or PDF and turns the summary into flashcards and a quiz. For pre-made decks across many subjects, Quizlet is stronger. For long-term spaced repetition with manual card creation, Anki is the standard. For document Q&A across a personal source library, Google's NotebookLM is purpose-built."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there a free AI study tool?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. ReadToRecall offers a free plan with 10 AI summaries per month and 3 saved sessions, including flashcards and quizzes. No credit card required. Paid Standard ($3.99/mo) and Pro ($9.99/mo) plans lift the limits."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between Quizlet and ReadToRecall?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Quizlet is a flashcard library — you mostly use decks other people made or build your own from scratch. ReadToRecall is the opposite direction: you open a webpage, YouTube video, or PDF, and the AI generates the summary, flashcards, and quiz for you in seconds. ReadToRecall lives as a browser extension on the page you are already reading; Quizlet lives in its own app."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can AI study tools summarize YouTube videos?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ReadToRecall can. It pulls the transcript from any YouTube video and turns it into a summary, then optionally flashcards and a quiz. The summary, flashcards, and quiz are all generated by Google Gemini."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What study technique do these tools actually use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The two evidence-backed techniques are active recall (testing yourself instead of re-reading) and spaced repetition (reviewing at increasing intervals). ReadToRecall is built around active recall by design: every summary can be converted into flashcards and quizzes that force retrieval, which is what moves information from short-term to long-term memory."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are AI-generated summaries accurate enough for studying?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AI summaries are usually good, not perfect. Large language models occasionally omit details, misinterpret the source, or fabricate facts. Treat them as a first pass that accelerates your reading, not as a substitute for checking the source — especially for academic, legal, medical, or safety-critical material."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does ReadToRecall work on PDFs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Any PDF you open in your browser — including local PDFs from your computer — can be summarized, then turned into flashcards or a quiz. The Pro plan removes the character-count cap, so long PDFs and textbook chapters can be summarized without truncation."
+      }
+    }
+  ]
+}
+</script>
+
+<style>
+  :root {
+    --bg: #F4F1EA;
+    --bg-elev: #FBF9F4;
+    --ink: #141311;
+    --ink-2: #4A4742;
+    --ink-3: #8C877C;
+    --line: #E3DDD0;
+    --line-2: #EFEAE0;
+    --accent: #B8412A;
+    --accent-soft: #F2DED6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.55;
+    font-size: 16px;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ───────── NAV ───────── */
+  nav {
+    position: sticky;
+    top: 0;
+    background: rgba(244, 241, 234, 0.82);
+    backdrop-filter: saturate(140%) blur(14px);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+    border-bottom: 1px solid var(--line);
+    z-index: 100;
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 0;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .logo-mark {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    overflow: hidden;
+  }
+  .logo-mark img { width: 100%; height: 100%; display: block; object-fit: contain; }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color .15s ease;
+  }
+  .nav-links a:hover { color: var(--ink); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 11px 18px;
+    border-radius: 9px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: transform .15s ease, opacity .15s ease;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:hover { transform: translateY(-1px); opacity: 0.92; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .btn-ghost:hover { background: var(--bg-elev); opacity: 1; }
+  .chrome-web-store-icon { width: 26px; height: 26px; }
+
+  @media (max-width: 720px) {
+    .nav-links { display: none; }
+  }
+
+  /* ───────── HERO ───────── */
+  .hero {
+    padding: 60px 0 40px;
+  }
+  .hero-narrow { max-width: 880px; }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-3);
+    margin-bottom: 12px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(40px, 5.6vw, 72px);
+    line-height: 1.0;
+    letter-spacing: -0.026em;
+    font-weight: 400;
+    max-width: 900px;
+    margin-bottom: 28px;
+    font-variation-settings: 'opsz' 144;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+  }
+  .lede {
+    font-size: 19px;
+    color: var(--ink-2);
+    max-width: 680px;
+    margin-bottom: 28px;
+    line-height: 1.55;
+  }
+  .cta-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  /* ───────── SECTIONS ───────── */
+  section.block { padding: 80px 0; }
+  .section-head {
+    margin-bottom: 48px;
+    max-width: 760px;
+  }
+  .section-head .eyebrow { margin-bottom: 20px; }
+  h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(32px, 3.8vw, 48px);
+    line-height: 1.05;
+    letter-spacing: -0.022em;
+    font-weight: 400;
+    margin-bottom: 18px;
+  }
+  h2 em { font-style: italic; color: var(--accent); }
+  .section-lede {
+    font-size: 17px;
+    color: var(--ink-2);
+    max-width: 640px;
+  }
+  .prose p {
+    color: var(--ink-2);
+    font-size: 16px;
+    line-height: 1.65;
+    max-width: 720px;
+    margin-bottom: 16px;
+  }
+  .prose p strong { color: var(--ink); font-weight: 500; }
+  .prose ul {
+    color: var(--ink-2);
+    font-size: 16px;
+    line-height: 1.65;
+    max-width: 720px;
+    margin: 0 0 20px 22px;
+  }
+  .prose ul li { margin-bottom: 8px; }
+
+  /* ───────── COMPARISON TABLE ───────── */
+  .compare-wrap {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: auto;
+    background: var(--bg-elev);
+  }
+  table.compare {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 640px;
+  }
+  table.compare th,
+  table.compare td {
+    text-align: left;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line-2);
+    vertical-align: middle;
+  }
+  table.compare thead th {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    font-weight: 500;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+  table.compare thead th.us {
+    color: var(--accent);
+  }
+  table.compare tbody th {
+    font-weight: 500;
+    color: var(--ink);
+    font-size: 14px;
+  }
+  table.compare tbody td.us {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  table.compare tbody tr:last-child th,
+  table.compare tbody tr:last-child td { border-bottom: 0; }
+  .yes { color: var(--accent); font-weight: 500; }
+  .no { color: var(--ink-3); }
+  .partial { color: var(--ink-2); }
+
+  /* ───────── PRICING MINI ───────── */
+  .pricing-mini {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 860px) {
+    .pricing-mini { grid-template-columns: 1fr; }
+  }
+  .price-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .price-card.featured {
+    border-color: var(--accent);
+  }
+  .price-card h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 6px;
+  }
+  .price-amount {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    margin-bottom: 10px;
+    color: var(--ink);
+  }
+  .price-amount .per { font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--ink-3); }
+  .price-card p {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.55;
+  }
+
+  /* ───────── FAQ ───────── */
+  .faq-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 80px;
+  }
+  details {
+    border-top: 1px solid var(--line);
+    padding: 22px 0;
+  }
+  details:last-child { border-bottom: 1px solid var(--line); }
+  summary {
+    cursor: pointer;
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: '+';
+    font-family: 'Geist Mono', monospace;
+    color: var(--ink-3);
+    font-size: 22px;
+    font-weight: 300;
+    transition: transform .2s ease;
+  }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p {
+    margin-top: 14px;
+    color: var(--ink-2);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 640px;
+  }
+  @media (max-width: 860px) {
+    .faq-grid { grid-template-columns: 1fr; gap: 40px; }
+  }
+
+  /* ───────── FINAL CTA ───────── */
+  .final {
+    text-align: center;
+    padding: 120px 0;
+    border-top: 1px solid var(--line);
+  }
+  .final h2 {
+    margin: 0 auto 24px;
+    max-width: 760px;
+  }
+  .final .lede {
+    margin: 0 auto 36px;
+    max-width: 480px;
+    text-align: center;
+  }
+  .final .cta-row { justify-content: center; }
+
+  /* ───────── FOOTER ───────── */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 56px 0 40px;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 56px;
+  }
+  .footer-grid h4 {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-3);
+    margin-bottom: 18px;
+    font-weight: 500;
+  }
+  .footer-grid ul { list-style: none; }
+  .footer-grid li { margin-bottom: 10px; }
+  .footer-grid a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .footer-grid a:hover { color: var(--ink); }
+  .footer-tag {
+    color: var(--ink-2);
+    font-size: 14px;
+    max-width: 280px;
+    margin-top: 14px;
+  }
+  .footer-bottom {
+    border-top: 1px solid var(--line);
+    padding-top: 28px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--ink-3);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  @media (max-width: 720px) {
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ───────── NAV ───────── -->
+<nav>
+  <div class="container nav-inner">
+    <a href="/" class="logo">
+      <span class="logo-mark"><img src="{% static 'landing-page/icon128.png' %}" alt="" width="128" height="128"></span>
+      ReadToRecall
+    </a>
+    <ul class="nav-links">
+      <li><a href="/#features">Features</a></li>
+      <li><a href="/#how">How it works</a></li>
+      <li><a href="/#faq">FAQ</a></li>
+      <li><a href="{% url 'payments' %}">Pricing</a></li>
+    </ul>
+    <a href="https://chromewebstore.google.com/detail/super-simple-summarizer/pcbnaokknjmejdfakjkglkpoflooafoe?authuser=0&amp;hl=en-AU"
+        class="btn"
+        target="_blank"
+        rel="noopener noreferrer">
+      Chrome Web Store
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ───────── HERO ───────── -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-narrow">
+      <div class="eyebrow">AI Study Tools — 2026</div>
+      <h1>The AI study tool for <em>anything you read online</em>.</h1>
+      <p class="lede">ReadToRecall is a free AI studying tool that turns any webpage, YouTube video, or PDF into a clean summary, flashcards, and a quiz — built around active recall, the studying technique with the strongest evidence base. Install once; study from any tab.</p>
+      <div class="cta-row">
+        <a href="https://chromewebstore.google.com/detail/super-simple-summarizer/pcbnaokknjmejdfakjkglkpoflooafoe?authuser=0&amp;hl=en-AU" class="btn" target="_blank" rel="noopener noreferrer">
+          Add to Chrome — Free
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a href="#compare" class="btn btn-ghost">Compare study tools</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ───────── WHAT MAKES A GOOD STUDY TOOL ───────── -->
+<section class="block">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Buyer's guide</div>
+      <h2>What makes a <em>good AI study tool</em>.</h2>
+      <p class="section-lede">"AI study tool" covers everything from flashcard apps to document Q&amp;A. The ones worth your time share four properties — anything missing two or more is a productivity tool wearing a study-tool hat.</p>
+    </div>
+    <div class="prose">
+      <ul>
+        <li><strong>It uses active recall, not just re-reading.</strong> Summaries alone don't move information into long-term memory. The tool has to make you retrieve — flashcards, quizzes, or fill-in-the-blank.</li>
+        <li><strong>It works on what you're already reading.</strong> Copy-pasting article text into a separate app is friction that kills the habit. The best AI study tools live where you study — usually a browser extension.</li>
+        <li><strong>It handles the three formats students actually use:</strong> webpages, YouTube videos (lecture recordings count), and PDFs (papers, textbooks, slides).</li>
+        <li><strong>It produces material in seconds, not minutes.</strong> If generating a deck takes longer than reading the source, you'll stop using it.</li>
+      </ul>
+      <p>ReadToRecall was built to clear all four bars: it's a Chrome extension that reads the active tab, generates a summary, and turns that summary into flashcards or a quiz with one more click. Everything runs against Google Gemini; nothing is stored on our servers except your account and subscription.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── COMPARISON ───────── -->
+<section class="block" id="compare">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Comparison</div>
+      <h2>How ReadToRecall compares to <em>Quizlet, Anki, and NotebookLM</em>.</h2>
+      <p class="section-lede">Four of the most-used AI and study tools, side by side. Different shapes for different use cases — pick the one that matches the way you actually study.</p>
+    </div>
+    <div class="compare-wrap">
+      <table class="compare">
+        <thead>
+          <tr>
+            <th scope="col">Capability</th>
+            <th scope="col" class="us">ReadToRecall</th>
+            <th scope="col">Quizlet</th>
+            <th scope="col">Anki</th>
+            <th scope="col">NotebookLM</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Summarizes webpages</th>
+            <td class="us"><span class="yes">Yes</span></td>
+            <td><span class="no">No</span></td>
+            <td><span class="no">No</span></td>
+            <td><span class="partial">Via URL upload</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Summarizes YouTube videos</th>
+            <td class="us"><span class="yes">Yes (transcripts)</span></td>
+            <td><span class="no">No</span></td>
+            <td><span class="no">No</span></td>
+            <td><span class="partial">Via URL upload</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Summarizes PDFs</th>
+            <td class="us"><span class="yes">Yes</span></td>
+            <td><span class="no">No</span></td>
+            <td><span class="no">No</span></td>
+            <td><span class="yes">Yes</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Auto-generated flashcards from source</th>
+            <td class="us"><span class="yes">Yes</span></td>
+            <td><span class="partial">Magic Notes (paid)</span></td>
+            <td><span class="no">Manual only</span></td>
+            <td><span class="no">No</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Auto-generated quizzes</th>
+            <td class="us"><span class="yes">Yes (easy / medium / hard)</span></td>
+            <td><span class="yes">Yes (from your decks)</span></td>
+            <td><span class="no">No</span></td>
+            <td><span class="partial">Q&amp;A only</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Works as a browser extension</th>
+            <td class="us"><span class="yes">Yes</span></td>
+            <td><span class="no">No</span></td>
+            <td><span class="no">No</span></td>
+            <td><span class="no">No</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Built around active recall</th>
+            <td class="us"><span class="yes">Yes</span></td>
+            <td><span class="yes">Yes</span></td>
+            <td><span class="yes">Yes (gold standard SRS)</span></td>
+            <td><span class="no">No (reference tool)</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Free tier</th>
+            <td class="us"><span class="yes">10 summaries/mo</span></td>
+            <td><span class="yes">Limited (ads)</span></td>
+            <td><span class="yes">Fully free</span></td>
+            <td><span class="yes">Yes</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose" style="margin-top: 32px;">
+      <p><strong>Use ReadToRecall</strong> if you study from the open web — articles, lectures on YouTube, research PDFs — and want the AI to do the deck-building. <strong>Use Quizlet</strong> if your subject already has good community decks. <strong>Use Anki</strong> if you want the strongest long-term spaced-repetition scheduling and don't mind making cards by hand. <strong>Use NotebookLM</strong> if you have a fixed source library and need Q&amp;A against it, not flashcards.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── ACTIVE RECALL ───────── -->
+<section class="block">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">The studying technique</div>
+      <h2>Built on <em>active recall</em>.</h2>
+      <p class="section-lede">Active recall is the practice of testing yourself on material instead of re-reading it. It's the studying technique with the strongest evidence base in cognitive science — and the one ReadToRecall is designed around end-to-end.</p>
+    </div>
+    <div class="prose">
+      <p>Re-reading and highlighting feel productive but produce little retention. Retrieval — pulling an answer out of your head — is what consolidates memory. That's why every ReadToRecall summary can be converted into <strong>flashcards</strong> (cued retrieval) and <strong>quizzes</strong> (recognition + retrieval), at three difficulty levels.</p>
+      <p>Pair it with spaced repetition — coming back to flashcards on increasing intervals — and you have the loop that moves information from short-term into long-term memory. ReadToRecall generates the material; you do the retrieval.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── PRICING MINI ───────── -->
+<section class="block" id="pricing">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Pricing</div>
+      <h2>Free to start. <em>$3.99 to grow into.</em></h2>
+      <p class="section-lede">Three plans. The Free tier alone is enough for most students for casual reading; Standard and Pro lift the limits when studying becomes a daily habit.</p>
+    </div>
+    <div class="pricing-mini">
+      <div class="price-card">
+        <h3>Free</h3>
+        <div class="price-amount">$0<span class="per"> / mo</span></div>
+        <p>10 summaries/month, 3 saved sessions, 10,000-character input cap. No credit card.</p>
+      </div>
+      <div class="price-card featured">
+        <h3>Standard</h3>
+        <div class="price-amount">$3.99<span class="per"> / mo</span></div>
+        <p>300 summaries/month, 5 saved sessions, 30,000-character input cap. The right plan for most students.</p>
+      </div>
+      <div class="price-card">
+        <h3>Pro</h3>
+        <div class="price-amount">$9.99<span class="per"> / mo</span></div>
+        <p>1,200 summaries/month, 10 saved sessions, unlimited input length — for long PDFs, books, and lectures.</p>
+      </div>
+    </div>
+    <div class="cta-row" style="margin-top: 32px;">
+      <a href="{% url 'payments' %}" class="btn btn-ghost">See full pricing →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── FAQ ───────── -->
+<section class="block" id="faq">
+  <div class="container">
+    <div class="faq-grid">
+      <div>
+        <div class="eyebrow">FAQ</div>
+        <h2>Study-tool questions, <em>answered</em>.</h2>
+      </div>
+      <div>
+        <details open>
+          <summary>What is the best AI study tool for college students?</summary>
+          <p>The best AI study tool depends on what you're studying. For active reading and self-study from web sources, ReadToRecall is built specifically for the read-then-recall loop: it summarizes any webpage, YouTube video, or PDF and turns the summary into flashcards and a quiz. For pre-made decks across many subjects, Quizlet is stronger. For long-term spaced repetition with manual card creation, Anki is the standard. For document Q&amp;A across a personal source library, Google's NotebookLM is purpose-built.</p>
+        </details>
+        <details>
+          <summary>Is there a free AI study tool?</summary>
+          <p>Yes. ReadToRecall offers a free plan with 10 AI summaries per month and 3 saved sessions, including flashcards and quizzes. No credit card required. Paid Standard ($3.99/mo) and Pro ($9.99/mo) plans lift the limits.</p>
+        </details>
+        <details>
+          <summary>What is the difference between Quizlet and ReadToRecall?</summary>
+          <p>Quizlet is a flashcard library — you mostly use decks other people made or build your own from scratch. ReadToRecall is the opposite direction: you open a webpage, YouTube video, or PDF, and the AI generates the summary, flashcards, and quiz for you in seconds. ReadToRecall lives as a browser extension on the page you are already reading; Quizlet lives in its own app.</p>
+        </details>
+        <details>
+          <summary>Can AI study tools summarize YouTube videos?</summary>
+          <p>ReadToRecall can. It pulls the transcript from any YouTube video and turns it into a summary, then optionally flashcards and a quiz. The summary, flashcards, and quiz are all generated by Google Gemini.</p>
+        </details>
+        <details>
+          <summary>What study technique do these tools actually use?</summary>
+          <p>The two evidence-backed techniques are active recall (testing yourself instead of re-reading) and spaced repetition (reviewing at increasing intervals). ReadToRecall is built around active recall by design: every summary can be converted into flashcards and quizzes that force retrieval, which is what moves information from short-term to long-term memory.</p>
+        </details>
+        <details>
+          <summary>Are AI-generated summaries accurate enough for studying?</summary>
+          <p>AI summaries are usually good, not perfect. Large language models occasionally omit details, misinterpret the source, or fabricate facts. Treat them as a first pass that accelerates your reading, not as a substitute for checking the source — especially for academic, legal, medical, or safety-critical material.</p>
+        </details>
+        <details>
+          <summary>Does ReadToRecall work on PDFs?</summary>
+          <p>Yes. Any PDF you open in your browser — including local PDFs from your computer — can be summarized, then turned into flashcards or a quiz. The Pro plan removes the character-count cap, so long PDFs and textbook chapters can be summarized without truncation.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── FINAL CTA ───────── -->
+<section class="final">
+  <div class="container">
+    <h2>Study smarter. <em>Recall longer.</em></h2>
+    <p class="lede">Free to install. Free to try. Two clicks to your first summary, flashcards, and quiz.</p>
+    <div class="cta-row">
+      <a href="https://chromewebstore.google.com/detail/super-simple-summarizer/pcbnaokknjmejdfakjkglkpoflooafoe?authuser=0&amp;hl=en-AU" class="btn" target="_blank" rel="noopener noreferrer">
+        Add to Chrome — Free
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a href="/" class="btn btn-ghost">Back to home</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ───────── FOOTER ───────── -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a href="/" class="logo">
+          <span class="logo-mark"><img src="{% static 'landing-page/icon128.png' %}" alt="" width="128" height="128"></span>
+          ReadToRecall
+        </a>
+        <p class="footer-tag">The AI study tool for anything you read on the web.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/#features">Features</a></li>
+          <li><a href="{% url 'study-tools' %}">Study tools</a></li>
+          <li><a href="{% url 'payments' %}">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="mailto:readtorecall.business@gmail.com">readtorecall.business@gmail.com</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="{% url 'privacy' %}">Privacy</a></li>
+          <li><a href="{% url 'terms' %}">Terms</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 ReadToRecall. All rights reserved.</span>
+      <span>Made with care.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

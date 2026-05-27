@@ -4,9 +4,6 @@ import stripe
 env = environ.Env()
 
 client = stripe.StripeClient(str(env("STRIPE_SEC_KEY")))
-# Also set the module-level api_key for stripe.Event.construct_from in the
-# unsigned dev fallback path. Set once at import time.
-stripe.api_key = str(env("STRIPE_SEC_KEY"))
 webhook_secret = str(env("STRIPE_WEBHOOK_SECRET", default=""))
 
 PAID_PLAN_RANK = {"standard": 1, "pro": 2}

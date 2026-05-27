@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Back card: the source page being read -->
+  <rect x="10" y="9" width="18" height="20" rx="3.5" fill="#141311"/>
+  <!-- Front card: the generated flashcard -->
+  <rect x="4" y="3" width="18" height="20" rx="3.5" fill="#B8412A"/>
+  <!-- Content lines suggesting recall material -->
+  <rect x="7.5" y="8" width="11" height="2" rx="1" fill="#FBF9F4"/>
+  <rect x="7.5" y="12" width="8" height="2" rx="1" fill="#FBF9F4"/>
+  <rect x="7.5" y="16" width="9" height="2" rx="1" fill="#FBF9F4" opacity="0.55"/>
+</svg>

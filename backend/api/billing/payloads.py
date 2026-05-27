@@ -103,21 +103,22 @@ def find_user_by_id(user_id):
 
 
 def find_user_for_session(session):
+    # Resolve only by identifiers we set during checkout creation
+    # (api/billing/checkout.py:_checkout_params). Email fallback is intentionally
+    # absent: customer_email is user-supplied at Stripe checkout and would let
+    # an attacker bind their Stripe customer to a victim's account by entering
+    # the victim's email.
     user = find_user_by_id(get(session, "client_reference_id"))
     if user is not None:
         return user
 
-    user = find_user_by_id(metadata_user_id(session))
-    if user is not None:
-        return user
-
-    email = path(session, "customer_details", "email") or get(session, "customer_email")
-    if email:
-        return User.objects.filter(email__iexact=email).first()
-    return None
+    return find_user_by_id(metadata_user_id(session))
 
 
 def find_user_for_invoice(invoice):
+    # Resolve only via identifiers we control (metadata.user_id set at checkout,
+    # or a stripe_customer_id we previously linked to a user). See note on
+    # find_user_for_session for why customer_email is not consulted.
     user = find_user_by_id(metadata_user_id(invoice))
     if user is not None:
         return user
@@ -130,11 +131,6 @@ def find_user_for_invoice(invoice):
 
     customer_id = get(invoice, "customer")
     if customer_id:
-        user = User.objects.filter(stripe_customer_id=customer_id).first()
-        if user is not None:
-            return user
+        return User.objects.filter(stripe_customer_id=customer_id).first()
 
-    email = get(invoice, "customer_email")
-    if email:
-        return User.objects.filter(email__iexact=email).first()
     return None
