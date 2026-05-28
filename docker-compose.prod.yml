@@ -10,17 +10,65 @@ services:
       - "8000"
     container_name: backend
     restart: always
-    env_file: ./backend/.env.production
+    env_file: ./backend/.env.prod
     # Use Gunicorn instead of runserver for AWS
-    command: gunicorn --bind 0.0.0.0:8000 backend.wsgi:application
+    command: >
+      gunicorn backend.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers 3
+      --worker-class gthread
+      --threads 4
+      --timeout 90
+      --graceful-timeout 30
+      --keep-alive 5
+      --max-requests 1000
+      --max-requests-jitter 50
+      --access-logfile -
+      --error-logfile -
+      --worker-tmp-dir /dev/shm
+
     healthcheck:
       test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1', 8000)); s.close()"]
       interval: 10s
       timeout: 3s
       retries: 10
       start_period: 15s
+    depends_on:
+      db:
+        condition: service_healthy
+      migration_call:
+        condition: service_completed_successfully
     networks:
       - app_network
+
+  db:
+    image: postgres:16-alpine
+    container_name: postgres_db
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env.prod
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  migration_call:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    env_file: ./backend/.env.prod
+    depends_on:
+      db:
+        condition: service_healthy
+    command: python manage.py migrate --noinput
+    networks:
+      - app_network
+
 
   nginx:
     build: ./nginx

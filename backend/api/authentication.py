@@ -11,7 +11,7 @@ class CookieJWTAuthentication(JWTAuthentication):
     """
 
     def _enforce_csrf(self, request) -> None:
-        check = CSRFCheck(lambda req: None)
+        check = CSRFCheck(lambda req: None) # type: ignore
         check.process_request(request)
         reason = check.process_view(request, None, (), {})
         if reason:

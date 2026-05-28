@@ -5,11 +5,22 @@ import { ProfilePageStatRow } from "../StatRow/ProfilePageStatRow";
 import {
   deriveUsageMetrics,
   deriveWordLimit,
+  formatDate,
   formatLimit,
 } from "../profilepage.helpers";
 import '../ProfilePage.css'
 
 type Subscription = NonNullable<UserProfile["subscription"]>;
+
+const derivePeriodEnd = (subscription: Subscription | undefined): string => {
+  if (!subscription || subscription.plan_slug === "free") {
+    return "N/A";
+  }
+  if (typeof subscription.current_period_end === "string" && subscription.current_period_end.length > 0) {
+    return formatDate(subscription.current_period_end);
+  }
+  return "Unavailable";
+};
 
 interface PlanLimitsProps {
   subscription: Subscription | undefined;
@@ -20,6 +31,7 @@ export const PlanLimits = ({ subscription, onClickUpgrade }: PlanLimitsProps) =>
   const { t } = useTranslation();
 
   const planName = subscription?.plan_name ?? t("profile.unavailable", "Unavailable");
+  const periodEnd = derivePeriodEnd(subscription);
   const wordLimit = deriveWordLimit(subscription?.character_limit);
   const historyLimit = formatLimit(subscription?.history_limit, " items");
 
@@ -33,6 +45,13 @@ export const PlanLimits = ({ subscription, onClickUpgrade }: PlanLimitsProps) =>
         content="profile.planTooltip"
         arialabel="profile.planTooltipAria"
         value={planName}
+      />
+
+      <ProfilePageStatRow
+        title="profile.periodEnd"
+        content="profile.periodEndTooltip"
+        arialabel="profile.periodEndTooltipAria"
+        value={periodEnd}
       />
 
       <ProfilePageStatRow

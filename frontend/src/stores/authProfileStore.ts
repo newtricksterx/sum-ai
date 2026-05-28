@@ -17,6 +17,8 @@ export type UserProfile = {
     actions_used?: number;
     history_limit: number | null;
     character_limit: number | null;
+    current_period_end?: string | null;
+    cancel_at_period_end?: boolean;
   };
   created_at: string;
   updated_at: string;
