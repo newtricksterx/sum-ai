@@ -107,7 +107,7 @@ export const LogoutAction = ({ email, isSubmitting, plan_name, onConfirm, cancel
         onConfirm={onConfirm}
       />
       {
-        !plan_name || plan_name == "Free" ? null : 
+        !plan_name || plan_name === "Free" ? null :
           <AlertPopup
             trigger={
               <button

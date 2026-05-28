@@ -12,9 +12,7 @@ interface QuizProps {
     difficulty?: QuizDifficulty | null
 }
 
-interface DifficultyColor {
-  [key: string]: string;
-}
+type DifficultyColor = Record<QuizDifficulty, string>;
 
 const createInitialAnswers = (length: number): Array<number | null> => {
   return Array.from({ length }, () => null);
@@ -87,7 +85,6 @@ export const Quiz = ({ document, difficulty = null } : QuizProps) => {
     }
 
     if (isLastQuestion) {
-      // resetQuiz();
       setIsQuizResetPage(true)
       return;
     }

@@ -45,34 +45,6 @@ export const deriveWordLimit = (characterLimit: number | null | undefined) => {
 
 type BillingIntervalTranslator = (key: string, defaultValue: string) => string;
 
-export const deriveBillingInterval = (
-  billingInterval: string | null | undefined,
-  t: BillingIntervalTranslator,
-) => {
-  const normalizedInterval = billingInterval?.trim().toLowerCase();
-
-  if (normalizedInterval === "daily") {
-    return t("profile.billingIntervalDaily", "Daily");
-  }
-
-  if (normalizedInterval === "weekly") {
-    return t("profile.billingIntervalWeekly", "Weekly");
-  }
-
-  if (normalizedInterval === "monthly") {
-    return t("profile.billingIntervalMonthly", "Monthly");
-  }
-
-  if (normalizedInterval === "yearly") {
-    return t("profile.billingIntervalYearly", "Yearly");
-  }
-
-  if (normalizedInterval && normalizedInterval.length > 0) {
-    return normalizedInterval.charAt(0).toUpperCase() + normalizedInterval.slice(1);
-  }
-
-  return t("profile.unavailable", "Unavailable");
-};
 
 export const deriveSubscriptionPrice = (
   priceMinor: number | null | undefined,

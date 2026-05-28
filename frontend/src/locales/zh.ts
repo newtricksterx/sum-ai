@@ -17,9 +17,6 @@
       noSession: "无会话",
       startNewSession: "开始新会话",
     },
-    loader: {
-      drafting: "正在生成摘要",
-    },
     frontpage: {
       heading: "从当前活动标签页生成摘要",
       activeTab: "活动标签页",

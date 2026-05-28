@@ -1,14 +1,13 @@
 ﻿import './App.css'
 import '../SummaryPage/Summary.css'
-import { startTransition, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import { lazy, startTransition, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import MenuBar from '../../components/MenuBar/MenuBar'
 import ToolBar from '../../components/ToolBar/ToolBar'
+import LoaderCircle from '../../components/LoaderCircle'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { GetPageFromStorage, UpdatePageStorage } from '../../utils/storage'
 import FrontPage from '../FrontPage/FrontPage'
 import SummaryPage from '../SummaryPage/SummaryPage'
-import HistoryPage from '../HistoryPage/HistoryPage'
-import ProfilePage from '../ProfilePage/ProfilePage'
 import { useActionItem } from '../SummaryPage/useActionItem'
 import { isPersistedAuthProfileIntact, useAuthProfileStore } from '../../stores/authProfileStore'
 import { useCurrentSessionState, type SessionState } from '../../stores/sessionStorage'
@@ -19,10 +18,15 @@ import { useHydrateProfileOnAuthChange } from './useHydrateProfileOnAuthChange'
 import { useRestoreSessionOnLogin } from './useRestoreSessionOnLogin'
 import { useTrackMountedPages } from './useTrackMountedPages'
 import { usePageSwitchCleanup } from './usePageSwitchCleanup'
-import { SettingsPage } from '../SettingsPage/SettingsPage'
 import { ActionId } from '../../types/summary'
 import { PageType } from '../../utils/types'
 import * as Toast from '@radix-ui/react-toast'
+
+const HistoryPage = lazy(() => import('../HistoryPage/HistoryPage'))
+const ProfilePage = lazy(() => import('../ProfilePage/ProfilePage'))
+const SettingsPage = lazy(() =>
+  import('../SettingsPage/SettingsPage').then((m) => ({ default: m.SettingsPage })),
+)
 
 // Returns true if the persisted auth blob is intact. When tampered, forces
 // a real logout and returns false so the caller can route to FrontPage.
@@ -205,15 +209,15 @@ function App() {
   const profilePageContent = useMemo(() => <ProfilePage />, []);
   const settingsPageContent = useMemo(() => <SettingsPage />, []);
 
-  const pages: ReadonlyArray<{ key: PageType; content: ReactNode }> = [
+  const pages: ReadonlyArray<{ key: PageType; content: ReactNode; lazy?: boolean }> = [
     { key: "home", content: frontPageContent },
     { key: "session", content: summaryPageContent },
-    { key: "history", content: historyPageContent },
-    { key: "profile", content: profilePageContent },
-    { key: "settings", content: settingsPageContent },
+    { key: "history", content: historyPageContent, lazy: true },
+    { key: "profile", content: profilePageContent, lazy: true },
+    { key: "settings", content: settingsPageContent, lazy: true },
   ];
 
-  const renderPagePanel = (pageKey: PageType, content: ReactNode) => {
+  const renderPagePanel = (pageKey: PageType, content: ReactNode, isLazy?: boolean) => {
     if (!mountedPages[pageKey] && currentPage !== pageKey) {
       return null;
     }
@@ -225,7 +229,11 @@ function App() {
         hidden={!isActivePage}
         className="app-page-panel"
       >
-        {content}
+        {isLazy ? (
+          <Suspense fallback={<LoaderCircle />}>{content}</Suspense>
+        ) : (
+          content
+        )}
       </section>
     );
   };
@@ -238,7 +246,7 @@ function App() {
       />
       <Toast.Provider>
         <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar">
-          {pages.map(({ key, content }) => renderPagePanel(key, content))}
+          {pages.map(({ key, content, lazy: isLazy }) => renderPagePanel(key, content, isLazy))}
         </div>
         {currentPage === "session" && (
           <ToolBar

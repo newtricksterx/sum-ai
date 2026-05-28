@@ -59,24 +59,21 @@ export const PricingPage = ({ currentPlanSlug, onClickReturn }: PricingPageProps
     const handleUpgrade = async (plan_slug: PlanSlug) => {
         setErrorMessage(null)
         setLoadingSlug(plan_slug)
-        // Open the new tab synchronously while we still have the user-gesture
-        // context — most popup blockers allow this and would block window.open
-        // called after the await resolves.
-        const popup = window.open("about:blank", "_blank")
         try {
             const { data } = await authInstance.post<{ url: string }>(
                 "/api/billing/checkout-session",
                 { plan_slug, currency },
             )
-            if (popup && !popup.closed) {
-                popup.opener = null // mimic rel="noopener" — Stripe doesn't need access to this window
-                popup.location.href = data.url
+            // Use chrome.tabs.create when running as an extension. Opening from
+            // the extension popup via window.open would close the popup as
+            // focus shifts, leaving the new tab stuck on about:blank.
+            const chromeApi = globalThis.chrome
+            if (chromeApi?.tabs?.create) {
+                chromeApi.tabs.create({ url: data.url })
             } else {
-                // Popup blocked — fall back to same-tab navigation so the flow still completes.
                 window.location.href = data.url
             }
         } catch (error) {
-            popup?.close()
             setErrorMessage(parseApiErrorMessage(error))
         } finally {
             setLoadingSlug(null)

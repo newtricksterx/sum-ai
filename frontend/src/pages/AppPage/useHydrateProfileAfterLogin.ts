@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { clearLoginPending, isLoginPending } from "../../services/authSignals";
+import { getCsrfToken } from "../../services/axiosService";
 
 type HydrateProfile = (force?: boolean, currency?: string) => Promise<unknown>;
 
@@ -18,6 +19,9 @@ export const useHydrateProfileAfterLogin = (
 
       isHydrating = true;
       try {
+        // The pre-login CSRF token was scoped to the anonymous session.
+        // Refresh it before any post-login mutating request can fire.
+        await getCsrfToken(true).catch(() => undefined);
         await hydrateProfile(true, currency);
       } catch {
         // If login is incomplete/failed, the store will remain unauthenticated.

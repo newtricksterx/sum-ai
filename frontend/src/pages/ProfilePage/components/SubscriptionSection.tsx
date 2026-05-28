@@ -3,7 +3,6 @@ import "../../../i18n";
 import type { UserProfile } from "../../../stores/authProfileStore";
 import { ProfilePageStatRow } from "../StatRow/ProfilePageStatRow";
 import {
-  deriveBillingInterval,
   deriveUsageMetrics,
   deriveWordLimit,
   formatLimit,
@@ -19,12 +18,10 @@ interface PlanLimitsProps {
 
 export const PlanLimits = ({ subscription, onClickUpgrade }: PlanLimitsProps) => {
   const { t } = useTranslation();
-  const translate = (key: string, defaultValue: string) => t(key, { defaultValue });
 
   const planName = subscription?.plan_name ?? t("profile.unavailable", "Unavailable");
   const wordLimit = deriveWordLimit(subscription?.character_limit);
   const historyLimit = formatLimit(subscription?.history_limit, " items");
-  const billingInterval = deriveBillingInterval(subscription?.billing_interval, translate);
 
   return (
     <section className="pp-card pp-section" aria-label="Plan and limits">
@@ -50,13 +47,6 @@ export const PlanLimits = ({ subscription, onClickUpgrade }: PlanLimitsProps) =>
         content="profile.historyCapacityTooltip"
         arialabel="profile.historyCapacityTooltipAria"
         value={historyLimit}
-      />
-
-      <ProfilePageStatRow
-        title="profile.billingInterval"
-        content="profile.billingIntervalTooltip"
-        arialabel="profile.billingIntervalTooltipAria"
-        value={billingInterval}
       />
 
       <button className="upgrade-btn" onClick={onClickUpgrade}>

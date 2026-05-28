@@ -17,9 +17,6 @@ const hi = {
       noSession: "कोई सत्र नहीं",
       startNewSession: "नया सत्र शुरू करें",
     },
-    loader: {
-      drafting: "सारांश तैयार किया जा रहा है",
-    },
     frontpage: {
       heading: "अपने सक्रिय टैब से सारांश बनाएं",
       activeTab: "सक्रिय टैब",

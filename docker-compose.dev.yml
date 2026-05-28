@@ -12,7 +12,7 @@ services:
       - ./backend:/app  # This maps your local folder to the container's /app folder
     container_name: backend
     restart: always
-    env_file: ./backend/.env
+    env_file: ./backend/.env.dev
     # dev file uses runserver - development mode
     command: python manage.py runserver 0.0.0.0:8000
     healthcheck:
@@ -21,6 +21,25 @@ services:
       timeout: 3s
       retries: 10
       start_period: 15s
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app_network
+
+  db:
+    image: postgres:16-alpine
+    container_name: postgres_db
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env.dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - app_network
 
@@ -41,3 +60,7 @@ services:
 networks:
   app_network:
     driver: bridge
+
+volumes:
+    postgres_data:
+

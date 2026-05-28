@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import LoaderCircle from "../../components/LoaderCircle";
 
@@ -9,17 +9,15 @@ afterEach(() => {
 });
 
 describe("LoaderCircle", () => {
-  it("renders loader shell and text", () => {
+  it("renders the spinner element", () => {
     const { container } = render(<LoaderCircle />);
 
-    expect(screen.getByText("Drafting Summary")).not.toBeNull();
     expect(container.querySelector("#loader")).not.toBeNull();
   });
 
-  it("can render without text", () => {
-    const { container } = render(<LoaderCircle showText={false} />);
+  it("appends a custom className to the shell", () => {
+    const { container } = render(<LoaderCircle className="custom-loader" />);
 
-    expect(screen.queryByText("Drafting Summary")).toBeNull();
-    expect(container.querySelector("#loader")).not.toBeNull();
+    expect(container.querySelector(".loader-shell.custom-loader")).not.toBeNull();
   });
 });

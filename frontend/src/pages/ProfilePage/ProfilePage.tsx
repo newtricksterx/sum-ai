@@ -60,7 +60,7 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  if (page == "pricing"){
+  if (page === "pricing"){
     return (
       <PricingPage onClickReturn={onClickReturn} currentPlanSlug={userProfile.subscription?.plan_slug} />
     )

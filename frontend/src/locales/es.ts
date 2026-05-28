@@ -17,9 +17,6 @@ const es = {
       noSession: "Sin sesion",
       startNewSession: "Iniciar nueva sesion",
     },
-    loader: {
-      drafting: "Preparando resumen",
-    },
     frontpage: {
       heading: "Genera un resumen de tu pestana activa",
       activeTab: "Pestana activa",

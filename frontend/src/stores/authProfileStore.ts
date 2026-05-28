@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import axios from "axios";
-import { authInstance } from "../services/axiosService";
+import { authInstance, getCsrfToken } from "../services/axiosService";
 
 export type UserProfile = {
   username?: string | null;
@@ -25,7 +25,7 @@ export type UserProfile = {
 type AuthProfileStatus = "idle" | "loading" | "ready" | "error";
 
 const ME_CACHE_TTL_MS = 60_000;
-const AUTH_PROFILE_PERSIST_VERSION = 2;
+const AUTH_PROFILE_PERSIST_VERSION = 3;
 const AUTH_PROFILE_STORAGE_KEY = "auth-profile";
 
 interface AuthProfileState {
@@ -40,61 +40,24 @@ interface AuthProfileState {
   logout: () => Promise<void>;
 }
 
+// The profile is stored in plain JSON. It contains no secrets — the JWT lives
+// in an HTTP-only cookie. Anything readable here (email, plan, usage counts)
+// is also returnable to a logged-in caller via /api/users/me.
 type PersistedAuthProfileState = {
-  encodedProfile?: string | null;
+  profile?: UserProfile | null;
   lastFetchedAt?: number | null;
   lastCurrency?: string | null;
 };
 
-const encodeProfileText = (value: string) => {
-  const bytes = new TextEncoder().encode(value);
-  let binary = "";
-
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-
-  return btoa(binary);
-};
-
-const decodeProfileText = (value: string) => {
-  const binary = atob(value);
-  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
-
-  return new TextDecoder().decode(bytes);
-};
-
-const encodeProfileForStorage = (profile: UserProfile | null): string | null => {
-  if (!profile) {
-    return null;
-  }
-
-  return encodeProfileText(JSON.stringify(profile));
-};
-
-const decodeProfileFromStorage = (encoded: string | null | undefined): UserProfile | null => {
-  if (!encoded) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(decodeProfileText(encoded)) as UserProfile;
-  } catch {
-    return null;
-  }
-};
-
-// Returns true iff the persisted blob exists AND decodes to a non-null profile.
+// Returns true iff the persisted blob exists AND contains a non-null profile.
 // When in-memory `profile` is set but this returns false, the cache has been
-// wiped or modified out from under us — caller should force a logout.
+// wiped out from under us — caller should force a logout.
 export const isPersistedAuthProfileIntact = (): boolean => {
   try {
     const raw = localStorage.getItem(AUTH_PROFILE_STORAGE_KEY);
     if (!raw) return false;
     const parsed = JSON.parse(raw) as { state?: PersistedAuthProfileState };
-    const encoded = parsed?.state?.encodedProfile;
-    if (!encoded) return false;
-    return decodeProfileFromStorage(encoded) !== null;
+    return parsed?.state?.profile != null;
   } catch {
     return false;
   }
@@ -205,6 +168,9 @@ export const useAuthProfileStore = create<AuthProfileState>()(
         } catch {
           // localStorage can throw in private mode; non-fatal.
         }
+        // The CSRF token cached in axiosService was bound to the now-dead
+        // session. Force-refresh so the next anonymous POST doesn't 403.
+        await getCsrfToken(true).catch(() => undefined);
       },
     }),
     {
@@ -212,13 +178,13 @@ export const useAuthProfileStore = create<AuthProfileState>()(
       storage: createJSONStorage(() => localStorage),
       version: AUTH_PROFILE_PERSIST_VERSION,
       migrate: (persistedState, version) => {
-        // Any pre-v2 shape (hand-rolled v1, or unversioned) is incompatible
-        // with the current encoded-blob layout. Drop the profile and let the
-        // next hydrateProfile() refetch it from /api/users/me.
+        // Older shapes (v1 hand-rolled, v2 base64 encodedProfile) cannot be
+        // safely decoded here. Drop the profile and let the next
+        // hydrateProfile() refetch it from /api/users/me.
         if (version < AUTH_PROFILE_PERSIST_VERSION) {
           const legacy = (persistedState as Partial<PersistedAuthProfileState>) ?? {};
           return {
-            encodedProfile: null,
+            profile: null,
             lastFetchedAt: null,
             lastCurrency: legacy.lastCurrency ?? null,
           } satisfies PersistedAuthProfileState;
@@ -226,18 +192,18 @@ export const useAuthProfileStore = create<AuthProfileState>()(
         return persistedState as PersistedAuthProfileState;
       },
       partialize: (state): PersistedAuthProfileState => ({
-        encodedProfile: encodeProfileForStorage(state.profile),
+        profile: state.profile,
         lastFetchedAt: state.lastFetchedAt,
         lastCurrency: state.lastCurrency,
       }),
       merge: (persistedState, currentState) => {
-        const { encodedProfile, ...persistedAuthState } =
-          (persistedState as PersistedAuthProfileState | undefined) ?? {};
+        const persisted = (persistedState as PersistedAuthProfileState | undefined) ?? {};
 
         return {
           ...currentState,
-          ...persistedAuthState,
-          profile: decodeProfileFromStorage(encodedProfile),
+          profile: persisted.profile ?? null,
+          lastFetchedAt: persisted.lastFetchedAt ?? null,
+          lastCurrency: persisted.lastCurrency ?? null,
           status: "ready",
           inFlightPromise: null,
           inFlightCurrency: null,

@@ -15,9 +15,6 @@
       noSession: "No Session",
       startNewSession: "Start New Session",
     },
-    loader: {
-      drafting: "Drafting Summary",
-    },
     frontpage: {
       heading: "Generate a summary from your active tab",
       activeTab: "Active tab",

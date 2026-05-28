@@ -8,25 +8,4 @@ export default defineConfig({
     tailwindcss(),
     react(),
   ],
-  build: {
-    chunkSizeWarningLimit: 800,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (!id.includes("/node_modules/")) {
-            return;
-          }
-
-          if (
-            id.includes("/node_modules/jspdf/") ||
-            id.includes("/node_modules/html2canvas/")
-          ) {
-            return "vendor-pdf";
-          }
-
-          return;
-        },
-      },
-    },
-  },
 })

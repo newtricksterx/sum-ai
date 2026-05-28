@@ -17,9 +17,6 @@ const fr = {
       noSession: "Aucune session",
       startNewSession: "Demarrer une nouvelle session",
     },
-    loader: {
-      drafting: "Preparation du resume",
-    },
     frontpage: {
       heading: "Generer un resume de votre onglet actif",
       activeTab: "Onglet actif",

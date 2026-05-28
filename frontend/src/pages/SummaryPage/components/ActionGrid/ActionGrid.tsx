@@ -92,7 +92,7 @@ export const ActionGrid = ({ onClickAction, title, loadingActionId = null, class
               <div className="summary-action-footer">
                 <span className={`summary-action-tag summary-action-tag--${item.tone}`}>{itemTag}</span>
                 {isActionLoading ? (
-                  <LoaderCircle showText={false} className="summary-action-loader" />
+                  <LoaderCircle className="summary-action-loader" />
                 ) : (
                   <ArrowRightIcon className="summary-action-arrow" aria-hidden="true" />
                 )}

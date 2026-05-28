@@ -5,6 +5,7 @@ type RetryableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean; _
 type CsrfTokenResponse = { csrfToken?: string };
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
+const REQUEST_TIMEOUT_MS = 30_000;
 const EXCLUDED_REFRESH_ROUTES = ["/api/login", "/api/register", "/api/logout", "/api/token/refresh"];
 const SAFE_HTTP_METHODS = new Set(["get", "head", "options", "trace"]);
 
@@ -17,16 +18,19 @@ let csrfPromise: Promise<string> | null = null;
 const refreshClient = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
+  timeout: REQUEST_TIMEOUT_MS,
 });
 
 const logoutClient = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
+  timeout: REQUEST_TIMEOUT_MS,
 });
 
 const csrfClient = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
+  timeout: REQUEST_TIMEOUT_MS,
 });
 
 const isUnsafeHttpMethod = (method?: string) => {
@@ -174,6 +178,7 @@ export const setAuthLogoutHandler = (handler: LogoutHandler | null) => {
 export const authInstance: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
+  timeout: REQUEST_TIMEOUT_MS,
 });
 
 authInstance.interceptors.request.use(withCsrfProtection);

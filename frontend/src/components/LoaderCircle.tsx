@@ -1,22 +1,16 @@
-import { useTranslation } from "react-i18next";
-import "../i18n";
-
 interface LoaderCircleProps {
-  showText?: boolean;
   className?: string;
 }
 
-export default function LoaderCircle({ showText = true, className = "" }: LoaderCircleProps) {
-  const { t } = useTranslation();
+export default function LoaderCircle({ className = "" }: LoaderCircleProps) {
   const normalizedClassName = className.trim();
   const shellClassName = normalizedClassName
     ? `loader-shell font-google ${normalizedClassName}`
     : "loader-shell font-google";
 
   return (
-    <div className={shellClassName}>
+    <div className={`${shellClassName} my-2`}>
       <div id="loader" />
-      {showText && <p className="loader-text">{t("loader.drafting")}</p>}
     </div>
   )
 }
