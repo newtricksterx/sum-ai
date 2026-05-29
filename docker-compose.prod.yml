@@ -91,10 +91,7 @@ services:
     restart: always
     ports:
       - "80:80"
-      - "443:443"
     volumes:
-      - ./nginx/certs/fullchain.pem:/etc/nginx/certs/fullchain.pem:ro
-      - ./nginx/certs/privkey.pem:/etc/nginx/certs/privkey.pem:ro
       - static_volume:/usr/share/nginx/static:ro
     deploy:
       resources:
