@@ -16,6 +16,9 @@ class ApiRootView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
+        if not settings.DEBUG:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
         payload = {
             "action_item": reverse("action-item", request=request),
             "csrf_token": reverse("csrf-token", request=request),
