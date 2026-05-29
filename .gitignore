@@ -19,3 +19,6 @@ public_key.pem
 
 # Django collectstatic output
 backend/staticfiles/
+
+DEPLOYMENT.html
+aws-ec2-setup.html
