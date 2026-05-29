@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.http import HttpResponse
 from django.template import loader
 
@@ -27,14 +28,23 @@ def privacy(request):
 def robots(request):
     host = request.get_host()
     scheme = request.scheme
+    admin_path = getattr(settings, "ADMIN_URL_PATH", "admin/")
+    if not admin_path.startswith("/"):
+        admin_path = "/" + admin_path
+    if not admin_path.endswith("/"):
+        admin_path += "/"
+    disallow_lines = [
+        f"Disallow: {admin_path}\n",
+        "Disallow: /api/\n",
+        "Disallow: /accounts/\n",
+        "Disallow: /billing/\n",
+    ]
+    if settings.DEBUG:
+        disallow_lines.append("Disallow: /api-auth/\n")
     body = (
         "User-agent: *\n"
-        "Disallow: /admin/\n"
-        "Disallow: /api/\n"
-        "Disallow: /api-auth/\n"
-        "Disallow: /accounts/\n"
-        "Disallow: /billing/\n"
-        "Allow: /\n"
+        + "".join(disallow_lines)
+        + "Allow: /\n"
         "\n"
         f"Sitemap: {scheme}://{host}/sitemap.xml\n"
     )

@@ -48,6 +48,8 @@ if not SECRET_KEY:
     else:
         raise ImproperlyConfigured("SECRET_KEY must be set when DEBUG is False.")
 
+ADMIN_URL_PATH = env.str("ADMIN_URL_PATH", default="admin/") # type: ignore
+
 ALLOWED_HOSTS = env.list(
     "ALLOWED_HOSTS",
     default=["127.0.0.1", "localhost"] if DEBUG else [] # type: ignore
