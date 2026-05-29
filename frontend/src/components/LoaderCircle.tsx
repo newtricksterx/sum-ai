@@ -9,7 +9,7 @@ export default function LoaderCircle({ className = "" }: LoaderCircleProps) {
     : "loader-shell font-google";
 
   return (
-    <div className={`${shellClassName} my-2`}>
+    <div className={`${shellClassName}`}>
       <div id="loader" />
     </div>
   )

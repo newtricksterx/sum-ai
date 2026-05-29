@@ -134,7 +134,7 @@
       languageChangeHint: "Regenerate summary to apply language.",
       sectionAppearance: "Appearance",
       sectionSummary: "Summary Preferences",
-      sectionLearn: "Learn Actions",
+      sectionLearn: "Quiz Preferences",
       sectionRegional: "Regional",
       option: {
         english: "English",

@@ -136,7 +136,7 @@ const hi = {
       languageChangeHint: "भाषा लागू करने के लिए सारांश फिर बनाएं।",
       sectionAppearance: "दिखावट",
       sectionSummary: "सारांश प्राथमिकताएं",
-      sectionLearn: "सीखने की क्रियाएं",
+      sectionLearn: "क्विज़ प्राथमिकताएँ",
       sectionRegional: "क्षेत्रीय",
       option: {
         english: "English",

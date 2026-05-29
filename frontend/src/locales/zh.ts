@@ -136,7 +136,7 @@
       languageChangeHint: "重新生成摘要以应用语言。",
       sectionAppearance: "外观",
       sectionSummary: "摘要偏好",
-      sectionLearn: "学习操作",
+      sectionLearn: "测验偏好",
       sectionRegional: "区域",
       option: {
         english: "English",

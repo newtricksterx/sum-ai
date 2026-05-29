@@ -208,7 +208,7 @@ function App() {
         className="app-page-panel"
       >
         {isLazy ? (
-          <Suspense fallback={<LoaderCircle />}>{content}</Suspense>
+          <Suspense fallback={<LoaderCircle className='my-2'/>}>{content}</Suspense>
         ) : (
           content
         )}

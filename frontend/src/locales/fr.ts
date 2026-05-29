@@ -136,7 +136,7 @@ const fr = {
       languageChangeHint: "Regenerez le resume pour appliquer la langue.",
       sectionAppearance: "Apparence",
       sectionSummary: "Preferences de resume",
-      sectionLearn: "Actions d'apprentissage",
+      sectionLearn: "Préférences du quiz",
       sectionRegional: "Regional",
       option: {
         english: "Anglais",

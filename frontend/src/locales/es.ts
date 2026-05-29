@@ -136,7 +136,7 @@ const es = {
       languageChangeHint: "Regenera el resumen para aplicar el idioma.",
       sectionAppearance: "Apariencia",
       sectionSummary: "Preferencias de resumen",
-      sectionLearn: "Acciones de aprendizaje",
+      sectionLearn: "Preferencias del cuestionario",
       sectionRegional: "Regional",
       option: {
         english: "Ingles",
