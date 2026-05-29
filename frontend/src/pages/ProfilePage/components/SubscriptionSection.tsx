@@ -30,10 +30,12 @@ interface PlanLimitsProps {
 export const PlanLimits = ({ subscription, onClickUpgrade }: PlanLimitsProps) => {
   const { t } = useTranslation();
 
-  const planName = subscription?.plan_name ?? t("profile.unavailable", "Unavailable");
+  const planSlug = subscription?.plan_slug ?? "free";
+  const planNameKey = `profile.planName${planSlug.charAt(0).toUpperCase() + planSlug.slice(1)}`;
+  const planName = t(planNameKey, subscription?.plan_name ?? "Unavailable");
   const periodEnd = derivePeriodEnd(subscription);
-  const wordLimit = deriveWordLimit(subscription?.character_limit);
-  const historyLimit = formatLimit(subscription?.history_limit, " items");
+  const wordLimit = deriveWordLimit(subscription?.character_limit, t);
+  const historyLimit = formatLimit(subscription?.history_limit, ` ${t("profile.items")}`, t);
 
   return (
     <section className="pp-card pp-section" aria-label="Plan and limits">
@@ -69,7 +71,7 @@ export const PlanLimits = ({ subscription, onClickUpgrade }: PlanLimitsProps) =>
       />
 
       <button className="upgrade-btn" onClick={onClickUpgrade}>
-        Upgrade Plan
+        {t("profile.upgradePlan")}
       </button>
     </section>
   );

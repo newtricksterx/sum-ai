@@ -65,7 +65,6 @@ pydantic==2.10.6
 pydantic_core==2.27.2
 PyJWT==2.12.1
 PyMuPDF==1.27.2.3
-python-certifi-win32==1.6.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
 python-slugify==8.0.4

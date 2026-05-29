@@ -12,34 +12,12 @@ import { parseApiErrorMessage } from "../../../../utils/apiError"
 
 type PlanSlug = "standard" | "pro"
 
-const standard_plan: PointDescription[] = [
-    {amount: 300, desc: "Summaries, Flashcards, Quizzes"},
-    {amount: 5, desc: "Saved session slots"},
-    {amount: 30000, desc: "Characters per input"},
-    {amount: null, desc: "Works on Webpages, PDFs, YouTube Transcripts"}
-]
-
-const pro_plan: PointDescription[] = [
-    {amount: 1200, desc: "Summaries, Flashcards, Quizzes"},
-    {amount: 10, desc: "Saved session slots"},
-    {amount: "Unlimited", desc: "Characters per input"},
-    {amount: null, desc: "Works on Webpages, PDFs, YouTube Transcripts"}
-]
-
 const PLAN_PRICES_MINOR: Record<PlanSlug, Record<Currency, number>> = {
     standard: { USD: 399, CAD: 499, EUR: 399 },
     pro:      { USD: 999, CAD: 1399, EUR: 999 },
 }
 
 const PLAN_TIER: Record<string, number> = { free: 0, standard: 1, pro: 2 }
-
-const getCtaLabel = (cardSlug: PlanSlug, cardName: string, currentSlug?: string) => {
-    if (!currentSlug) return `Get ${cardName}`
-    if (currentSlug === cardSlug) return "Current Plan"
-    return PLAN_TIER[cardSlug] > (PLAN_TIER[currentSlug] ?? 0)
-        ? `Upgrade to ${cardName}`
-        : `Downgrade to ${cardName}`
-}
 
 interface PricingPageProps {
     currentPlanSlug?: string;
@@ -55,6 +33,31 @@ export const PricingPage = ({ currentPlanSlug, onClickReturn }: PricingPageProps
 
     const standardPrice = deriveSubscriptionPrice(PLAN_PRICES_MINOR.standard[currency], currency, t)
     const proPrice = deriveSubscriptionPrice(PLAN_PRICES_MINOR.pro[currency], currency, t)
+
+    const standardName = t("profile.planNameStandard", "Standard")
+    const proName = t("profile.planNamePro", "Pro")
+
+    const getCtaLabel = (cardSlug: PlanSlug, cardName: string) => {
+        if (!currentPlanSlug) return t("profile.getPlan", { name: cardName, defaultValue: `Get ${cardName}` })
+        if (currentPlanSlug === cardSlug) return t("profile.currentPlan", "Current Plan")
+        return PLAN_TIER[cardSlug] > (PLAN_TIER[currentPlanSlug] ?? 0)
+            ? t("profile.upgradeTo", { name: cardName, defaultValue: `Upgrade to ${cardName}` })
+            : t("profile.downgradeTo", { name: cardName, defaultValue: `Downgrade to ${cardName}` })
+    }
+
+    const standard_plan: PointDescription[] = [
+        {amount: 300, desc: t("profile.featureSummaries")},
+        {amount: 5, desc: t("profile.featureSessionSlots")},
+        {amount: 30000, desc: t("profile.featureCharsPerInput")},
+        {amount: null, desc: t("profile.featureWorksOn")}
+    ]
+
+    const pro_plan: PointDescription[] = [
+        {amount: 1200, desc: t("profile.featureSummaries")},
+        {amount: 10, desc: t("profile.featureSessionSlots")},
+        {amount: t("profile.unlimited", "Unlimited"), desc: t("profile.featureCharsPerInput")},
+        {amount: null, desc: t("profile.featureWorksOn")}
+    ]
 
     const handleUpgrade = async (plan_slug: PlanSlug) => {
         setErrorMessage(null)
@@ -84,25 +87,25 @@ export const PricingPage = ({ currentPlanSlug, onClickReturn }: PricingPageProps
         <div>
             <button className="return-btn" onClick={onClickReturn}>
                 <ArrowLeftIcon width={14} height={14}/>
-                <span className="return-text">Return</span>
+                <span className="return-text">{t("profile.returnButton")}</span>
             </button>
             <div className="pricingpage">
                 <PricingPageCard
-                    plan_name="Standard"
-                    plan_desc="For casual users."
+                    plan_name={standardName}
+                    plan_desc={t("profile.standardDesc")}
                     price={standardPrice}
                     pointsList={standard_plan}
-                    ctaLabel={getCtaLabel("standard", "Standard", currentPlanSlug)}
+                    ctaLabel={getCtaLabel("standard", standardName)}
                     disabled={currentPlanSlug === "standard"}
                     loading={loadingSlug === "standard"}
                     onClick={() => handleUpgrade("standard")}
                 />
                 <PricingPageCard
-                    plan_name="Pro"
-                    plan_desc="For heavy users."
+                    plan_name={proName}
+                    plan_desc={t("profile.proDesc")}
                     price={proPrice}
                     pointsList={pro_plan}
-                    ctaLabel={getCtaLabel("pro", "Pro", currentPlanSlug)}
+                    ctaLabel={getCtaLabel("pro", proName)}
                     disabled={currentPlanSlug === "pro"}
                     loading={loadingSlug === "pro"}
                     onClick={() => handleUpgrade("pro")}

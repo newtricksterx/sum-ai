@@ -11,36 +11,45 @@ export const formatDate = (rawDate: string) => {
   }).format(parsedDate);
 };
 
-export const formatLimit = (value: number | null | undefined, suffix = "") => {
+export const formatLimit = (
+  value: number | null | undefined,
+  suffix = "",
+  t?: (key: string, defaultValue: string) => string,
+) => {
   if (value === null) {
-    return "Unlimited";
+    return t ? t("profile.unlimited", "Unlimited") : "Unlimited";
   }
 
   if (typeof value === "number") {
     return `${value.toLocaleString()}${suffix}`;
   }
 
-  return "Unavailable";
+  return t ? t("profile.unavailable", "Unavailable") : "Unavailable";
 };
 
-export const deriveWordLimit = (characterLimit: number | null | undefined) => {
+export const deriveWordLimit = (
+  characterLimit: number | null | undefined,
+  t?: (key: string, defaultValue: string) => string,
+) => {
+  const words = t ? t("profile.words", "words") : "words";
+
   if (characterLimit === null) {
-    return "Unlimited";
+    return t ? t("profile.unlimited", "Unlimited") : "Unlimited";
   }
 
   if (typeof characterLimit !== "number") {
-    return "Unavailable";
+    return t ? t("profile.unavailable", "Unavailable") : "Unavailable";
   }
 
   if (characterLimit <= 10000) {
-    return "1,500 words";
+    return `1,500 ${words}`;
   }
 
   if (characterLimit <= 30000) {
-    return "5,000 words";
+    return `5,000 ${words}`;
   }
 
-  return `${Math.round(characterLimit / 6.5).toLocaleString()} words`;
+  return `${Math.round(characterLimit / 6.5).toLocaleString()} ${words}`;
 };
 
 type BillingIntervalTranslator = (key: string, defaultValue: string) => string;

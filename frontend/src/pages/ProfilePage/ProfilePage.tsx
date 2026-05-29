@@ -99,7 +99,7 @@ const ProfilePage: React.FC = () => {
           <LogoutAction
             email={userProfile.email}
             isSubmitting={isSubmitting}
-            plan_name={userProfile?.subscription?.plan_name}
+            plan_slug={userProfile?.subscription?.plan_slug}
             onConfirm={() => void handleLogout()}
             cancelSubscription={openBillingPortal}
           />

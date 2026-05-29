@@ -79,12 +79,12 @@ export const SignInView = ({ infoMessage, errorMessage, onDismissError }: SignIn
 interface LogoutActionProps {
   email: string;
   isSubmitting: boolean;
-  plan_name: string | undefined;
+  plan_slug: string | undefined;
   onConfirm: () => void;
   cancelSubscription: () => void;
 }
 
-export const LogoutAction = ({ email, isSubmitting, plan_name, onConfirm, cancelSubscription }: LogoutActionProps) => {
+export const LogoutAction = ({ email, isSubmitting, plan_slug, onConfirm, cancelSubscription }: LogoutActionProps) => {
   const { t } = useTranslation();
 
   return (
@@ -107,26 +107,26 @@ export const LogoutAction = ({ email, isSubmitting, plan_name, onConfirm, cancel
         onConfirm={onConfirm}
       />
       {
-        !plan_name || plan_name === "Free" ? null :
+        !plan_slug || plan_slug === "free" ? null :
           <AlertPopup
             trigger={
               <button
                 type="button"
                 className="pp-cancel-btn"
               >
-                Cancel Subscription
+                {t("profile.cancelSubscription")}
               </button>
             }
-          title="Cancel subscription"
-          description="Are you sure that you want to cancel your subscription?"
-          previewText="You will go back to the free plan once your current plan period ends."
-          confirmLabel="Yes"
-          cancelLabel="No"
+          title={t("profile.cancelSubscriptionTitle")}
+          description={t("profile.cancelSubscriptionDescription")}
+          previewText={t("profile.cancelSubscriptionPreview")}
+          confirmLabel={t("profile.yes")}
+          cancelLabel={t("profile.no")}
           onConfirm={cancelSubscription}
         />
       }
 
     </div>
-    
+
   );
 };

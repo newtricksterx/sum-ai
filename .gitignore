@@ -16,3 +16,6 @@ CLAUDE.md
 
 skills-lock.json
 public_key.pem
+
+# Django collectstatic output
+backend/staticfiles/

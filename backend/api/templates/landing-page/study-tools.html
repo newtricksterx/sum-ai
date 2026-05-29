@@ -48,7 +48,11 @@
   "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
   "description": "The AI study tool that turns any webpage, YouTube video, or PDF into summaries, flashcards, and quizzes. Free, no signup. Active-recall studying built in.",
   "inLanguage": "en",
-  "about": {"@type": "Thing", "name": "AI study tools"},
+  "about": [
+    {"@type": "Thing", "name": "AI study tools"},
+    {"@type": "Thing", "name": "Active recall", "sameAs": "https://en.wikipedia.org/wiki/Testing_effect"},
+    {"@type": "Thing", "name": "Spaced repetition", "sameAs": "https://en.wikipedia.org/wiki/Spaced_repetition"}
+  ],
   "isPartOf": {"@type": "WebSite", "name": "ReadToRecall", "url": "{{ request.scheme }}://{{ request.get_host }}/"},
   "primaryImageOfPage": "{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}"
 }
@@ -76,6 +80,15 @@
   "audience": {"@type": "EducationalAudience", "educationalRole": "student"},
   "learningResourceType": ["Summary", "Flashcard", "Quiz"],
   "educationalUse": ["Active Recall", "Spaced Repetition", "Self-Study"],
+  "about": [
+    {"@type": "Thing", "name": "Active recall", "sameAs": "https://en.wikipedia.org/wiki/Testing_effect"},
+    {"@type": "Thing", "name": "Spaced repetition", "sameAs": "https://en.wikipedia.org/wiki/Spaced_repetition"}
+  ],
+  "mentions": [
+    {"@type": "SoftwareApplication", "name": "Quizlet", "sameAs": "https://en.wikipedia.org/wiki/Quizlet"},
+    {"@type": "SoftwareApplication", "name": "Anki", "sameAs": "https://en.wikipedia.org/wiki/Anki_(software)"},
+    {"@type": "SoftwareApplication", "name": "NotebookLM", "sameAs": "https://en.wikipedia.org/wiki/NotebookLM"}
+  ],
   "description": "ReadToRecall is a free AI study tool built as a Chrome extension. It turns any webpage, YouTube video, or PDF into a summary, flashcards, and a quiz, using active recall to help students remember what they read.",
   "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
   "image": "{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}",
@@ -697,10 +710,10 @@
     <div class="section-head">
       <div class="eyebrow">The studying technique</div>
       <h2>Built on <em>active recall</em>.</h2>
-      <p class="section-lede">Active recall is the practice of testing yourself on material instead of re-reading it. It's the studying technique with the strongest evidence base in cognitive science — and the one ReadToRecall is designed around end-to-end.</p>
+      <p class="section-lede">Active recall is the practice of testing yourself on material instead of re-reading it. It's the studying technique with the strongest evidence base in cognitive science — ranked the most effective technique in a review of ten popular study methods (<a href="https://doi.org/10.1177/1529100612453266" target="_blank" rel="noopener noreferrer" style="color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--accent-soft); text-underline-offset: 3px;">Dunlosky et al., 2013</a>) — and the one ReadToRecall is designed around end-to-end.</p>
     </div>
     <div class="prose">
-      <p>Re-reading and highlighting feel productive but produce little retention. Retrieval — pulling an answer out of your head — is what consolidates memory. That's why every ReadToRecall summary can be converted into <strong>flashcards</strong> (cued retrieval) and <strong>quizzes</strong> (recognition + retrieval), at three difficulty levels.</p>
+      <p>Re-reading and highlighting feel productive but produce little retention (<a href="https://doi.org/10.1111/j.1467-9280.2006.01693.x" target="_blank" rel="noopener noreferrer" style="color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--accent-soft); text-underline-offset: 3px;">Roediger &amp; Karpicke, 2006</a>). Retrieval — pulling an answer out of your head — is what consolidates memory. That's why every ReadToRecall summary can be converted into <strong>flashcards</strong> (cued retrieval) and <strong>quizzes</strong> (recognition + retrieval), at three difficulty levels.</p>
       <p>Pair it with spaced repetition — coming back to flashcards on increasing intervals — and you have the loop that moves information from short-term into long-term memory. ReadToRecall generates the material; you do the retrieval.</p>
     </div>
   </div>

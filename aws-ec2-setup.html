@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AWS EC2 Setup — Sum AI</title>
+<style>
+  @media print {
+    body { font-size: 11pt; }
+    pre { page-break-inside: avoid; }
+    h2 { page-break-after: avoid; }
+    .no-print { display: none; }
+  }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+    color: #1a1a1a;
+    line-height: 1.6;
+  }
+  h1 {
+    border-bottom: 2px solid #0f172a;
+    padding-bottom: 10px;
+    font-size: 24pt;
+  }
+  h2 {
+    color: #0f172a;
+    margin-top: 32px;
+    font-size: 14pt;
+  }
+  h3 {
+    color: #334155;
+    font-size: 12pt;
+  }
+  pre {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    font-size: 10pt;
+    line-height: 1.5;
+  }
+  code {
+    background: #f1f5f9;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 10pt;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 12px 0;
+    font-size: 10pt;
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 8px 12px;
+    text-align: left;
+  }
+  th {
+    background: #f1f5f9;
+    font-weight: 600;
+  }
+  ol > li {
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    color: #64748b;
+    font-size: 12pt;
+    margin-top: -10px;
+  }
+  .note {
+    background: #fefce8;
+    border-left: 4px solid #eab308;
+    padding: 10px 14px;
+    margin: 12px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 10pt;
+  }
+  .print-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #0f172a;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 11pt;
+  }
+  .print-btn:hover { background: #334155; }
+</style>
+</head>
+<body>
+
+<button class="print-btn no-print" onclick="window.print()">Save as PDF</button>
+
+<h1>AWS EC2 Setup — Sum AI</h1>
+<p class="subtitle">Instance: t3.micro (2 vCPU, 1 GB RAM) &bull; OS: Ubuntu 24.04 LTS</p>
+
+<h2>Step 1 — Launch Instance</h2>
+<ol>
+  <li>Go to <strong>EC2 &rarr; Launch Instance</strong> in the AWS Console</li>
+  <li><strong>Name</strong>: <code>sum-ai</code></li>
+  <li><strong>AMI</strong>: Ubuntu 24.04 LTS (free tier eligible)</li>
+  <li><strong>Instance type</strong>: <code>t3.micro</code></li>
+  <li><strong>Key pair</strong>: Create new &rarr; download the <code>.pem</code> file</li>
+  <li><strong>Network settings</strong> &rarr; Create security group:</li>
+</ol>
+<table>
+  <tr><th>Port</th><th>Source</th><th>Purpose</th></tr>
+  <tr><td>22 (SSH)</td><td>My IP</td><td>SSH access</td></tr>
+  <tr><td>80 (HTTP)</td><td>0.0.0.0/0</td><td>HTTP &rarr; HTTPS redirect</td></tr>
+  <tr><td>443 (HTTPS)</td><td>0.0.0.0/0</td><td>API traffic</td></tr>
+</table>
+<ol start="7">
+  <li><strong>Storage</strong>: 20 GB gp3</li>
+  <li>Click <strong>Launch instance</strong></li>
+</ol>
+
+<h2>Step 2 — Elastic IP</h2>
+<p>Prevents your public IP from changing on instance stop/start.</p>
+<ol>
+  <li><strong>EC2 &rarr; Elastic IPs &rarr; Allocate</strong></li>
+  <li>Select the new IP &rarr; <strong>Actions &rarr; Associate</strong> &rarr; pick your instance</li>
+  <li>Note this IP — this is your permanent server address</li>
+</ol>
+
+<h2>Step 3 — Point Your Domain</h2>
+<p>In your domain registrar (Namecheap, Cloudflare, etc.):</p>
+<ul>
+  <li><strong>A record</strong> &rarr; <code>@</code> &rarr; <code>&lt;Elastic IP&gt;</code></li>
+  <li><strong>A record</strong> &rarr; <code>www</code> &rarr; <code>&lt;Elastic IP&gt;</code> (optional)</li>
+</ul>
+<p>Wait a few minutes for DNS propagation.</p>
+
+<h2>Step 4 — SSH In</h2>
+<pre><code>chmod 400 your-key.pem
+ssh -i your-key.pem ubuntu@&lt;Elastic IP&gt;</code></pre>
+
+<h2>Step 5 — Install Docker</h2>
+<pre><code># Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install Docker
+sudo apt install -y docker.io docker-compose-v2
+
+# Let your user run docker without sudo
+sudo usermod -aG docker $USER
+
+# Log out and back in
+exit</code></pre>
+<p>SSH back in and verify:</p>
+<pre><code>ssh -i your-key.pem ubuntu@&lt;Elastic IP&gt;
+docker --version</code></pre>
+
+<h2>Step 6 — Clone Your Repo</h2>
+<pre><code>git clone https://github.com/YOUR_USER/sum-ai.git
+cd sum-ai</code></pre>
+
+<h2>Step 7 — Create Production Env File</h2>
+<pre><code>nano backend/.env.prod</code></pre>
+<p>Paste the following (replace placeholder values):</p>
+<pre><code>PRODUCTION=True
+DJANGO_SECRET_KEY=&lt;run: python3 -c "import secrets; print(secrets.token_urlsafe(50))"&gt;
+GEMINI_API_KEY=&lt;your-gemini-key&gt;
+CORS_ALLOWED_ORIGINS=https://yourdomain.com
+
+POSTGRES_DB=sumai
+POSTGRES_USER=sumai_user
+POSTGRES_PASSWORD=&lt;run: python3 -c "import secrets; print(secrets.token_urlsafe(32))"&gt;</code></pre>
+<p>Add any other env vars your <code>settings.py</code> expects (Stripe keys, etc.).</p>
+
+<h2>Step 8 — SSL Certificates (Let's Encrypt)</h2>
+<pre><code># Install certbot
+sudo apt install -y certbot
+
+# Get cert (nothing should be running on port 80 yet)
+sudo certbot certonly --standalone -d yourdomain.com
+
+# Copy certs into your project
+sudo cp /etc/letsencrypt/live/yourdomain.com/fullchain.pem nginx/certs/
+sudo cp /etc/letsencrypt/live/yourdomain.com/privkey.pem nginx/certs/
+sudo chown $USER:$USER nginx/certs/*.pem</code></pre>
+
+<h2>Step 9 — Build and Launch</h2>
+<pre><code>cd ~/sum-ai
+docker compose -f docker-compose.prod.yml up -d --build</code></pre>
+<p>Watch the logs until everything is healthy:</p>
+<pre><code>docker compose -f docker-compose.prod.yml logs -f</code></pre>
+<p>Press <code>Ctrl+C</code> to exit logs.</p>
+
+<h2>Step 10 — Verify</h2>
+<pre><code># From the server
+curl -k https://localhost/api/auth/csrf
+
+# From your browser
+# https://yourdomain.com/api/auth/csrf</code></pre>
+
+<h2>Step 11 — Auto-Renew SSL</h2>
+<pre><code>crontab -e</code></pre>
+<p>Add this line:</p>
+<pre><code>0 3 1,15 * * certbot renew --quiet && cp /etc/letsencrypt/live/yourdomain.com/fullchain.pem ~/sum-ai/nginx/certs/ && cp /etc/letsencrypt/live/yourdomain.com/privkey.pem ~/sum-ai/nginx/certs/ && docker compose -f ~/sum-ai/docker-compose.prod.yml restart nginx</code></pre>
+<p>Renews certs and restarts Nginx on the 1st and 15th of each month.</p>
+
+<h2>Step 12 — Enable Swap (safety net for 1 GB RAM)</h2>
+<pre><code>sudo fallocate -l 1G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab</code></pre>
+<p>Prevents OOM-kills if memory spikes temporarily.</p>
+
+<h2>Quick Reference</h2>
+<table>
+  <tr><th>Task</th><th>Command</th></tr>
+  <tr><td>Start</td><td><code>docker compose -f docker-compose.prod.yml up -d</code></td></tr>
+  <tr><td>Stop</td><td><code>docker compose -f docker-compose.prod.yml down</code></td></tr>
+  <tr><td>Logs</td><td><code>docker compose -f docker-compose.prod.yml logs -f</code></td></tr>
+  <tr><td>Rebuild after code change</td><td><code>git pull && docker compose -f docker-compose.prod.yml up -d --build</code></td></tr>
+  <tr><td>Check memory</td><td><code>free -h</code></td></tr>
+  <tr><td>Check containers</td><td><code>docker stats --no-stream</code></td></tr>
+</table>
+
+<h2>Resource Budget</h2>
+<table>
+  <tr><th>Container</th><th>Memory Limit</th><th>Workers</th></tr>
+  <tr><td>Backend (Gunicorn)</td><td>256 MB</td><td>2 workers, 4 threads</td></tr>
+  <tr><td>Postgres</td><td>128 MB</td><td>tuned shared_buffers=32MB</td></tr>
+  <tr><td>Nginx</td><td>32 MB</td><td>2 workers</td></tr>
+  <tr><td>OS + Docker</td><td>~300 MB</td><td>—</td></tr>
+  <tr><td><strong>Total</strong></td><td><strong>~716 MB / 1024 MB</strong></td><td></td></tr>
+</table>
+
+<div class="note">
+  <strong>Note:</strong> 1 GB swap is configured as a safety net. If <code>docker stats</code> consistently shows containers near their limits, consider upgrading to a <code>t3.small</code> (2 GB RAM, ~$15/mo).
+</div>
+
+</body>
+</html>

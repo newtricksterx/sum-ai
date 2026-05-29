@@ -1,8 +1,9 @@
+import { useTranslation } from "react-i18next"
 import PageCard from "../../../../components/PageCard/PageCard"
 import './PricingPageCard.css'
 
 export type PointDescription = {
-    amount: number | "Unlimited" | null;
+    amount: number | string | null;
     desc: string;
 }
 
@@ -18,6 +19,7 @@ interface PricingPageCardProps {
 }
 
 export const PricingPageCard = ({ plan_name, plan_desc, price, pointsList, ctaLabel, onClick, disabled = false, loading = false } : PricingPageCardProps) => {
+    const { t } = useTranslation();
     const inactive = disabled || loading;
     return (
         <PageCard className="pricingpage-card">
@@ -29,7 +31,7 @@ export const PricingPageCard = ({ plan_name, plan_desc, price, pointsList, ctaLa
 
                 <div>
                     <span className="price">{price}</span>
-                    <p className="frequency">per month</p>
+                    <p className="frequency">{t("profile.perMonth")}</p>
                 </div>
 
             </header>
@@ -49,7 +51,7 @@ export const PricingPageCard = ({ plan_name, plan_desc, price, pointsList, ctaLa
                 aria-disabled={inactive || undefined}
                 disabled={inactive}
                 onClick={onClick}
-            >{loading ? "Loading…" : ctaLabel}</button>
+            >{loading ? t("profile.loading") : ctaLabel}</button>
         </PageCard>
     )
 }

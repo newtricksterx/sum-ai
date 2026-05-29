@@ -5,28 +5,32 @@ LENGTH_GUIDANCE = {
 }
 
 INLINE_MARKS_RULES = """\
-Output rules:
-- Return ONE valid JSON object. No markdown fences, no commentary, no fields outside the schema.
-- "title" is concise and derived from the source.
-- Each inline element is {"text": <string>} with optional marks below. Plain runs stay one segment; split only when a mark applies to a sub-span.
-- Consider what type of content is being asked to summarize. For example, a math textbook or article, you want to use the var mark often. Whereas for a python documentation, you would use a code mark
+HARD CONSTRAINTS (violating any of these = invalid output):
+1. Return ONE valid JSON object. No markdown fences, no commentary, no extra fields.
+2. Never combine "code" and "var" on the same segment.
+3. Never invent URLs or facts not present in the source.
+4. "title" must be concise and derived from the source.
 
-Inline marks (each has ONE meaning; never invent or substitute):
+SEGMENT STRUCTURE:
+Each inline element is {"text": <string>} with optional marks. Keep plain runs as one segment; split only where a mark begins or ends.
+Marks may combine when both genuinely apply (e.g. {"text": "Ax = b", "var": true, "italic": true}).
+
+MARK DEFINITIONS (each has ONE meaning — never invent or substitute):
 - "bold": the single most important concept per bullet/paragraph. Never bold whole sentences, code, math, or URLs.
 - "italic": contrast, foreign words, or titles of works. Use sparingly.
-- "code": LITERAL source code — function calls, identifiers, file paths, CLI flags, JSON/HTML/regex. NOT math.
-- "var": MATHEMATICAL notation — variables, equations, Greek letters, math operators. NOT code identifiers.
-- "link": "<full URL>". Only when the source contains a real URL — never invent one.
+- "code": LITERAL source code — function calls, identifiers, file paths, CLI flags, JSON/HTML/regex. NOT math variables.
+- "var": MATHEMATICAL notation — variables, equations, Greek letters, operators. NOT code identifiers.
+- "link": "<full URL>" present in the source. Never invent a URL.
 
-Code vs var: code-editor monospace context → "code"; LaTeX math context → "var". For an isolated single letter naming a math object, prefer "var".
+Deciding "code" vs "var": if it belongs in a code editor, use "code"; if it belongs in a math equation, use "var". A single letter naming a math object → "var".
 
-Math inside "var" (write the formatted form directly in "text"):
-- Superscripts/subscripts: use Unicode (x², σ², A⁻¹, x₁, e⁻ⁿ). Never x^2, A^-1, or x_1.
-- Greek: use the Unicode glyph (α β γ θ σ Σ Ω). Never spell or escape.
-- Keep compound expressions in ONE "var" segment: {"text": "Ax = b", "var": true}.
-- Fallback only when no Unicode glyph exists: parenthesized form like "e^(a+b)".
+MATH FORMATTING (inside "var" segments, write the formatted form directly in "text"):
+- Unicode superscripts/subscripts: x², σ², A⁻¹, x₁, e⁻ⁿ. Never x^2 or x_1.
+- Unicode Greek glyphs: α β γ θ σ Σ Ω. Never spell out or escape.
+- Keep compound expressions in ONE segment: {"text": "Ax = b", "var": true}.
+- Parenthesized fallback only when no Unicode glyph exists: e^(a+b).
 
-Marks may combine when both genuinely apply (e.g. {"text": "Ax = b", "var": true, "italic": true}). Never combine "code" and "var" on the same segment. Do not invent URLs or facts not present in the source."""
+CONTENT-AWARE MARKING: match marks to the source domain — technical docs/code → favor "code"; math/science → favor "var"; general prose → favor "bold" and "italic" only."""
 
 
 JSON_FORMAT_GUIDANCE = {

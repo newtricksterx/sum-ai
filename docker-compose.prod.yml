@@ -15,7 +15,7 @@ services:
     command: >
       gunicorn backend.wsgi:application
       --bind 0.0.0.0:8000
-      --workers 3
+      --workers 2
       --worker-class gthread
       --threads 4
       --timeout 90
@@ -36,8 +36,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      migration_call:
+      init:
         condition: service_completed_successfully
+    volumes:
+      - static_volume:/app/staticfiles
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     networks:
       - app_network
 
@@ -54,10 +60,15 @@ services:
       retries: 10
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    command: postgres -c shared_buffers=32MB -c work_mem=2MB -c maintenance_work_mem=16MB -c effective_cache_size=64MB
+    deploy:
+      resources:
+        limits:
+          memory: 128M
     networks:
       - app_network
 
-  migration_call:
+  init:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
@@ -65,7 +76,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: python manage.py migrate --noinput
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput"
+    volumes:
+      - static_volume:/app/staticfiles
     networks:
       - app_network
 
@@ -80,6 +95,11 @@ services:
     volumes:
       - ./nginx/certs/fullchain.pem:/etc/nginx/certs/fullchain.pem:ro
       - ./nginx/certs/privkey.pem:/etc/nginx/certs/privkey.pem:ro
+      - static_volume:/usr/share/nginx/static:ro
+    deploy:
+      resources:
+        limits:
+          memory: 32M
     depends_on:
       backend:
         condition: service_healthy
@@ -89,3 +109,7 @@ services:
 networks:
   app_network:
     driver: bridge
+
+volumes:
+  postgres_data:
+  static_volume:
