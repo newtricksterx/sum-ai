@@ -22,6 +22,8 @@ RUN addgroup --system appgroup && \
 
 COPY --chown=appuser:appgroup . .
 
+RUN mkdir -p /app/staticfiles && chown appuser:appgroup /app/staticfiles
+
 USER appuser
 
 EXPOSE 8000
