@@ -110,7 +110,7 @@
       proDesc: "For heavy users.",
       featureSummaries: "Summaries, Flashcards, Quizzes",
       featureSessionSlots: "Saved session slots",
-      featureCharsPerInput: "Characters per input",
+      featureCharsPerInput: "Character limit per input",
       featureWorksOn: "Works on Webpages, PDFs, YouTube Transcripts",
       subscriptionPriceFree: "Free",
       billingIntervalDaily: "Daily",

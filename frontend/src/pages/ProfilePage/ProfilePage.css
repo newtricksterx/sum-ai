@@ -442,6 +442,8 @@
   background-color: rgb(62, 62, 203);
   transition: background-color 0.3s ease;
   margin-top: 0.3rem;
+  color: white;
+  font-weight: 500;
 }
 
 .upgrade-btn:hover {

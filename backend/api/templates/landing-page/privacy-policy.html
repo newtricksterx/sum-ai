@@ -491,10 +491,10 @@
       <p>The extension uses your browser&rsquo;s <code>localStorage</code> to keep the Service usable offline and to avoid sending data we don&rsquo;t need to. Items stored locally include:</p>
       <ul>
         <li><strong>Settings</strong> &mdash; theme, language, summary format and length, font size, currency, quiz difficulty, last page viewed.</li>
-        <li><strong>Auth profile cache</strong> (<code>auth-profile</code>) &mdash; a base64-encoded copy of your <code>/api/users/me</code> response (email, username, avatar URL, subscription state). This is a cache for performance; deleting it does not delete your account.</li>
         <li><strong>Current session</strong> (<code>current-session</code>) &mdash; the URL you are currently summarizing and any flashcards / quiz already generated in this tab.</li>
         <li><strong>History</strong> (<code>user-history</code>) &mdash; a map of past summaries, flashcards, and quizzes <strong>keyed by your email</strong> (or <code>anonymous</code> if you are not signed in). This is stored only in your browser. It is never transmitted to our backend.</li>
       </ul>
+      <p><strong>No authentication or account data is stored in local storage.</strong> Your identity and session are managed entirely through HTTP-only cookies (see above); the extension does not persist tokens, profile information, or login state in <code>localStorage</code>.</p>
       <p>You can clear any of these at any time using your browser&rsquo;s &ldquo;Clear site data&rdquo; control, or by uninstalling the extension. Clearing local storage does not delete your account on our servers.</p>
 
       <!-- ───────── 8 ───────── -->

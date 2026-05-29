@@ -9,7 +9,7 @@ export const useProfileAccount = () => {
   const { t } = useTranslation();
   const userProfile = useAuthProfileStore((state) => state.profile);
   const profileStatus = useAuthProfileStore((state) => state.status);
-  const clearProfile = useAuthProfileStore((state) => state.clearProfile);
+  const logout = useAuthProfileStore((state) => state.logout);
   const currency = useSettingsStore((s) => s.currency);
   const language = useSettingsStore((s) => s.language);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,15 +33,14 @@ export const useProfileAccount = () => {
     setInfoMessage(null);
 
     try {
-      await authInstance.post("/api/logout");
-      clearProfile();
+      await logout();
       setInfoMessage(t("profile.loggedOut", { defaultValue: "You have been logged out." }));
     } catch (error) {
       setErrorMessage(parseApiErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
-  }, [clearProfile, t]);
+  }, [logout, t]);
 
   const dismissError = useCallback(() => setErrorMessage(null), []);
 
@@ -75,7 +74,7 @@ export const useProfileAccount = () => {
 
   return {
     userProfile,
-    isInitializing: profileStatus === "loading",
+    isInitializing: profileStatus === "idle" || profileStatus === "loading",
     isSubmitting,
     errorMessage,
     infoMessage,

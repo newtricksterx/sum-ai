@@ -9,12 +9,11 @@ import { GetPageFromStorage, UpdatePageStorage } from '../../utils/storage'
 import FrontPage from '../FrontPage/FrontPage'
 import SummaryPage from '../SummaryPage/SummaryPage'
 import { useActionItem } from '../SummaryPage/useActionItem'
-import { isPersistedAuthProfileIntact, useAuthProfileStore } from '../../stores/authProfileStore'
+import { useAuthProfileStore } from '../../stores/authProfileStore'
 import { useCurrentSessionState, type SessionState } from '../../stores/sessionStorage'
 import { useAppLanguageEffect } from './useAppLanguageEffect'
 import { useHydrateProfileAfterLogin } from './useHydrateProfileAfterLogin'
 import { useAuthLogoutReset } from './useAuthLogoutReset'
-import { useHydrateProfileOnAuthChange } from './useHydrateProfileOnAuthChange'
 import { useRestoreSessionOnLogin } from './useRestoreSessionOnLogin'
 import { useTrackMountedPages } from './useTrackMountedPages'
 import { usePageSwitchCleanup } from './usePageSwitchCleanup'
@@ -27,17 +26,6 @@ const ProfilePage = lazy(() => import('../ProfilePage/ProfilePage'))
 const SettingsPage = lazy(() =>
   import('../SettingsPage/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 )
-
-// Returns true if the persisted auth blob is intact. When tampered, forces
-// a real logout and returns false so the caller can route to FrontPage.
-function enforceAuthIntegrity(): boolean {
-  const authState = useAuthProfileStore.getState();
-  if (authState.profile && !isPersistedAuthProfileIntact()) {
-    void authState.logout();
-    return false;
-  }
-  return true;
-}
 
 function App() {
   const [currentPage, setCurrentPage] = useState<PageType>(() => GetPageFromStorage() ?? "home");
@@ -68,7 +56,6 @@ function App() {
   useAuthLogoutReset(clearProfile);
 
   
-  useHydrateProfileOnAuthChange(authProfile, currency, hydrateProfile);
   useRestoreSessionOnLogin(authProfile);
   useTrackMountedPages(currentPage, setMountedPages);
 
@@ -104,10 +91,6 @@ function App() {
   }, [schedulePageStorageWrite]);
 
   const setPage = useCallback((nextPage: PageType) => {
-    if (!enforceAuthIntegrity()) {
-      nextPage = "home";
-    }
-
     pendingPageRef.current = nextPage;
 
     if (typeof window === "undefined") {
@@ -134,14 +117,9 @@ function App() {
   }, [commitPage]);
   usePageSwitchCleanup(pageFrameRef, pageStorageTimeoutRef);
 
-  // Catch tampering that happened while the extension was closed.
   useEffect(() => {
-    if (!enforceAuthIntegrity()) {
-      setPage("home");
-    }
-    // Intentionally run once on mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    void hydrateProfile(false, currency);
+  }, [hydrateProfile, currency]);
 
   const onMenuClick = useCallback((page: PageType) => {
     setPage(page);

@@ -39,7 +39,7 @@ export const PricingPageCard = ({ plan_name, plan_desc, price, pointsList, ctaLa
                 <ul>
                     {
                         pointsList.map((point, index) => (
-                            <li key={index}>{point.amount ? <strong>{point.amount}</strong> : null} {point.desc}</li>
+                            <li key={index}>{point.amount ? <strong>{point.amount}</strong> : null} <span>{point.desc}</span></li>
                         ))
                     }
                 </ul>

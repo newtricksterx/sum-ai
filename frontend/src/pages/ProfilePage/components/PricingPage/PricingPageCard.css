@@ -46,7 +46,7 @@ li {
 
 strong {
     color: var(--color-text-primary);
-    font-weight: 500;
+    font-weight: 700;
 }
 
 
@@ -78,4 +78,9 @@ strong {
     background-color: transparent;
     opacity: 0.6;
     pointer-events: none;
+}
+
+ul > li {
+    font-weight: 400;
+    color: var(--color-text-secondary);
 }
