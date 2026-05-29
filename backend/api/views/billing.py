@@ -16,6 +16,19 @@ from api.plans import normalize_currency
 
 logger = logging.getLogger(__name__)
 
+STRIPE_LOCALE_MAP = {
+    "english": "en",
+    "french": "fr",
+    "spanish": "es",
+    "mandarin": "zh",
+}
+
+
+def _normalize_stripe_locale(language):
+    if not language or not isinstance(language, str):
+        return "auto"
+    return STRIPE_LOCALE_MAP.get(language.strip().lower(), "auto")
+
 
 def _handle_webhook_event(event):
     event_type = payloads.event_type(event)
@@ -104,6 +117,7 @@ def session_action(request):
         return Response({"error": "invalid_plan_slug"}, status=400)
 
     currency = normalize_currency(request.data.get("currency"))
+    locale = _normalize_stripe_locale(request.data.get("language"))
     price_id = checkout.price_for_plan_currency(plan_slug, currency)
     if price_id is None:
         return Response({"error": "price_not_configured"}, status=500)
@@ -130,6 +144,7 @@ def session_action(request):
                         params={
                             "customer": user.stripe_customer_id,
                             "return_url": str(stripe_client.env("STRIPE_PORTAL_RETURN_URL")),
+                            "locale": locale,
                         }
                     )
                     return Response({"url": portal_session.url})
@@ -145,7 +160,7 @@ def session_action(request):
                     )
                     checkout.clear_paid_subscription_state(user, subscription)
 
-            return checkout.create_checkout_response(user, subscription, plan_slug, currency, price_id)
+            return checkout.create_checkout_response(user, subscription, plan_slug, currency, price_id, locale)
     except stripe.error.StripeError as exc:
         logger.exception(
             "Stripe API error in session_action user=%s request_id=%s",

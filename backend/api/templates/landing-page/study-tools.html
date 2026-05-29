@@ -8,13 +8,9 @@
 <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
 
 <meta property="og:locale" content="en_US">
-<meta property="og:locale:alternate" content="es_ES">
-<meta property="og:locale:alternate" content="fr_FR">
-<meta property="og:locale:alternate" content="hi_IN">
-<meta property="og:locale:alternate" content="zh_CN">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ReadToRecall">
-<meta property="og:title" content="Best AI Study Tool for 2026: Summaries, Flashcards &amp; Quizzes — ReadToRecall">
+<meta property="og:title" content="AI Study Tools Compared (2026) — ReadToRecall">
 <meta property="og:description" content="The AI study tool that turns any webpage, YouTube video, or PDF into summaries, flashcards, and quizzes. Free, no signup. Active-recall studying built in.">
 <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
 <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
@@ -23,11 +19,11 @@
 <meta property="og:image:height" content="649">
 
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Best AI Study Tool for 2026 — ReadToRecall">
+<meta name="twitter:title" content="AI Study Tools Compared (2026) — ReadToRecall">
 <meta name="twitter:description" content="The AI study tool that turns any webpage, YouTube video, or PDF into summaries, flashcards, and quizzes. Free, no signup.">
 <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
 <meta name="twitter:image:alt" content="ReadToRecall extension popup summarizing a webpage">
-<title>Best AI Study Tool for 2026: Summaries, Flashcards &amp; Quizzes — ReadToRecall</title>
+<title>AI Study Tools Compared (2026) — ReadToRecall</title>
 <meta name="description" content="The AI study tool that turns any webpage, YouTube video, or PDF into summaries, flashcards, and quizzes. Free, no signup. Active-recall studying built in.">
 
 <link rel="icon" type="image/svg+xml" href="{% static 'landing-page/favicon.svg' %}">
@@ -39,12 +35,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'landing-page/base.css' %}">
 
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": "Best AI Study Tool for 2026: Summaries, Flashcards & Quizzes — ReadToRecall",
+  "name": "AI Study Tools Compared (2026) — ReadToRecall",
   "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
   "description": "The AI study tool that turns any webpage, YouTube video, or PDF into summaries, flashcards, and quizzes. Free, no signup. Active-recall studying built in.",
   "inLanguage": "en",
@@ -54,7 +51,8 @@
     {"@type": "Thing", "name": "Spaced repetition", "sameAs": "https://en.wikipedia.org/wiki/Spaced_repetition"}
   ],
   "isPartOf": {"@type": "WebSite", "name": "ReadToRecall", "url": "{{ request.scheme }}://{{ request.get_host }}/"},
-  "primaryImageOfPage": "{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}"
+  "primaryImageOfPage": "{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}",
+  "speakable": {"@type": "SpeakableSpecification", "cssSelector": [".hero .lede", "#faq details:first-of-type p"]}
 }
 </script>
 <script type="application/ld+json">
@@ -159,140 +157,41 @@
         "@type": "Answer",
         "text": "Yes. Any PDF you open in your browser — including local PDFs from your computer — can be summarized, then turned into flashcards or a quiz. The Pro plan removes the character-count cap, so long PDFs and textbook chapters can be summarized without truncation."
       }
+    },
+    {
+      "@type": "Question",
+      "name": "Can ReadToRecall summarize research papers and academic PDFs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Open any research paper or academic PDF in your browser, click the ReadToRecall icon, and get a summary, flashcards, and a quiz. The extension strips headers, footers, and navigation automatically, so the AI focuses on the paper's content. The Pro plan removes the character-count cap, which matters for longer papers and literature reviews."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is ReadToRecall good for exam prep?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ReadToRecall is built around active recall — the studying technique ranked most effective for exam preparation by cognitive science research (Dunlosky et al., 2013). Summarize your lecture materials, textbook chapters, or class slides, then generate flashcards and quizzes to test yourself. The quiz difficulty levels (easy, medium, hard) let you ramp up as you get closer to the exam."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use ReadToRecall to summarize lecture recordings on YouTube?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. ReadToRecall pulls the transcript from any YouTube video — including recorded lectures, conference talks, and tutorials — and turns it into a summary, flashcards, and a quiz. This works on any YouTube video that has captions or auto-generated subtitles."
+      }
     }
   ]
 }
 </script>
 
 <style>
-  :root {
-    --bg: #F4F1EA;
-    --bg-elev: #FBF9F4;
-    --ink: #141311;
-    --ink-2: #4A4742;
-    --ink-3: #8C877C;
-    --line: #E3DDD0;
-    --line-2: #EFEAE0;
-    --accent: #B8412A;
-    --accent-soft: #F2DED6;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    line-height: 1.55;
-    font-size: 16px;
-    font-feature-settings: 'ss01', 'cv11';
-  }
-
-  .container {
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 0 32px;
-  }
-
-  /* ───────── NAV ───────── */
-  nav {
-    position: sticky;
-    top: 0;
-    background: rgba(244, 241, 234, 0.82);
-    backdrop-filter: saturate(140%) blur(14px);
-    -webkit-backdrop-filter: saturate(140%) blur(14px);
-    border-bottom: 1px solid var(--line);
-    z-index: 100;
-  }
-  .nav-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 0;
-  }
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 500;
-    font-size: 15px;
-    letter-spacing: -0.01em;
-    text-decoration: none;
-    color: var(--ink);
-  }
-  .logo-mark {
-    width: 26px; height: 26px;
-    border-radius: 7px;
-    overflow: hidden;
-  }
-  .logo-mark img { width: 100%; height: 100%; display: block; object-fit: contain; }
-  .nav-links {
-    display: flex;
-    gap: 36px;
-    list-style: none;
-  }
-  .nav-links a {
-    color: var(--ink-2);
-    text-decoration: none;
-    font-size: 14px;
-    transition: color .15s ease;
-  }
-  .nav-links a:hover { color: var(--ink); }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--ink);
-    color: var(--bg);
-    padding: 11px 18px;
-    border-radius: 9px;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    transition: transform .15s ease, opacity .15s ease;
-    border: none;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .btn:hover { transform: translateY(-1px); opacity: 0.92; }
-  .btn-ghost {
-    background: transparent;
-    color: var(--ink);
-    border: 1px solid var(--line);
-  }
-  .btn-ghost:hover { background: var(--bg-elev); opacity: 1; }
-  .chrome-web-store-icon { width: 26px; height: 26px; }
-
-  @media (max-width: 720px) {
-    .nav-links { display: none; }
-  }
-
   /* ───────── HERO ───────── */
   .hero {
     padding: 60px 0 40px;
   }
   .hero-narrow { max-width: 880px; }
-  .eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    font-family: 'Geist Mono', monospace;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--ink-3);
-    margin-bottom: 12px;
-  }
-  .eyebrow::before {
-    content: '';
-    width: 6px; height: 6px;
-    background: var(--accent);
-    border-radius: 50%;
-    box-shadow: 0 0 0 4px var(--accent-soft);
-  }
   h1 {
     font-family: 'Fraunces', Georgia, serif;
     font-size: clamp(40px, 5.6vw, 72px);
@@ -303,11 +202,6 @@
     margin-bottom: 28px;
     font-variation-settings: 'opsz' 144;
   }
-  h1 em {
-    font-style: italic;
-    color: var(--accent);
-    font-weight: 400;
-  }
   .lede {
     font-size: 19px;
     color: var(--ink-2);
@@ -315,13 +209,6 @@
     margin-bottom: 28px;
     line-height: 1.55;
   }
-  .cta-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
   /* ───────── SECTIONS ───────── */
   section.block { padding: 80px 0; }
   .section-head {
@@ -337,7 +224,6 @@
     font-weight: 400;
     margin-bottom: 18px;
   }
-  h2 em { font-style: italic; color: var(--accent); }
   .section-lede {
     font-size: 17px;
     color: var(--ink-2);
@@ -445,113 +331,7 @@
     line-height: 1.55;
   }
 
-  /* ───────── FAQ ───────── */
-  .faq-grid {
-    display: grid;
-    grid-template-columns: 1fr 1.6fr;
-    gap: 80px;
-  }
-  details {
-    border-top: 1px solid var(--line);
-    padding: 22px 0;
-  }
-  details:last-child { border-bottom: 1px solid var(--line); }
-  summary {
-    cursor: pointer;
-    font-size: 17px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    list-style: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 24px;
-  }
-  summary::-webkit-details-marker { display: none; }
-  summary::after {
-    content: '+';
-    font-family: 'Geist Mono', monospace;
-    color: var(--ink-3);
-    font-size: 22px;
-    font-weight: 300;
-    transition: transform .2s ease;
-  }
-  details[open] summary::after { transform: rotate(45deg); }
-  details p {
-    margin-top: 14px;
-    color: var(--ink-2);
-    font-size: 15px;
-    line-height: 1.6;
-    max-width: 640px;
-  }
-  @media (max-width: 860px) {
-    .faq-grid { grid-template-columns: 1fr; gap: 40px; }
-  }
-
-  /* ───────── FINAL CTA ───────── */
-  .final {
-    text-align: center;
-    padding: 120px 0;
-    border-top: 1px solid var(--line);
-  }
-  .final h2 {
-    margin: 0 auto 24px;
-    max-width: 760px;
-  }
-  .final .lede {
-    margin: 0 auto 36px;
-    max-width: 480px;
-    text-align: center;
-  }
-  .final .cta-row { justify-content: center; }
-
-  /* ───────── FOOTER ───────── */
-  footer {
-    border-top: 1px solid var(--line);
-    padding: 56px 0 40px;
-  }
-  .footer-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 40px;
-    margin-bottom: 56px;
-  }
-  .footer-grid h4 {
-    font-family: 'Geist Mono', monospace;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--ink-3);
-    margin-bottom: 18px;
-    font-weight: 500;
-  }
-  .footer-grid ul { list-style: none; }
-  .footer-grid li { margin-bottom: 10px; }
-  .footer-grid a {
-    color: var(--ink-2);
-    text-decoration: none;
-    font-size: 14px;
-  }
-  .footer-grid a:hover { color: var(--ink); }
-  .footer-tag {
-    color: var(--ink-2);
-    font-size: 14px;
-    max-width: 280px;
-    margin-top: 14px;
-  }
-  .footer-bottom {
-    border-top: 1px solid var(--line);
-    padding-top: 28px;
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    color: var(--ink-3);
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  @media (max-width: 720px) {
-    .footer-grid { grid-template-columns: 1fr 1fr; }
-  }
+  .final { padding: 120px 0; }
 </style>
 </head>
 <body>
@@ -786,6 +566,18 @@
         <details>
           <summary>Does ReadToRecall work on PDFs?</summary>
           <p>Yes. Any PDF you open in your browser — including local PDFs from your computer — can be summarized, then turned into flashcards or a quiz. The Pro plan removes the character-count cap, so long PDFs and textbook chapters can be summarized without truncation.</p>
+        </details>
+        <details>
+          <summary>Can ReadToRecall summarize research papers and academic PDFs?</summary>
+          <p>Yes. Open any research paper or academic PDF in your browser, click the ReadToRecall icon, and get a summary, flashcards, and a quiz. The extension strips headers, footers, and navigation automatically, so the AI focuses on the paper&rsquo;s content. The Pro plan removes the character-count cap, which matters for longer papers and literature reviews.</p>
+        </details>
+        <details>
+          <summary>Is ReadToRecall good for exam prep?</summary>
+          <p>ReadToRecall is built around active recall &mdash; the studying technique ranked most effective for exam preparation by cognitive science research (Dunlosky et al., 2013). Summarize your lecture materials, textbook chapters, or class slides, then generate flashcards and quizzes to test yourself. The quiz difficulty levels (easy, medium, hard) let you ramp up as you get closer to the exam.</p>
+        </details>
+        <details>
+          <summary>Can I use ReadToRecall to summarize lecture recordings on YouTube?</summary>
+          <p>Yes. ReadToRecall pulls the transcript from any YouTube video &mdash; including recorded lectures, conference talks, and tutorials &mdash; and turns it into a summary, flashcards, and a quiz. This works on any YouTube video that has captions or auto-generated subtitles.</p>
         </details>
       </div>
     </div>

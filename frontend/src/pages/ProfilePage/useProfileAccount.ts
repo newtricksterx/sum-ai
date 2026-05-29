@@ -11,6 +11,7 @@ export const useProfileAccount = () => {
   const profileStatus = useAuthProfileStore((state) => state.status);
   const clearProfile = useAuthProfileStore((state) => state.clearProfile);
   const currency = useSettingsStore((s) => s.currency);
+  const language = useSettingsStore((s) => s.language);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
@@ -57,7 +58,7 @@ export const useProfileAccount = () => {
       try {
         const { data } = await authInstance.post<{ url: string }>(
           "/api/billing/checkout-session",
-          { plan_slug, currency },
+          { plan_slug, currency, language },
         );
         if (popup && !popup.closed) {
           popup.opener = null;
@@ -70,7 +71,7 @@ export const useProfileAccount = () => {
         setErrorMessage(parseApiErrorMessage(error));
       }
     })();
-  }, [userProfile, currency]);
+  }, [userProfile, currency, language]);
 
   return {
     userProfile,

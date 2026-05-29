@@ -27,6 +27,7 @@ interface PricingPageProps {
 export const PricingPage = ({ currentPlanSlug, onClickReturn }: PricingPageProps) => {
     const { t } = useTranslation()
     const currency = useSettingsStore((s) => s.currency)
+    const language = useSettingsStore((s) => s.language)
 
     const [loadingSlug, setLoadingSlug] = useState<PlanSlug | null>(null)
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -65,7 +66,7 @@ export const PricingPage = ({ currentPlanSlug, onClickReturn }: PricingPageProps
         try {
             const { data } = await authInstance.post<{ url: string }>(
                 "/api/billing/checkout-session",
-                { plan_slug, currency },
+                { plan_slug, currency, language },
             )
             // Use chrome.tabs.create when running as an extension. Opening from
             // the extension popup via window.open would close the popup as

@@ -53,7 +53,7 @@ def ensure_stripe_customer(user):
     return user.stripe_customer_id
 
 
-def _checkout_params(user, customer_id, plan_slug, currency, price_id):
+def _checkout_params(user, customer_id, plan_slug, currency, price_id, locale="auto"):
     metadata = {
         "plan_slug": plan_slug,
         "user_id": str(user.pk),
@@ -68,6 +68,7 @@ def _checkout_params(user, customer_id, plan_slug, currency, price_id):
         "subscription_data": {"metadata": metadata},
         "client_reference_id": str(user.pk),
         "customer": customer_id,
+        "locale": locale,
     }
 
 
@@ -94,7 +95,7 @@ def clear_paid_subscription_state(user, subscription):
     subscription.save()
 
 
-def create_checkout_response(user, subscription, plan_slug, currency, price_id):
+def create_checkout_response(user, subscription, plan_slug, currency, price_id, locale="auto"):
     pending = _reuse_pending_checkout(user, plan_slug, currency)
     if pending is not None:
         return Response({"url": pending.url})
@@ -106,7 +107,7 @@ def create_checkout_response(user, subscription, plan_slug, currency, price_id):
     ).delete()
 
     customer_id = ensure_stripe_customer(user)
-    params = _checkout_params(user, customer_id, plan_slug, currency, price_id)
+    params = _checkout_params(user, customer_id, plan_slug, currency, price_id, locale)
     # Stable key per (user, plan, currency). _reuse_pending_checkout above
     # already short-circuits within a session's lifetime; this key prevents
     # network-retry duplicates within Stripe's 24h dedup window.
@@ -129,7 +130,7 @@ def create_checkout_response(user, subscription, plan_slug, currency, price_id):
         user.stripe_customer_id = None
         user.save(update_fields=["stripe_customer_id", "updated_at"])
         customer_id = ensure_stripe_customer(user)
-        params = _checkout_params(user, customer_id, plan_slug, currency, price_id)
+        params = _checkout_params(user, customer_id, plan_slug, currency, price_id, locale)
         session = stripe_client.client.v1.checkout.sessions.create(
             params=params,
             options={"idempotency_key": f"{idempotency_key}-retry"},
