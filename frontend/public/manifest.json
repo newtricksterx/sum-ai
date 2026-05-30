@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "ReadToRecall",
-    "description": "Summarize webpages, YouTube videos, and PDFs with AI. Generate flashcards and quizzes to retain what you read.",
+    "description": "Generate AI Summaries, Flashcards, and Quizzes. Works with any webpages, YouTube videos, and PDFs",
     "icons": {
         "16": "icon16.png",
         "32": "icon32.png",

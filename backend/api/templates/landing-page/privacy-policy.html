@@ -500,7 +500,7 @@
       <ul>
         <li><strong><code>activeTab</code></strong> &mdash; lets the extension read the current tab&rsquo;s content <em>only when you click the extension icon</em>. It does not give us access to other tabs, your browsing history, or your bookmarks.</li>
         <li><strong><code>scripting</code></strong> &mdash; lets the extension inject the script that extracts readable text from the page you are summarizing.</li>
-        <li><strong>Host permissions</strong> &mdash; <code>https://super-summarizer.ddns.net/*</code> (our backend) and <code>file:///*</code> (so the extension can summarize local PDFs you open in Chrome).</li>
+        <li><strong>Host permissions</strong> &mdash; <code>https://readtorecall.com/*</code> (our backend), so the extension can make authenticated API calls to generate summaries, flashcards, and quizzes.</li>
       </ul>
       <p>The extension does <strong>not</strong> request, and therefore cannot access, the <code>tabs</code>, <code>webNavigation</code>, <code>cookies</code>, <code>browsingHistory</code>, <code>bookmarks</code>, <code>storage</code> (extension-scoped), <code>nativeMessaging</code>, or <code>downloads</code> permissions.</p>
 
