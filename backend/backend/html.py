@@ -1,30 +1,36 @@
 from django.conf import settings
 from django.http import HttpResponse
 from django.template import loader
+from django.views.decorators.cache import cache_control
 
 from api.plans import PLANS, SUPPORTED_CURRENCIES
 
 
+@cache_control(public=True, max_age=7200)
 def index(request):
     template = loader.get_template('../templates/landing-page/index.html')
     return HttpResponse(template.render({}, request))
 
 
+@cache_control(public=True, max_age=7200)
 def study_tools(request):
     template = loader.get_template('../templates/landing-page/study-tools.html')
     return HttpResponse(template.render({}, request))
 
 
+@cache_control(public=True, max_age=7200)
 def terms(request):
     template = loader.get_template('../templates/landing-page/terms-and-conditions.html')
     return HttpResponse(template.render({}, request))
 
 
+@cache_control(public=True, max_age=7200)
 def privacy(request):
     template = loader.get_template('../templates/landing-page/privacy-policy.html')
     return HttpResponse(template.render({}, request))
 
 
+@cache_control(public=True, max_age=7200)
 def robots(request):
     host = request.get_host()
     scheme = request.scheme
@@ -51,6 +57,7 @@ def robots(request):
     return HttpResponse(body, content_type="text/plain")
 
 
+@cache_control(public=True, max_age=7200)
 def sitemap_xml(request):
     base = f"{request.scheme}://{request.get_host()}"
     urls = [
@@ -74,6 +81,7 @@ def sitemap_xml(request):
     return HttpResponse("".join(parts), content_type="application/xml")
 
 
+@cache_control(public=True, max_age=7200)
 def llms_txt(request):
     base = f"{request.scheme}://{request.get_host()}"
     body = (
