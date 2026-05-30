@@ -1,0 +1,319 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ReadToRecall">
+<meta property="og:title" content="Checkout cancelled — ReadToRecall">
+<meta property="og:description" content="Your checkout was cancelled. No charge was made.">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Checkout cancelled — ReadToRecall">
+<meta name="twitter:description" content="Your checkout was cancelled. No charge was made.">
+
+<title>Checkout cancelled — ReadToRecall</title>
+
+<link rel="icon" type="image/png" sizes="16x16" href="{% static 'landing-page/icon16.png' %}">
+<link rel="icon" type="image/png" sizes="32x32" href="{% static 'landing-page/icon32.png' %}">
+<link rel="icon" type="image/png" sizes="48x48" href="{% static 'landing-page/icon48.png' %}">
+<link rel="icon" type="image/png" sizes="128x128" href="{% static 'landing-page/icon128.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #F4F1EA;
+    --bg-elev: #FBF9F4;
+    --ink: #141311;
+    --ink-2: #4A4742;
+    --ink-3: #8C877C;
+    --line: #E3DDD0;
+    --line-2: #EFEAE0;
+    --accent: #B8412A;
+    --accent-soft: #F2DED6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.55;
+    font-size: 16px;
+    font-feature-settings: 'ss01', 'cv11';
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ───────── NAV ───────── */
+  nav {
+    position: sticky;
+    top: 0;
+    background: rgba(244, 241, 234, 0.82);
+    backdrop-filter: saturate(140%) blur(14px);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+    border-bottom: 1px solid var(--line);
+    z-index: 100;
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 0;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .logo-mark {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    overflow: hidden;
+  }
+  .logo-mark img { width: 100%; height: 100%; display: block; object-fit: contain; }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color .15s ease;
+  }
+  .nav-links a:hover { color: var(--ink); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 11px 18px;
+    border-radius: 9px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: transform .15s ease, opacity .15s ease;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:hover { transform: translateY(-1px); opacity: 0.92; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .btn-ghost:hover { background: var(--bg-elev); opacity: 1; }
+
+  @media (max-width: 720px) {
+    .nav-links { display: none; }
+  }
+
+  /* ───────── HERO ───────── */
+  .hero {
+    padding: 60px 0 40px;
+  }
+  .hero-narrow {
+    max-width: 820px;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-3);
+    margin-bottom: 12px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(44px, 6.6vw, 84px);
+    line-height: 0.98;
+    letter-spacing: -0.028em;
+    font-weight: 400;
+    max-width: 900px;
+    margin-bottom: 28px;
+    font-variation-settings: 'opsz' 144;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+  }
+  .lede {
+    font-size: 19px;
+    color: var(--ink-2);
+    max-width: 620px;
+    margin-bottom: 28px;
+    line-height: 1.55;
+  }
+
+  /* ───────── CANCEL CARD ───────── */
+  main { flex: 1; }
+  .cancel-section {
+    padding: 24px 0 100px;
+  }
+  .cancel-narrow {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .cancel-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 36px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .cancel-name {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+  .cancel-detail {
+    color: var(--ink-2);
+    font-size: 15px;
+    line-height: 1.6;
+    border-top: 1px solid var(--line-2);
+    padding-top: 22px;
+  }
+  .cta-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+
+  /* ───────── FOOTER ───────── */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 40px 0 32px;
+  }
+  .footer-grid {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .footer-tag {
+    color: var(--ink-2);
+    font-size: 14px;
+    max-width: 320px;
+  }
+  .footer-bottom {
+    border-top: 1px solid var(--line);
+    margin-top: 24px;
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--ink-3);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ───────── NAV ───────── -->
+<nav>
+  <div class="container nav-inner">
+    <a href="/" class="logo">
+      <span class="logo-mark"><img src="{% static 'landing-page/icon128.png' %}" alt="" width="128" height="128"></span>
+      ReadToRecall
+    </a>
+    <ul class="nav-links">
+      <li><a href="/#features">Features</a></li>
+      <li><a href="/#how">How it works</a></li>
+      <li><a href="{% url 'payments' %}">Pricing</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+
+<!-- ───────── HERO ───────── -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-narrow">
+      <div class="eyebrow">Checkout</div>
+      <h1>Checkout <em>cancelled.</em></h1>
+      <p class="lede">No charge was made. Your current plan is unchanged — you can try again whenever you're ready.</p>
+    </div>
+  </div>
+</header>
+
+<!-- ───────── CANCEL PANEL ───────── -->
+<section class="cancel-section">
+  <div class="container">
+    <div class="cancel-narrow">
+      <article class="cancel-card">
+        <div class="cancel-name">Nothing changed</div>
+        <p class="cancel-detail">Your checkout session was cancelled before completing. You have not been charged and your current plan remains active. If you ran into an issue during checkout, feel free to reach out.</p>
+        <div class="cta-row">
+          <a href="{% url 'payments' %}" class="btn">Back to pricing</a>
+          <a href="/" class="btn btn-ghost">Back to home</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ───────── FOOTER ───────── -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <a href="/" class="logo">
+        <span class="logo-mark"><img src="{% static 'landing-page/icon128.png' %}" alt="" width="128" height="128"></span>
+        ReadToRecall
+      </a>
+      <p class="footer-tag">Summarize, flashcard, and quiz anything you read on the web.</p>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 ReadToRecall. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

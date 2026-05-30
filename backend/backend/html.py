@@ -54,19 +54,20 @@ def robots(request):
 def sitemap_xml(request):
     base = f"{request.scheme}://{request.get_host()}"
     urls = [
-        (f"{base}/",              "weekly",  "1.0"),
-        (f"{base}/study-tools/",  "weekly",  "0.9"),
-        (f"{base}/payments/",     "monthly", "0.8"),
-        (f"{base}/privacy/",      "yearly",  "0.3"),
-        (f"{base}/terms/",        "yearly",  "0.3"),
+        (f"{base}/",              "weekly",  "1.0", "2026-05-28"),
+        (f"{base}/study-tools/",  "weekly",  "0.9", "2026-05-28"),
+        (f"{base}/payments/",     "monthly", "0.8", "2026-05-28"),
+        (f"{base}/privacy/",      "yearly",  "0.3", "2026-05-25"),
+        (f"{base}/terms/",        "yearly",  "0.3", "2026-05-25"),
     ]
     parts = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     ]
-    for loc, changefreq, priority in urls:
+    for loc, changefreq, priority, lastmod in urls:
         parts.append(
-            f"<url><loc>{loc}</loc><changefreq>{changefreq}</changefreq>"
+            f"<url><loc>{loc}</loc><lastmod>{lastmod}</lastmod>"
+            f"<changefreq>{changefreq}</changefreq>"
             f"<priority>{priority}</priority></url>"
         )
     parts.append("</urlset>")
