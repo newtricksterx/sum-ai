@@ -37,6 +37,8 @@
       minRead: "分钟阅读",
       startSession: "点击以开始会话",
       actionRegionAria: "生成摘要",
+      signInPrompt: "登录以解锁更多用量和历史记录位。",
+      signInButton: "登录以开始使用",
     },
     history: {
       title: "会话历史",

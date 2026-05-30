@@ -37,6 +37,8 @@ const hi = {
       minRead: "मिनट पढ़ें",
       startSession: "सत्र शुरू करने के लिए क्लिक करें",
       actionRegionAria: "सारांश बनाएं",
+      signInPrompt: "अधिक उपयोग और इतिहास स्लॉट अनलॉक करने के लिए साइन इन करें।",
+      signInButton: "शुरू करने के लिए साइन इन करें",
     },
     history: {
       title: "सत्र इतिहास",

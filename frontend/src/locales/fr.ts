@@ -37,6 +37,8 @@ const fr = {
       minRead: "min de lecture",
       startSession: "Cliquez pour demarrer une session",
       actionRegionAria: "Generer un resume",
+      signInPrompt: "Connectez-vous pour debloquer plus d'utilisation et d'emplacements d'historique.",
+      signInButton: "Connectez-vous pour commencer",
     },
     history: {
       title: "Historique des sessions",

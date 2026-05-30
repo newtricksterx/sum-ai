@@ -176,9 +176,10 @@ function App() {
         loadingActionId={loadingActionId}
         errorMessage={errorMessage}
         onDismissError={dismissError}
+        onClickSignInPage={onClickSignInPage}
       />
     ),
-    [loadingActionId, onClickStartSession, errorMessage, dismissError],
+    [loadingActionId, onClickStartSession, errorMessage, dismissError, onClickSignInPage],
   );
   const historyPageContent = useMemo(
     () => <HistoryPage onOpenSession={onOpenHistorySession} onClickSignInPage={onClickSignInPage}/>,

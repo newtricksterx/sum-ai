@@ -37,6 +37,8 @@ const es = {
       minRead: "min de lectura",
       startSession: "Haz clic para iniciar una sesion",
       actionRegionAria: "Generar resumen",
+      signInPrompt: "Inicia sesion para desbloquear mas uso y espacios de historial.",
+      signInButton: "Inicia sesion para comenzar",
     },
     history: {
       title: "Historial de sesiones",

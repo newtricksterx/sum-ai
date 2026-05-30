@@ -35,6 +35,8 @@
       minRead: "min read",
       startSession: "Click to start a session",
       actionRegionAria: "Generate summary",
+      signInPrompt: "Sign in to unlock more usage and history slots.",
+      signInButton: "Sign in to get started",
     },
     history: {
       title: "Session History",
