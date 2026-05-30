@@ -51,19 +51,21 @@ def _extract_video_id(value) -> str:
     return video_id
 
 
-def _fetch_transcript(value) -> str:
-    video_id = _extract_video_id(value)
-    fetched_transcript = YouTubeTranscriptApi().fetch(video_id)
-    return " ".join(snippet.text for snippet in fetched_transcript).strip()
-
-
 class YouTubeExtractor(SourceExtractor):
     source_type = "youtube"
+
+    def __init__(self):
+        self._api = YouTubeTranscriptApi()
+
+    def _fetch_transcript(self, value) -> str:
+        video_id = _extract_video_id(value)
+        fetched_transcript = self._api.fetch(video_id)
+        return " ".join(snippet.text for snippet in fetched_transcript).strip()
 
     def extract(self, request) -> ExtractionResult:
         source_url = request.data.get("source_url")
         try:
-            transcript = _fetch_transcript(source_url)
+            transcript = self._fetch_transcript(source_url)
         except Exception:
             logger.exception("YouTube transcript fetch failed for %s", source_url)
             return ExtractionResult(

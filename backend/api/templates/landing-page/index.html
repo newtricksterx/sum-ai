@@ -6,15 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="index, follow">
 <meta name="google-site-verification" content="_fq1eeGjnvOsjw0EI5YnzqNtMvRhk-X5TqlQzCRh3LA" />
-<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+<link rel="canonical" href="{{ canonical_url }}">
 
 <meta property="og:locale" content="en_US">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ReadToRecall">
 <meta property="og:title" content="ReadToRecall — Free AI Study Tool &amp; Quizzes for Students">
 <meta property="og:description" content="ReadToRecall is a free AI study tool that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes — built for active recall, the studying technique that actually sticks.">
-<meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
-<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:image" content="{{ site_origin }}{% static 'landing-page/front-page-linalg-light.png' %}">
 <meta property="og:image:alt" content="ReadToRecall extension popup summarizing a webpage">
 <meta property="og:image:width" content="535">
 <meta property="og:image:height" content="649">
@@ -22,7 +22,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="ReadToRecall — Free AI Study Tool &amp; Quizzes for Students">
 <meta name="twitter:description" content="A free AI studying tool that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes — built for active recall.">
-<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
+<meta name="twitter:image" content="{{ site_origin }}{% static 'landing-page/front-page-linalg-light.png' %}">
 <meta name="twitter:image:alt" content="ReadToRecall extension popup summarizing a webpage">
 <title>ReadToRecall — Free AI Study Tool &amp; Quizzes for Students</title>
 <meta name="description" content="ReadToRecall is a free AI study tool that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes — built for active recall, the studying technique that actually sticks.">
@@ -50,7 +50,7 @@
   "softwareVersion": "1.0.1",
   "dateModified": "2026-05-28",
   "inLanguage": ["en", "es", "fr", "hi", "zh"],
-  "mainEntityOfPage": {"@type": "WebPage", "@id": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}"},
+  "mainEntityOfPage": {"@type": "WebPage", "@id": "{{ canonical_url }}"},
   "speakable": {"@type": "SpeakableSpecification", "cssSelector": ["#what-it-is", "#faq details:first-of-type p"]},
   "datePublished": "2026-04-04",
   "isAccessibleForFree": true,
@@ -70,8 +70,8 @@
     "Per-account history with deletion controls"
   ],
   "description": "ReadToRecall is a free AI study tool — a Chrome extension that turns any webpage, PDF, or YouTube transcript into a summary, flashcards, and a quiz so you remember what you read. Built on active recall, the evidence-backed studying technique. Free plan: 10 summaries/month with 3 saved sessions. Standard plan: 300 summaries/month for $3.99/mo. Pro plan: 1,200 summaries/month for $9.99/mo. Supports Chrome and all Chromium browsers (Edge, Brave, Arc, Opera).",
-  "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
-  "image": "{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}",
+  "url": "{{ canonical_url }}",
+  "image": "{{ site_origin }}{% static 'landing-page/front-page-linalg-light.png' %}",
   "author":    {"@type": "Person",       "name": "Daniel Li"},
   "publisher": {"@type": "Organization", "name": "ReadToRecall"},
   "offers": [
@@ -86,8 +86,8 @@
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "ReadToRecall",
-  "url": "{{ request.scheme }}://{{ request.get_host }}/",
-  "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/icon128.png' %}",
+  "url": "{{ site_origin }}/",
+  "logo": "{{ site_origin }}{% static 'landing-page/icon128.png' %}",
   "sameAs": [
     "https://chromewebstore.google.com/detail/super-simple-summarizer/pcbnaokknjmejdfakjkglkpoflooafoe"
   ],
@@ -105,7 +105,7 @@
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "ReadToRecall",
-  "url": "{{ request.scheme }}://{{ request.get_host }}/"
+  "url": "{{ site_origin }}/"
 }
 </script>
 <script type="application/ld+json">
@@ -120,7 +120,7 @@
       "@type": "HowToStep",
       "position": 1,
       "name": "Install the extension",
-      "text": "Add ReadToRecall to Chrome (or any Chromium browser — Edge, Brave, Arc, Opera) from the Chrome Web Store. No account is required to try it."
+      "text": "ReadToRecall is coming soon to Chrome (and Chromium browsers — Edge, Brave, Arc, Opera). No account will be required to try it."
     },
     {
       "@type": "HowToStep",
@@ -693,7 +693,7 @@
     <div class="steps">
       <div class="step">
         <h3>Add to Chrome</h3>
-        <p>One click from the Chrome Web Store. No account needed to try it.</p>
+        <p>Coming soon to the Chrome Web Store. No account will be needed to try it.</p>
       </div>
       <div class="step">
         <h3>Open any page</h3>
@@ -773,7 +773,7 @@
 <section class="final">
   <div class="container">
     <h2>Read once. <em>Recall forever.</em></h2>
-    <p class="lede">Free to install. Free to try. Two clicks to your first summary.</p>
+    <p class="lede">Coming soon. Free to try. Two clicks to your first summary.</p>
     <div class="cta-row">
       <span class="btn" style="opacity:.6;cursor:default;pointer-events:none">
         Coming Soon

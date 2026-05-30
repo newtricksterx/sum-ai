@@ -5,35 +5,48 @@ from django.views.decorators.cache import cache_control
 
 from api.plans import PLANS, SUPPORTED_CURRENCIES
 
+PUBLIC_SITE_ORIGIN = "https://readtorecall.com"
+
+
+def _public_url(path: str = "/") -> str:
+    if not path.startswith("/"):
+        path = "/" + path
+    return f"{PUBLIC_SITE_ORIGIN}{path}"
+
+
+def _seo_context(request) -> dict[str, str]:
+    return {
+        "site_origin": PUBLIC_SITE_ORIGIN,
+        "canonical_url": _public_url(request.path),
+    }
+
 
 @cache_control(public=True, max_age=7200)
 def index(request):
     template = loader.get_template('../templates/landing-page/index.html')
-    return HttpResponse(template.render({}, request))
+    return HttpResponse(template.render(_seo_context(request), request))
 
 
 @cache_control(public=True, max_age=7200)
 def study_tools(request):
     template = loader.get_template('../templates/landing-page/study-tools.html')
-    return HttpResponse(template.render({}, request))
+    return HttpResponse(template.render(_seo_context(request), request))
 
 
 @cache_control(public=True, max_age=7200)
 def terms(request):
     template = loader.get_template('../templates/landing-page/terms-and-conditions.html')
-    return HttpResponse(template.render({}, request))
+    return HttpResponse(template.render(_seo_context(request), request))
 
 
 @cache_control(public=True, max_age=7200)
 def privacy(request):
     template = loader.get_template('../templates/landing-page/privacy-policy.html')
-    return HttpResponse(template.render({}, request))
+    return HttpResponse(template.render(_seo_context(request), request))
 
 
 @cache_control(public=True, max_age=7200)
 def robots(request):
-    host = request.get_host()
-    scheme = request.scheme
     admin_path = getattr(settings, "ADMIN_URL_PATH", "admin/")
     if not admin_path.startswith("/"):
         admin_path = "/" + admin_path
@@ -42,30 +55,28 @@ def robots(request):
     disallow_lines = [
         f"Disallow: {admin_path}\n",
         "Disallow: /api/\n",
-        "Disallow: /accounts/\n",
-        "Disallow: /billing/\n",
     ]
     if settings.DEBUG:
         disallow_lines.append("Disallow: /api-auth/\n")
     body = (
         "User-agent: *\n"
         + "".join(disallow_lines)
+        + "Allow: /api/auth/social/complete\n"
         + "Allow: /\n"
         "\n"
-        f"Sitemap: {scheme}://{host}/sitemap.xml\n"
+        f"Sitemap: {_public_url('/sitemap.xml')}\n"
     )
     return HttpResponse(body, content_type="text/plain")
 
 
 @cache_control(public=True, max_age=7200)
 def sitemap_xml(request):
-    base = f"{request.scheme}://{request.get_host()}"
     urls = [
-        (f"{base}/",              "weekly",  "1.0", "2026-05-28"),
-        (f"{base}/study-tools/",  "weekly",  "0.9", "2026-05-28"),
-        (f"{base}/payments/",     "monthly", "0.8", "2026-05-28"),
-        (f"{base}/privacy/",      "yearly",  "0.3", "2026-05-25"),
-        (f"{base}/terms/",        "yearly",  "0.3", "2026-05-25"),
+        (_public_url("/"),              "weekly",  "1.0", "2026-05-28"),
+        (_public_url("/study-tools/"),  "weekly",  "0.9", "2026-05-28"),
+        (_public_url("/payments/"),     "monthly", "0.8", "2026-05-28"),
+        (_public_url("/privacy/"),      "yearly",  "0.3", "2026-05-25"),
+        (_public_url("/terms/"),        "yearly",  "0.3", "2026-05-25"),
     ]
     parts = [
         '<?xml version="1.0" encoding="UTF-8"?>',
@@ -83,7 +94,7 @@ def sitemap_xml(request):
 
 @cache_control(public=True, max_age=7200)
 def llms_txt(request):
-    base = f"{request.scheme}://{request.get_host()}"
+    base = PUBLIC_SITE_ORIGIN
     body = (
         "# ReadToRecall\n"
         "\n"
@@ -97,7 +108,7 @@ def llms_txt(request):
         "- Platform: Chrome and all Chromium browsers (Edge, Brave, Arc, Opera). "
         "Not available on Firefox or Safari.\n"
         "- Creator: Daniel Li\n"
-        "- Launched: 2025\n"
+        "- Status: Coming soon\n"
         "- Supported sources: webpages, YouTube transcripts, PDFs (including "
         "local PDFs opened in the browser)\n"
         "- Output formats: TL;DR, bullets, paragraph, Q&A, pros & cons — at "
@@ -196,6 +207,7 @@ def payments(request):
         for slug, plan in PLANS.items()
     ]
     context = {
+        **_seo_context(request),
         "plans": plans_view,
         "currencies": SUPPORTED_CURRENCIES,
         "default_currency": "USD",

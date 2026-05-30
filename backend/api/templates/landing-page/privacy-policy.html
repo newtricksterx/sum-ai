@@ -5,20 +5,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+<link rel="canonical" href="{{ canonical_url }}">
 
 <meta property="og:locale" content="en_US">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ReadToRecall">
 <meta property="og:title" content="Privacy Policy — ReadToRecall">
 <meta property="og:description" content="How ReadToRecall collects, uses, and protects your personal information.">
-<meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
-<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:image" content="{{ site_origin }}{% static 'landing-page/front-page-linalg-light.png' %}">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Privacy Policy — ReadToRecall">
 <meta name="twitter:description" content="How ReadToRecall collects, uses, and protects your personal information.">
-<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
+<meta name="twitter:image" content="{{ site_origin }}{% static 'landing-page/front-page-linalg-light.png' %}">
 <title>Privacy Policy — ReadToRecall</title>
 <meta name="description" content="How ReadToRecall collects, uses, and protects your personal information.">
 
@@ -33,6 +33,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 {% include "landing-page/_base-css.html" %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_origin }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Privacy Policy", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
 
 <style>
   /* ───────── HERO ───────── */

@@ -91,6 +91,7 @@ ACCOUNT_SIGNUP_FIELDS = ["email*", "username", "password1*", "password2*"]
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'backend.middleware.NoIndexPrivatePagesMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

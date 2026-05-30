@@ -5,15 +5,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+<link rel="canonical" href="{{ canonical_url }}">
 
 <meta property="og:locale" content="en_US">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ReadToRecall">
 <meta property="og:title" content="Pricing — ReadToRecall">
 <meta property="og:description" content="Free, Standard, and Pro plans for ReadToRecall — the AI Chrome extension that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes.">
-<meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
-<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:image" content="{{ site_origin }}{% static 'landing-page/front-page-linalg-light.png' %}">
 <meta property="og:image:alt" content="ReadToRecall extension popup summarizing a webpage">
 <meta property="og:image:width" content="535">
 <meta property="og:image:height" content="649">
@@ -21,7 +21,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Pricing — ReadToRecall">
 <meta name="twitter:description" content="Free, Standard, and Pro plans for ReadToRecall — summarize webpages, YouTube videos, and PDFs.">
-<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}">
+<meta name="twitter:image" content="{{ site_origin }}{% static 'landing-page/front-page-linalg-light.png' %}">
 <meta name="twitter:image:alt" content="ReadToRecall extension popup summarizing a webpage">
 <title>Pricing — ReadToRecall</title>
 <meta name="description" content="Free, Standard, and Pro plans for ReadToRecall — the AI Chrome extension that summarizes webpages, YouTube videos, and PDFs into flashcards and quizzes.">
@@ -46,8 +46,8 @@
   "category": "BrowserExtension",
   "description": "ReadToRecall is an AI Chrome extension with three plans. Free: 10 summaries/month with 3 saved sessions. Standard ($3.99/mo): 300 summaries/month, 30,000-character input, 5 saved sessions. Pro ($9.99/mo): 1,200 summaries/month, unlimited input length, 10 saved sessions. All plans bill monthly via Stripe in USD, CAD, or EUR.",
   "brand": { "@type": "Brand", "name": "ReadToRecall" },
-  "image": "{{ request.scheme }}://{{ request.get_host }}{% static 'landing-page/front-page-linalg-light.png' %}",
-  "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+  "image": "{{ site_origin }}{% static 'landing-page/front-page-linalg-light.png' %}",
+  "url": "{{ canonical_url }}",
   "offers": [
     {
       "@type": "Offer",
@@ -55,7 +55,7 @@
       "price": "0.00",
       "priceCurrency": "USD",
       "availability": "https://schema.org/InStock",
-      "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+      "url": "{{ canonical_url }}",
       "priceSpecification": {
         "@type": "UnitPriceSpecification",
         "price": "0.00",
@@ -70,7 +70,7 @@
       "price": "3.99",
       "priceCurrency": "USD",
       "availability": "https://schema.org/InStock",
-      "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+      "url": "{{ canonical_url }}",
       "priceSpecification": {
         "@type": "UnitPriceSpecification",
         "price": "3.99",
@@ -85,7 +85,7 @@
       "price": "9.99",
       "priceCurrency": "USD",
       "availability": "https://schema.org/InStock",
-      "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+      "url": "{{ canonical_url }}",
       "priceSpecification": {
         "@type": "UnitPriceSpecification",
         "price": "9.99",
@@ -102,8 +102,8 @@
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ request.scheme }}://{{ request.get_host }}/"},
-    {"@type": "ListItem", "position": 2, "name": "Pricing", "item": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}"}
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_origin }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Pricing", "item": "{{ canonical_url }}"}
   ]
 }
 </script>
@@ -403,7 +403,7 @@
 <section class="final">
   <div class="container">
     <h2>Read once. <em>Recall forever.</em></h2>
-    <p class="lede">Free to install. Free to try. Two clicks to your first summary.</p>
+    <p class="lede">Coming soon. Free to try. Two clicks to your first summary.</p>
     <div class="cta-row">
       <span class="btn" style="opacity:.6;cursor:default;pointer-events:none">
         Coming Soon
