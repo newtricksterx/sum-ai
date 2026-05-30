@@ -1,5 +1,4 @@
 .menubar-btn {
-  background-color: var(--color-background-secondary);
   padding: calc(var(--spacing) * 3);
   transition: background-color 0.15s ease;
   display: flex;
@@ -7,6 +6,14 @@
   justify-content: center;
   width: 100%;
   align-items: center;
+}
+
+.menubar-btn-state-notcurrent {
+  background-color: var(--color-background-tertiary);
+}
+
+.menubar-btn-state-current {
+  background-color: var(--color-background-secondary);
 }
 
 .menubar-btn:hover {

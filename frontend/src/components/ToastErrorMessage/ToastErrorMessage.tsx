@@ -13,7 +13,7 @@ export const ToastErrorMessage = ({ errorMessage, onDismissError } : ToastErrorM
         <Toast.Root
             open={errorMessage !== null}
             onOpenChange={(open) => { if (!open) onDismissError(); }}
-            duration={4000}
+            duration={8000}
             className="toast-root"
         >
             <CrossCircledIcon width={16} height={16} className="toast-error-icon"/>

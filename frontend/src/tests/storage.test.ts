@@ -51,7 +51,7 @@ describe("storage utils", () => {
       expect(GetFontSizeFromStorage()).toBeNull();
       expect(GetThemeFromStorage()).toBeNull();
       expect(GetFormatFromStorage()).toBeNull();
-      expect(GetPageFromStorage()).toBeNull();
+      expect(GetPageFromStorage()).toBe("home");
     });
   });
 

@@ -27,7 +27,8 @@
 
 .toast-desc {
     color: var(--color-text-danger);
-    font-size: 10px
+    font-size: 10px;
+    font-weight: 500;
 }
 
 .toast-close {

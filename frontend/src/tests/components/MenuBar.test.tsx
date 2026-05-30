@@ -14,7 +14,7 @@ describe("MenuBar", () => {
     const onMenuClick = vi.fn();
     const onClickClose = vi.fn();
 
-    render(<MenuBar onMenuClick={onMenuClick} onClickClose={onClickClose} />);
+    render(<MenuBar currentPage="home" onMenuClick={onMenuClick} onClickClose={onClickClose} />);
 
     const menuButtons = screen.getAllByRole("button");
     expect(menuButtons).toHaveLength(6);

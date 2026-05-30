@@ -219,6 +219,7 @@ function App() {
   return (
     <section className="app-shell flex flex-col w-90 max-h-137.5">
       <MenuBar
+        currentPage={currentPage}
         onMenuClick={onMenuClick}
         onClickClose={onClickClose}
       />

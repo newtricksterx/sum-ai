@@ -18,11 +18,12 @@ const MENU_ITEMS: ReadonlyArray<MenuItem> = [
 ];
 
 export interface MenuBarProps {
+    currentPage: PageType;
     onMenuClick: (page: PageType) => void;
     onClickClose: React.MouseEventHandler;
 }
 
-function MenuBar({ onMenuClick, onClickClose }: MenuBarProps) {
+function MenuBar({ currentPage, onMenuClick, onClickClose }: MenuBarProps) {
   const { t } = useTranslation();
 
   return (
@@ -31,14 +32,14 @@ function MenuBar({ onMenuClick, onClickClose }: MenuBarProps) {
             <button
                 key={page}
                 type="button"
-                className='menubar-btn'
+                className={`menubar-btn ${currentPage === page ? 'menubar-btn-state-current' : 'menubar-btn-state-notcurrent'}`}
                 onClick={() => onMenuClick(page)}
                 title={t(titleKey)}
             >
                 {icon}
             </button>
         ))}
-        <button className='menubar-btn hover:bg-red-500!' onClick={onClickClose} title={t("menu.close")}>
+        <button className='menubar-btn menubar-btn-state-notcurrent hover:bg-red-500!' onClick={onClickClose} title={t("menu.close")}>
           <Cross1Icon width={MenuIconSize} height={MenuIconSize}/>
         </button>
     </nav>
