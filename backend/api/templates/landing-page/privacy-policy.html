@@ -399,7 +399,7 @@
         <li>Your IP address, user-agent string, request method, path, status code, and timestamp &mdash; standard web-server log fields used for security, debugging, and abuse prevention.</li>
         <li>Authentication cookies (see §7).</li>
       </ul>
-      <p>We do not run third-party analytics, advertising trackers, fingerprinting scripts, or session-replay tools on the extension or backend.</p>
+      <p>We use <strong>Google Analytics</strong> on the readtorecall.com marketing website to measure aggregate traffic (page views, referral sources, geography). Google Analytics may set its own cookies; see <a href="https://policies.google.com/technologies/cookies" target="_blank" rel="noopener noreferrer">Google&rsquo;s cookie policy</a> for details. We do not run analytics, advertising trackers, fingerprinting scripts, or session-replay tools inside the Chrome extension or on the backend API.</p>
 
       <!-- ───────── 3 ───────── -->
       <h2 id="s3">3. How We Collect Information</h2>
@@ -502,7 +502,7 @@
           </tr>
         </tbody>
       </table>
-      <p>We do not use cookies for advertising, analytics, or cross-site tracking. We do not use Google Analytics, Meta Pixel, or any comparable tracker.</p>
+      <p>We do not use cookies for advertising or cross-site tracking. Google Analytics, used on the marketing website, sets its own cookies to measure traffic; those cookies are not set inside the Chrome extension. We do not use Meta Pixel or any comparable advertising tracker.</p>
 
       <h3>Local storage in your browser</h3>
       <p>The extension uses your browser&rsquo;s <code>localStorage</code> to keep the Service usable offline and to avoid sending data we don&rsquo;t need to. Items stored locally include:</p>
@@ -609,12 +609,13 @@
           <span class="logo-mark"><img src="{% static 'landing-page/icon128.png' %}" alt="" width="128" height="128"></span>
           ReadToRecall
         </a>
-        <p class="footer-tag">Summarize, flashcard, and quiz anything you read on the web.</p>
+        <p class="footer-tag">The AI study tool for anything you read on the web.</p>
       </div>
       <div>
         <h3>Product</h3>
         <ul>
           <li><a href="/#features">Features</a></li>
+          <li><a href="{% url 'study-tools' %}">Study tools</a></li>
           <li><a href="{% url 'payments' %}">Pricing</a></li>
         </ul>
       </div>

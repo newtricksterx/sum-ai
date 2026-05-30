@@ -20,8 +20,8 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ReadToRecall">
-<meta property="og:title" content="ReadToRecall — Free AI Study Assistant for Students">
-<meta property="og:description" content="ReadToRecall is a free AI-powered study assistant that turns webpages, YouTube videos, and PDFs into summaries, flashcards, and quizzes — built for active recall, the studying technique that actually sticks.">
+<meta property="og:title" content="ReadToRecall — Free AI Study Tool for Students">
+<meta property="og:description" content="ReadToRecall is a free AI study tool that turns webpages, YouTube videos, and PDFs into summaries, flashcards, and quizzes — built for active recall, the studying technique that actually sticks.">
 <meta property="og:url" content="{{ canonical_url }}">
 <meta property="og:image" content="{{ site_origin }}{% static 'landing-page/front-page-linalg-light.png' %}">
 <meta property="og:image:alt" content="ReadToRecall extension popup summarizing a webpage">
@@ -29,12 +29,12 @@
 <meta property="og:image:height" content="649">
 
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="ReadToRecall — Free AI Study Assistant for Students">
-<meta name="twitter:description" content="A free study assistant that turns webpages, YouTube videos, and PDFs into summaries, flashcards, and quizzes — built for active recall.">
+<meta name="twitter:title" content="ReadToRecall — Free AI Study Tool for Students">
+<meta name="twitter:description" content="A free AI study tool that turns webpages, YouTube videos, and PDFs into summaries, flashcards, and quizzes — built for active recall.">
 <meta name="twitter:image" content="{{ site_origin }}{% static 'landing-page/front-page-linalg-light.png' %}">
 <meta name="twitter:image:alt" content="ReadToRecall extension popup summarizing a webpage">
-<title>ReadToRecall — Free AI Study Assistant for Students</title>
-<meta name="description" content="ReadToRecall is a free AI-powered study assistant that turns webpages, YouTube videos, and PDFs into summaries, flashcards, and quizzes — built for active recall, the studying technique that actually sticks.">
+<title>ReadToRecall — Free AI Study Tool for Students</title>
+<meta name="description" content="ReadToRecall is a free AI study tool that turns webpages, YouTube videos, and PDFs into summaries, flashcards, and quizzes — built for active recall, the studying technique that actually sticks.">
 
 <link rel="icon" type="image/png" sizes="16x16" href="{% static 'landing-page/icon16.png' %}">
 <link rel="icon" type="image/png" sizes="32x32" href="{% static 'landing-page/icon32.png' %}">
@@ -53,7 +53,7 @@
   "@type": ["SoftwareApplication", "EducationalApplication"],
   "name": "ReadToRecall",
   "applicationCategory": "BrowserApplication",
-  "applicationSubCategory": "Study Assistant",
+  "applicationSubCategory": "Study Tool",
   "operatingSystem": "Windows, macOS, Linux, ChromeOS",
   "browserRequirements": "Requires Chrome or any Chromium-based browser (Edge, Brave, Arc, Opera)",
   "softwareVersion": "1.0.1",
@@ -78,7 +78,7 @@
     "5 output languages: English, Spanish, French, Hindi, Mandarin",
     "Per-account history with deletion controls"
   ],
-  "description": "ReadToRecall is a free AI-powered study assistant — a Chrome extension that turns any webpage, PDF, or YouTube transcript into a summary, flashcards, and a quiz so you remember what you read. Built on active recall, the evidence-backed studying technique. Free plan: 10 summaries/month with 3 saved sessions. Standard plan: 300 summaries/month for $3.99/mo. Pro plan: 1,200 summaries/month for $9.99/mo. Supports Chrome and all Chromium browsers (Edge, Brave, Arc, Opera).",
+  "description": "ReadToRecall is a free AI study tool — a Chrome extension that turns any webpage, PDF, or YouTube transcript into a summary, flashcards, and a quiz so you remember what you read. Built on active recall, the evidence-backed studying technique. Free plan: 10 summaries/month with 3 saved sessions. Standard plan: 300 summaries/month for $3.99/mo. Pro plan: 1,200 summaries/month for $9.99/mo. Supports Chrome and all Chromium browsers (Edge, Brave, Arc, Opera).",
   "url": "{{ canonical_url }}",
   "image": "{{ site_origin }}{% static 'landing-page/front-page-linalg-light.png' %}",
   "author":    {"@type": "Person",       "name": "Daniel Li"},
@@ -156,7 +156,7 @@
       "name": "What is ReadToRecall?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "ReadToRecall is a free AI-powered study assistant coming soon — a Chrome extension that summarizes any webpage, YouTube video, or PDF, then turns the summary into flashcards and a quiz. It is built for students, researchers, and anyone who reads to learn, and uses active recall — the evidence-backed studying technique for moving information from short-term to long-term memory."
+        "text": "ReadToRecall is a free AI study tool coming soon — a Chrome extension that summarizes any webpage, YouTube video, or PDF, then turns the summary into flashcards and a quiz. It is built for students, researchers, and anyone who reads to learn, and uses active recall — the evidence-backed studying technique for moving information from short-term to long-term memory."
       }
     },
     {
@@ -220,7 +220,7 @@
       "name": "What AI model does ReadToRecall use?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "ReadToRecall uses Google Gemini for all AI generation — summaries, flashcards, quizzes, and action items. Your content is sent to Gemini through Google's official API with no user identity attached."
+        "text": "ReadToRecall uses Google Gemini for all AI generation — summaries, flashcards, and quizzes. Your content is sent to Gemini through Google's official API with no user identity attached."
       }
     },
     {
@@ -582,8 +582,8 @@
     <div class="hero-grid">
       <div class="hero-text">
         <div class="eyebrow">Coming soon</div>
-        <h1>The study assistant that helps you <em>read, recall, and retain</em> anything on the web.</h1>
-        <p class="lede">ReadToRecall is a free AI-powered study assistant for students and researchers — a Chrome extension that turns any webpage, YouTube video, or PDF into a summary, flashcards, and a quiz built for active recall. Study smarter, remember more, and spend less time re-reading. <a href="{% url 'study-tools' %}" style="color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent-soft); text-underline-offset: 3px;">See how it compares to other study tools →</a></p>
+        <h1>The AI study tool that helps you <em>read, recall, and retain</em> anything on the web.</h1>
+        <p class="lede">ReadToRecall is a free AI study tool for students and researchers — a Chrome extension that turns any webpage, YouTube video, or PDF into a summary, flashcards, and a quiz built for active recall. Study smarter, remember more, and spend less time re-reading. <a href="{% url 'study-tools' %}" style="color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent-soft); text-underline-offset: 3px;">See how it compares to other study tools →</a></p>
         <div class="cta-row">
           <span class="btn" style="opacity:.6;cursor:default;pointer-events:none">
             Coming Soon
@@ -607,10 +607,10 @@
   <div class="container">
     <div class="section-head" style="margin-bottom: 32px;">
       <div class="eyebrow">What it is</div>
-      <h2>ReadToRecall is an AI-powered study assistant, built around helping you <em>remember</em> detailed information.</h2>
+      <h2>ReadToRecall is an AI study tool, built around helping you <em>remember</em> detailed information.</h2>
     </div>
     <div style="max-width: 720px; display: flex; flex-direction: column; gap: 20px; font-size: 17px; line-height: 1.6; color: var(--ink-2);">
-      <p>A study assistant turns reading into something you&rsquo;ll actually remember. ReadToRecall is a free Chrome extension that does three things from a single toolbar icon: it summarizes any webpage, YouTube video, or PDF; it generates flashcards from that summary; and it builds a multiple-choice quiz to test what stuck. Whether you&rsquo;re a student reviewing lectures or a researcher processing papers, the workflow is purpose-built for <a href="https://en.wikipedia.org/wiki/Testing_effect" target="_blank" rel="noopener noreferrer" style="color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent-soft); text-underline-offset: 3px;">active recall</a> &mdash; the evidence-backed studying technique where retrieving information strengthens memory more than re-reading it (<a href="https://doi.org/10.1111/j.1467-9280.2006.01693.x" target="_blank" rel="noopener noreferrer" style="color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent-soft); text-underline-offset: 3px;">Roediger &amp; Karpicke, 2006</a>). Five summary formats (TL;DR, bullets, paragraph, Q&amp;A, pros &amp; cons) cover different reading styles. Five output languages (English, Spanish, French, Hindi, Mandarin) cover non-native readers. Everything is generated by Google Gemini and stored in your browser &mdash; not on our servers.</p>
+      <p>A study tool turns reading into something you&rsquo;ll actually remember. ReadToRecall is a free Chrome extension that does three things from a single toolbar icon: it summarizes any webpage, YouTube video, or PDF; it generates flashcards from that summary; and it builds a multiple-choice quiz to test what stuck. Whether you&rsquo;re a student reviewing lectures or a researcher processing papers, the workflow is purpose-built for <a href="https://en.wikipedia.org/wiki/Testing_effect" target="_blank" rel="noopener noreferrer" style="color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent-soft); text-underline-offset: 3px;">active recall</a> &mdash; the evidence-backed studying technique where retrieving information strengthens memory more than re-reading it (<a href="https://doi.org/10.1111/j.1467-9280.2006.01693.x" target="_blank" rel="noopener noreferrer" style="color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent-soft); text-underline-offset: 3px;">Roediger &amp; Karpicke, 2006</a>). Five summary formats (TL;DR, bullets, paragraph, Q&amp;A, pros &amp; cons) cover different reading styles. Five output languages (English, Spanish, French, Hindi, Mandarin) cover non-native readers. Everything is generated by Google Gemini and stored in your browser &mdash; not on our servers.</p>
       <p>How is this different from the other study tools? <strong>Quizlet</strong> is a library of decks made by other students &mdash; useful when someone else has already studied your topic. <strong>Anki</strong> is the gold standard for spaced repetition, but the cards are written by hand. <strong>NotebookLM</strong> (Google&rsquo;s offering) is a question-and-answer interface over a fixed document library. ReadToRecall sits one step earlier in the workflow: it generates the deck and the quiz directly from whatever you&rsquo;re reading right now. See the <a href="{% url 'study-tools' %}" style="color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent-soft); text-underline-offset: 3px;">full comparison</a> for the side-by-side.</p>
     </div>
   </div>
@@ -725,7 +725,7 @@
       <div>
         <details open>
           <summary>What is ReadToRecall?</summary>
-          <p>ReadToRecall is a free AI-powered study assistant coming soon — a Chrome extension that summarizes any webpage, YouTube video, or PDF, then turns the summary into flashcards and a quiz. Built for students, researchers, and anyone who reads to learn — it leverages active recall, the evidence-backed studying technique for moving information from short-term to long-term memory.</p>
+          <p>ReadToRecall is a free AI study tool coming soon — a Chrome extension that summarizes any webpage, YouTube video, or PDF, then turns the summary into flashcards and a quiz. Built for students, researchers, and anyone who reads to learn — it leverages active recall, the evidence-backed studying technique for moving information from short-term to long-term memory.</p>
         </details>
         <details>
           <summary>How does ReadToRecall compare to Quizlet, Anki, or NotebookLM?</summary>
@@ -757,7 +757,7 @@
         </details>
         <details>
           <summary>What AI model does ReadToRecall use?</summary>
-          <p>ReadToRecall uses <strong>Google Gemini</strong> for all AI generation — summaries, flashcards, quizzes, and action items. Your content is sent to Gemini through Google&rsquo;s official API with no user identity attached.</p>
+          <p>ReadToRecall uses <strong>Google Gemini</strong> for all AI generation — summaries, flashcards, and quizzes. Your content is sent to Gemini through Google&rsquo;s official API with no user identity attached.</p>
         </details>
         <details>
           <summary>What data do you collect? Is my data private?</summary>
@@ -799,7 +799,7 @@
           <span class="logo-mark"><img src="{% static 'landing-page/icon128.png' %}" alt="" width="128" height="128"></span>
           ReadToRecall
         </a>
-        <p class="footer-tag">Summarize, flashcard, and quiz anything you read on the web.</p>
+        <p class="footer-tag">The AI study tool for anything you read on the web.</p>
       </div>
       <div>
         <h3>Product</h3>

@@ -1,17 +1,22 @@
+{% load static %}
 <!doctype html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta name="robots" content="noindex, nofollow" />
-        <title>Sign in complete</title>
+        <title>Sign in complete — ReadToRecall</title>
+        <link rel="icon" type="image/png" sizes="32x32" href="{% static 'landing-page/icon32.png' %}">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
         <style>
         html, body { height: 100%; margin: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; background: #f8fafc; color: #0f172a; overflow: hidden; }
+        body { font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif; background: #F0ECE5; color: #141311; overflow: hidden; -webkit-font-smoothing: antialiased; }
         .wrap { min-height: 100dvh; display: grid; place-items: center; padding: 24px; box-sizing: border-box; }
-        .card { width: min(520px, 100%); background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); }
-        h1 { margin: 0 0 8px; font-size: 18px; }
-        p { margin: 0; font-size: 14px; line-height: 1.45; color: #334155; }
+        .card { width: min(520px, 100%); background: #FBF9F4; border: 1px solid #E3DDD0; border-radius: 14px; padding: 20px; box-shadow: 0 8px 24px rgba(20, 19, 17, 0.08); }
+        h1 { margin: 0 0 8px; font-size: 18px; font-weight: 600; }
+        p { margin: 0; font-size: 14px; line-height: 1.45; color: #4A4742; }
         .hidden { display: none; }
         </style>
     </head>
