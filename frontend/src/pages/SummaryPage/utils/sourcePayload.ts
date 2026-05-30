@@ -76,7 +76,7 @@ export const buildSourcePayloadFromTab = async (
       if (error instanceof PdfFileAccessDeniedError) {
         return sourcePayloadError(
           "Local PDF access blocked",
-          "Open chrome://extensions, find Super Simple Summarizer, and enable \"Allow access to file URLs\", then try again.",
+          "Open chrome://extensions, find ReadToRecall, and enable \"Allow access to file URLs\", then try again.",
           tab.url,
         );
       }

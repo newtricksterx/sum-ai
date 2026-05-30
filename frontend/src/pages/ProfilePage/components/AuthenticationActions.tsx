@@ -20,18 +20,18 @@ export const SignInView = ({ infoMessage, errorMessage, onDismissError }: SignIn
   const googleSignInUrl = useMemo(() => {
     const configuredBaseUrl = (import.meta.env.VITE_BASE_URL ?? "").toString().trim();
     const defaultBaseUrl =
-      typeof window !== "undefined" && window.location.protocol === "chrome-extension:"
-        ? "http://localhost:8000"
-        : typeof window !== "undefined"
-          ? window.location.origin
-          : "http://localhost:8000";
+      typeof window !== "undefined" && window.location.protocol !== "chrome-extension:"
+        ? window.location.origin
+        : "";
 
     const baseUrl = configuredBaseUrl.length > 0 ? configuredBaseUrl : defaultBaseUrl;
+
+    if (!baseUrl) return "";
 
     try {
       return new URL("/accounts/google/login/?process=login", baseUrl).toString();
     } catch {
-      return "http://localhost:8000/accounts/google/login/?process=login";
+      return "";
     }
   }, []);
 
