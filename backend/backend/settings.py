@@ -204,14 +204,15 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#EXT_ID = env.str("EXT_ID", default="") # type: ignore
+EXT_ID = env.str("EXT_ID", default="") # type: ignore
 _cors_allowed_origins = env.list("CORS_ALLOWED_ORIGINS", default=[]) # type: ignore
-#if EXT_ID:
-#    _cors_allowed_origins.append(f"chrome-extension://{EXT_ID}") # type: ignore
 CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_cors_allowed_origins)) # type: ignore
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[]) # type: ignore
+_csrf_trusted_origins = env.list("CSRF_TRUSTED_ORIGINS", default=[]) # type: ignore
+if EXT_ID:
+    _csrf_trusted_origins.append(f"chrome-extension://{EXT_ID}")
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(_csrf_trusted_origins)) # type: ignore
 if IS_PRODUCTION and STRICT_SECURITY_VALIDATION:
     if not CORS_ALLOWED_ORIGINS:
         raise ImproperlyConfigured(
@@ -264,7 +265,8 @@ if IS_PRODUCTION and SIMPLE_JWT["AUTH_COOKIE_SAMESITE"] == "None" and not SIMPLE
 # CSRF Permissions
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=IS_PRODUCTION) # type: ignore
-CSRF_COOKIE_SAMESITE = env.str("CSRF_COOKIE_SAMESITE", default="Lax") # type: ignore
+_csrf_samesite_default = "None" if IS_PRODUCTION else "Lax"
+CSRF_COOKIE_SAMESITE = env.str("CSRF_COOKIE_SAMESITE", default=_csrf_samesite_default) # type: ignore
 if CSRF_COOKIE_SAMESITE == "None" and not CSRF_COOKIE_SECURE:
     raise ImproperlyConfigured(
         "CSRF_COOKIE_SECURE must be True when CSRF_COOKIE_SAMESITE is 'None'."
