@@ -1,8 +1,10 @@
 import logging
+import os
 import re
 from urllib.parse import parse_qs, urlparse
 
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api.proxies import WebshareProxyConfig
 
 from .base import ExtractionResult, SourceExtractor
 
@@ -51,15 +53,27 @@ def _extract_video_id(value) -> str:
     return video_id
 
 
+def _build_proxy_config():
+    username = os.environ.get("WEBSHARE_PROXY_USERNAME")
+    password = os.environ.get("WEBSHARE_PROXY_PASSWORD")
+    if not username or not password:
+        logger.warning("Webshare proxy credentials not set — requests will use direct connection")
+        return None
+    logger.info("Webshare proxy configured for user=%s", username)
+    return WebshareProxyConfig(proxy_username=username, proxy_password=password)
+
+
 class YouTubeExtractor(SourceExtractor):
     source_type = "youtube"
 
     def __init__(self):
-        self._api = YouTubeTranscriptApi()
+        self._api = YouTubeTranscriptApi(proxy_config=_build_proxy_config())
 
     def _fetch_transcript(self, value) -> str:
         video_id = _extract_video_id(value)
+        logger.info("Fetching transcript for video_id=%s", video_id)
         fetched_transcript = self._api.fetch(video_id)
+        logger.info("Transcript fetched successfully for video_id=%s (%d snippets)", video_id, len(fetched_transcript))
         return " ".join(snippet.text for snippet in fetched_transcript).strip()
 
     def extract(self, request) -> ExtractionResult:
