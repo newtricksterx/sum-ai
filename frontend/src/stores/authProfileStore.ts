@@ -129,6 +129,7 @@ export const useAuthProfileStore = create<AuthProfileState>()(
     logout: async () => {
       let logoutFailed = false;
       try {
+        await getCsrfToken(true);
         await authInstance.post("/api/logout");
       } catch (err) {
         logoutFailed = true;
