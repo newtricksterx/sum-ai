@@ -64,9 +64,13 @@ const ensureCsrfToken = async (force = false) => {
     return csrfToken;
   }
 
-  if (!csrfPromise) {
-    csrfPromise = requestCsrfToken().finally(() => {
-      csrfPromise = null;
+  if (!csrfPromise || force) {
+    const pending = requestCsrfToken();
+    csrfPromise = pending;
+    pending.finally(() => {
+      if (csrfPromise === pending) {
+        csrfPromise = null;
+      }
     });
   }
 

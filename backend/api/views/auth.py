@@ -69,6 +69,7 @@ def _clear_session_cookie(response: Response | HttpResponseRedirect):
 
 def _has_valid_csrf_token(request) -> bool:
     check = _CSRFCheck(lambda req: None) # type: ignore
+    check.process_request(request)
     original_csrf_bypass = getattr(request, "_dont_enforce_csrf_checks", False)
     request._dont_enforce_csrf_checks = False
     try:
