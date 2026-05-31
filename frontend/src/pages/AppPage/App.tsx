@@ -17,6 +17,7 @@ import { useAuthLogoutReset } from './useAuthLogoutReset'
 import { useRestoreSessionOnLogin } from './useRestoreSessionOnLogin'
 import { useTrackMountedPages } from './useTrackMountedPages'
 import { usePageSwitchCleanup } from './usePageSwitchCleanup'
+import { isLoggedOut } from '../../services/authSignals'
 import { ActionId } from '../../types/summary'
 import { PageType } from '../../utils/types'
 import * as Toast from '@radix-ui/react-toast'
@@ -118,8 +119,12 @@ function App() {
   usePageSwitchCleanup(pageFrameRef, pageStorageTimeoutRef);
 
   useEffect(() => {
-    void hydrateProfile(false, currency);
-  }, [hydrateProfile, currency]);
+    if (isLoggedOut()) {
+      clearProfile();
+    } else {
+      void hydrateProfile(false, currency);
+    }
+  }, [hydrateProfile, clearProfile, currency]);
 
   const onMenuClick = useCallback((page: PageType) => {
     setPage(page);

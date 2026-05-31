@@ -1,5 +1,7 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
 
+import { markLoggedOut } from "./authSignals";
+
 type LogoutHandler = () => void;
 type RetryableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean; _csrfRetry?: boolean };
 type CsrfTokenResponse = { csrfToken?: string };
@@ -150,6 +152,7 @@ const requestTokenRefresh = async () => {
 const runForcedLogout = async () => {
   if (!forceLogoutPromise) {
     forceLogoutPromise = (async () => {
+      markLoggedOut();
       try {
         await postWithCsrfRetry(logoutClient, "/api/logout", {});
       } catch {

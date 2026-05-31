@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 import { authInstance, getCsrfToken } from "../services/axiosService";
+import { markLoggedOut } from "../services/authSignals";
 
 export type UserProfile = {
   username?: string | null;
@@ -127,6 +128,7 @@ export const useAuthProfileStore = create<AuthProfileState>()(
         inFlightCurrency: null,
       }),
     logout: async () => {
+      markLoggedOut();
       let logoutFailed = false;
       try {
         await getCsrfToken(true);

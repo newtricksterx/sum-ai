@@ -108,7 +108,11 @@ class LogoutUserView(APIView):
         cookie_domain = settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"]
         cookie_same_site = settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"]
 
+        logger.info("[logout] request received from %s", request.META.get("REMOTE_ADDR"))
+        logger.debug("[logout] cookies present: %s", list(request.COOKIES.keys()))
+
         if not _has_valid_csrf_token(request):
+            logger.warning("[logout] CSRF validation failed")
             return Response(
                 {"detail": "CSRF token missing or invalid."},
                 status=status.HTTP_403_FORBIDDEN,
@@ -118,9 +122,17 @@ class LogoutUserView(APIView):
         if refresh_token:
             try:
                 RefreshToken(refresh_token).blacklist()
+                logger.info("[logout] refresh token blacklisted")
             except Exception:
-                # Logout should still clear cookies even if token blacklisting fails.
-                pass
+                logger.warning("[logout] refresh token blacklisting failed", exc_info=True)
+        else:
+            logger.info("[logout] no refresh token cookie present (path=%s)", refresh_cookie_path)
+
+        has_access = access_cookie_name in request.COOKIES
+        logger.info(
+            "[logout] clearing cookies: access=%s (present=%s), refresh=%s (present=%s)",
+            access_cookie_name, has_access, refresh_cookie_name, bool(refresh_token),
+        )
 
         response = Response({"detail": "Logout successful."}, status=status.HTTP_200_OK)
 
@@ -136,6 +148,8 @@ class LogoutUserView(APIView):
             domain=cookie_domain,
             samesite=cookie_same_site,  # type: ignore
         )
+
+        logger.info("[logout] complete — delete-cookie headers set")
         return response
 
 

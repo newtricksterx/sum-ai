@@ -287,6 +287,9 @@ SOCIALACCOUNT_PROVIDERS = {
             'profile',
             'email',
         ],
+        'AUTH_PARAMS': {
+            'prompt': 'select_account',
+        },
         'APP': {
             'client_id': env.str("GOOGLE_CLIENT_ID"),
             'secret': env.str("GOOGLE_CLIENT_SECRET"),
