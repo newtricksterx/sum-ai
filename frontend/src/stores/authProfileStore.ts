@@ -127,10 +127,12 @@ export const useAuthProfileStore = create<AuthProfileState>()(
         inFlightCurrency: null,
       }),
     logout: async () => {
+      let logoutFailed = false;
       try {
         await authInstance.post("/api/logout");
-      } catch {
-        // Best effort. The JWT cookie or CSRF token may already be invalid.
+      } catch (err) {
+        logoutFailed = true;
+        console.error("[logout] backend logout failed:", err);
       }
       set({
         profile: null,
@@ -140,9 +142,10 @@ export const useAuthProfileStore = create<AuthProfileState>()(
         inFlightPromise: null,
         inFlightCurrency: null,
       });
-      // The CSRF token cached in axiosService was bound to the now-dead
-      // session. Force-refresh so the next anonymous POST doesn't 403.
       await getCsrfToken(true).catch(() => undefined);
+      if (logoutFailed) {
+        throw new Error("Logout failed on the server. Your session cookies may not have been cleared.");
+      }
     },
   }),
 );

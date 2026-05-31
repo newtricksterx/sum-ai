@@ -206,6 +206,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EXT_ID = env.str("EXT_ID", default="") # type: ignore
 _cors_allowed_origins = env.list("CORS_ALLOWED_ORIGINS", default=[]) # type: ignore
+if EXT_ID:
+    _cors_allowed_origins.append(f"chrome-extension://{EXT_ID}")
 CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_cors_allowed_origins)) # type: ignore
 CORS_ALLOW_CREDENTIALS = True
 
