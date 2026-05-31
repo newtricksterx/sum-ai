@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 from django.http import HttpResponse, HttpResponseRedirect
 from django.middleware.csrf import CsrfViewMiddleware, get_token
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.cache import never_cache
+from django.utils.decorators import method_decorator
 import logging
 from rest_framework import generics, permissions, status
 from rest_framework.authentication import SessionAuthentication
@@ -84,6 +86,7 @@ def _has_valid_csrf_token(request) -> bool:
     return False
 
 
+@method_decorator(never_cache, name="dispatch")
 class CSRFTokenView(APIView):
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
