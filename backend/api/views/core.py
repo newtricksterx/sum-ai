@@ -5,6 +5,8 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
+from django.views.decorators.cache import never_cache
+from django.utils.decorators import method_decorator
 
 from api.models.subscription import Subscription
 from api.serializers import SubscriptionPlanUpdateSerializer, UserReadSerializer
@@ -36,7 +38,7 @@ class ApiRootView(APIView):
 
         return Response(payload)
 
-
+@method_decorator(never_cache, name="dispatch")
 class MeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     throttle_scope = "me"
