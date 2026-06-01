@@ -123,7 +123,7 @@ class SubscriptionPlanUpdateSerializer(serializers.ModelSerializer):
         fields = ("plan_slug",)
 
 
-class BaseUserWriteSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, trim_whitespace=False)
 
     def validate_username(self, value):
@@ -165,12 +165,6 @@ class BaseUserWriteSerializer(serializers.ModelSerializer):
         password = validated_data.pop("password")
         return User.objects.create_user(password=password, **validated_data)
 
-
-class UserCreateSerializer(BaseUserWriteSerializer):
-    # is_staff and is_active are exposed read-only so the API response includes
-    # them, but they cannot be set via this endpoint. Staff promotion goes
-    # through Django admin (audited); is_active is governed by signup/lifecycle
-    # logic, not client input.
     class Meta:
         model = User
         fields = (
@@ -184,7 +178,3 @@ class UserCreateSerializer(BaseUserWriteSerializer):
         read_only_fields = ("id", "is_active", "is_staff")
 
 
-class UserUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ("first_name", "last_name")

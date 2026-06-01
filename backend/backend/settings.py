@@ -226,7 +226,7 @@ if IS_PRODUCTION and STRICT_SECURITY_VALIDATION:
 
 ANON_THROTTLE_SUMMARIES_COUNT = env.int("THROTTLE_SUMMARIES_COUNT", default=1) # type: ignore
 ANON_THROTTLE_SUMMARIES_PERIOD = env.str("THROTTLE_SUMMARIES_PERIOD", default="day").lower() # type: ignore
-if ANON_THROTTLE_SUMMARIES_PERIOD not in {"sec", "min", "hour", "day"}:
+if ANON_THROTTLE_SUMMARIES_PERIOD not in {"sec", "min", "hour", "day", "month"}:
     ANON_THROTTLE_SUMMARIES_PERIOD = "day"
 
 PDF_MAX_UPLOAD_SIZE_BYTES = env.int("PDF_MAX_UPLOAD_SIZE_BYTES", default=10 * 1024 * 1024) # type: ignore

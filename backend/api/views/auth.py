@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.middleware.csrf import CsrfViewMiddleware, get_token
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.cache import never_cache
@@ -233,13 +233,6 @@ class SocialJWTBridgeView(APIView):
 
         request.session.flush()
         _clear_session_cookie(response)
-        # Also clear any fallback auth session artifacts after JWT cookies are set.
-        response.delete_cookie(
-            key=settings.SESSION_COOKIE_NAME,
-            path=settings.SESSION_COOKIE_PATH,
-            domain=settings.SESSION_COOKIE_DOMAIN,
-            samesite=settings.SESSION_COOKIE_SAMESITE, # type: ignore
-        )
         return response
 
 

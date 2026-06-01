@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.throttling import AnonRateThrottle
+from api.throttles import AnonMonthRateThrottle
 
 from api.quota import QuotaExceeded, release_request_slot, reserve_request_slot
 from scripts.summary import MAX_CONTENT_CHARACTERS, get_action_item, get_summary
@@ -53,13 +53,13 @@ def _reserve_for(user):
     subscription, character_limit = reserve_request_slot(user)
     return subscription.pk, character_limit
 
-def _handle_summary(request):
+def _handle_generation(request, generator_fn, error_label):
     try:
         reservation_pk, character_limit = _reserve_for(request.user)
     except QuotaExceeded as exc:
         return _quota_response(exc)
 
-    result = get_summary(request, character_limit=character_limit) or {}
+    result = generator_fn(request, character_limit=character_limit) or {}
     content = result.get("content")
     is_success = bool(result.get("isSuccess"))
 
@@ -67,39 +67,10 @@ def _handle_summary(request):
         if reservation_pk is not None:
             release_request_slot(reservation_pk)
         return _error_response(
-            "Could not generate summary content.",
+            f"Could not generate {error_label} content.",
             status.HTTP_502_BAD_GATEWAY,
         )
 
-    # Soft failures (invalid request / transcript miss / PDF parse fail) flow through at 200
-    # so the frontend's existing error-doc renderer handles them via isSuccess + content.
-    # Refund the slot since no real LLM-generated summary was produced.
-    if not is_success and reservation_pk is not None:
-        release_request_slot(reservation_pk)
-
-    return _success_response(content, is_success=is_success)
-
-
-def _handle_action_item(request):
-    try:
-        reservation_pk, character_limit = _reserve_for(request.user)
-    except QuotaExceeded as exc:
-        return _quota_response(exc)
-
-    result = get_action_item(request, character_limit=character_limit) or {}
-    content = result.get("content")
-    is_success = bool(result.get("isSuccess"))
-
-    if content is None:
-        if reservation_pk is not None:
-            release_request_slot(reservation_pk)
-        return _error_response(
-            "Could not generate action content.",
-            status.HTTP_502_BAD_GATEWAY,
-        )
-
-    # Soft failures (invalid request / extraction fail) flow through at 200 with isSuccess=False.
-    # Refund the slot since no real LLM-generated content was produced.
     if not is_success and reservation_pk is not None:
         release_request_slot(reservation_pk)
 
@@ -107,7 +78,7 @@ def _handle_action_item(request):
 
 
 class ActionItem(APIView):
-    throttle_classes = [AnonRateThrottle]
+    throttle_classes = [AnonMonthRateThrottle]
 
     def post(self, request):
         action_type = request.data.get("type")
@@ -133,5 +104,5 @@ class ActionItem(APIView):
             )
 
         if normalized_action_type == "summary":
-            return _handle_summary(request)
-        return _handle_action_item(request)
+            return _handle_generation(request, get_summary, "summary")
+        return _handle_generation(request, get_action_item, "action")
