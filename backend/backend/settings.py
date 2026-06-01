@@ -205,16 +205,16 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EXT_ID = env.str("EXT_ID", default="") # type: ignore
+EXT_IDS = env.list("EXT_ID", default=[]) # type: ignore
 _cors_allowed_origins = env.list("CORS_ALLOWED_ORIGINS", default=[]) # type: ignore
-if EXT_ID:
-    _cors_allowed_origins.append(f"chrome-extension://{EXT_ID}")
+for _ext_id in EXT_IDS:
+    _cors_allowed_origins.append(f"chrome-extension://{_ext_id}")
 CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_cors_allowed_origins)) # type: ignore
 CORS_ALLOW_CREDENTIALS = True
 
 _csrf_trusted_origins = env.list("CSRF_TRUSTED_ORIGINS", default=[]) # type: ignore
-if EXT_ID:
-    _csrf_trusted_origins.append(f"chrome-extension://{EXT_ID}")
+for _ext_id in EXT_IDS:
+    _csrf_trusted_origins.append(f"chrome-extension://{_ext_id}")
 CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(_csrf_trusted_origins)) # type: ignore
 if IS_PRODUCTION and STRICT_SECURITY_VALIDATION:
     if not CORS_ALLOWED_ORIGINS:
