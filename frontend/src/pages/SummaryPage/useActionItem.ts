@@ -13,7 +13,6 @@ import type {
   SourcePayloadResolution,
   SummaryDocument,
 } from "./utils/types";
-import { isAnyActionItemMockEnabled } from "./utils/mocks";
 import { errorDocument } from "./utils/document";
 import {
   buildMockSourcePayload,
@@ -82,8 +81,11 @@ export const useActionItem = () => {
   ): Promise<SourcePayload | null> => {
     lastSourceErrorRef.current = null;
 
-    if (isAnyActionItemMockEnabled()) {
-      return !options?.forceActiveTab && sourcePayload ? sourcePayload : buildMockSourcePayload();
+    if (import.meta.env.DEV) {
+      const { isAnyActionItemMockEnabled } = await import("./utils/mocks");
+      if (isAnyActionItemMockEnabled()) {
+        return !options?.forceActiveTab && sourcePayload ? sourcePayload : buildMockSourcePayload();
+      }
     }
 
     const tab = await resolveCurrentTab();

@@ -1,8 +1,4 @@
 import type { SourcePayload, SourcePayloadResolution, SourceType } from "./types";
-import {
-  MOCK_SUMMARY_DOCUMENT,
-  getMockSourceUrl,
-} from "./mocks";
 import { extractTabContent, isYoutube } from "./sources";
 import { errorDocument } from "./document";
 import { isPDF, fetchPdfBytes, PdfFileAccessDeniedError, type PdfPayload } from "./pdf";
@@ -14,6 +10,7 @@ export const detectSourceType = (url: string | undefined): SourceType => {
 };
 
 export const buildMockSourcePayload = async (): Promise<SourcePayload> => {
+  const { MOCK_SUMMARY_DOCUMENT, getMockSourceUrl } = await import("./mocks");
   const mockSourceUrl = await getMockSourceUrl();
   return {
     sourceType: "webpage",

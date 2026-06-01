@@ -11,12 +11,6 @@ import type {
   RequestActionItemArgs,
   SourcePayload,
 } from "./types";
-import {
-  MOCK_FLASHCARDS_DOCUMENT,
-  MOCK_QUIZ_DOCUMENT,
-  MOCK_SUMMARY_ACTION_ITEM_DOCUMENT,
-  isMockActionItemModeEnabled,
-} from "./mocks";
 import { getCsrfToken, isCsrfFailurePayload } from "../../../services/axiosService";
 import { readErrorBody } from "./sources";
 import {
@@ -24,14 +18,6 @@ import {
   errorDocument,
   throttleMessage,
 } from "./document";
-
-const DEBUG_ERROR_MESSAGE = false
-
-const MOCK_BY_ACTION_ID: Record<ActionId, SummaryDocument> = {
-  flashcards: MOCK_FLASHCARDS_DOCUMENT,
-  quiz: MOCK_QUIZ_DOCUMENT,
-  summary: MOCK_SUMMARY_ACTION_ITEM_DOCUMENT,
-};
 
 const actionItemErrorResult = (
   title: string,
@@ -152,20 +138,20 @@ export const requestActionItem = async ({
   isAuthenticated = false,
   t,
 }: RequestActionItemArgs): Promise<ActionItemRequestResult> => {
-  if (isMockActionItemModeEnabled()) {
-    if (DEBUG_ERROR_MESSAGE){
+  if (import.meta.env.DEV) {
+    const mocks = await import("./mocks");
+    if (mocks.isMockActionItemModeEnabled()) {
+      const mockByActionId: Record<ActionId, SummaryDocument> = {
+        flashcards: mocks.MOCK_FLASHCARDS_DOCUMENT,
+        quiz: mocks.MOCK_QUIZ_DOCUMENT,
+        summary: mocks.MOCK_SUMMARY_ACTION_ITEM_DOCUMENT,
+      };
       return {
-        document: null,
+        document: mockByActionId[type],
         sourceUrl: sourcePayload.sourceUrl,
-        isSuccess: false,
-      }
+        isSuccess: true,
+      };
     }
-
-    return {
-      document: MOCK_BY_ACTION_ID[type],
-      sourceUrl: sourcePayload.sourceUrl,
-      isSuccess: true,
-    };
   }
 
   try {
