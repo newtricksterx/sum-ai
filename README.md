@@ -1,43 +1,58 @@
-# **ReadToRecall** — Chrome Extension
-Summarize any webpage in seconds.
+# ReadToRecall
 
-ReadToRecall is a lightweight, easy-to-use Chrome extension that uses AI to summarize the contents of your current tab instantly. Get the key points without the fluff, whether it’s a long article, research paper, news story, or blog post.
+A Chrome extension that uses AI to summarize webpages, YouTube videos, and PDFs — then turns them into flashcards and quizzes.
+
+![Home](backend/api/static/landing-page/front-page-linalg-light.png)
 
 ## Features
-+ Summarize Any Webpage — Instantly condense the content of the active tab.
-+ Powered by AI — Uses the OpenAI API for accurate, intelligent summaries.
-+ Simple Interface — Clean popup design for quick, easy access.
-+ Light/Dark Themes — Customize the way that you want your interface to look.
-+ Format Customization — Tailor your summaries to your preference: pick the length (short, medium, long) and choose between paragraph or bullet point styles.
-+ Language — Choose the language that you would like the summary to be in.
 
-## Example
-![example-summaryai](https://github.com/user-attachments/assets/3ecafd41-e080-462a-9909-9f3b18f6e20c)
+**Summarize anything in your browser**
+- Webpages, articles, research papers, blog posts
+- YouTube video transcripts (auto-extracted)
+- PDFs
 
-## Step-by-Step Guide:
+**Multiple summary formats** — Paragraph, Bullet Points, TL;DR, Key Takeaways, Q&A, Pros & Cons, Action Items. Choose short, medium, or long.
 
-### Step 1: Install the Extension
-Add ReadToRecall to your Chrome browser from the Chrome Web Store (Coming Soon).
+**Flashcards** — Generate study cards from any summarized content. Navigate through them with a swipeable carousel.
 
-### Step 2: Open the Extension
-Navigate to any webpage you’d like to summarize. Click the ReadToRecall icon in your Chrome toolbar to open the extension.
+![Flashcards](backend/api/static/landing-page/sumai-session-flashcards-light.png)
 
-### Step 3: Customize Settings
-Click on the settings button and customize how you;d like to view your summarized content.
+**Quizzes** — Auto-generated multiple choice questions with adjustable difficulty. Get instant feedback on your answers.
 
-### Step 4: Generate a Summary
-Click the Summarize button. The extension will automatically analyze the content of the active tab (the page you're currently on) and start generating a summary.
+![Quiz](backend/api/static/landing-page/sumai-session-quiz-light.png)
 
-### Step 5: View Your Summary
-Once the summary is ready, it will be displayed in the popup window according to your selected format and length preferences (e.g. short, medium, long — in paragraph or bullet point format). You may change these in the settings dropdown.
+**Multi-language** — Summarize in English, Spanish, French, Mandarin Chinese, or Hindi.
 
-### Step 6: Regenerate If Needed
-Not quite what you wanted? Click the Regenerate button to create a new version of the summary. Each regenerated summary will follow your current settings and may offer a different phrasing or structure.
+**Session history** — Access past summaries, flashcards, and quizzes from previous sessions.
 
-## Development Roadmap
-+ Extension can also summarize video transcripts
-+ Export to PDF, Markdown, etc
-+ Copy to clipboard
-+ Additional analysis on the contents of the page (i.e. positive, negative, neutral)
-+ Can go to past summaries
+**Themes** — Light and dark mode with adjustable font size.
 
+## How It Works
+
+1. Navigate to any webpage, YouTube video, or PDF
+2. Click the ReadToRecall icon in your toolbar
+3. Pick an action — Summary, Flashcards, or Quiz
+4. View your results instantly in the popup
+
+![Summary](backend/api/static/landing-page/sumai-session-summary-light.png)
+
+## Tech Stack
+
+**Frontend** — React, TypeScript, Vite, Zustand, Tailwind CSS, Radix UI
+
+**Backend** — Django REST Framework, PostgreSQL, Google Gemini API, Stripe
+
+**Infrastructure** — Docker, Nginx, Gunicorn, JWT authentication, Google OAuth
+
+## Plans
+
+| | Free | Standard | Pro |
+|---|---|---|---|
+| Monthly summaries | 10 | 300 | 1,200 |
+| History slots | 3 | 5 | 10 |
+| Character limit | 10,000 | 30,000 | Unlimited |
+| Flashcards & Quizzes | Yes | Yes | Yes |
+
+## License
+
+All rights reserved. Copyright 2026 Daniel Li.
