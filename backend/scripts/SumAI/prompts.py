@@ -24,6 +24,10 @@ def normalize_language(value) -> str:
     return formats.LANGUAGE_DISPLAY.get(to_text(value).lower(), "English")
 
 
+def normalize_quiz_difficulty(value) -> str:
+    return _normalize_option(value, formats.QUIZ_DIFFICULTY_GUIDANCE, "medium")
+
+
 def normalize_action_type(value) -> str:
     return to_text(value).lower()
 
@@ -93,5 +97,6 @@ def build_action_query(action_type: str, language, content: str, quiz_difficulty
             """
 
     if quiz_difficulty:
-        query += f"DIFFICULTY: Generate quiz with {quiz_difficulty} difficulty."
+        normalized_difficulty = normalize_quiz_difficulty(quiz_difficulty)
+        query += f"DIFFICULTY: {normalized_difficulty} ({formats.QUIZ_DIFFICULTY_GUIDANCE[normalized_difficulty]})"
     return query

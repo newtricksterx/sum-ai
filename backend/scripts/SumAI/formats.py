@@ -99,6 +99,13 @@ LANGUAGE_DISPLAY = {
 }
 
 
+QUIZ_DIFFICULTY_GUIDANCE = {
+    "easy": "introductory — focus on recall of key facts and definitions",
+    "medium": "intermediate — mix recall with application and comparison",
+    "hard": "advanced — emphasis on analysis, edge cases, and synthesis",
+}
+
+
 ACTION_FORMAT_GUIDANCE = {
     "flashcards": """\
 {

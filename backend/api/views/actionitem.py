@@ -1,5 +1,6 @@
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from api.throttles import AnonMonthRateThrottle
 
@@ -78,7 +79,8 @@ def _handle_generation(request, generator_fn, error_label):
 
 
 class ActionItem(APIView):
-    throttle_classes = [AnonMonthRateThrottle]
+    throttle_classes = [AnonMonthRateThrottle, ScopedRateThrottle]
+    throttle_scope = "auth"
 
     def post(self, request):
         action_type = request.data.get("type")
