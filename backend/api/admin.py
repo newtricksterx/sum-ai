@@ -14,6 +14,7 @@ class UserAdmin(DjangoUserAdmin):
     ordering = ("id",)
     list_display = ("username", "email", "stripe_customer_id", "is_staff", "is_active")
     search_fields = ("username", "email", "first_name", "last_name", "stripe_customer_id")
+    readonly_fields = ("stripe_customer_id",)
 
     fieldsets = (
         (None, {"fields": ("username", "email", "password")}),
@@ -47,6 +48,7 @@ class UserAdmin(DjangoUserAdmin):
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
+    readonly_fields = ("stripe_subscription_id", "stripe_price_id", "created_at", "updated_at")
     list_display = (
         "user",
         "plan_slug",

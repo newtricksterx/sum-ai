@@ -22,9 +22,8 @@ def reserve_request_slot(user) -> tuple[Subscription, int | None]:
     """
     now = timezone.now()
     with transaction.atomic():
-        subscription, _ = Subscription.objects.select_for_update().get_or_create(
-            user=user,
-            defaults={"plan_slug": "free", "current_period_start": now},
+        subscription = Subscription.ensure_for_user(
+            user, select_for_update_=True, defaults={"current_period_start": now},
         )
 
         if subscription.should_reset_usage_period(reference_time=now):

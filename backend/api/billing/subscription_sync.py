@@ -57,10 +57,7 @@ def sync_paid_subscription(user, stripe_sub):
     price_id = payloads.subscription_item_price_id(item)
     mapped_slug = stripe_client.get_plan_type(price_id) if price_id else "free"
 
-    subscription, _ = Subscription.objects.select_for_update().get_or_create(
-        user=user,
-        defaults={"plan_slug": "free"},
-    )
+    subscription = Subscription.ensure_for_user(user, select_for_update_=True)
 
     if mapped_slug == "free":
         logger.warning(
@@ -217,10 +214,7 @@ def mark_payment_problem(invoice, reason):
         if customer_id:
             user = User.objects.filter(stripe_customer_id=customer_id).first()
             if user is not None:
-                subscription, _ = Subscription.objects.select_for_update().get_or_create(
-                    user=user,
-                    defaults={"plan_slug": "free"},
-                )
+                subscription = Subscription.ensure_for_user(user, select_for_update_=True)
 
     if subscription is None:
         logger.warning(

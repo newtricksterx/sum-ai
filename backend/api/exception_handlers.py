@@ -13,16 +13,8 @@ def custom_exception_handler(exc, context):
     if isinstance(exc, Throttled):
         wait = getattr(exc, "wait", None)
         retry_after_seconds = math.ceil(wait) if wait is not None else None
-        summaries_limit = getattr(
-            settings,
-            "THROTTLE_SUMMARIES_COUNT",
-            getattr(settings, "ANON_THROTTLE_SUMMARIES_COUNT", None),
-        )
-        limit_period = getattr(
-            settings,
-            "THROTTLE_SUMMARIES_PERIOD",
-            getattr(settings, "ANON_THROTTLE_SUMMARIES_PERIOD", None),
-        )
+        summaries_limit = getattr(settings, "ANON_THROTTLE_SUMMARIES_COUNT", None)
+        limit_period = getattr(settings, "ANON_THROTTLE_SUMMARIES_PERIOD", None)
         response.data = {
             "isSuccess": False,
             "error": "rate_limited",

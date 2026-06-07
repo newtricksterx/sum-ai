@@ -54,14 +54,14 @@ class ReserveRequestSlotTest(TestCase):
             get_action_limit("free"),
         )
 
-    def test_pro_plan_with_none_limit_never_raises(self):
+    def test_pro_plan_allows_usage_below_limit(self):
         Subscription.objects.update_or_create(
             user=self.user,
-            defaults={"plan_slug": "pro", "actions_used": 10_000},
+            defaults={"plan_slug": "pro", "actions_used": 1000},
         )
 
         subscription, _ = reserve_request_slot(self.user)
-        self.assertEqual(subscription.actions_used, 10_001)
+        self.assertEqual(subscription.actions_used, 1001)
 
     def test_resets_usage_period_when_expired(self):
         subscription = Subscription.objects.get(user=self.user)

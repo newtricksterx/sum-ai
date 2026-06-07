@@ -17,7 +17,4 @@ def set_subscription_on_user_create(
     if raw or not created:
         return
 
-    Subscription.objects.get_or_create(
-        user=instance,
-        defaults={"plan_slug": "free"},
-    )
+    Subscription.ensure_for_user(instance)

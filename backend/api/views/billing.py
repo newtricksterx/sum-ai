@@ -114,21 +114,18 @@ def session_action(request):
     plan_slug = request.data.get("plan_slug")
 
     if plan_slug not in stripe_client.PAID_PLAN_RANK:
-        return Response({"error": "invalid_plan_slug"}, status=400)
+        return Response({"isSuccess": False, "error": "invalid_plan_slug"}, status=400)
 
     currency = normalize_currency(request.data.get("currency"))
     locale = _normalize_stripe_locale(request.data.get("language"))
     price_id = checkout.price_for_plan_currency(plan_slug, currency)
     if price_id is None:
-        return Response({"error": "price_not_configured"}, status=500)
+        return Response({"isSuccess": False, "error": "price_not_configured"}, status=500)
 
     try:
         with transaction.atomic():
             user = User.objects.select_for_update().get(pk=user.pk)
-            subscription, _ = Subscription.objects.select_for_update().get_or_create(
-                user=user,
-                defaults={"plan_slug": "free"},
-            )
+            subscription = Subscription.ensure_for_user(user, select_for_update_=True)
 
             if subscription.stripe_subscription_id:
                 if not user.stripe_customer_id:
@@ -137,7 +134,7 @@ def session_action(request):
                         subscription.stripe_subscription_id,
                         user.pk,
                     )
-                    return Response({"error": "customer_not_linked"}, status=500)
+                    return Response({"isSuccess": False, "error": "customer_not_linked"}, status=500)
 
                 try:
                     portal_session = stripe_client.client.v1.billing_portal.sessions.create(
@@ -168,6 +165,6 @@ def session_action(request):
             stripe_client.stripe_request_id(exc),
         )
         return Response(
-            {"error": "stripe_unavailable"},
+            {"isSuccess": False, "error": "stripe_unavailable"},
             status=status.HTTP_502_BAD_GATEWAY,
         )

@@ -66,10 +66,9 @@ class UserReadSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField()
 
     def get_subscription(self, obj):
-        subscription, _ = Subscription.objects.get_or_create(
-            user=obj,
-            defaults={"plan_slug": "free"},
-        )
+        subscription = getattr(obj, "subscription", None)
+        if subscription is None:
+            return None
         return SubscriptionReadSerializer(subscription, context=self.context).data
 
     def get_avatar_url(self, obj):

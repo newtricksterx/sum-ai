@@ -58,10 +58,7 @@ class AdminUserSubscriptionView(APIView):
 
     def patch(self, request, user_id: int):
         target_user = get_object_or_404(User, pk=user_id)
-        subscription, _ = Subscription.objects.get_or_create(
-            user=target_user,
-            defaults={"plan_slug": "free"},
-        )
+        subscription = Subscription.ensure_for_user(target_user)
 
         serializer = SubscriptionPlanUpdateSerializer(
             instance=subscription,

@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
-from django.middleware.csrf import CsrfViewMiddleware, get_token
+from django.middleware.csrf import get_token
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
@@ -14,6 +14,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import render
 
+from api.csrf_utils import has_valid_csrf_token
 from api.jwt_tokens import _get_tokens_for_user
 from api.serializers import (
     UserCreateSerializer,
@@ -23,40 +24,43 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
-class _CSRFCheck(CsrfViewMiddleware):
-    def _reject(self, request, reason):  # type: ignore[override]
-        return reason
+def _get_cookie_config() -> dict:
+    jwt = settings.SIMPLE_JWT
+    cookie_path = jwt["AUTH_COOKIE_PATH"]
+    return {
+        "access_cookie_name": jwt["AUTH_COOKIE"],
+        "refresh_cookie_name": jwt["AUTH_REFRESH_COOKIE"],
+        "cookie_domain": jwt["AUTH_COOKIE_DOMAIN"],
+        "cookie_path": cookie_path,
+        "refresh_cookie_path": jwt.get("AUTH_REFRESH_COOKIE_PATH", cookie_path),
+        "cookie_secure": jwt["AUTH_COOKIE_SECURE"],
+        "cookie_http_only": jwt["AUTH_COOKIE_HTTP_ONLY"],
+        "cookie_same_site": jwt["AUTH_COOKIE_SAMESITE"],
+    }
 
 
 def _set_auth_cookies(response: Response | HttpResponseRedirect, access_token: str, refresh_token: str):
-    access_cookie_name = settings.SIMPLE_JWT["AUTH_COOKIE"]
-    refresh_cookie_name = settings.SIMPLE_JWT["AUTH_REFRESH_COOKIE"]
-    cookie_domain = settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"]
-    cookie_path = settings.SIMPLE_JWT["AUTH_COOKIE_PATH"]
-    refresh_cookie_path = settings.SIMPLE_JWT.get("AUTH_REFRESH_COOKIE_PATH", cookie_path)
-    cookie_secure = settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"]
-    cookie_http_only = settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"]
-    cookie_same_site = settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"]
+    cfg = _get_cookie_config()
 
     response.set_cookie(
-        key=access_cookie_name,
+        key=cfg["access_cookie_name"],
         value=access_token,
         max_age=int(settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()),
-        secure=cookie_secure,
-        httponly=cookie_http_only,
-        samesite=cookie_same_site,
-        path=cookie_path,
-        domain=cookie_domain,
+        secure=cfg["cookie_secure"],
+        httponly=cfg["cookie_http_only"],
+        samesite=cfg["cookie_same_site"],
+        path=cfg["cookie_path"],
+        domain=cfg["cookie_domain"],
     )
     response.set_cookie(
-        key=refresh_cookie_name,
+        key=cfg["refresh_cookie_name"],
         value=refresh_token,
         max_age=int(settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()),
-        secure=cookie_secure,
-        httponly=cookie_http_only,
-        samesite=cookie_same_site,
-        path=refresh_cookie_path,
-        domain=cookie_domain,
+        secure=cfg["cookie_secure"],
+        httponly=cfg["cookie_http_only"],
+        samesite=cfg["cookie_same_site"],
+        path=cfg["refresh_cookie_path"],
+        domain=cfg["cookie_domain"],
     )
 
 
@@ -67,23 +71,6 @@ def _clear_session_cookie(response: Response | HttpResponseRedirect):
         domain=settings.SESSION_COOKIE_DOMAIN,
         samesite=settings.SESSION_COOKIE_SAMESITE, # type: ignore
     )
-
-
-def _has_valid_csrf_token(request) -> bool:
-    check = _CSRFCheck(lambda req: None) # type: ignore
-    check.process_request(request)
-    original_csrf_bypass = getattr(request, "_dont_enforce_csrf_checks", False)
-    request._dont_enforce_csrf_checks = False
-    try:
-        rejection_reason = check.process_view(request, None, (), {})
-    finally:
-        request._dont_enforce_csrf_checks = original_csrf_bypass
-
-    if rejection_reason is None:
-        return True
-
-    logger.warning("CSRF validation failed for %s: %s", request.path, rejection_reason)
-    return False
 
 
 @method_decorator(never_cache, name="dispatch")
@@ -101,24 +88,19 @@ class LogoutUserView(APIView):
     throttle_scope = 'auth'
 
     def post(self, request):
-        access_cookie_name = settings.SIMPLE_JWT["AUTH_COOKIE"]
-        refresh_cookie_name = settings.SIMPLE_JWT["AUTH_REFRESH_COOKIE"]
-        cookie_path = settings.SIMPLE_JWT["AUTH_COOKIE_PATH"]
-        refresh_cookie_path = settings.SIMPLE_JWT.get("AUTH_REFRESH_COOKIE_PATH", cookie_path)
-        cookie_domain = settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"]
-        cookie_same_site = settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"]
+        cfg = _get_cookie_config()
 
         logger.info("[logout] request received from %s", request.META.get("REMOTE_ADDR"))
         logger.debug("[logout] cookies present: %s", list(request.COOKIES.keys()))
 
-        if not _has_valid_csrf_token(request):
+        if not has_valid_csrf_token(request):
             logger.warning("[logout] CSRF validation failed")
             return Response(
                 {"detail": "CSRF token missing or invalid."},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        refresh_token = request.COOKIES.get(refresh_cookie_name)
+        refresh_token = request.COOKIES.get(cfg["refresh_cookie_name"])
         if refresh_token:
             try:
                 RefreshToken(refresh_token).blacklist()
@@ -126,27 +108,27 @@ class LogoutUserView(APIView):
             except Exception:
                 logger.warning("[logout] refresh token blacklisting failed", exc_info=True)
         else:
-            logger.info("[logout] no refresh token cookie present (path=%s)", refresh_cookie_path)
+            logger.info("[logout] no refresh token cookie present (path=%s)", cfg["refresh_cookie_path"])
 
-        has_access = access_cookie_name in request.COOKIES
+        has_access = cfg["access_cookie_name"] in request.COOKIES
         logger.info(
             "[logout] clearing cookies: access=%s (present=%s), refresh=%s (present=%s)",
-            access_cookie_name, has_access, refresh_cookie_name, bool(refresh_token),
+            cfg["access_cookie_name"], has_access, cfg["refresh_cookie_name"], bool(refresh_token),
         )
 
         response = Response({"detail": "Logout successful."}, status=status.HTTP_200_OK)
 
         response.delete_cookie(
-            key=access_cookie_name,
-            path=cookie_path,
-            domain=cookie_domain,
-            samesite=cookie_same_site,  # type: ignore
+            key=cfg["access_cookie_name"],
+            path=cfg["cookie_path"],
+            domain=cfg["cookie_domain"],
+            samesite=cfg["cookie_same_site"],  # type: ignore
         )
         response.delete_cookie(
-            key=refresh_cookie_name,
-            path=refresh_cookie_path,
-            domain=cookie_domain,
-            samesite=cookie_same_site,  # type: ignore
+            key=cfg["refresh_cookie_name"],
+            path=cfg["refresh_cookie_path"],
+            domain=cfg["cookie_domain"],
+            samesite=cfg["cookie_same_site"],  # type: ignore
         )
 
         logger.info("[logout] complete — delete-cookie headers set")
@@ -160,7 +142,7 @@ class CookieTokenRefreshView(APIView):
 
 
     def post(self, request):
-        if not _has_valid_csrf_token(request):
+        if not has_valid_csrf_token(request):
             return Response(
                 {"detail": "CSRF token missing or invalid."},
                 status=status.HTTP_403_FORBIDDEN,

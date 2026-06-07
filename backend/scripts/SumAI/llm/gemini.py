@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import threading
 import time
 
 from google import genai
@@ -94,6 +95,7 @@ class GeminiProvider(LLMProvider):
         )
 
 
+_provider_lock = threading.Lock()
 _default_provider: GeminiProvider | None = None
 _default_provider_api_key: str | None = None
 
@@ -117,7 +119,11 @@ def get_default_provider() -> LLMProvider:
         raise RuntimeError(
             "Gemini is not configured. Missing env var(s): " + ", ".join(missing)
         )
-    if _default_provider is None or _default_provider_api_key != api_key:
+    if _default_provider is not None and _default_provider_api_key == api_key:
+        return _default_provider
+    with _provider_lock:
+        if _default_provider is not None and _default_provider_api_key == api_key:
+            return _default_provider
         _default_provider = GeminiProvider(
             api_key=api_key,  # type: ignore[arg-type]
             primary_model=model_name,  # type: ignore[arg-type]
@@ -129,8 +135,9 @@ def get_default_provider() -> LLMProvider:
 
 def reset_default_provider() -> None:
     global _default_provider, _default_provider_api_key
-    _default_provider = None
-    _default_provider_api_key = None
+    with _provider_lock:
+        _default_provider = None
+        _default_provider_api_key = None
 
 
 def log_startup_config() -> None:

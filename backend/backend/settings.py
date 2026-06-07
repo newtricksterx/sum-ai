@@ -206,16 +206,17 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EXT_IDS = env.list("EXT_ID", default=[]) # type: ignore
-_cors_allowed_origins = env.list("CORS_ALLOWED_ORIGINS", default=[]) # type: ignore
-for _ext_id in EXT_IDS:
-    _cors_allowed_origins.append(f"chrome-extension://{_ext_id}")
-CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_cors_allowed_origins)) # type: ignore
+
+def _build_origin_list(env_var, ext_ids):
+    origins = env.list(env_var, default=[])  # type: ignore
+    for ext_id in ext_ids:
+        origins.append(f"chrome-extension://{ext_id}")
+    return list(dict.fromkeys(origins))
+
+CORS_ALLOWED_ORIGINS = _build_origin_list("CORS_ALLOWED_ORIGINS", EXT_IDS)
 CORS_ALLOW_CREDENTIALS = True
 
-_csrf_trusted_origins = env.list("CSRF_TRUSTED_ORIGINS", default=[]) # type: ignore
-for _ext_id in EXT_IDS:
-    _csrf_trusted_origins.append(f"chrome-extension://{_ext_id}")
-CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(_csrf_trusted_origins)) # type: ignore
+CSRF_TRUSTED_ORIGINS = _build_origin_list("CSRF_TRUSTED_ORIGINS", EXT_IDS)
 if IS_PRODUCTION and STRICT_SECURITY_VALIDATION:
     if not CORS_ALLOWED_ORIGINS:
         raise ImproperlyConfigured(

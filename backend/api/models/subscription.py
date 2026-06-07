@@ -56,6 +56,15 @@ class Subscription(models.Model):
     def __str__(self) -> str:
         return f"{self.user.email} ({self.plan_slug})"
 
+    @classmethod
+    def ensure_for_user(cls, user, *, select_for_update_=False, defaults=None):
+        qs = cls.objects.select_for_update() if select_for_update_ else cls.objects
+        base_defaults = {"plan_slug": "free"}
+        if defaults:
+            base_defaults.update(defaults)
+        subscription, _ = qs.get_or_create(user=user, defaults=base_defaults)
+        return subscription
+
     @property
     def plan(self) -> dict:
         return get_plan(self.plan_slug)

@@ -36,12 +36,12 @@ class SubscriptionTest(TestCase):
 
         self.assertEqual(subscription.usage_period_ends_at(), expected_end)
 
-    def test_daily_free_plan_ignores_stale_current_period_end(self):
+    def test_monthly_free_plan_uses_current_period_end_when_set(self):
         subscription = Subscription.objects.get(user=self.user_test)
         subscription.current_period_start = timezone.now() - timedelta(days=2)
-        subscription.current_period_end = timezone.now() + timedelta(days=20)
+        expected_end = timezone.now() + timedelta(days=20)
+        subscription.current_period_end = expected_end
 
-        expected_end = subscription.current_period_start + timedelta(days=1)
         self.assertEqual(subscription.usage_period_ends_at(), expected_end)
 
     def test_set_subscription_standard(self):
@@ -59,7 +59,7 @@ class SubscriptionTest(TestCase):
 
         subscription = Subscription.objects.get(user=self.user_test)
         self.assertEqual(subscription.plan_slug, "pro")
-        self.assertEqual(subscription.action_limit, None)
+        self.assertEqual(subscription.action_limit, 1200)
         self.assertEqual(subscription.history_limit, 10)
         self.assertIsNone(subscription.character_limit)
         

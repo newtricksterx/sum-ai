@@ -194,10 +194,7 @@ def handle_checkout_session_completed(session):
     user.stripe_customer_id = customer_id
     user.save(update_fields=["stripe_customer_id", "updated_at"])
 
-    subscription, _ = Subscription.objects.select_for_update().get_or_create(
-        user=user,
-        defaults={"plan_slug": "free"},
-    )
+    subscription = Subscription.ensure_for_user(user, select_for_update_=True)
     if subscription_id:
         subscription.stripe_subscription_id = subscription_id
         subscription.save(update_fields=["stripe_subscription_id", "updated_at"])

@@ -1,6 +1,7 @@
 import ast
 import json
 import re
+from urllib.parse import urlsplit
 
 
 def _to_text(value) -> str:
@@ -61,7 +62,6 @@ def _load_json_like_payload(raw_output):
 
     return None
 
-
 def parse_action_document(raw_output) -> dict | None:
     payload = _load_json_like_payload(raw_output)
     if not isinstance(payload, dict):
@@ -76,3 +76,4 @@ def parse_action_document(raw_output) -> dict | None:
         return None
 
     return payload
+

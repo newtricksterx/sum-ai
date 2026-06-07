@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
@@ -6,6 +8,8 @@ from api.throttles import AnonMonthRateThrottle
 
 from api.quota import QuotaExceeded, release_request_slot, reserve_request_slot
 from scripts.summary import MAX_CONTENT_CHARACTERS, get_action_item, get_summary
+
+logger = logging.getLogger(__name__)
 
 ACTION_ITEM_TYPES = {"flashcards", "quiz"}
 SUPPORTED_ACTION_TYPES = ACTION_ITEM_TYPES | {"summary"}
@@ -58,6 +62,7 @@ def _handle_generation(request, generator_fn, error_label):
     try:
         reservation_pk, character_limit = _reserve_for(request.user)
     except QuotaExceeded as exc:
+        logger.info("Quota exceeded for user=%s", request.user.pk)
         return _quota_response(exc)
 
     result = generator_fn(request, character_limit=character_limit) or {}
@@ -65,6 +70,7 @@ def _handle_generation(request, generator_fn, error_label):
     is_success = bool(result.get("isSuccess"))
 
     if content is None:
+        logger.warning("Generation returned no content for %s (user=%s)", error_label, request.user.pk)
         if reservation_pk is not None:
             release_request_slot(reservation_pk)
         return _error_response(
