@@ -5,13 +5,3 @@ export interface ButtonProps {
     disabled?: boolean;
     onClick?: React.MouseEventHandler;
 }
-
-export interface DropdownProps {
-    list: string[];
-    onChangeDropdown: (value: React.ChangeEvent<HTMLSelectElement>) => void;
-    title?: string
-    className?: string;
-    value?: string;
-    name?: string;
-    id?: string;
-}

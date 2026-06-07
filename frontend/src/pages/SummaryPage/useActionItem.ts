@@ -6,21 +6,10 @@ import { useCurrentSessionState } from "../../stores/sessionStorage";
 import { useCurrentUserHistoryKey, useHistoryStorage } from "../../stores/historyStorage";
 import type { ActionId } from "../../types/summary";
 import { createActionItemId } from "../../types/summary";
-import type {
-  AddActionItemOptions,
-  ResolveSourcePayloadOptions,
-  SourcePayload,
-  SourcePayloadResolution,
-  SummaryDocument,
-} from "./utils/types";
+import type { AddActionItemOptions, SummaryDocument } from "./utils/types";
 import { errorDocument } from "./utils/document";
-import {
-  buildMockSourcePayload,
-  buildSourcePayloadFromTab,
-  sourcePayloadError,
-} from "./utils/sourcePayload";
 import { requestActionItem } from "./utils/actionItemRequest";
-import { isRestrictedPage, resolveCurrentTab } from "../FrontPage/utils/chromeTabs";
+import { useSourcePayload } from "./useSourcePayload";
 
 const waitForNextPaintTask = (): Promise<void> =>
   new Promise((resolve) => {
@@ -67,63 +56,14 @@ export const useActionItem = () => {
   const removeSessionActionItem = useCurrentSessionState((state) => state.removeActionItem);
   const resetSession = useCurrentSessionState((state) => state.resetSession);
 
+  const { setSourcePayload, resolveSourcePayload, lastSourceErrorRef } = useSourcePayload();
+
   const syncHistory = useCallback(() => {
     upsertHistoryItem(userHistoryKey, useCurrentSessionState.getState().session, historyLimit);
   }, [historyLimit, upsertHistoryItem, userHistoryKey]);
-  const [sourcePayload, setSourcePayload] = useState<SourcePayload | null>(null);
-  const lastSourceErrorRef = useRef<SourcePayloadResolution | null>(null);
+
   const [loadingActionId, setLoadingActionId] = useState<ActionId | null>(null);
   const actionRequestInFlightRef = useRef(false);
-
-  // For restored sessions, re-extract the live source when the user is still on that page.
-  const resolveSourcePayload = useCallback(async (
-    options?: ResolveSourcePayloadOptions,
-  ): Promise<SourcePayload | null> => {
-    lastSourceErrorRef.current = null;
-
-    if (import.meta.env.DEV) {
-      const { isAnyActionItemMockEnabled } = await import("./utils/mocks");
-      if (isAnyActionItemMockEnabled()) {
-        return !options?.forceActiveTab && sourcePayload ? sourcePayload : buildMockSourcePayload();
-      }
-    }
-
-    const tab = await resolveCurrentTab();
-    if (!tab?.id) {
-      if (sourcePayload) return sourcePayload;
-      lastSourceErrorRef.current = sourcePayloadError(
-        "No active tab",
-        "Could not find an active browser tab.",
-      );
-      return null;
-    }
-
-    if (isRestrictedPage(tab.url)) {
-      if (sourcePayload) return sourcePayload;
-      lastSourceErrorRef.current = sourcePayloadError(
-        "Page not supported",
-        "Chrome internal pages (like chrome://settings) are not supported. Open a normal website tab and try again.",
-        tab.url,
-      );
-      return null;
-    }
-
-    if (!options?.forceActiveTab && sourcePayload !== null && tab.url !== sourcePayload.sourceUrl) {
-      return sourcePayload;
-    }
-
-    const result = await buildSourcePayloadFromTab(tab);
-    if (result.payload) {
-      return result.payload;
-    }
-
-    if (!options?.forceActiveTab && sourcePayload) {
-      return sourcePayload;
-    }
-
-    lastSourceErrorRef.current = result;
-    return null;
-  }, [sourcePayload]);
 
   const resetActionItemRequestState = useCallback(() => {
     actionRequestInFlightRef.current = false;
@@ -142,7 +82,6 @@ export const useActionItem = () => {
       actionRequestInFlightRef.current = true;
       setLoadingActionId(actionId);
 
-      // Snapshot at click time so later setting changes don't retroactively alter this item.
       const clickQuizDifficulty = actionId === "quiz" ? quizDifficulty : undefined;
 
       try {
@@ -153,8 +92,8 @@ export const useActionItem = () => {
           setSourcePayload(null);
         }
 
-        const sourcePayload = await resolveSourcePayload({ forceActiveTab: options.forceActiveTab });
-        if (sourcePayload === null) {
+        const resolved = await resolveSourcePayload({ forceActiveTab: options.forceActiveTab });
+        if (resolved === null) {
           const sourceError = lastSourceErrorRef.current;
           if (options.resetSession) {
             startSession(sourceError?.sourceUrl ?? "");
@@ -179,13 +118,13 @@ export const useActionItem = () => {
           length,
           quizDifficulty: clickQuizDifficulty,
           type: actionId,
-          sourcePayload,
+          sourcePayload: resolved,
           isAuthenticated: Boolean(userProfile),
           t,
         });
 
         if (options.resetSession) {
-          startSession(result.sourceUrl ?? sourcePayload.sourceUrl ?? "");
+          startSession(result.sourceUrl ?? resolved.sourceUrl ?? "");
         }
 
         if (!result.isSuccess) {
@@ -212,7 +151,7 @@ export const useActionItem = () => {
         });
         syncHistory();
 
-        setSourcePayload(sourcePayload);
+        setSourcePayload(resolved);
         if (userProfile) {
           void hydrateProfile(true, currency);
         }
@@ -230,9 +169,11 @@ export const useActionItem = () => {
       hydrateProfile,
       language,
       length,
+      lastSourceErrorRef,
       quizDifficulty,
       resetSession,
       resolveSourcePayload,
+      setSourcePayload,
       startSession,
       syncHistory,
       t,

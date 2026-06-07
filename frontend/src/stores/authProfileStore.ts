@@ -135,7 +135,7 @@ export const useAuthProfileStore = create<AuthProfileState>()(
         await authInstance.post("/api/logout");
       } catch (err) {
         logoutFailed = true;
-        console.error("[logout] backend logout failed:", err);
+        if (import.meta.env.DEV) console.error("[logout] backend logout failed:", err);
       }
       set({
         profile: null,

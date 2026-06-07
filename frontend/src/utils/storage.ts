@@ -1,65 +1,45 @@
 import { Currency, Format, Language, Length, QuizDifficulty, Theme, PageType } from "./types"
 
-export const UpdateLanguageStorage = (currentLang: Language) => {
-    localStorage.setItem('language', currentLang)
+type StorageSchema = {
+    language: Language;
+    length: Length;
+    currency: Currency;
+    fontSize: number;
+    theme: Theme;
+    format: Format;
+    quizDifficulty: QuizDifficulty;
+    page: PageType;
 }
 
-export const UpdateLengthStorage = (currentLength: Length) => {
-    localStorage.setItem('length', currentLength)
+type StorageKey = keyof StorageSchema;
+
+const setStorage = (key: StorageKey, value: string | number) => {
+    localStorage.setItem(key, String(value));
 }
 
-export const UpdateCurrencyStorage = (currentCurrency: Currency) => {
-    localStorage.setItem('currency', currentCurrency)
+const getStringStorage = <K extends StorageKey>(key: K): StorageSchema[K] | null => {
+    return (localStorage?.getItem(key) as StorageSchema[K]) ?? null;
 }
 
-export const UpdateFontSizeStorage = (currentFontSize: number) => {
-    localStorage.setItem('fontSize', currentFontSize.toString())
+const getNumericStorage = (key: StorageKey): number | null => {
+    const raw = localStorage?.getItem(key);
+    return raw !== null ? Number(raw) : null;
 }
 
-export const UpdateThemeStorage = (currentTheme: Theme) => {
-    localStorage.setItem('theme', currentTheme)
-}
+export const UpdateLanguageStorage = (value: Language) => setStorage('language', value);
+export const UpdateLengthStorage = (value: Length) => setStorage('length', value);
+export const UpdateCurrencyStorage = (value: Currency) => setStorage('currency', value);
+export const UpdateFontSizeStorage = (value: number) => setStorage('fontSize', value);
+export const UpdateThemeStorage = (value: Theme) => setStorage('theme', value);
+export const UpdateFormatStorage = (value: Format) => setStorage('format', value);
+export const UpdateQuizDifficultyStorage = (value: QuizDifficulty) => setStorage('quizDifficulty', value);
+export const UpdatePageStorage = (value: PageType) => setStorage('page', value);
 
-export const UpdateFormatStorage = (currentFormat: Format) => {
-    localStorage.setItem('format', currentFormat)
-}
-
-export const UpdateQuizDifficultyStorage = (currentQuizDifficulty: QuizDifficulty) => {
-    localStorage.setItem('quizDifficulty', currentQuizDifficulty)
-}
-
-export const UpdatePageStorage = (currentPage: PageType) => {
-    localStorage.setItem('page', currentPage);
-}
-
-export const GetLangFromStorage = () => {
-    return localStorage && localStorage.getItem('language') ? localStorage.getItem('language') as Language : "english"
-}
-
-export const GetLengthFromStorage = () => {
-    return localStorage && localStorage.getItem('length') ? localStorage.getItem('length') as Length : null
-}
-
-export const GetCurrencyFromStorage = () => {
-    return localStorage && localStorage.getItem('currency') ? localStorage.getItem('currency') as Currency : null
-}
-
-export const GetFontSizeFromStorage = () => {
-    return localStorage && localStorage.getItem('fontSize') ? Number(localStorage.getItem('fontSize')) : null
-}
-
-export const GetThemeFromStorage = () => {
-    return localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') as Theme : null
-}
-
-export const GetFormatFromStorage = () => {
-    return localStorage && localStorage.getItem('format') ? localStorage.getItem('format') as Format : null
-}
-
-export const GetPageFromStorage = () => {
-    return localStorage && localStorage.getItem('page') ? (localStorage.getItem('page') as PageType) : "home" as PageType
-}
-
-export const GetQuizDifficultyFromStorage = () => {
-    return localStorage && localStorage.getItem('quizDifficulty') ? localStorage.getItem('quizDifficulty') as QuizDifficulty : null
-}
+export const GetLangFromStorage = (): Language => getStringStorage('language') ?? "english";
+export const GetLengthFromStorage = () => getStringStorage('length');
+export const GetCurrencyFromStorage = () => getStringStorage('currency');
+export const GetFontSizeFromStorage = () => getNumericStorage('fontSize');
+export const GetThemeFromStorage = () => getStringStorage('theme');
+export const GetFormatFromStorage = () => getStringStorage('format');
+export const GetPageFromStorage = (): PageType => getStringStorage('page') ?? "home";
+export const GetQuizDifficultyFromStorage = () => getStringStorage('quizDifficulty');

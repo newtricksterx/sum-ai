@@ -62,7 +62,7 @@ export const fetchPdfBytes = async (tab: chrome.tabs.Tab): Promise<PdfPayload> =
   try {
     return await fetchPdfPayload(url, filename);
   } catch (error) {
-    console.warn("Extension-context PDF fetch failed; falling back to page-context fetch.", error);
+    if (import.meta.env.DEV) console.warn("Extension-context PDF fetch failed; falling back to page-context fetch.", error);
   }
 
   // For http(s), fetch from the page's own context so we don't need <all_urls> host permission.

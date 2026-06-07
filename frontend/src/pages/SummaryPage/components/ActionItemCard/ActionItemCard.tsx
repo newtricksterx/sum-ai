@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import PageCard from '../../../../components/PageCard/PageCard';
 import AlertPopup from '../../../../components/AlertPopup/AlertPopup';
@@ -33,92 +33,90 @@ const CLOSE_META: Record<'error' | ActionId, CloseMeta> = {
   },
 };
 
-const renderDocumentBody = (document: SummaryDocument) => {
-  if (document.format === 'error') {
-    return (
-      <div className="summary-error" role="alert">
-        {document.blocks.map((block, blockIndex) => (
-          <p key={blockIndex}>{block.children.map(renderInlineSegment)}</p>
-        ))}
-      </div>
-    );
-  }
+const renderError = (document: SummaryDocument): ReactNode => (
+  <div className="summary-error" role="alert">
+    {document.blocks.map((block, i) => (
+      <p key={i}>{block.children.map(renderInlineSegment)}</p>
+    ))}
+  </div>
+);
 
-  if (document.format === 'bullet-point') {
-    return (
+const renderBulletPoint = (document: SummaryDocument): ReactNode => (
+  <ul>
+    {document.blocks.map((block, i) => (
+      <li key={i}>{block.children.map(renderInlineSegment)}</li>
+    ))}
+  </ul>
+);
+
+const renderParagraph = (document: SummaryDocument): ReactNode => (
+  <section>
+    {document.blocks.map((block, i) => {
+      if (block.type === 'heading') {
+        return <h3 key={i}>{block.children.map(renderInlineSegment)}</h3>;
+      }
+      return <p key={i}>{block.children.map(renderInlineSegment)}</p>;
+    })}
+  </section>
+);
+
+const renderTldr = (document: SummaryDocument): ReactNode => (
+  <section>
+    <h3>tl;dr: </h3>
+    {document.blocks.map((block, i) => (
+      <p key={i}>{block.children.map(renderInlineSegment)}</p>
+    ))}
+  </section>
+);
+
+const renderQandA = (document: SummaryDocument): ReactNode => (
+  <section>
+    {document.blocks.map((block, i) => (
+      <div key={i}>
+        <p><strong>Q: </strong>{(block.question ?? []).map(renderInlineSegment)}</p>
+        <p><strong>A: </strong>{(block.answer ?? []).map(renderInlineSegment)}</p>
+      </div>
+    ))}
+  </section>
+);
+
+const renderProsCons = (document: SummaryDocument): ReactNode => {
+  const pros: SummaryDocument['blocks'] = [];
+  const cons: SummaryDocument['blocks'] = [];
+  for (const block of document.blocks) {
+    if (block.type === 'pro') pros.push(block);
+    else if (block.type === 'con') cons.push(block);
+  }
+  return (
+    <section>
+      <h3>Pros</h3>
       <ul>
-        {document.blocks.map((block, blockIndex) => (
-          <li key={blockIndex}>{block.children.map(renderInlineSegment)}</li>
+        {pros.map((block, i) => (
+          <li key={`pro-${i}`}>{block.children.map(renderInlineSegment)}</li>
         ))}
       </ul>
-    );
-  }
-
-  if (document.format === 'paragraph') {
-    return (
-      <section>
-        {document.blocks.map((block, blockIndex) => {
-          if (block.type === 'heading') {
-            return <h3 key={blockIndex}>{block.children.map(renderInlineSegment)}</h3>;
-          }
-          return (
-            <p key={blockIndex}>{block.children.map(renderInlineSegment)}</p>
-          );
-        })}
-      </section>
-    );
-  }
-
-  if (document.format === 'tl-dr') {
-    return (
-      <section>
-        <h3>tl;dr: </h3>
-        {document.blocks.map((block, blockIndex) => (
-          <p key={blockIndex}>{block.children.map(renderInlineSegment)}</p>
+      <h3>Cons</h3>
+      <ul>
+        {cons.map((block, i) => (
+          <li key={`con-${i}`}>{block.children.map(renderInlineSegment)}</li>
         ))}
-      </section>
-    );
-  }
+      </ul>
+    </section>
+  );
+};
 
-  if (document.format === 'q-and-a') {
-    return (
-      <section>
-        {document.blocks.map((block, blockIndex) => (
-          <div key={blockIndex}>
-            <p><strong>Q: </strong>{(block.question ?? []).map(renderInlineSegment)}</p>
-            <p><strong>A: </strong>{(block.answer ?? []).map(renderInlineSegment)}</p>
-          </div>
-        ))}
-      </section>
-    );
-  }
+const FORMAT_RENDERERS: Record<string, (doc: SummaryDocument) => ReactNode> = {
+  'error': renderError,
+  'bullet-point': renderBulletPoint,
+  'paragraph': renderParagraph,
+  'tl-dr': renderTldr,
+  'q-and-a': renderQandA,
+  'pros-cons': renderProsCons,
+};
 
-  if (document.format === 'pros-cons') {
-    const pros: SummaryDocument['blocks'] = [];
-    const cons: SummaryDocument['blocks'] = [];
-    for (const block of document.blocks) {
-      if (block.type === 'pro') pros.push(block);
-      else if (block.type === 'con') cons.push(block);
-    }
-    return (
-      <section>
-        <h3>Pros</h3>
-        <ul>
-          {pros.map((block, i) => (
-            <li key={`pro-${i}`}>{block.children.map(renderInlineSegment)}</li>
-          ))}
-        </ul>
-        <h3>Cons</h3>
-        <ul>
-          {cons.map((block, i) => (
-            <li key={`con-${i}`}>{block.children.map(renderInlineSegment)}</li>
-          ))}
-        </ul>
-      </section>
-    );
-  }
-
-  return <div />;
+const renderDocumentBody = (document: SummaryDocument): ReactNode => {
+  const renderer = FORMAT_RENDERERS[document.format];
+  return renderer ? renderer(document) : <div />;
 };
 
 const SummaryDocumentView: React.FC<{ document: SummaryDocument }> = ({ document }) => {
@@ -160,8 +158,6 @@ const ActionItemCardInner: React.FC<ActionItemCardProps> = ({ actionItem, fontSi
     actionItem.document.format === 'error' ? 'error' : actionItem.type;
   const meta = CLOSE_META[role];
 
-  // Document-shaped content (error + summary) renders inside a styled article card;
-  // interactive types (flashcards, quiz) use the default card.
   const useDocumentStyling = role === 'error' || role === 'summary';
 
   return (

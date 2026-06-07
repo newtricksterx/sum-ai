@@ -10,9 +10,6 @@
     },
     toolbar: {
       generateTitle: "为当前标签页生成新的会话",
-      generate: "生成摘要",
-      downloadTitle: "将摘要下载为 PDF",
-      copyTitle: "复制摘要",
       sessionLabel: "当前会话 URL",
       noSession: "无会话",
       startNewSession: "开始新会话",

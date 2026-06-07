@@ -51,7 +51,7 @@ class GeminiProvider(LLMProvider):
 
         request_kwargs = {"model": model_name, "contents": prompt}
         if response_mime_type:
-            request_kwargs["config"] = genai_types.GenerateContentConfig(
+            request_kwargs["config"] = genai_types.GenerateContentConfig( # type: ignore
                 response_mime_type=response_mime_type,
             )
 

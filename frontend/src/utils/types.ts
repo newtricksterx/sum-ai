@@ -15,8 +15,6 @@ export type Format =
 
 export type QuizDifficulty = "easy" | "medium" | "hard";
 
-export type ButtonDisplyStatus = "block" | "hidden";
-
 export type Settings = {
     language: Language;
     currency: Currency;

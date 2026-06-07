@@ -10,9 +10,6 @@ const hi = {
     },
     toolbar: {
       generateTitle: "वर्तमान टैब के लिए नया सत्र बनाएं",
-      generate: "सारांश बनाएं",
-      downloadTitle: "सारांश को PDF के रूप में डाउनलोड करें",
-      copyTitle: "सारांश कॉपी करें",
       sessionLabel: "वर्तमान सत्र URL",
       noSession: "कोई सत्र नहीं",
       startNewSession: "नया सत्र शुरू करें",

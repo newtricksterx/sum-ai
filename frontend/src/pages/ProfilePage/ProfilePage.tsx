@@ -18,7 +18,6 @@ const ProfilePage: React.FC = () => {
     isInitializing,
     isSubmitting,
     errorMessage,
-    infoMessage,
     handleLogout,
     openBillingPortal,
     dismissError,
@@ -53,7 +52,6 @@ const ProfilePage: React.FC = () => {
   if (!userProfile) {
     return (
       <SignInView
-        infoMessage={infoMessage}
         errorMessage={errorMessage}
         onDismissError={dismissError}
       />
@@ -72,12 +70,6 @@ const ProfilePage: React.FC = () => {
     <main className="profile-page-shell h-full overflow-y-auto custom-scrollbar px-2 py-2 font-google">
       <PageCard as="section" className="profile-account-card p-3">
         <div className="pp-root">
-          {infoMessage && (
-            <p className="profile-status-message profile-status-message--success">
-              {infoMessage}
-            </p>
-          )}
-
           <IdentityCard
             displayName={displayName}
             email={userProfile.email}

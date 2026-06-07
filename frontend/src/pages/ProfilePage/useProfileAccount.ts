@@ -14,7 +14,6 @@ export const useProfileAccount = () => {
   const language = useSettingsStore((s) => s.language);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (userProfile) {
@@ -30,11 +29,9 @@ export const useProfileAccount = () => {
   const handleLogout = useCallback(async () => {
     setIsSubmitting(true);
     setErrorMessage(null);
-    setInfoMessage(null);
 
     try {
       await logout();
-      setInfoMessage(t("profile.loggedOut", { defaultValue: "You have been logged out." }));
     } catch (error) {
       setErrorMessage(parseApiErrorMessage(error));
     } finally {
@@ -77,7 +74,6 @@ export const useProfileAccount = () => {
     isInitializing: profileStatus === "idle" || profileStatus === "loading",
     isSubmitting,
     errorMessage,
-    infoMessage,
     handleLogout,
     openBillingPortal,
     dismissError,

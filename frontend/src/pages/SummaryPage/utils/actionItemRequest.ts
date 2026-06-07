@@ -178,7 +178,7 @@ export const requestActionItem = async ({
 
       const fallbackMessage =
         response.errorPayload?.message || response.errorPayload?.error || "Could not generate action item.";
-      console.error("Action Item Error:", fallbackMessage);
+      if (import.meta.env.DEV) console.error("Action Item Error:", fallbackMessage);
       return actionItemErrorResult("Request failed", fallbackMessage, sourcePayload.sourceUrl);
     }
 
@@ -206,7 +206,7 @@ export const requestActionItem = async ({
       isSuccess: true,
     };
   } catch (error) {
-    console.error("Fetch Action Item Error:", error);
+    if (import.meta.env.DEV) console.error("Fetch Action Item Error:", error);
     return actionItemErrorResult(
       "Network error",
       "Could not contact the backend. Please try again.",

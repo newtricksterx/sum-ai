@@ -7,12 +7,7 @@ module.exports = {
     theme: {
         extend: {},
     },
-    plugins: [      
-        new webpack.ProvidePlugin(
-            {
-                process: 'process/browser',
-            }
-        ),
+    plugins: [
         require('@tailwindcss/typography'),
     ],
 };

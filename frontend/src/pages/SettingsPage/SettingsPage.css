@@ -129,14 +129,6 @@
   color: var(--color-text-secondary);
 }
 
-.settings-row-hint--accent {
-  color: var(--color-interactive-primary-text);
-}
-
-.dark .settings-row-hint--accent {
-  color: var(--color-interactive-primary-text);
-}
-
 .settings-row-control {
   margin-left: auto;
   flex: 0 0 auto;
@@ -168,13 +160,10 @@
 }
 
 .settings-fontsize-input:hover {
-  border-color: var(--color-border-info);
+  border-color: var(--color-border-secondary);
 }
 
 .settings-fontsize-input:focus {
-  outline: none;
-  border-color: var(--color-border-info);
-  box-shadow: 0 0 0 2px var(--color-ring-info);
 }
 
 .settings-fontsize-unit {

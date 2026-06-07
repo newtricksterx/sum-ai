@@ -10,9 +10,6 @@ const fr = {
     },
     toolbar: {
       generateTitle: "Generer une nouvelle session pour l'onglet actuel",
-      generate: "Generer le resume",
-      downloadTitle: "Telecharger le resume en PDF",
-      copyTitle: "Copier le resume",
       sessionLabel: "URL de la session actuelle",
       noSession: "Aucune session",
       startNewSession: "Demarrer une nouvelle session",

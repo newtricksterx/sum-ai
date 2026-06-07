@@ -55,7 +55,6 @@
 }
 
 .pp-root {
-  --pp-accent: var(--color-interactive-primary);
   --pp-accent-muted: color-mix(in srgb, var(--pp-accent) 18%, transparent);
   --pp-radius: 10px;
   --pp-gap: 0.42rem;
@@ -88,7 +87,6 @@
   justify-content: center;
   background: var(--pp-accent-muted);
   border: 1px solid color-mix(in srgb, var(--pp-accent) 55%, var(--color-border-primary));
-  color: var(--color-interactive-primary-text);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -451,7 +449,7 @@
 }
 
 .pp-cancel-btn {
-  font-size: 14px;
+  font-size: 10px;
   color: rgb(188, 2, 2);
-  font-weight: 200;
+  font-weight: 400;
 }

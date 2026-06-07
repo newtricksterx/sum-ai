@@ -38,7 +38,6 @@
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--pp-accent) 52%, var(--color-border-primary));
   background: var(--pp-accent-muted);
-  color: var(--color-interactive-primary-text);
   font-size: 10px;
   letter-spacing: 0.02em;
 }

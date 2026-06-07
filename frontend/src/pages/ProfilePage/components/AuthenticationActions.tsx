@@ -9,12 +9,11 @@ import { MenuIconSize } from "../../../utils/constants";
 import { markLoginPending } from "../../../services/authSignals";
 
 interface SignInViewProps {
-  infoMessage: string | null;
   errorMessage: string | null;
   onDismissError: () => void;
 }
 
-export const SignInView = ({ infoMessage, errorMessage, onDismissError }: SignInViewProps) => {
+export const SignInView = ({ errorMessage, onDismissError }: SignInViewProps) => {
   const { t } = useTranslation();
 
   const googleSignInUrl = useMemo(() => {
@@ -55,12 +54,6 @@ export const SignInView = ({ infoMessage, errorMessage, onDismissError }: SignIn
           <h1 className="test-profile-title">{t("profile.secureAccess")}</h1>
           <p className="test-profile-subtitle">{t("profile.signInDescription")}</p>
         </header>
-
-        {infoMessage && (
-          <p className="profile-status-message profile-status-message--success">
-            {infoMessage}
-          </p>
-        )}
 
         <button
           type="button"

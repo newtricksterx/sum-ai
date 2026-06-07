@@ -250,9 +250,6 @@ input::-webkit-inner-spin-button {
   transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
 }
 
-.ui-ghost-interactive:hover {
-  background: var(--color-interactive-quiet-hover);
-}
 
 .ui-ghost-interactive:focus-visible {
   outline: none;

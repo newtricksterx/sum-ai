@@ -26,8 +26,7 @@ export const SessionMismatch = ({ sessionUrl }: SessionMismatchProps) => {
                 <div className='sessionmismatch-tooltip'>
                     <span className=''>{t('sessionMismatch.tooltip')}</span>
                 </div>
-                <button>
-                    <a
+                <a
                     href={sessionUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -35,8 +34,7 @@ export const SessionMismatch = ({ sessionUrl }: SessionMismatchProps) => {
                     className="return-session-btn">
                     <ExternalLinkIcon width={20} height={20}/>
                     {t('sessionMismatch.goToOriginal')}
-                    </a>
-                </button>
+                </a>
 
             </div>
         </section>

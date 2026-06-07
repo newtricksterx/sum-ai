@@ -53,7 +53,7 @@ export const buildSourcePayloadFromTab = async (
     try {
       tabContent = await extractTabContent(tab.id as number);
     } catch (error) {
-      console.error("Script Injection Error:", error);
+      if (import.meta.env.DEV) console.error("Script Injection Error:", error);
       return sourcePayloadError(
         "Cannot read this page",
         "This page blocks extension script access. Try another site tab and try again.",
@@ -69,7 +69,7 @@ export const buildSourcePayloadFromTab = async (
     try {
       pdf = await fetchPdfBytes(tab);
     } catch (error) {
-      console.error("PDF Fetch Error:", error);
+      if (import.meta.env.DEV) console.error("PDF Fetch Error:", error);
       if (error instanceof PdfFileAccessDeniedError) {
         return sourcePayloadError(
           "Local PDF access blocked",

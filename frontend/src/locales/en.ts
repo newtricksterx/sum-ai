@@ -10,7 +10,6 @@
     },
     toolbar: {
       generateTitle: "Generate a new session for the current tab",
-      copyTitle: "Copy summary",
       sessionLabel: "Current Session URL",
       noSession: "No Session",
       startNewSession: "Start New Session",

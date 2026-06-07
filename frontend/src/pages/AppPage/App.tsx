@@ -1,11 +1,10 @@
-﻿import './App.css'
+import './App.css'
 import '../SummaryPage/Summary.css'
-import { lazy, startTransition, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from "react"
 import MenuBar from '../../components/MenuBar/MenuBar'
 import ToolBar from '../../components/ToolBar/ToolBar'
 import LoaderCircle from '../../components/LoaderCircle'
 import { useSettingsStore } from '../../stores/settingsStore'
-import { GetPageFromStorage, UpdatePageStorage } from '../../utils/storage'
 import FrontPage from '../FrontPage/FrontPage'
 import SummaryPage from '../SummaryPage/SummaryPage'
 import { useActionItem } from '../SummaryPage/useActionItem'
@@ -17,10 +16,12 @@ import { useAuthLogoutReset } from './useAuthLogoutReset'
 import { useRestoreSessionOnLogin } from './useRestoreSessionOnLogin'
 import { useTrackMountedPages } from './useTrackMountedPages'
 import { usePageSwitchCleanup } from './usePageSwitchCleanup'
+import { usePageRouter } from './usePageRouter'
 import { isLoggedOut } from '../../services/authSignals'
 import { ActionId } from '../../types/summary'
 import { PageType } from '../../utils/types'
 import * as Toast from '@radix-ui/react-toast'
+import { ErrorBoundary } from '../../components/ErrorBoundary'
 
 const HistoryPage = lazy(() => import('../HistoryPage/HistoryPage'))
 const ProfilePage = lazy(() => import('../ProfilePage/ProfilePage'))
@@ -29,14 +30,15 @@ const SettingsPage = lazy(() =>
 )
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<PageType>(() => GetPageFromStorage() ?? "home");
-  const pendingPageRef = useRef<PageType | null>(null);
-  const pageFrameRef = useRef<number | null>(null);
-  const pageStorageTimeoutRef = useRef<number | null>(null);
-  const [mountedPages, setMountedPages] = useState<Partial<Record<PageType, true>>>(() => {
-    const initialPage: PageType = GetPageFromStorage() ?? "home";
-    return { [initialPage]: true };
-  });
+  const {
+    currentPage,
+    mountedPages,
+    setMountedPages,
+    setPage,
+    pageFrameRef,
+    pageStorageTimeoutRef,
+  } = usePageRouter();
+
   const {
     actionItems,
     loadingActionId,
@@ -55,76 +57,9 @@ function App() {
   useAppLanguageEffect(language);
   useHydrateProfileAfterLogin(hydrateProfile, currency);
   useAuthLogoutReset(clearProfile);
-
-  
   useRestoreSessionOnLogin(authProfile);
   useTrackMountedPages(currentPage, setMountedPages);
-
-  const schedulePageStorageWrite = useCallback((nextPage: PageType) => {
-    if (typeof window === "undefined") {
-      UpdatePageStorage(nextPage);
-      return;
-    }
-
-    if (pageStorageTimeoutRef.current !== null) {
-      window.clearTimeout(pageStorageTimeoutRef.current);
-    }
-
-    // Defer localStorage writes so rapid menu taps do not block input handling.
-    pageStorageTimeoutRef.current = window.setTimeout(() => {
-      UpdatePageStorage(nextPage);
-      pageStorageTimeoutRef.current = null;
-    }, 120);
-  }, []);
-
-  const commitPage = useCallback((nextPage: PageType) => {
-    let didChange = false;
-    startTransition(() => {
-      setCurrentPage((prevPage) => {
-        if (prevPage === nextPage) return prevPage;
-        didChange = true;
-        return nextPage;
-      });
-    });
-    if (didChange) {
-      schedulePageStorageWrite(nextPage);
-    }
-  }, [schedulePageStorageWrite]);
-
-  const setPage = useCallback((nextPage: PageType) => {
-    pendingPageRef.current = nextPage;
-
-    if (typeof window === "undefined") {
-      commitPage(nextPage);
-      pendingPageRef.current = null;
-      return;
-    }
-
-    if (pageFrameRef.current !== null) {
-      return;
-    }
-
-    pageFrameRef.current = window.requestAnimationFrame(() => {
-      pageFrameRef.current = null;
-      const scheduledPage = pendingPageRef.current;
-      pendingPageRef.current = null;
-
-      if (scheduledPage === null) {
-        return;
-      }
-
-      commitPage(scheduledPage);
-    });
-  }, [commitPage]);
   usePageSwitchCleanup(pageFrameRef, pageStorageTimeoutRef);
-
-  useEffect(() => {
-    if (isLoggedOut()) {
-      clearProfile();
-    } else {
-      void hydrateProfile(false, currency);
-    }
-  }, [hydrateProfile, clearProfile, currency]);
 
   const onMenuClick = useCallback((page: PageType) => {
     setPage(page);
@@ -159,33 +94,36 @@ function App() {
     setPage("session");
   }, [setPage]);
 
+  useEffect(() => {
+    if (isLoggedOut()) {
+      clearProfile();
+    } else {
+      void hydrateProfile(false, currency);
+    }
+  }, [hydrateProfile, clearProfile, currency]);
+
   const isActionItemLoading = loadingActionId !== null;
 
-  const summaryPageContent = useMemo(() => {
+  const summaryPageContent = useMemo(() => (
+    <SummaryPage
+      fontSize={fontSize}
+      actionItems={actionItems}
+      onAddActionItem={addActionItem}
+      onRemoveActionItem={removeActionItem}
+      loadingActionId={loadingActionId}
+    />
+  ), [actionItems, addActionItem, fontSize, loadingActionId, removeActionItem]);
 
-    return (
-      <SummaryPage
-        fontSize={fontSize}
-        actionItems={actionItems}
-        onAddActionItem={addActionItem}
-        onRemoveActionItem={removeActionItem}
-        loadingActionId={loadingActionId}
-      />
-    );
-  }, [actionItems, addActionItem, fontSize, loadingActionId, removeActionItem]);
+  const frontPageContent = useMemo(() => (
+    <FrontPage
+      onClickGenerate={onClickStartSession}
+      loadingActionId={loadingActionId}
+      errorMessage={errorMessage}
+      onDismissError={dismissError}
+      onClickSignInPage={onClickSignInPage}
+    />
+  ), [loadingActionId, onClickStartSession, errorMessage, dismissError, onClickSignInPage]);
 
-  const frontPageContent = useMemo(
-    () => (
-      <FrontPage
-        onClickGenerate={onClickStartSession}
-        loadingActionId={loadingActionId}
-        errorMessage={errorMessage}
-        onDismissError={dismissError}
-        onClickSignInPage={onClickSignInPage}
-      />
-    ),
-    [loadingActionId, onClickStartSession, errorMessage, dismissError, onClickSignInPage],
-  );
   const historyPageContent = useMemo(
     () => <HistoryPage onOpenSession={onOpenHistorySession} onClickSignInPage={onClickSignInPage}/>,
     [onOpenHistorySession, onClickSignInPage],
@@ -213,11 +151,13 @@ function App() {
         hidden={!isActivePage}
         className="app-page-panel"
       >
-        {isLazy ? (
-          <Suspense fallback={<LoaderCircle className='my-2'/>}>{content}</Suspense>
-        ) : (
-          content
-        )}
+        <ErrorBoundary>
+          {isLazy ? (
+            <Suspense fallback={<LoaderCircle className='my-2'/>}>{content}</Suspense>
+          ) : (
+            content
+          )}
+        </ErrorBoundary>
       </section>
     );
   };

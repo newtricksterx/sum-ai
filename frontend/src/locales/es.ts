@@ -10,9 +10,6 @@ const es = {
     },
     toolbar: {
       generateTitle: "Generar una nueva sesion para la pestana actual",
-      generate: "Generar resumen",
-      downloadTitle: "Descargar resumen en PDF",
-      copyTitle: "Copiar resumen",
       sessionLabel: "URL de la sesion actual",
       noSession: "Sin sesion",
       startNewSession: "Iniciar nueva sesion",

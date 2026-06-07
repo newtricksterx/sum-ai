@@ -9,7 +9,6 @@
   --summary-border: var(--color-border-secondary);
   --summary-border-strong: var(--color-border-primary);
   --summary-focus: var(--color-ring-primary);
-  --summary-accent: var(--color-interactive-primary-border);
   --summary-code-bg: var(--color-background-tertiary);
   --summary-code-text: var(--summary-text-primary);
   --summary-var-color: color-mix(in srgb, var(--summary-accent) 70%, var(--summary-text-primary));
