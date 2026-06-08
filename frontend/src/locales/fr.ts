@@ -167,19 +167,19 @@ const fr = {
       items: {
         summary: {
           title: "Resume",
-          description: "Generer un resume a partir du contenu de cet onglet",
+          description: "Générer un résumé de cet onglet",
           tag: "Lecture",
           hoverTitle: "Generer un resume concis de cette page",
         },
         flashcards: {
           title: "Fiches",
-          description: "Generer des fiches d'etude",
+          description: "Générer des fiches d'étude de cet onglet",
           tag: "Etude",
           hoverTitle: "Creer des fiches d'etude a partir de ce resume",
         },
         quiz: {
           title: "Quiz",
-          description: "Testez vos connaissances.",
+          description: "Testez vos connaissances sur cet onglet",
           tag: "Test",
           hoverTitle: "Passer un quiz pour tester votre comprehension",
         },

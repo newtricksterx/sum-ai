@@ -167,19 +167,19 @@ const es = {
       items: {
         summary: {
           title: "Resumen",
-          description: "Genera un resumen usando el contenido de esta pestana",
+          description: "Genera un resumen de esta pestaña",
           tag: "Lectura",
           hoverTitle: "Genera un resumen conciso de esta pagina",
         },
         flashcards: {
           title: "Tarjetas",
-          description: "Genera tarjetas de estudio",
+          description: "Genera tarjetas de estudio de esta pestaña",
           tag: "Estudio",
           hoverTitle: "Crea tarjetas de estudio a partir de este resumen",
         },
         quiz: {
           title: "Quiz",
-          description: "Pon a prueba tus conocimientos.",
+          description: "Pon a prueba tus conocimientos de esta pestaña",
           tag: "Prueba",
           hoverTitle: "Haz un quiz para poner a prueba tu comprension",
         },

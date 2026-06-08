@@ -78,15 +78,17 @@ export const ActionGrid = ({ onClickAction, title, loadingActionId = null, class
               aria-busy={isActionLoading}
               title={itemHoverTitle}
             >
-              <div
-                className={`summary-action-icon summary-action-icon--${item.tone}`}
-                aria-hidden="true"
-              >
-                {item.icon}
-              </div>
-              <div className="summary-action-body">
-                <span className="summary-action-title">{itemTitle}</span>
-                <span className="summary-action-desc">{itemDescription}</span>
+              <div className='summary-action-head'>
+                <div
+                  className={`summary-action-icon summary-action-icon--${item.tone}`}
+                  aria-hidden="true"
+                >
+                  {item.icon}
+                </div>
+                <div className="summary-action-body">
+                  <span className="summary-action-title">{itemTitle}</span>
+                  <span className="summary-action-desc">{itemDescription}</span>
+                </div>
               </div>
 
               <div className="summary-action-footer">

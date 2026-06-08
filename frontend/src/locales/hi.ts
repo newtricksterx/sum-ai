@@ -167,19 +167,19 @@ const hi = {
       items: {
         summary: {
           title: "सारांश",
-          description: "इस टैब की सामग्री से सारांश बनाएं",
+          description: "इस टैब से सारांश बनाएं",
           tag: "पठन",
           hoverTitle: "इस पृष्ठ का संक्षिप्त सारांश बनाएं",
         },
         flashcards: {
           title: "फ्लैशकार्ड",
-          description: "अध्ययन कार्ड बनाएं",
+          description: "इस टैब से अध्ययन कार्ड बनाएं",
           tag: "अध्ययन",
           hoverTitle: "इस सारांश से अध्ययन के लिए फ्लैशकार्ड बनाएं",
         },
         quiz: {
           title: "क्विज",
-          description: "अपनी समझ की जांच करें।",
+          description: "इस टैब पर अपनी समझ की जांच करें",
           tag: "परीक्षण",
           hoverTitle: "अपनी समझ की जांच के लिए क्विज लें",
         },

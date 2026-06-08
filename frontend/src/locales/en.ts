@@ -167,19 +167,19 @@
       items: {
         summary: {
           title: "Summary",
-          description: "Generate a summary using content from this tab",
+          description: "Generate a summary from this tab",
           tag: "Read",
           hoverTitle: "Generate a concise summary of this page",
         },
         flashcards: {
           title: "Flashcards",
-          description: "Generate study cards using content from this tab",
+          description: "Generate study cards from this tab",
           tag: "Study",
           hoverTitle: "Create flashcards from the active tab to study",
         },
         quiz: {
           title: "Quiz",
-          description: "Test your knowledge using content from this tab.",
+          description: "Test your knowledge on this tab",
           tag: "Test",
           hoverTitle: "Take a quiz to test your understanding using the content from the active tab",
         },

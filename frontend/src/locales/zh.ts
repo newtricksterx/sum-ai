@@ -167,19 +167,19 @@
       items: {
         summary: {
           title: "摘要",
-          description: "使用此标签页的内容生成摘要",
+          description: "从此标签页生成摘要",
           tag: "阅读",
           hoverTitle: "生成本页的简明摘要",
         },
         flashcards: {
           title: "闪卡",
-          description: "生成学习卡片",
+          description: "从此标签页生成学习卡片",
           tag: "学习",
           hoverTitle: "根据本摘要生成学习闪卡",
         },
         quiz: {
           title: "测验",
-          description: "测试你的掌握程度。",
+          description: "测试你对此标签页的掌握程度",
           tag: "测试",
           hoverTitle: "进行测验以检验你的理解",
         },

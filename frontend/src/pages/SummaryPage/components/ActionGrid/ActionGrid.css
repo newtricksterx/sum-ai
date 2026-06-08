@@ -1,11 +1,11 @@
 .summary-actions {
   margin-bottom: 0.1rem;
   padding: 5px 0px;
-  --ag-tone-teal-bg: color-mix(in srgb, var(--color-status-success-bg) 42%, var(--color-surface-primary));
+  --ag-tone-teal-bg: color-mix(in srgb, var(--color-status-success-bg) 100%, var(--color-surface-primary));
   --ag-tone-teal-fg: var(--color-status-success-text);
-  --ag-tone-purple-bg: color-mix(in srgb, var(--color-status-info-bg) 58%, var(--color-surface-primary));
+  --ag-tone-purple-bg: color-mix(in srgb, var(--color-status-info-bg) 100%, var(--color-surface-primary));
   --ag-tone-purple-fg: color-mix(in srgb, var(--color-status-info-text) 72%, var(--color-text-primary));
-  --ag-tone-amber-bg: color-mix(in srgb, var(--color-status-warning-bg) 78%, var(--color-surface-primary));
+  --ag-tone-amber-bg: color-mix(in srgb, var(--color-status-warning-bg) 100%, var(--color-surface-primary));
   --ag-tone-amber-fg: var(--color-status-warning-text);
   --ag-tone-blue-bg: color-mix(in srgb, var(--color-status-info-bg) 74%, var(--color-surface-primary));
   --ag-tone-blue-fg: var(--color-status-info-text);
@@ -36,8 +36,8 @@
 }
 
 .summary-actions-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 0.45rem;
 }
 
@@ -48,10 +48,11 @@
   color: var(--color-text-primary);
   text-align: left;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.4rem 0.64rem 0.4rem 0.64rem;
+  padding: 0.6rem 0.64rem 0.6rem 0.64rem;
   font: inherit;
   transition: border-color 130ms ease, background-color 130ms ease, transform 100ms ease;
 }
@@ -79,6 +80,12 @@
   border-color: color-mix(in srgb, var(--color-status-success-border) 48%, var(--color-border-secondary));
 }
 
+.summary-action-head {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
 .summary-action-icon {
   width: 1.95rem;
   height: 1.95rem;
@@ -86,7 +93,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid color-mix(in srgb, var(--color-border-primary) 64%, transparent);
+  padding: 6px;
 }
 
 .summary-action-icon--teal {
@@ -139,8 +146,8 @@
 .summary-action-tag {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
-  padding: 0.1rem 0.36rem;
+  border-radius: 0.6rem;
+  padding: 0.34rem;
   font-size: 0.59rem;
   line-height: 1.2;
   font-weight: 700;
