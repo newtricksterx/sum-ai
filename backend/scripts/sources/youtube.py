@@ -69,17 +69,62 @@ class YouTubeExtractor(SourceExtractor):
     def __init__(self):
         self._api = YouTubeTranscriptApi(proxy_config=_build_proxy_config())
 
-    def _fetch_transcript(self, value) -> str:
+    def _fetch_transcript_as_list(self, value, gap_threshold=5.0):
+        video_id = _extract_video_id(value)
+        logger.info("Fetching transcript for video_id=%s", video_id)
+        fetched_transcript = self._api.fetch(video_id)
+        logger.info("Transcript fetched successfully for video_id=%s (%d snippets)", video_id, len(fetched_transcript))
+
+        snippets = fetched_transcript.snippets
+        if not snippets:
+            return []
+
+        def clean(text):
+            return re.sub(r"\s+", " ", text.replace("\n", " ").replace("\\n", " ").replace("\\", "")).strip()
+
+        paragraphs = []
+        current_texts = [snippets[0].text]
+        paragraph_start = snippets[0].start
+
+        for prev, curr in zip(snippets, snippets[1:]):
+            prev_end = prev.start + prev.duration
+            if curr.start - prev_end >= gap_threshold:
+                paragraphs.append({
+                    "timestamp": paragraph_start,
+                    "text": clean(" ".join(current_texts)),
+                })
+                current_texts = [curr.text]
+                paragraph_start = curr.start
+            else:
+                current_texts.append(curr.text)
+
+        paragraphs.append({
+            "timestamp": paragraph_start,
+            "text": clean(" ".join(current_texts)),
+        })
+
+        return paragraphs
+
+    def _fetch_transcript_as_string(self, value) -> str:
         video_id = _extract_video_id(value)
         logger.info("Fetching transcript for video_id=%s", video_id)
         fetched_transcript = self._api.fetch(video_id)
         logger.info("Transcript fetched successfully for video_id=%s (%d snippets)", video_id, len(fetched_transcript))
         return " ".join(snippet.text for snippet in fetched_transcript).strip()
 
-    def extract(self, request) -> ExtractionResult:
+    def extract_transcript_as_list(self, request):
         source_url = request.data.get("source_url")
         try:
-            transcript = self._fetch_transcript(source_url)
+            paragraphs = self._fetch_transcript_as_list(source_url)
+        except Exception:
+            logger.exception("YouTube transcript fetch failed for %s", source_url)
+            return {"is_success": False, "error": "Could not fetch a transcript for this YouTube video."}
+        return {"is_success": True, "paragraphs": paragraphs}
+
+    def extract_transcript_as_string(self, request) -> ExtractionResult:
+        source_url = request.data.get("source_url")
+        try:
+            transcript = self._fetch_transcript_as_string(source_url)
         except Exception:
             logger.exception("YouTube transcript fetch failed for %s", source_url)
             return ExtractionResult(
@@ -87,3 +132,6 @@ class YouTubeExtractor(SourceExtractor):
                 error="Could not fetch a transcript for this YouTube video.",
             )
         return ExtractionResult(is_success=True, content=transcript)
+
+    def extract(self, request) -> ExtractionResult:
+        return self.extract_transcript_as_string(request)

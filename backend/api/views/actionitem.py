@@ -7,12 +7,12 @@ from rest_framework.views import APIView
 from api.throttles import AnonMonthRateThrottle
 
 from api.quota import QuotaExceeded, release_request_slot, reserve_request_slot
+from scripts.sources.youtube import YouTubeExtractor
 from scripts.summary import MAX_CONTENT_CHARACTERS, get_action_item, get_summary
 
 logger = logging.getLogger(__name__)
 
-ACTION_ITEM_TYPES = {"flashcards", "quiz"}
-SUPPORTED_ACTION_TYPES = ACTION_ITEM_TYPES | {"summary"}
+ACTION_ITEM_TYPES = {"flashcards", "quiz", "summary", "export"}
 
 # Reject obviously oversized payloads before extraction / quota work.
 # 4× the per-request cap leaves room for slightly-over content the truncator
@@ -97,11 +97,11 @@ class ActionItem(APIView):
             )
 
         normalized_action_type = action_type.strip().lower()
-        if normalized_action_type not in SUPPORTED_ACTION_TYPES:
+        if normalized_action_type not in ACTION_ITEM_TYPES:
             return _error_response(
                 "Unsupported action type.",
                 status.HTTP_400_BAD_REQUEST,
-                supported_types=sorted(SUPPORTED_ACTION_TYPES),
+                supported_types=sorted(ACTION_ITEM_TYPES),
             )
 
         source_content = request.data.get("source_content")
@@ -113,4 +113,15 @@ class ActionItem(APIView):
 
         if normalized_action_type == "summary":
             return _handle_generation(request, get_summary, "summary")
+        
+        if normalized_action_type == "export":
+            source_type = request.data.get("source_type")
+            if source_type != "youtube":
+                return _error_response("Export is only supported for YouTube transcripts.", status.HTTP_400_BAD_REQUEST)
+            extractor = YouTubeExtractor()
+            result = extractor.extract_transcript_as_list(request)
+            if not result["is_success"]:
+                return _error_response(result["error"], status.HTTP_502_BAD_GATEWAY)
+            return Response({"isSuccess": True, "paragraphs": result["paragraphs"]}, status=status.HTTP_200_OK)
+
         return _handle_generation(request, get_action_item, "action")

@@ -134,7 +134,7 @@ class ActionItemEndpointTest(TestCase):
         body = response.json()
         self.assertFalse(body["isSuccess"])
         self.assertEqual(body["error"], "Unsupported action type.")
-        self.assertEqual(body["supported_types"], ["flashcards", "quiz", "summary"])
+        self.assertEqual(body["supported_types"], ["export", "flashcards", "quiz", "summary"])
 
     def test_missing_source_returns_soft_failure(self):
         # No source_url / source_content -> _extract_source_text returns isSuccess=False
@@ -412,6 +412,88 @@ class ActionItemEndpointTest(TestCase):
         self.assertFalse(body["isSuccess"])
         self.assertEqual(body["error"], "Could not generate summary content.")
         self.assertEqual(mock_summarize.call_count, 1)
+
+
+def _youtube_export_payload(**overrides):
+    payload = {
+        "type": "export",
+        "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "source_type": "youtube",
+    }
+    payload.update(overrides)
+    return payload
+
+
+_MOCK_PARAGRAPHS = [
+    {"timestamp": 0.0, "text": "Hello and welcome to the video."},
+    {"timestamp": 35.2, "text": "Now lets get into the topic."},
+]
+
+
+@override_settings(REST_FRAMEWORK=TEST_REST_FRAMEWORK)
+class ActionItemExportTest(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+        self.url = reverse("action-item")
+
+    def test_export_non_youtube_returns_400(self):
+        response = self.client.post(
+            self.url,
+            data=json.dumps(_youtube_export_payload(source_type="webpage")),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        body = response.json()
+        self.assertFalse(body["isSuccess"])
+        self.assertIn("YouTube", body["error"])
+
+    @patch(
+        "api.views.actionitem.YouTubeExtractor.extract_transcript_as_list",
+        return_value={"is_success": True, "paragraphs": _MOCK_PARAGRAPHS},
+    )
+    def test_export_youtube_returns_paragraphs(self, mock_extract):
+        response = self.client.post(
+            self.url,
+            data=json.dumps(_youtube_export_payload()),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertTrue(body["isSuccess"])
+        self.assertEqual(body["paragraphs"], _MOCK_PARAGRAPHS)
+        mock_extract.assert_called_once()
+
+    @patch(
+        "api.views.actionitem.YouTubeExtractor.extract_transcript_as_list",
+        return_value={"is_success": False, "error": "Could not fetch a transcript for this YouTube video."},
+    )
+    def test_export_youtube_fetch_failure_returns_502(self, mock_extract):
+        response = self.client.post(
+            self.url,
+            data=json.dumps(_youtube_export_payload()),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 502)
+        body = response.json()
+        self.assertFalse(body["isSuccess"])
+        self.assertIn("Could not fetch", body["error"])
+        mock_extract.assert_called_once()
+
+    def test_export_missing_source_type_returns_400(self):
+        payload = _youtube_export_payload()
+        del payload["source_type"]
+        response = self.client.post(
+            self.url,
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["isSuccess"])
 
 
 @override_settings(REST_FRAMEWORK=TEST_REST_FRAMEWORK)
