@@ -30,7 +30,7 @@ const CLOSE_META: Record<'error' | ActionId, CloseMeta> = {
     ariaLabel: 'Close summary',
     title: 'Close summary?',
     description: 'This summary action item will be removed from the summary page.',
-  },
+  }, 
 };
 
 const renderError = (document: SummaryDocument): ReactNode => (

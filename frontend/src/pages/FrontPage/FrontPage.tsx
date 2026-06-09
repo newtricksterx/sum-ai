@@ -1,8 +1,10 @@
 import type React from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FcGoogle } from 'react-icons/fc';
 import PageCard from '../../components/PageCard/PageCard';
 import { ActionGrid } from '../SummaryPage/components/ActionGrid/ActionGrid';
+import { useExport } from '../SummaryPage/components/ActionGrid/export';
 import { ToastErrorMessage } from '../../components/ToastErrorMessage/ToastErrorMessage';
 import { ActionId } from '../../types/summary';
 import { useTabChange } from './useTabChange';
@@ -31,6 +33,21 @@ const FrontPage: React.FC<FrontPageProps> = ({
   const { t } = useTranslation();
   const activeTabMeta = useTabChange();
   const profile = useAuthProfileStore((state) => state.profile);
+  const { handleExport, isExportLoading } = useExport();
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const handleClickExport = useCallback(async () => {
+    const result = await handleExport();
+    if (!result.success) {
+      setExportError(result.errorMessage);
+    }
+  }, [handleExport]);
+
+  const activeError = errorMessage || exportError;
+  const dismissActiveError = useCallback(() => {
+    if (errorMessage) onDismissError();
+    setExportError(null);
+  }, [errorMessage, onDismissError]);
 
   return (
     <main className="front-page-shell overflow-y-auto custom-scrollbar px-2 py-2 font-google">
@@ -42,8 +59,10 @@ const FrontPage: React.FC<FrontPageProps> = ({
         <section className="front-action-section" aria-label={t("frontpage.actionRegionAria")}>
           <ActionGrid
             onClickAction={onClickGenerate}
+            onClickExport={handleClickExport}
             title={t("frontpage.startSession")}
             loadingActionId={loadingActionId}
+            isExportLoading={isExportLoading}
             className="mb-0!"
           />
         </section>
@@ -64,7 +83,7 @@ const FrontPage: React.FC<FrontPageProps> = ({
           </section>
         )}
       </PageCard>
-      <ToastErrorMessage errorMessage={errorMessage} onDismissError={onDismissError} />
+      <ToastErrorMessage errorMessage={activeError} onDismissError={dismissActiveError} />
     </main>
   );
 };

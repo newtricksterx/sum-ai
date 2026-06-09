@@ -5,6 +5,7 @@ import {
   CheckCircledIcon,
   QuestionMarkCircledIcon,
   ReaderIcon,
+  ExternalLinkIcon
 } from '@radix-ui/react-icons';
 import { useTranslation } from 'react-i18next';
 import LoaderCircle from '../../../../components/LoaderCircle';
@@ -14,8 +15,10 @@ import type { ActionId } from '../../../../types/summary';
 
 interface ActionGridProps {
     onClickAction: (actionId: ActionId) => void | Promise<void>;
+    onClickExport?: () => void | Promise<void>;
     title: string;
     loadingActionId?: ActionId | null;
+    isExportLoading?: boolean;
     className?: string;
 }
 
@@ -38,14 +41,15 @@ const ACTION_ITEMS: ReadonlyArray<{
     id: 'quiz',
     icon: <QuestionMarkCircledIcon width={18} height={18} />,
     tone: 'amber',
-  }
+  },
 ];
 
 
-export const ActionGrid = ({ onClickAction, title, loadingActionId = null, className = "" } : ActionGridProps) => {
+export const ActionGrid = ({ onClickAction, onClickExport, title, loadingActionId = null, isExportLoading = false, className = "" } : ActionGridProps) => {
   const { t } = useTranslation();
 
   const isAnyActionLoading = loadingActionId !== null;
+  const isAnyLoading = isAnyActionLoading || isExportLoading;
 
   return (
     <section className={`summary-actions ${className}`} aria-label={t('summaryActions.regionAriaLabel')}>
@@ -61,7 +65,7 @@ export const ActionGrid = ({ onClickAction, title, loadingActionId = null, class
           const itemTag = t(`summaryActions.items.${item.id}.tag`);
           const itemHoverTitle = t(`summaryActions.items.${item.id}.hoverTitle`)
           const isActionLoading = loadingActionId === item.id;
-          const isActionDisabled = isAnyActionLoading;
+          const isActionDisabled = isAnyLoading;
 
           return (
             <button
@@ -103,6 +107,42 @@ export const ActionGrid = ({ onClickAction, title, loadingActionId = null, class
             </button>
           );
         })}
+        {onClickExport && <button
+          type="button"
+          className={`summary-action-card${isExportLoading ? ' is-loading' : ''}`}
+          onClick={() => {
+            if (!isAnyLoading) {
+              void onClickExport();
+            }
+          }}
+          disabled={isAnyLoading}
+          aria-disabled={isAnyLoading}
+          aria-busy={isExportLoading}
+          title={t('summaryActions.items.export.hoverTitle')}
+        >
+          <div className='summary-action-head'>
+            <div
+              className={`summary-action-icon summary-action-icon--rose`}
+              aria-hidden="true"
+            >
+              <ExternalLinkIcon width={18} height={18} />
+            </div>
+            <div className="summary-action-body">
+              <span className="summary-action-title">{t('summaryActions.items.export.title')}</span>
+              <span className="summary-action-desc">{t('summaryActions.items.export.description')}</span>
+            </div>
+          </div>
+
+          <div className="summary-action-footer">
+            <span className={`summary-action-tag summary-action-tag--rose`}>{t('summaryActions.items.export.tag')}</span>
+            {isExportLoading ? (
+              <LoaderCircle className="summary-action-loader" />
+            ) : (
+              <ArrowRightIcon className="summary-action-arrow" aria-hidden="true" />
+            )}
+            <CheckCircledIcon className="summary-action-check" aria-hidden="true" />
+          </div>
+        </button>}
       </div>
     </section>
   );

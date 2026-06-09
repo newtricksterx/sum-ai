@@ -183,6 +183,12 @@
           tag: "Test",
           hoverTitle: "Take a quiz to test your understanding using the content from the active tab",
         },
+        export: {
+          title: "Export",
+          description: "Generate a PDF from this tab",
+          tag: "Save",
+          hoverTitle: "Export the content of this tab as a PDF",
+        },
       },
     },
     sessionMismatch: {

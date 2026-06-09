@@ -9,6 +9,8 @@
   --ag-tone-amber-fg: var(--color-status-warning-text);
   --ag-tone-blue-bg: color-mix(in srgb, var(--color-status-info-bg) 74%, var(--color-surface-primary));
   --ag-tone-blue-fg: var(--color-status-info-text);
+  --ag-tone-rose-bg: color-mix(in srgb, var(--color-status-danger-bg) 100%, var(--color-surface-primary));
+  --ag-tone-rose-fg: var(--color-status-danger-text);
 }
 
 .summary-actions-header {
@@ -116,6 +118,11 @@
   color: var(--ag-tone-blue-fg);
 }
 
+.summary-action-icon--rose {
+  background: var(--ag-tone-rose-bg);
+  color: var(--ag-tone-rose-fg);
+}
+
 .summary-action-body {
   display: flex;
   flex-direction: column;
@@ -172,6 +179,11 @@
 .summary-action-tag--blue {
   background: color-mix(in srgb, var(--ag-tone-blue-bg) 52%, transparent);
   color: var(--ag-tone-blue-fg);
+}
+
+.summary-action-tag--rose {
+  background: color-mix(in srgb, var(--ag-tone-rose-bg) 52%, transparent);
+  color: var(--ag-tone-rose-fg);
 }
 
 .summary-action-arrow,

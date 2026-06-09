@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from api.throttles import AnonMonthRateThrottle
 
 from api.quota import QuotaExceeded, release_request_slot, reserve_request_slot
+from scripts.sources.webpage import export_webpage_as_pdf
 from scripts.sources.youtube import YouTubeExtractor
 from scripts.summary import MAX_CONTENT_CHARACTERS, get_action_item, get_summary
 
@@ -116,12 +117,36 @@ class ActionItem(APIView):
         
         if normalized_action_type == "export":
             source_type = request.data.get("source_type")
-            if source_type != "youtube":
-                return _error_response("Export is only supported for YouTube transcripts.", status.HTTP_400_BAD_REQUEST)
-            extractor = YouTubeExtractor()
-            result = extractor.extract_transcript_as_list(request)
-            if not result["is_success"]:
-                return _error_response(result["error"], status.HTTP_502_BAD_GATEWAY)
-            return Response({"isSuccess": True, "paragraphs": result["paragraphs"]}, status=status.HTTP_200_OK)
+            source_url = request.data.get("source_url")
+
+            if not source_url:
+                return _error_response("Missing source URL.", status.HTTP_400_BAD_REQUEST)
+
+            try:
+                reservation_pk, _ = _reserve_for(request.user)
+            except QuotaExceeded as exc:
+                logger.info("Quota exceeded for user=%s", request.user.pk)
+                return _quota_response(exc)
+
+            if source_type == "youtube":
+                extractor = YouTubeExtractor()
+                result = extractor.extract_transcript_as_list(request)
+                if not result["is_success"]:
+                    if reservation_pk is not None:
+                        release_request_slot(reservation_pk)
+                    return _error_response(result["error"], status.HTTP_502_BAD_GATEWAY)
+                return Response({"isSuccess": True, "paragraphs": result["paragraphs"]}, status=status.HTTP_200_OK)
+
+            if source_type == "webpage":
+                result = export_webpage_as_pdf(source_url)
+                if not result["is_success"]:
+                    if reservation_pk is not None:
+                        release_request_slot(reservation_pk)
+                    return _error_response(result["error"], status.HTTP_502_BAD_GATEWAY)
+                return Response({"isSuccess": True, "pdf_base64": result["pdf_base64"]}, status=status.HTTP_200_OK)
+
+            if reservation_pk is not None:
+                release_request_slot(reservation_pk)
+            return _error_response("Export is not supported for this source type.", status.HTTP_400_BAD_REQUEST)
 
         return _handle_generation(request, get_action_item, "action")

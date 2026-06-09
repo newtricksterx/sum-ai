@@ -22,6 +22,7 @@
     "@tailwindcss/vite": "^4.0.15",
     "axios": "^1.15.2",
     "i18next": "^26.0.9",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.486.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

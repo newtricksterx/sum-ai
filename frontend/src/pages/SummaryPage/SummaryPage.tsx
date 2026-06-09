@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { ToastErrorMessage } from '../../components/ToastErrorMessage/ToastErrorMessage';
 import { ActionGrid } from './components/ActionGrid/ActionGrid';
+import { useExport } from './components/ActionGrid/export';
 import { ActionItemCard } from './components/ActionItemCard/ActionItemCard';
 import type { SummaryActionItem } from '../../types/summary';
 import type { AddActionItemOptions } from "./utils/types";
@@ -57,6 +58,8 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
   const shouldShowReturnLink =
     Boolean(sessionUrl) && activeTabUrl !== undefined && sessionUrl !== activeTabUrl;
 
+  const { handleExport, isExportLoading } = useExport();
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const dismissError = useCallback(() => setErrorMessage(null), []);
 
@@ -75,6 +78,13 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
     [onAddActionItem, sessionUrl],
   );
 
+  const handleClickExport = useCallback(async () => {
+    const result = await handleExport();
+    if (!result.success) {
+      setErrorMessage(result.errorMessage);
+    }
+  }, [handleExport]);
+
   return (
     <section className={`summary-shell px-2! py-2!`}>
       <SummaryActionItemList
@@ -87,8 +97,10 @@ const SummaryPage: React.FC<SummaryPageProps> = ({
       ) : (
         <ActionGrid
           onClickAction={handleAddActionItem}
+          onClickExport={handleClickExport}
           title={t("summaryActions.whatsNext")}
           loadingActionId={loadingActionId}
+          isExportLoading={isExportLoading}
         />
       )}
       <ToastErrorMessage errorMessage={errorMessage} onDismissError={dismissError} />
