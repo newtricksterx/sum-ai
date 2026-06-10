@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import { useAuthProfileStore } from "../../../../../stores/authProfileStore";
 import { resolveCurrentTab } from "../../../../FrontPage/utils/chromeTabs";
 import { detectSourceType } from "../../../utils/sourcePayload";
+import { capturePageHtml } from "./capturePageHtml";
 import { exportWebpage } from "./exportWebpage";
 import { exportPdf } from "./exportPdf";
 import { exportYoutube } from "./exportYoutube";
@@ -39,9 +40,11 @@ export const useExport = () => {
       const isAuthenticated = Boolean(userProfile);
 
       switch (sourceType) {
-        case "webpage":
-          await exportWebpage(url, tab.title ?? "", baseUrl, isAuthenticated);
+        case "webpage": {
+          const sourceHtml = await capturePageHtml(tab.id);
+          await exportWebpage(url, sourceHtml, tab.title ?? "", baseUrl, isAuthenticated);
           break;
+        }
         case "pdf":
           await exportPdf(tab);
           break;

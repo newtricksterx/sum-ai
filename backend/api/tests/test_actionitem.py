@@ -11,6 +11,7 @@ from rest_framework.test import APIClient
 
 from api.models import Subscription
 from api.plans import get_action_limit
+from api.views.actionitem import MAX_REQUEST_SOURCE_CONTENT_CHARS
 from api.tests.helpers import authenticate_client_with_jwt, get_csrf_headers
 from scripts.sources import ExtractionResult
 
@@ -424,6 +425,17 @@ def _youtube_export_payload(**overrides):
     return payload
 
 
+def _webpage_export_payload(**overrides):
+    payload = {
+        "type": "export",
+        "source_url": "https://www.google.com/search?q=llms",
+        "source_html": "<html><head></head><body>Rendered results</body></html>",
+        "source_type": "webpage",
+    }
+    payload.update(overrides)
+    return payload
+
+
 _MOCK_PARAGRAPHS = [
     {"timestamp": 0.0, "text": "Hello and welcome to the video."},
     {"timestamp": 35.2, "text": "Now lets get into the topic."},
@@ -437,17 +449,17 @@ class ActionItemExportTest(TestCase):
         self.client = Client()
         self.url = reverse("action-item")
 
-    def test_export_non_youtube_returns_400(self):
+    def test_export_unsupported_source_type_returns_400(self):
         response = self.client.post(
             self.url,
-            data=json.dumps(_youtube_export_payload(source_type="webpage")),
+            data=json.dumps(_youtube_export_payload(source_type="pdf")),
             content_type="application/json",
         )
 
         self.assertEqual(response.status_code, 400)
         body = response.json()
         self.assertFalse(body["isSuccess"])
-        self.assertIn("YouTube", body["error"])
+        self.assertIn("not supported", body["error"])
 
     @patch(
         "api.views.actionitem.YouTubeExtractor.extract_transcript_as_list",
@@ -482,6 +494,91 @@ class ActionItemExportTest(TestCase):
         self.assertFalse(body["isSuccess"])
         self.assertIn("Could not fetch", body["error"])
         mock_extract.assert_called_once()
+
+    @patch(
+        "api.views.actionitem.export_webpage_as_pdf",
+        return_value={"is_success": True, "pdf_base64": "JVBERi0="},
+    )
+    def test_export_webpage_renders_client_html(self, mock_export):
+        # The PDF must be rendered from the HTML captured in the user's browser.
+        # Re-fetching the URL server-side gets bot-check/captcha interstitials
+        # (no user session, datacenter IP) instead of the real content.
+        payload = _webpage_export_payload()
+        response = self.client.post(
+            self.url,
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertTrue(body["isSuccess"])
+        self.assertEqual(body["pdf_base64"], "JVBERi0=")
+        mock_export.assert_called_once_with(
+            payload["source_url"], source_html=payload["source_html"]
+        )
+
+    @patch(
+        "api.views.actionitem.export_webpage_as_pdf",
+        return_value={"is_success": True, "pdf_base64": "JVBERi0="},
+    )
+    def test_export_webpage_without_html_falls_back_to_url(self, mock_export):
+        # Older extension versions only send the URL; the server still tries a
+        # direct fetch for them rather than rejecting the request.
+        payload = _webpage_export_payload()
+        del payload["source_html"]
+        response = self.client.post(
+            self.url,
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        mock_export.assert_called_once_with(payload["source_url"], source_html=None)
+
+    @patch(
+        "api.views.actionitem.export_webpage_as_pdf",
+        return_value={"is_success": False, "error": "Could not generate PDF from this webpage."},
+    )
+    def test_export_webpage_failure_returns_502(self, mock_export):
+        response = self.client.post(
+            self.url,
+            data=json.dumps(_webpage_export_payload()),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 502)
+        body = response.json()
+        self.assertFalse(body["isSuccess"])
+        self.assertIn("Could not generate PDF", body["error"])
+        mock_export.assert_called_once()
+
+    def test_export_webpage_missing_source_url_returns_400(self):
+        payload = _webpage_export_payload()
+        del payload["source_url"]
+        response = self.client.post(
+            self.url,
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["isSuccess"])
+
+    def test_export_webpage_oversized_html_returns_413(self):
+        # Captured page HTML rides the same request-size guard as source_content
+        # so a multi-megabyte DOM can't be fanned into the export pipeline.
+        payload = _webpage_export_payload(
+            source_html="x" * (MAX_REQUEST_SOURCE_CONTENT_CHARS + 1)
+        )
+        response = self.client.post(
+            self.url,
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 413)
+        self.assertFalse(response.json()["isSuccess"])
 
     def test_export_missing_source_type_returns_400(self):
         payload = _youtube_export_payload()

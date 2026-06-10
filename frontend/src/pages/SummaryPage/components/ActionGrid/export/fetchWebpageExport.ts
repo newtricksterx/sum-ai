@@ -9,6 +9,7 @@ export type WebpageExportResponse = {
 export const fetchWebpageExport = async (
   baseUrl: string,
   sourceUrl: string,
+  sourceHtml: string,
   isAuthenticated: boolean,
 ): Promise<WebpageExportResponse> => {
   const headers: HeadersInit = { "Content-Type": "application/json" };
@@ -25,6 +26,7 @@ export const fetchWebpageExport = async (
     body: JSON.stringify({
       type: "export",
       source_url: sourceUrl,
+      source_html: sourceHtml,
       source_type: "webpage",
     }),
   });

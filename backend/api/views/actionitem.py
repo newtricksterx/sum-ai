@@ -105,12 +105,14 @@ class ActionItem(APIView):
                 supported_types=sorted(ACTION_ITEM_TYPES),
             )
 
-        source_content = request.data.get("source_content")
-        if isinstance(source_content, str) and len(source_content) > MAX_REQUEST_SOURCE_CONTENT_CHARS:
-            return _error_response(
-                "Source content exceeds maximum allowed size.",
-                status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            )
+        if normalized_action_type != "export":
+            for oversized_field in ("source_content", "source_html"):
+                value = request.data.get(oversized_field)
+                if isinstance(value, str) and len(value) > MAX_REQUEST_SOURCE_CONTENT_CHARS:
+                    return _error_response(
+                        "Source content exceeds maximum allowed size.",
+                        status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                    )
 
         if normalized_action_type == "summary":
             return _handle_generation(request, get_summary, "summary")
@@ -138,7 +140,10 @@ class ActionItem(APIView):
                 return Response({"isSuccess": True, "paragraphs": result["paragraphs"]}, status=status.HTTP_200_OK)
 
             if source_type == "webpage":
-                result = export_webpage_as_pdf(source_url)
+                source_html = request.data.get("source_html")
+                if not isinstance(source_html, str) or not source_html.strip():
+                    source_html = None
+                result = export_webpage_as_pdf(source_url, source_html=source_html)
                 if not result["is_success"]:
                     if reservation_pk is not None:
                         release_request_slot(reservation_pk)

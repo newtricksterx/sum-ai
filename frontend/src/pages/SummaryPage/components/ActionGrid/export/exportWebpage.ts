@@ -12,11 +12,12 @@ const base64ToUint8Array = (base64: string): Uint8Array => {
 
 export const exportWebpage = async (
   sourceUrl: string,
+  sourceHtml: string,
   title: string,
   baseUrl: string,
   isAuthenticated: boolean,
 ): Promise<void> => {
-  const result = await fetchWebpageExport(baseUrl, sourceUrl, isAuthenticated);
+  const result = await fetchWebpageExport(baseUrl, sourceUrl, sourceHtml, isAuthenticated);
 
   if (!result.isSuccess || !result.pdf_base64) {
     throw new Error(result.error ?? "Could not generate PDF from this webpage.");
