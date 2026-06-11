@@ -1,11 +1,12 @@
 .menubar-btn {
   padding: calc(var(--spacing) * 3);
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
   display: flex;
   flex-direction: row;
   justify-content: center;
   width: 100%;
   align-items: center;
+  color: var(--color-text-secondary);
 }
 
 .menubar-btn-state-notcurrent {
@@ -14,10 +15,31 @@
 
 .menubar-btn-state-current {
   background-color: var(--color-background-secondary);
+  color: var(--color-accent);
+  box-shadow: inset 0 -2px 0 var(--color-accent);
 }
 
 .menubar-btn:hover {
   background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
+}
+
+.menubar-btn-state-current:hover {
+  color: var(--color-accent);
+}
+
+.menubar-btn:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--color-ring-accent);
+}
+
+.menubar-btn-state-current:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--color-ring-accent), inset 0 -2px 0 var(--color-accent);
+}
+
+.menubar-btn-close:hover {
+  background-color: var(--color-background-danger);
+  color: var(--color-text-danger);
 }
 
 .menu-bar-shell {

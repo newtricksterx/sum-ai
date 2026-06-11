@@ -164,6 +164,9 @@
 }
 
 .settings-fontsize-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-ring-accent);
 }
 
 .settings-fontsize-unit {
@@ -175,10 +178,10 @@
 .settings-save-button {
   width: 100%;
   min-height: 38px;
-  border: 1px solid var(--color-border-secondary);
+  border: 1px solid transparent;
   border-radius: 10px;
-  background: var(--color-background-secondary);
-  color: var(--color-text-primary);
+  background: var(--color-background-accent);
+  color: var(--color-text-on-accent);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -186,11 +189,11 @@
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.01em;
-  transition: opacity 140ms ease, transform 100ms ease, box-shadow 140ms ease;
+  transition: background-color 140ms ease, transform 100ms ease, box-shadow 140ms ease;
 }
 
-.settings-save-button:hover {
-  opacity: 0.8;
+.settings-save-button:not(.settings-save-button--saved):hover {
+  background: var(--color-background-accent-hover);
 }
 
 .settings-save-button:active {
@@ -199,7 +202,7 @@
 
 .settings-save-button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-ring-primary);
+  box-shadow: 0 0 0 2px var(--color-ring-accent);
 }
 
 .settings-save-button--saved {

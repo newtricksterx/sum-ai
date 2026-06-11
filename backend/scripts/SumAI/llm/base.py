@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 
@@ -17,11 +18,22 @@ class RetryPolicy:
 
 class LLMProvider(ABC):
     @abstractmethod
-    def generate(self, prompt: str, *, response_mime_type: str | None = None) -> str:
+    def generate(
+        self,
+        prompt: str,
+        *,
+        response_mime_type: str | None = None,
+        response_schema: dict | None = None,
+        validate_payload: Callable[[object], bool] | None = None,
+    ) -> str:
         """Run a single generation request.
 
+        response_schema constrains decoding when the provider supports
+        structured output (Gemini OpenAPI-subset dict).
+
         Implementations MUST raise InvalidJSONResponse when response_mime_type is
-        "application/json" but the response body is not valid JSON, so callers can
+        "application/json" but the response body is not valid JSON, or when
+        validate_payload is given and rejects the parsed JSON, so callers can
         decide whether to retry on a different model.
         """
         ...

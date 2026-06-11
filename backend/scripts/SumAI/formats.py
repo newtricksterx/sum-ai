@@ -42,7 +42,7 @@ JSON_FORMAT_GUIDANCE = {
     {"type": "bullet", "children": [{"text": "..."}, {"text": "...", "bold": true}]}
   ]
 }
-Rules: one "bullet" block per point. No nested or empty bullets.""",
+Rules: one "bullet" block per point. "blocks" must contain ONLY "bullet" blocks — no headings, paragraphs, or other types. No nested or empty bullets.""",
 
     "paragraph": """\
 {
@@ -63,7 +63,7 @@ Rules: alternate one "heading" with one or more "paragraph" blocks. One cohesive
     {"type": "tl-dr", "children": [{"text": "..."}]}
   ]
 }
-Rules: exactly ONE "tl-dr" block. One or two dense sentences, leading with the takeaway. No headings, bullets, or extra paragraphs.""",
+Rules: exactly ONE "tl-dr" block. One or two dense sentences, leading with the takeaway. No headings, bullets, or extra paragraphs. Do not prefix the text with "TL;DR" or any similar label — the UI adds its own.""",
 
     "q-and-a": """\
 {
@@ -75,7 +75,7 @@ Rules: exactly ONE "tl-dr" block. One or two dense sentences, leading with the t
      "answer":   [{"text": "..."}]}
   ]
 }
-Rules: each block is "qna_pair". "question" is plain text only (no marks) and is a genuine question, not a heading rephrased. "answer" does not restate the question.""",
+Rules: "blocks" must contain ONLY "qna_pair" blocks — no other types. "question" is plain text only (no marks) and is a genuine question, not a heading rephrased. "answer" does not restate the question.""",
 
     "pros-cons": """\
 {
@@ -117,7 +117,7 @@ ACTION_FORMAT_GUIDANCE = {
      "back":  [{"text": "..."}]}
   ]
 }
-Rules: each block is "flashcard". "front" is plain text only — a focused question or term, answerable in 1-2 sentences (split into two cards otherwise). "back" is a direct answer, not a restatement of the front. One idea per card.""",
+Rules: "blocks" must contain ONLY "flashcard" blocks. Create 5-12 cards, scaling with the amount of source material. "front" is plain text only — a focused question or term, answerable in 1-2 sentences (split into two cards otherwise). "back" is a direct answer, not a restatement of the front. One idea per card.""",
 
     "quiz": """\
 {
@@ -135,7 +135,7 @@ Rules: each block is "flashcard". "front" is plain text only — a focused quest
      "explanation": [{"text": "..."}]}
   ]
 }
-Rules: each block is "question" with plain-text "question" (no marks), exactly 4 options keyed A-D, and "explanation". Exactly ONE option has "correct": true; vary which key is correct across questions. Wrong options must be plausible (common misconceptions, not absurd filler). Up to 10 questions.""",
+Rules: "blocks" must contain ONLY "question" blocks, each with plain-text "question" (no marks), exactly 4 options keyed A-D, and "explanation". Exactly ONE option has "correct": true; vary which key is correct across questions. Wrong options must be plausible (common misconceptions, not absurd filler). Create 5-10 questions, scaling with the amount of source material.""",
 }
 
 

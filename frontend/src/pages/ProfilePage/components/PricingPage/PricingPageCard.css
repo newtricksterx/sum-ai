@@ -32,7 +32,7 @@
 
 li::marker {
     content: "✔";
-    color: rgb(33, 207, 33);
+    color: var(--color-text-success);
     font-size: 12px;
 }
 
@@ -55,27 +55,34 @@ strong {
 }
 
 .plan_btn {
-    color: var(--color-text-primary);
+    color: var(--color-text-on-accent);
     cursor: pointer;
     padding: 0.6rem;
-    border: 1px solid var(--color-border-secondary);
+    border: 1px solid transparent;
     border-radius: 0.3rem;
     display: block;
     width: 100%;
     text-align: center;
-    background-color: var(--color-background-secondary);
-    font-weight: 600;
+    background-color: var(--color-background-accent);
+    font-weight: 700;
+    transition: background-color 140ms ease;
 }
 
 .plan_btn:hover {
     text-decoration: none;
-    background-color: var(--color-background-tertiary);
+    background-color: var(--color-background-accent-hover);
+}
+
+.plan_btn:focus-visible {
+    outline: 2px solid var(--color-ring-accent);
+    outline-offset: 2px;
 }
 
 .plan_btn--disabled {
     color: var(--color-text-tertiary);
     cursor: not-allowed;
     background-color: transparent;
+    border-color: var(--color-border-secondary);
     opacity: 0.6;
     pointer-events: none;
 }

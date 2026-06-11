@@ -1,10 +1,13 @@
 import os
 from concurrent.futures import ThreadPoolExecutor
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from django.test import SimpleTestCase
 
+from scripts.SumAI.llm.base import RetryPolicy
 from scripts.SumAI.llm.gemini import (
+    GeminiProvider,
     get_default_provider,
     reset_default_provider,
 )
@@ -113,3 +116,59 @@ class FallbackModelTests(SimpleTestCase):
     def test_fallback_same_as_primary_is_none(self, mock_client_cls):
         provider = get_default_provider()
         self.assertIsNone(provider._fallback_model)
+
+
+@patch("scripts.SumAI.llm.gemini.genai.Client")
+class StructuredOutputTests(SimpleTestCase):
+    def _provider(self, mock_client_cls, responses):
+        mock_client = MagicMock()
+        mock_client.models.generate_content.side_effect = [
+            SimpleNamespace(text=text) for text in responses
+        ]
+        mock_client_cls.return_value = mock_client
+        provider = GeminiProvider(
+            api_key="test-key",
+            primary_model="gemini-test",
+            retry_policy=RetryPolicy(base_delay_seconds=0.0),
+        )
+        return provider, mock_client
+
+    def test_passes_response_schema_to_request_config(self, mock_client_cls):
+        schema = {"type": "OBJECT", "properties": {"title": {"type": "STRING"}}, "required": ["title"]}
+        provider, mock_client = self._provider(mock_client_cls, ['{"title": "ok"}'])
+
+        provider.generate("prompt", response_mime_type="application/json", response_schema=schema)
+
+        config = mock_client.models.generate_content.call_args.kwargs["config"]
+        self.assertEqual(config.response_schema, schema)
+        self.assertEqual(config.response_mime_type, "application/json")
+
+    def test_retries_when_payload_fails_shape_validation(self, mock_client_cls):
+        # Shape violations must be caught while we can still retry, instead of
+        # degrading silently in the frontend parser.
+        provider, mock_client = self._provider(
+            mock_client_cls, ['{"wrong": "shape"}', '{"title": "ok"}'],
+        )
+
+        result = provider.generate(
+            "prompt",
+            response_mime_type="application/json",
+            validate_payload=lambda payload: isinstance(payload, dict) and "title" in payload,
+        )
+
+        self.assertEqual(result, '{"title": "ok"}')
+        self.assertEqual(mock_client.models.generate_content.call_count, 2)
+
+    def test_raises_when_shape_validation_never_passes(self, mock_client_cls):
+        provider, mock_client = self._provider(
+            mock_client_cls, ['{"wrong": 1}', '{"wrong": 2}', '{"wrong": 3}'],
+        )
+
+        with self.assertRaises(RuntimeError):
+            provider.generate(
+                "prompt",
+                response_mime_type="application/json",
+                validate_payload=lambda payload: False,
+            )
+
+        self.assertEqual(mock_client.models.generate_content.call_count, 3)

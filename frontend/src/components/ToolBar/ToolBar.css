@@ -28,8 +28,19 @@
   font-weight: 700;
 }
 
+.toolbar-generate-btn-active {
+  border-color: transparent;
+  background-color: var(--color-background-accent);
+  color: var(--color-text-on-accent);
+}
+
 .toolbar-generate-btn-active:hover {
-  background: var(--color-background-tertiary);
+  background-color: var(--color-background-accent-hover);
+}
+
+.toolbar-generate-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-ring-accent);
 }
 
 .toolbar-generate-btn-disabled {

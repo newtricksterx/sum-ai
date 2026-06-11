@@ -77,3 +77,104 @@ def parse_action_document(raw_output) -> dict | None:
 
     return payload
 
+
+def _is_inline_array(value) -> bool:
+    return (
+        isinstance(value, list)
+        and len(value) > 0
+        and all(isinstance(item, dict) and isinstance(item.get("text"), str) for item in value)
+    )
+
+
+def _has_document_envelope(payload, expected_format: str) -> bool:
+    return (
+        isinstance(payload, dict)
+        and isinstance(payload.get("title"), str)
+        and payload.get("format") == expected_format
+        and isinstance(payload.get("blocks"), list)
+        and len(payload["blocks"]) > 0
+    )
+
+
+def _is_children_block(block, allowed_types: frozenset) -> bool:
+    return (
+        isinstance(block, dict)
+        and block.get("type") in allowed_types
+        and _is_inline_array(block.get("children"))
+    )
+
+
+def _is_qna_pair_block(block) -> bool:
+    return (
+        isinstance(block, dict)
+        and block.get("type") == "qna_pair"
+        and _is_inline_array(block.get("question"))
+        and _is_inline_array(block.get("answer"))
+    )
+
+
+def _is_flashcard_block(block) -> bool:
+    return (
+        isinstance(block, dict)
+        and block.get("type") == "flashcard"
+        and _is_inline_array(block.get("front"))
+        and _is_inline_array(block.get("back"))
+    )
+
+
+def _is_quiz_question_block(block) -> bool:
+    if not isinstance(block, dict) or block.get("type") != "question":
+        return False
+    if not _is_inline_array(block.get("question")) or not _is_inline_array(block.get("explanation")):
+        return False
+    options = block.get("options")
+    if not isinstance(options, list) or len(options) != 4:
+        return False
+    correct_count = 0
+    for option in options:
+        if not isinstance(option, dict) or not isinstance(option.get("key"), str):
+            return False
+        if not _is_inline_array(option.get("children")):
+            return False
+        if option.get("correct") is True:
+            correct_count += 1
+    return correct_count == 1
+
+
+_SUMMARY_BLOCK_TYPES = {
+    "bullet-point": frozenset({"bullet"}),
+    "paragraph": frozenset({"heading", "paragraph"}),
+    "tl-dr": frozenset({"tl-dr"}),
+    "pros-cons": frozenset({"pro", "con"}),
+}
+
+
+def validate_summary_document(payload, expected_format: str) -> bool:
+    """Shape check for a parsed summary payload, mirroring what the frontend
+    renderer for `expected_format` needs. Used inside the provider retry loop
+    so a wrong-shaped response is retried instead of degrading silently."""
+    if not _has_document_envelope(payload, expected_format):
+        return False
+    blocks = payload["blocks"]
+    if expected_format == "q-and-a":
+        return all(_is_qna_pair_block(block) for block in blocks)
+    if expected_format == "tl-dr" and len(blocks) != 1:
+        return False
+    allowed_types = _SUMMARY_BLOCK_TYPES.get(expected_format)
+    if allowed_types is None:
+        return True
+    return all(_is_children_block(block, allowed_types) for block in blocks)
+
+
+def validate_action_document(payload, action_type: str) -> bool:
+    """Shape check for a parsed action payload. Covers rules the response
+    schema cannot express, e.g. exactly one correct quiz option."""
+    if not _has_document_envelope(payload, action_type):
+        return False
+    blocks = payload["blocks"]
+    if action_type == "flashcards":
+        return all(_is_flashcard_block(block) for block in blocks)
+    if action_type == "quiz":
+        return all(_is_quiz_question_block(block) for block in blocks)
+    return True
+

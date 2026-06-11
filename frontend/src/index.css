@@ -81,6 +81,16 @@
   --color-border-warning: light-dark(rgba(128, 92, 31, 1), rgba(168, 120, 41, 1));
   --color-border-disabled: light-dark(rgba(31, 30, 29, 0.1), rgba(222, 220, 209, 0.1));
   
+  /* Brand accent — warm terracotta. Solid fills pair with --color-text-on-accent;
+     --color-accent is for accent-colored text/icons on normal surfaces. */
+  --color-accent: light-dark(rgba(178, 80, 46, 1), rgba(224, 138, 106, 1));
+  --color-accent-strong: light-dark(rgba(149, 65, 37, 1), rgba(233, 158, 130, 1));
+  --color-background-accent: light-dark(rgba(178, 80, 46, 1), rgba(186, 88, 55, 1));
+  --color-background-accent-hover: light-dark(rgba(156, 68, 38, 1), rgba(204, 104, 70, 1));
+  --color-background-accent-soft: light-dark(rgba(178, 80, 46, 0.1), rgba(217, 119, 87, 0.16));
+  --color-text-on-accent: light-dark(rgba(255, 255, 255, 1), rgba(255, 250, 246, 1));
+  --color-ring-accent: light-dark(rgba(178, 80, 46, 0.45), rgba(217, 119, 87, 0.55));
+
   --color-ring-primary: light-dark(rgba(20, 20, 19, 0.7), rgba(250, 249, 245, 0.7));
   --color-ring-secondary: light-dark(rgba(61, 61, 58, 0.7), rgba(194, 192, 182, 0.7));
   --color-ring-inverse: light-dark(rgba(255, 255, 255, 0.7), rgba(20, 20, 19, 0.7));
@@ -123,8 +133,6 @@
   --color-card-tertiary: var(--color-surface-tertiary);
   --color-focus-ring: var(--color-ring-primary);
   --color-page-card-backdrop: var(--color-surface-secondary);
-  --color-accent: var(--color-text-secondary);
-  --color-accent-strong: var(--color-text-primary);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -208,13 +216,13 @@ input::-webkit-inner-spin-button {
 }
 
 .settings-select:hover {
-  border-color: var(--color-border-info);
+  border-color: var(--color-accent);
 }
 
 .settings-select:focus {
   outline: none;
-  border-color: var(--color-border-info);
-  box-shadow: 0 0 0 2px var(--color-ring-info);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-ring-accent);
 }
 
 .settings-option {
@@ -234,7 +242,7 @@ input::-webkit-inner-spin-button {
   height: 1.25rem; /* Using rem for better scaling than em in menus */
   width: 1.25rem;
   border: 2px solid color-mix(in srgb, var(--color-border-primary) 88%, transparent); /* Thinner border looks more "pro" in small sizes */
-  border-top-color: var(--color-text-secondary);
+  border-top-color: var(--color-accent);
   border-radius: 50%;
   animation: spin 1s linear infinite; /* Added 'linear' for smooth rotation */
 }

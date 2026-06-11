@@ -39,7 +39,7 @@ function MenuBar({ currentPage, onMenuClick, onClickClose }: MenuBarProps) {
                 {icon}
             </button>
         ))}
-        <button className='menubar-btn menubar-btn-state-notcurrent hover:bg-red-500!' onClick={onClickClose} title={t("menu.close")}>
+        <button className='menubar-btn menubar-btn-state-notcurrent menubar-btn-close' onClick={onClickClose} title={t("menu.close")}>
           <Cross1Icon width={MenuIconSize} height={MenuIconSize}/>
         </button>
     </nav>

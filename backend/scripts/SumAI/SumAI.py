@@ -3,7 +3,7 @@ import logging
 import os
 import time
 
-from . import formats, prompts, response
+from . import formats, prompts, response, schemas
 from .llm import LLMProvider, get_default_provider
 
 DEBUG_MODE = os.getenv("DEBUG", "False").lower() == "true"
@@ -17,9 +17,20 @@ if DEBUG_MODE:
 logger = logging.getLogger(__name__)
 
 
-def QueryAI(query: str, response_mime_type: str | None = None, provider: LLMProvider | None = None) -> str:
+def QueryAI(
+    query: str,
+    response_mime_type: str | None = None,
+    response_schema: dict | None = None,
+    validate_payload=None,
+    provider: LLMProvider | None = None,
+) -> str:
     provider = provider or get_default_provider()
-    return provider.generate(query, response_mime_type=response_mime_type)
+    return provider.generate(
+        query,
+        response_mime_type=response_mime_type,
+        response_schema=response_schema,
+        validate_payload=validate_payload,
+    )
 
 
 def SummarizeContent(content, length, format, language, provider: LLMProvider | None = None) -> dict:
@@ -27,9 +38,14 @@ def SummarizeContent(content, length, format, language, provider: LLMProvider | 
 
     try:
         text = prompts.to_text(content)
+        normalized_format = prompts.normalize_format(format)
         query = prompts.build_summary_query(text, length, format, language)
         result = query if ECHO_PROMPT_MODE else QueryAI(
-            query, response_mime_type="application/json", provider=provider,
+            query,
+            response_mime_type="application/json",
+            response_schema=schemas.SUMMARY_RESPONSE_SCHEMAS[normalized_format],
+            validate_payload=lambda payload: response.validate_summary_document(payload, normalized_format),
+            provider=provider,
         )
         return {"isSuccess": True, "content": result}
     except Exception:
@@ -54,7 +70,11 @@ def ActionContent(type, language, content, quizDifficulty, provider: LLMProvider
             return {"isSuccess": False, "content": None}
 
         result = query if ECHO_PROMPT_MODE else QueryAI(
-            query, response_mime_type="application/json", provider=provider,
+            query,
+            response_mime_type="application/json",
+            response_schema=schemas.ACTION_RESPONSE_SCHEMAS[normalized_type],
+            validate_payload=lambda payload: response.validate_action_document(payload, normalized_type),
+            provider=provider,
         )
         document = response.parse_action_document(result)
         if not isinstance(document, dict) or not document.get("blocks"):

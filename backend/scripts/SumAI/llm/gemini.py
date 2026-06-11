@@ -26,9 +26,18 @@ class GeminiProvider(LLMProvider):
         self._fallback_model = fallback_model if fallback_model and fallback_model != primary_model else None
         self._retry_policy = retry_policy or RetryPolicy()
 
-    def generate(self, prompt: str, *, response_mime_type: str | None = None) -> str:
+    def generate(
+        self,
+        prompt: str,
+        *,
+        response_mime_type: str | None = None,
+        response_schema: dict | None = None,
+        validate_payload=None,
+    ) -> str:
         try:
-            return self._generate_with_retries(self._primary_model, prompt, response_mime_type)
+            return self._generate_with_retries(
+                self._primary_model, prompt, response_mime_type, response_schema, validate_payload,
+            )
         except Exception as primary_exc:
             if self._fallback_model and self._should_retry(primary_exc):
                 logger.warning(
@@ -37,7 +46,7 @@ class GeminiProvider(LLMProvider):
                 )
                 try:
                     return self._generate_with_retries(
-                        self._fallback_model, prompt, response_mime_type,
+                        self._fallback_model, prompt, response_mime_type, response_schema, validate_payload,
                     )
                 except Exception as fallback_exc:
                     logger.exception("Gemini fallback model also failed.")
@@ -46,13 +55,23 @@ class GeminiProvider(LLMProvider):
             logger.exception("Gemini summary request failed.")
             raise RuntimeError("Gemini summary request failed.") from primary_exc
 
-    def _generate_with_retries(self, model_name: str, prompt: str, response_mime_type: str | None) -> str:
+    def _generate_with_retries(
+        self,
+        model_name: str,
+        prompt: str,
+        response_mime_type: str | None,
+        response_schema: dict | None = None,
+        validate_payload=None,
+    ) -> str:
         require_json = response_mime_type == "application/json"
 
         request_kwargs = {"model": model_name, "contents": prompt}
         if response_mime_type:
+            config_kwargs = {"response_mime_type": response_mime_type}
+            if response_schema is not None:
+                config_kwargs["response_schema"] = response_schema
             request_kwargs["config"] = genai_types.GenerateContentConfig( # type: ignore
-                response_mime_type=response_mime_type,
+                **config_kwargs,
             )
 
         last_exc: Exception | None = None
@@ -64,7 +83,7 @@ class GeminiProvider(LLMProvider):
                     raise RuntimeError("Gemini returned an empty response.")
                 if require_json:
                     try:
-                        json.loads(text)
+                        payload = json.loads(text)
                     except json.JSONDecodeError as parse_exc:
                         logger.warning(
                             "Gemini %s returned invalid JSON on attempt %d.", model_name, attempt,
@@ -72,6 +91,14 @@ class GeminiProvider(LLMProvider):
                         raise InvalidJSONResponse(
                             "Gemini returned invalid JSON."
                         ) from parse_exc
+                    if validate_payload is not None and not validate_payload(payload):
+                        logger.warning(
+                            "Gemini %s returned JSON failing shape validation on attempt %d.",
+                            model_name, attempt,
+                        )
+                        raise InvalidJSONResponse(
+                            "Gemini returned JSON that failed shape validation."
+                        )
                 return text
             except Exception as exc:
                 last_exc = exc

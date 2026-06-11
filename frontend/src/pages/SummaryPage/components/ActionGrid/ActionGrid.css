@@ -60,7 +60,7 @@
 }
 
 .summary-action-card:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--color-border-secondary) 52%, var(--color-border-primary));
+  border-color: color-mix(in srgb, var(--color-accent) 38%, var(--color-border-secondary));
   background: var(--color-background-tertiary);
 }
 
@@ -70,7 +70,7 @@
 
 .summary-action-card:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-ring-primary);
+  box-shadow: 0 0 0 2px var(--color-ring-accent);
 }
 
 .summary-action-card:disabled {
