@@ -34,7 +34,7 @@
 <meta name="twitter:image" content="{{ site_origin }}{% static 'landing-page/front-page-linalg-light.png' %}">
 <meta name="twitter:image:alt" content="ReadToRecall extension popup summarizing a webpage">
 <title>ReadToRecall — Free AI Study Tool for Students</title>
-<meta name="description" content="ReadToRecall is a free AI study tool that turns webpages, YouTube videos, and PDFs into summaries, flashcards, and quizzes — built for active recall, the studying technique that actually sticks.">
+<meta name="description" content="ReadToRecall is a free AI study tool that turns webpages, YouTube videos, and PDFs into summaries, flashcards, and quizzes — built for active recall.">
 
 <link rel="icon" type="image/png" sizes="16x16" href="{% static 'landing-page/icon16.png' %}">
 <link rel="icon" type="image/png" sizes="32x32" href="{% static 'landing-page/icon32.png' %}">
@@ -57,7 +57,7 @@
   "operatingSystem": "Windows, macOS, Linux, ChromeOS",
   "browserRequirements": "Requires Chrome or any Chromium-based browser (Edge, Brave, Arc, Opera)",
   "softwareVersion": "1.0.1",
-  "dateModified": "2026-05-28",
+  "dateModified": "{{ content_lastmod }}",
   "inLanguage": ["en", "es", "fr", "hi", "zh"],
   "mainEntityOfPage": {"@type": "WebPage", "@id": "{{ canonical_url }}"},
   "speakable": {"@type": "SpeakableSpecification", "cssSelector": ["#what-it-is", "#faq details:first-of-type p"]},
@@ -566,7 +566,7 @@
     </a>
     <ul class="nav-links">
       <li><a href="#features">Features</a></li>
-      <li><a href="#how">How it works</a></li>
+      <li><a href="#how-it-works">How it works</a></li>
       <li><a href="#faq">FAQ</a></li>
       <li><a href="{% url 'payments' %}">Pricing</a></li>
     </ul>
@@ -694,7 +694,7 @@
 <section class="block" id="how" style="padding-top: 40px;">
   <div class="container">
     <div class="section-head">
-      <div class="eyebrow">How it works</div>
+      <div class="eyebrow">Get started</div>
       <h2>Install once. <em>Try for Free.</em></h2>
     </div>
 

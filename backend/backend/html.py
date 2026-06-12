@@ -7,6 +7,10 @@ from api.plans import PLANS, SUPPORTED_CURRENCIES
 
 PUBLIC_SITE_ORIGIN = "https://readtorecall.com"
 
+# Bump when landing-page content changes; feeds sitemap <lastmod> and JSON-LD dateModified.
+CONTENT_LASTMOD = "2026-06-12"
+LEGAL_LASTMOD = "2026-05-25"
+
 
 def _public_url(path: str = "/") -> str:
     if not path.startswith("/"):
@@ -18,6 +22,7 @@ def _seo_context(request) -> dict[str, str]:
     return {
         "site_origin": PUBLIC_SITE_ORIGIN,
         "canonical_url": _public_url(request.path),
+        "content_lastmod": CONTENT_LASTMOD,
     }
 
 
@@ -72,11 +77,11 @@ def robots(request):
 @cache_control(public=True, max_age=7200)
 def sitemap_xml(request):
     urls = [
-        (_public_url("/"),              "weekly",  "1.0", "2026-05-28"),
-        (_public_url("/study-tools/"),  "weekly",  "0.9", "2026-05-28"),
-        (_public_url("/payments/"),     "monthly", "0.8", "2026-05-28"),
-        (_public_url("/privacy/"),      "yearly",  "0.3", "2026-05-25"),
-        (_public_url("/terms/"),        "yearly",  "0.3", "2026-05-25"),
+        (_public_url("/"),              "weekly",  "1.0", CONTENT_LASTMOD),
+        (_public_url("/study-tools/"),  "weekly",  "0.9", CONTENT_LASTMOD),
+        (_public_url("/payments/"),     "monthly", "0.8", CONTENT_LASTMOD),
+        (_public_url("/privacy/"),      "yearly",  "0.3", LEGAL_LASTMOD),
+        (_public_url("/terms/"),        "yearly",  "0.3", LEGAL_LASTMOD),
     ]
     parts = [
         '<?xml version="1.0" encoding="UTF-8"?>',
@@ -108,7 +113,7 @@ def llms_txt(request):
         "- Platform: Chrome and all Chromium browsers (Edge, Brave, Arc, Opera). "
         "Not available on Firefox or Safari.\n"
         "- Creator: Daniel Li\n"
-        "- Status: Coming soon\n"
+        "- Status: Live on the Chrome Web Store\n"
         "- Supported sources: webpages, YouTube transcripts, PDFs (including "
         "local PDFs opened in the browser)\n"
         "- Output formats: TL;DR, bullets, paragraph, Q&A, pros & cons — at "
@@ -191,6 +196,7 @@ def _format_price(minor_units: int, currency: str) -> str:
     return f"{symbol}{minor_units / 100:.2f}"
 
 
+@cache_control(public=True, max_age=7200)
 def payments(request):
     template = loader.get_template('../templates/landing-page/payments.html')
     plans_view = [

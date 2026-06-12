@@ -104,10 +104,10 @@ class SeoSurfaceTests(SimpleTestCase):
             response.content.decode("utf-8"),
         )
 
-    def test_llms_txt_reflects_coming_soon_status(self):
+    def test_llms_txt_reflects_live_status(self):
         response = self.client.get("/llms.txt")
 
         self.assertEqual(response.status_code, 200)
         body = response.content.decode("utf-8")
-        self.assertIn("- Status: Coming soon", body)
-        self.assertNotIn("- Launched:", body)
+        self.assertIn("- Status: Live on the Chrome Web Store", body)
+        self.assertNotIn("Coming soon", body)
