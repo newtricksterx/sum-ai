@@ -38,7 +38,6 @@ const extractErrorMessage = (
 
 export const useActionItem = () => {
   const { t } = useTranslation();
-  const baseUrl = import.meta.env.VITE_BASE_URL;
   const language = useSettingsStore((state) => state.language);
   const length = useSettingsStore((state) => state.length);
   const format = useSettingsStore((state) => state.format);
@@ -76,7 +75,12 @@ export const useActionItem = () => {
       options: AddActionItemOptions = {},
     ): Promise<AddActionItemResult> => {
       if (actionRequestInFlightRef.current) {
-        return { success: false, errorMessage: "An action is already in progress." };
+        return {
+          success: false,
+          errorMessage: t("summaryErrors.actionInProgress", {
+            defaultValue: "An action is already in progress.",
+          }),
+        };
       }
 
       actionRequestInFlightRef.current = true;
@@ -99,20 +103,26 @@ export const useActionItem = () => {
             startSession(sourceError?.sourceUrl ?? "");
           }
           const fallbackDoc = errorDocument(
-            "Could not read source",
-            "Could not read the current tab. Try reloading the page and trying again.",
+            t("summaryErrors.sourceReadTitle", { defaultValue: "Could not read source" }),
+            t("summaryErrors.sourceReadMessage", {
+              defaultValue: "Could not read the current tab. Try reloading the page and trying again.",
+            }),
           );
           const usedDoc = sourceError?.errorDocument ?? fallbackDoc;
           syncHistory();
           return {
             success: false,
-            errorMessage: extractErrorMessage(usedDoc, "Could not read the current tab."),
+            errorMessage: extractErrorMessage(
+              usedDoc,
+              t("summaryErrors.sourceReadMessage", {
+                defaultValue: "Could not read the current tab. Try reloading the page and trying again.",
+              }),
+            ),
           };
         }
 
         const actionItemId = createActionItemId(actionId);
         const result = await requestActionItem({
-          baseUrl,
           language,
           format,
           length,
@@ -131,7 +141,10 @@ export const useActionItem = () => {
           syncHistory();
           return {
             success: false,
-            errorMessage: extractErrorMessage(result.document, "Could not generate action item."),
+            errorMessage: extractErrorMessage(
+              result.document,
+              t("summaryErrors.generateFailed", { defaultValue: "Could not generate action item." }),
+            ),
           };
         }
 
@@ -139,7 +152,9 @@ export const useActionItem = () => {
           syncHistory();
           return {
             success: false,
-            errorMessage: "The backend returned an empty response.",
+            errorMessage: t("summaryErrors.emptyResponse", {
+              defaultValue: "The backend returned an empty response.",
+            }),
           };
         }
 
@@ -163,7 +178,6 @@ export const useActionItem = () => {
     },
     [
       addSessionActionItem,
-      baseUrl,
       currency,
       format,
       hydrateProfile,

@@ -1,3 +1,4 @@
+import type { TranslateFn } from "../../../utils/types";
 import { fetchWebpageExport } from "./fetchWebpageExport";
 import { triggerDownload } from "./triggerDownload";
 
@@ -14,13 +15,15 @@ export const exportWebpage = async (
   sourceUrl: string,
   sourceHtml: string,
   title: string,
-  baseUrl: string,
-  isAuthenticated: boolean,
+  t: TranslateFn,
 ): Promise<void> => {
-  const result = await fetchWebpageExport(baseUrl, sourceUrl, sourceHtml, isAuthenticated);
+  const result = await fetchWebpageExport(sourceUrl, sourceHtml, t);
 
   if (!result.isSuccess || !result.pdf_base64) {
-    throw new Error(result.error ?? "Could not generate PDF from this webpage.");
+    throw new Error(
+      result.error ??
+        t("exportErrors.webpageFailed", { defaultValue: "Could not generate PDF from this webpage." }),
+    );
   }
 
   const bytes = base64ToUint8Array(result.pdf_base64);

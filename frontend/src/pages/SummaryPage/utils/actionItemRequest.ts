@@ -1,7 +1,9 @@
+import axios from "axios";
+
 import type { ActionId } from "../../../types/summary";
 import { coerceActionItemDocument } from "../../../types/summary";
 import type { Format, Language, Length, QuizDifficulty } from "../../../utils/types";
-import type { SummaryDocument } from "./types";
+import type { SummaryDocument, TranslateFn } from "./types";
 import type {
   ActionItemPostResult,
   ActionItemRequestErrorPayload,
@@ -11,13 +13,18 @@ import type {
   RequestActionItemArgs,
   SourcePayload,
 } from "./types";
-import { getCsrfToken, isCsrfFailurePayload } from "../../../services/axiosService";
-import { readErrorBody } from "./sources";
+import { authInstance } from "../../../services/axiosService";
 import {
   anonymousThrottleMessage,
   errorDocument,
   throttleMessage,
 } from "./document";
+
+// Generation can outlast authInstance's default 30s timeout, so disable it for this endpoint.
+const GENERATION_REQUEST_CONFIG = { timeout: 0 };
+
+const fallbackTranslate: TranslateFn = (key, options) =>
+  typeof options?.defaultValue === "string" ? options.defaultValue : key;
 
 const actionItemErrorResult = (
   title: string,
@@ -29,18 +36,11 @@ const actionItemErrorResult = (
   isSuccess: false,
 });
 
-const withCsrfHeader = async (headers?: HeadersInit, forceRefresh = false): Promise<Headers> => {
-  const token = await getCsrfToken(forceRefresh);
-  const nextHeaders = new Headers(headers);
-  nextHeaders.set("X-CSRFToken", token);
-  return nextHeaders;
-};
-
 export const buildSourceActionRequest = (
   type: ActionId,
   source: SourcePayload,
   extras?: { length?: Length; format?: Format; language?: Language; quizDifficulty?: QuizDifficulty },
-): { body: BodyInit; headers?: HeadersInit } => {
+): FormData | Record<string, unknown> => {
   const { sourceType, sourceUrl, sourceContent, pdf } = source;
   const { length, format, language, quizDifficulty } = extras ?? {};
 
@@ -54,8 +54,8 @@ export const buildSourceActionRequest = (
     if (format) formData.append("format", format);
     if (language) formData.append("language", language);
     if (quizDifficulty) formData.append("quiz_difficulty", quizDifficulty);
-    // Browser sets multipart Content-Type with boundary automatically.
-    return { body: formData };
+    // Axios sets multipart Content-Type with boundary automatically.
+    return formData;
   }
 
   const jsonBody: Record<string, unknown> = {
@@ -69,66 +69,39 @@ export const buildSourceActionRequest = (
   if (language !== undefined) jsonBody.language = language;
   if (quizDifficulty !== undefined) jsonBody.quiz_difficulty = quizDifficulty;
 
-  return {
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(jsonBody),
-  };
+  return jsonBody;
 };
 
+// CSRF injection, CSRF-failure retry, and 401 token refresh are all handled by
+// authInstance's interceptors — do not reimplement them here.
 const postActionItem = async <TErrorPayload,>({
-  baseUrl,
   type,
   sourcePayload,
-  isAuthenticated = false,
   extras,
 }: PostActionItemArgs): Promise<ActionItemPostResult<TErrorPayload>> => {
-  const { body, headers } = buildSourceActionRequest(type, sourcePayload, extras);
-  const requestHeaders = isAuthenticated ? await withCsrfHeader(headers) : headers;
-  const response = await fetch(`${baseUrl}/api/action-item`, {
-    method: "POST",
-    credentials: "include",
-    headers: requestHeaders,
-    body,
-  });
+  const data = buildSourceActionRequest(type, sourcePayload, extras);
 
-  if (!response.ok) {
-    const errorPayload = await readErrorBody<TErrorPayload>(response);
-    if (isAuthenticated && isCsrfFailurePayload(response.status, errorPayload)) {
-      const refreshedHeaders = await withCsrfHeader(headers, true);
-      const retriedResponse = await fetch(`${baseUrl}/api/action-item`, {
-        method: "POST",
-        credentials: "include",
-        headers: refreshedHeaders,
-        body,
-      });
-      if (retriedResponse.ok) {
-        return {
-          ok: true,
-          result: (await retriedResponse.json()) as ActionItemResponse,
-        };
-      }
+  try {
+    const response = await authInstance.post<ActionItemResponse>(
+      "/api/action-item",
+      data,
+      GENERATION_REQUEST_CONFIG,
+    );
+    return { ok: true, result: response.data };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
       return {
         ok: false,
-        status: retriedResponse.status,
-        errorPayload: await readErrorBody<TErrorPayload>(retriedResponse),
+        status: error.response.status,
+        errorPayload: (error.response.data ?? null) as TErrorPayload | null,
       };
     }
-
-    return {
-      ok: false,
-      status: response.status,
-      errorPayload,
-    };
+    // Network-level failure — let the caller map it to a user-facing error.
+    throw error;
   }
-
-  return {
-    ok: true,
-    result: (await response.json()) as ActionItemResponse,
-  };
 };
 
 export const requestActionItem = async ({
-  baseUrl,
   language,
   type,
   sourcePayload,
@@ -138,6 +111,8 @@ export const requestActionItem = async ({
   isAuthenticated = false,
   t,
 }: RequestActionItemArgs): Promise<ActionItemRequestResult> => {
+  const translate = t ?? fallbackTranslate;
+
   if (import.meta.env.DEV) {
     const mocks = await import("./mocks");
     if (mocks.isMockActionItemModeEnabled()) {
@@ -156,37 +131,41 @@ export const requestActionItem = async ({
 
   try {
     const response = await postActionItem<ActionItemRequestErrorPayload>({
-      baseUrl,
       type,
       sourcePayload,
-      isAuthenticated,
       extras: { language, format, length, quizDifficulty },
     });
 
     if (!response.ok) {
-      if (response.status === 429 && t) {
+      if (response.status === 429) {
         const message = isAuthenticated
-          ? throttleMessage(response.errorPayload ?? {}, t)
-          : anonymousThrottleMessage(response.errorPayload ?? {}, t);
+          ? throttleMessage(response.errorPayload ?? {}, translate)
+          : anonymousThrottleMessage(response.errorPayload ?? {}, translate);
 
         return actionItemErrorResult(
-          t("summaryErrors.rateLimitTitle", { defaultValue: "Rate limit reached" }),
+          translate("summaryErrors.rateLimitTitle", { defaultValue: "Rate limit reached" }),
           message,
           sourcePayload.sourceUrl,
         );
       }
 
       const fallbackMessage =
-        response.errorPayload?.message || response.errorPayload?.error || "Could not generate action item.";
+        response.errorPayload?.message ||
+        response.errorPayload?.error ||
+        translate("summaryErrors.generateFailed", { defaultValue: "Could not generate action item." });
       if (import.meta.env.DEV) console.error("Action Item Error:", fallbackMessage);
-      return actionItemErrorResult("Request failed", fallbackMessage, sourcePayload.sourceUrl);
+      return actionItemErrorResult(
+        translate("summaryErrors.requestFailedTitle", { defaultValue: "Request failed" }),
+        fallbackMessage,
+        sourcePayload.sourceUrl,
+      );
     }
 
     const result = response.result;
     if (result.isSuccess !== true) {
       return actionItemErrorResult(
-        "Request failed",
-        "Could not generate action item",
+        translate("summaryErrors.requestFailedTitle", { defaultValue: "Request failed" }),
+        translate("summaryErrors.generateFailed", { defaultValue: "Could not generate action item." }),
         sourcePayload.sourceUrl,
       );
     }
@@ -194,8 +173,10 @@ export const requestActionItem = async ({
     const document = coerceActionItemDocument(result.content);
     if (!document) {
       return actionItemErrorResult(
-        "Malformed response",
-        "The server returned a response that could not be parsed.",
+        translate("summaryErrors.malformedTitle", { defaultValue: "Malformed response" }),
+        translate("summaryErrors.malformedMessage", {
+          defaultValue: "The server returned a response that could not be parsed.",
+        }),
         sourcePayload.sourceUrl,
       );
     }
@@ -208,8 +189,10 @@ export const requestActionItem = async ({
   } catch (error) {
     if (import.meta.env.DEV) console.error("Fetch Action Item Error:", error);
     return actionItemErrorResult(
-      "Network error",
-      "Could not contact the backend. Please try again.",
+      translate("summaryErrors.networkErrorTitle", { defaultValue: "Network error" }),
+      translate("summaryErrors.networkErrorMessage", {
+        defaultValue: "Could not contact the backend. Please try again.",
+      }),
       sourcePayload.sourceUrl,
     );
   }

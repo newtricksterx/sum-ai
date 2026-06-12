@@ -97,13 +97,16 @@ export const useAuthProfileStore = create<AuthProfileState>()(
             return null;
           }
 
+          // Don't rethrow: callers fire-and-forget this promise, so a throw here
+          // becomes an unhandled rejection. `status: "error"` is the error signal.
+          if (import.meta.env.DEV) console.error("[profile] hydrate failed:", error);
           set({
             profile: null,
             status: "error",
             lastFetchedAt: null,
             lastCurrency: null,
           });
-          throw error;
+          return null;
         })
         .finally(() => {
           set({

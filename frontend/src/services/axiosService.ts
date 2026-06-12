@@ -100,7 +100,7 @@ const isExcludedRefreshRoute = (url?: string) => {
   return EXCLUDED_REFRESH_ROUTES.some((route) => url === route || url.endsWith(route));
 };
 
-export const isCsrfFailurePayload = (statusCode: number | undefined, responseData: unknown) => {
+const isCsrfFailurePayload = (statusCode: number | undefined, responseData: unknown) => {
   if (statusCode !== 403) {
     return false;
   }

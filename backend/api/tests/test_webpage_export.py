@@ -1,6 +1,13 @@
+from unittest.mock import patch
+
 from django.test import SimpleTestCase
 
-from scripts.sources.webpage import _A4_WIDTH_PX, _is_blocked_page, _shrink_to_fit_scale
+from scripts.sources.webpage import (
+    _A4_WIDTH_PX,
+    _is_blocked_page,
+    _shrink_to_fit_scale,
+    _validate_public_url,
+)
 
 
 class _StubPage:
@@ -81,3 +88,56 @@ class ShrinkToFitScaleTest(SimpleTestCase):
         page = _StubMeasurablePage(600)
         _shrink_to_fit_scale(page)
         self.assertEqual(page.emulated_media, "print")
+
+
+class ValidatePublicUrlTest(SimpleTestCase):
+    """The URL-fallback export fetches an attacker-controllable URL on the
+    server. Without these checks it is an SSRF: the caller could read the cloud
+    metadata endpoint, internal services, or local files into the exported PDF.
+    Each test encodes a class of target that must stay unreachable."""
+
+    def _resolve_to(self, address):
+        # Patch DNS so host-based tests don't depend on real resolution.
+        return patch(
+            "scripts.sources.webpage._resolved_addresses",
+            return_value=[address],
+        )
+
+    def test_public_https_url_is_allowed(self):
+        with self._resolve_to("93.184.216.34"):  # example.com
+            self.assertIsNone(_validate_public_url("https://example.com/article"))
+
+    def test_non_http_scheme_is_rejected(self):
+        # file:// would let the export read local files off the server.
+        self.assertIsNotNone(_validate_public_url("file:///etc/passwd"))
+
+    def test_gopher_scheme_is_rejected(self):
+        self.assertIsNotNone(_validate_public_url("gopher://example.com/"))
+
+    def test_cloud_metadata_ip_is_rejected(self):
+        # 169.254.169.254 is the cloud metadata endpoint — the highest-value
+        # SSRF target (IAM credentials). It is link-local.
+        self.assertIsNotNone(_validate_public_url("http://169.254.169.254/latest/meta-data/"))
+
+    def test_loopback_is_rejected(self):
+        self.assertIsNotNone(_validate_public_url("http://127.0.0.1:8000/"))
+
+    def test_private_rfc1918_ip_is_rejected(self):
+        self.assertIsNotNone(_validate_public_url("http://10.0.0.5/"))
+
+    def test_hostname_resolving_to_private_ip_is_rejected(self):
+        # DNS-based SSRF: a public-looking hostname pointing at an internal IP.
+        with self._resolve_to("192.168.1.10"):
+            self.assertIsNotNone(_validate_public_url("http://internal.example.com/"))
+
+    def test_mixed_public_and_private_records_are_rejected(self):
+        # If any record is internal, the host is rejected — a split record set
+        # must not be usable to slip past the check.
+        with patch(
+            "scripts.sources.webpage._resolved_addresses",
+            return_value=["93.184.216.34", "10.0.0.5"],
+        ):
+            self.assertIsNotNone(_validate_public_url("http://mixed.example.com/"))
+
+    def test_empty_url_is_rejected(self):
+        self.assertIsNotNone(_validate_public_url(""))

@@ -105,14 +105,15 @@ class ActionItem(APIView):
                 supported_types=sorted(ACTION_ITEM_TYPES),
             )
 
-        if normalized_action_type != "export":
-            for oversized_field in ("source_content", "source_html"):
-                value = request.data.get(oversized_field)
-                if isinstance(value, str) and len(value) > MAX_REQUEST_SOURCE_CONTENT_CHARS:
-                    return _error_response(
-                        "Source content exceeds maximum allowed size.",
-                        status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                    )
+        # Applies to export too: captured source_html must ride the same size
+        # guard so a multi-megabyte DOM can't be fanned into the export pipeline.
+        for oversized_field in ("source_content", "source_html"):
+            value = request.data.get(oversized_field)
+            if isinstance(value, str) and len(value) > MAX_REQUEST_SOURCE_CONTENT_CHARS:
+                return _error_response(
+                    "Source content exceeds maximum allowed size.",
+                    status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                )
 
         if normalized_action_type == "summary":
             return _handle_generation(request, get_summary, "summary")

@@ -22,10 +22,21 @@ interface ActionGridProps {
     className?: string;
 }
 
+type CardTone = 'teal' | 'purple' | 'amber' | 'blue' | 'rose';
+
+// i18n keys live under summaryActions.items.<id>.
+type ActionCard = {
+  id: ActionId | 'export';
+  icon: ReactElement;
+  tone: CardTone;
+  isLoading: boolean;
+  onClick: () => void;
+};
+
 const ACTION_ITEMS: ReadonlyArray<{
   id: ActionId;
   icon: ReactElement;
-  tone: 'teal' | 'purple' | 'amber' | 'blue';
+  tone: CardTone;
 }> = [
   {
     id: 'summary',
@@ -51,6 +62,32 @@ export const ActionGrid = ({ onClickAction, onClickExport, title, loadingActionI
   const isAnyActionLoading = loadingActionId !== null;
   const isAnyLoading = isAnyActionLoading || isExportLoading;
 
+  const cards: ActionCard[] = ACTION_ITEMS.map((item) => ({
+    id: item.id,
+    icon: item.icon,
+    tone: item.tone,
+    isLoading: loadingActionId === item.id,
+    onClick: () => {
+      if (!isAnyLoading) {
+        void onClickAction(item.id);
+      }
+    },
+  }));
+
+  if (onClickExport) {
+    cards.push({
+      id: 'export',
+      icon: <ExternalLinkIcon width={18} height={18} />,
+      tone: 'rose',
+      isLoading: isExportLoading,
+      onClick: () => {
+        if (!isAnyLoading) {
+          void onClickExport();
+        }
+      },
+    });
+  }
+
   return (
     <section className={`summary-actions ${className}`} aria-label={t('summaryActions.regionAriaLabel')}>
       <header className="summary-actions-header">
@@ -59,90 +96,41 @@ export const ActionGrid = ({ onClickAction, onClickExport, title, loadingActionI
       </header>
 
       <div className="summary-actions-grid" role="list">
-        {ACTION_ITEMS.map((item) => {
-          const itemTitle = t(`summaryActions.items.${item.id}.title`);
-          const itemDescription = t(`summaryActions.items.${item.id}.description`);
-          const itemTag = t(`summaryActions.items.${item.id}.tag`);
-          const itemHoverTitle = t(`summaryActions.items.${item.id}.hoverTitle`)
-          const isActionLoading = loadingActionId === item.id;
-          const isActionDisabled = isAnyLoading;
-
-          return (
-            <button
-              key={item.id}
-              type="button"
-              className={`summary-action-card ${isActionLoading ? ' is-loading' : ''}`}
-              onClick={() => {
-                if (!isActionDisabled) {
-                  void onClickAction(item.id);
-                }
-              }}
-              disabled={isActionDisabled}
-              aria-disabled={isActionDisabled}
-              aria-busy={isActionLoading}
-              title={itemHoverTitle}
-            >
-              <div className='summary-action-head'>
-                <div
-                  className={`summary-action-icon summary-action-icon--${item.tone}`}
-                  aria-hidden="true"
-                >
-                  {item.icon}
-                </div>
-                <div className="summary-action-body">
-                  <span className="summary-action-title">{itemTitle}</span>
-                  <span className="summary-action-desc">{itemDescription}</span>
-                </div>
+        {cards.map((card) => (
+          <button
+            key={card.id}
+            type="button"
+            className={`summary-action-card${card.isLoading ? ' is-loading' : ''}`}
+            onClick={card.onClick}
+            disabled={isAnyLoading}
+            aria-disabled={isAnyLoading}
+            aria-busy={card.isLoading}
+            title={t(`summaryActions.items.${card.id}.hoverTitle`)}
+          >
+            <div className='summary-action-head'>
+              <div
+                className={`summary-action-icon summary-action-icon--${card.tone}`}
+                aria-hidden="true"
+              >
+                {card.icon}
               </div>
-
-              <div className="summary-action-footer">
-                <span className={`summary-action-tag summary-action-tag--${item.tone}`}>{itemTag}</span>
-                {isActionLoading ? (
-                  <LoaderCircle className="summary-action-loader" />
-                ) : (
-                  <ArrowRightIcon className="summary-action-arrow" aria-hidden="true" />
-                )}
-                <CheckCircledIcon className="summary-action-check" aria-hidden="true" />
+              <div className="summary-action-body">
+                <span className="summary-action-title">{t(`summaryActions.items.${card.id}.title`)}</span>
+                <span className="summary-action-desc">{t(`summaryActions.items.${card.id}.description`)}</span>
               </div>
-            </button>
-          );
-        })}
-        {onClickExport && <button
-          type="button"
-          className={`summary-action-card${isExportLoading ? ' is-loading' : ''}`}
-          onClick={() => {
-            if (!isAnyLoading) {
-              void onClickExport();
-            }
-          }}
-          disabled={isAnyLoading}
-          aria-disabled={isAnyLoading}
-          aria-busy={isExportLoading}
-          title={t('summaryActions.items.export.hoverTitle')}
-        >
-          <div className='summary-action-head'>
-            <div
-              className={`summary-action-icon summary-action-icon--rose`}
-              aria-hidden="true"
-            >
-              <ExternalLinkIcon width={18} height={18} />
             </div>
-            <div className="summary-action-body">
-              <span className="summary-action-title">{t('summaryActions.items.export.title')}</span>
-              <span className="summary-action-desc">{t('summaryActions.items.export.description')}</span>
-            </div>
-          </div>
 
-          <div className="summary-action-footer">
-            <span className={`summary-action-tag summary-action-tag--rose`}>{t('summaryActions.items.export.tag')}</span>
-            {isExportLoading ? (
-              <LoaderCircle className="summary-action-loader" />
-            ) : (
-              <ArrowRightIcon className="summary-action-arrow" aria-hidden="true" />
-            )}
-            <CheckCircledIcon className="summary-action-check" aria-hidden="true" />
-          </div>
-        </button>}
+            <div className="summary-action-footer">
+              <span className={`summary-action-tag summary-action-tag--${card.tone}`}>{t(`summaryActions.items.${card.id}.tag`)}</span>
+              {card.isLoading ? (
+                <LoaderCircle className="summary-action-loader" />
+              ) : (
+                <ArrowRightIcon className="summary-action-arrow" aria-hidden="true" />
+              )}
+              <CheckCircledIcon className="summary-action-check" aria-hidden="true" />
+            </div>
+          </button>
+        ))}
       </div>
     </section>
   );

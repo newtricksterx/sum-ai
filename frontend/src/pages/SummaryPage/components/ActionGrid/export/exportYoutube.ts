@@ -1,16 +1,19 @@
+import type { TranslateFn } from "../../../utils/types";
 import { fetchTranscript } from "./fetchTranscript";
 import { buildTranscriptPdf } from "./pdfBuilder";
 import { triggerDownload } from "./triggerDownload";
 
 export const exportYoutube = async (
-  baseUrl: string,
   sourceUrl: string,
-  isAuthenticated: boolean,
+  t: TranslateFn,
 ): Promise<void> => {
-  const result = await fetchTranscript(baseUrl, sourceUrl, isAuthenticated);
+  const result = await fetchTranscript(sourceUrl, t);
 
   if (!result.isSuccess || !result.paragraphs) {
-    throw new Error(result.error ?? "Could not fetch transcript for this video.");
+    throw new Error(
+      result.error ??
+        t("exportErrors.transcriptFailed", { defaultValue: "Could not fetch transcript for this video." }),
+    );
   }
 
   const blob = buildTranscriptPdf("YouTube Transcript", result.paragraphs);

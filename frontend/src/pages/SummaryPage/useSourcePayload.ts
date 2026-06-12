@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type {
   ResolveSourcePayloadOptions,
   SourcePayload,
@@ -12,6 +13,7 @@ import {
 import { isRestrictedPage, resolveCurrentTab } from "../FrontPage/utils/chromeTabs";
 
 export const useSourcePayload = () => {
+  const { t } = useTranslation();
   const [sourcePayload, setSourcePayload] = useState<SourcePayload | null>(null);
   const lastSourceErrorRef = useRef<SourcePayloadResolution | null>(null);
 
@@ -27,42 +29,44 @@ export const useSourcePayload = () => {
       }
     }
 
+    // Follow-up actions in an existing session are pinned to the session's
+    // original source: reuse the cached payload instead of re-scraping. The
+    // active tab may have changed since the session started, and a different
+    // page's content must never leak into an existing session. (SummaryPage
+    // hides the action grid on a URL mismatch; this is the data-level guard.)
+    if (!options?.forceActiveTab && sourcePayload !== null) {
+      return sourcePayload;
+    }
+
     const tab = await resolveCurrentTab();
     if (!tab?.id) {
-      if (sourcePayload) return sourcePayload;
       lastSourceErrorRef.current = sourcePayloadError(
-        "No active tab",
-        "Could not find an active browser tab.",
+        t("summaryErrors.noActiveTabTitle", { defaultValue: "No active tab" }),
+        t("summaryErrors.noActiveTabMessage", { defaultValue: "Could not find an active browser tab." }),
       );
       return null;
     }
 
     if (isRestrictedPage(tab.url)) {
-      if (sourcePayload) return sourcePayload;
       lastSourceErrorRef.current = sourcePayloadError(
-        "Page not supported",
-        "Chrome internal pages (like chrome://settings) are not supported. Open a normal website tab and try again.",
+        t("summaryErrors.restrictedPageTitle", { defaultValue: "Page not supported" }),
+        t("summaryErrors.restrictedPageMessage", {
+          defaultValue:
+            "Chrome internal pages (like chrome://settings) are not supported. Open a normal website tab and try again.",
+        }),
         tab.url,
       );
       return null;
     }
 
-    if (!options?.forceActiveTab && sourcePayload !== null && tab.url !== sourcePayload.sourceUrl) {
-      return sourcePayload;
-    }
-
-    const result = await buildSourcePayloadFromTab(tab);
+    const result = await buildSourcePayloadFromTab(tab, t);
     if (result.payload) {
       return result.payload;
     }
 
-    if (!options?.forceActiveTab && sourcePayload) {
-      return sourcePayload;
-    }
-
     lastSourceErrorRef.current = result;
     return null;
-  }, [sourcePayload]);
+  }, [sourcePayload, t]);
 
   return {
     sourcePayload,

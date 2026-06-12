@@ -1,9 +1,73 @@
 import base64
+import ipaddress
 import logging
+import socket
+from urllib.parse import urlsplit
 
 from .base import ExtractionResult, SourceExtractor
 
 logger = logging.getLogger(__name__)
+
+_ALLOWED_URL_SCHEMES = frozenset({"http", "https"})
+
+
+def _resolved_addresses(host: str) -> list[str]:
+    # Every A/AAAA record the host resolves to. We reject if *any* points at a
+    # non-public range so a record set that mixes one public and one internal
+    # IP can't be used to slip past the check.
+    infos = socket.getaddrinfo(host, None, proto=socket.IPPROTO_TCP)
+    return [info[4][0] for info in infos]
+
+
+def _is_public_ip(address: str) -> bool:
+    try:
+        ip = ipaddress.ip_address(address)
+    except ValueError:
+        return False
+    # Block loopback, RFC1918/ULA private, link-local (incl. cloud metadata at
+    # 169.254.169.254), multicast, reserved, and unspecified ranges.
+    return not (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_multicast
+        or ip.is_reserved
+        or ip.is_unspecified
+    )
+
+
+def _validate_public_url(source_url: str) -> str | None:
+    """Return an error message if `source_url` is unsafe to fetch server-side,
+    or None if it resolves to a public host over http(s).
+
+    Guards the URL-fallback export path against SSRF: only http(s) is allowed
+    (no file://, gopher://, etc.), and the host must resolve exclusively to
+    public IPs so it cannot reach loopback, the cloud metadata endpoint, or
+    internal services. A determined attacker could still rebind DNS in the
+    window between this check and the browser's fetch; the residual exposure is
+    a single GET to an internal host with no readable response leaking back,
+    which is acceptable for this export feature.
+    """
+    if not isinstance(source_url, str) or not source_url.strip():
+        return "Missing source URL."
+
+    parts = urlsplit(source_url.strip())
+    if parts.scheme.lower() not in _ALLOWED_URL_SCHEMES:
+        return "Only http and https URLs can be exported."
+
+    host = parts.hostname
+    if not host:
+        return "Could not determine the host for this URL."
+
+    try:
+        addresses = _resolved_addresses(host)
+    except socket.gaierror:
+        return "Could not resolve the host for this URL."
+
+    if not addresses or not all(_is_public_ip(addr) for addr in addresses):
+        return "This URL points to a non-public address and cannot be exported."
+
+    return None
 
 
 class WebpageExtractor(SourceExtractor):
@@ -73,6 +137,13 @@ def export_webpage_as_pdf(source_url: str, source_html: str | None = None) -> di
                 page.set_content(source_html, wait_until="networkidle", timeout=30000)
             else:
                 # Fallback for older extension versions that only send the URL.
+                # This branch fetches an attacker-controllable URL server-side,
+                # so it must be validated against SSRF before navigation.
+                url_error = _validate_public_url(source_url)
+                if url_error:
+                    logger.warning("Rejected export URL %s: %s", source_url, url_error)
+                    browser.close()
+                    return {"is_success": False, "error": url_error}
                 page = browser.new_page(viewport=_VIEWPORT)
                 page.goto(source_url, wait_until="networkidle", timeout=30000)
                 if _is_blocked_page(page):

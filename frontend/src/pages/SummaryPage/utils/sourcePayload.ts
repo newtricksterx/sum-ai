@@ -1,4 +1,4 @@
-import type { SourcePayload, SourcePayloadResolution, SourceType } from "./types";
+import type { SourcePayload, SourcePayloadResolution, SourceType, TranslateFn } from "./types";
 import { extractTabContent, isYoutube } from "./sources";
 import { errorDocument } from "./document";
 import { isPDF, fetchPdfBytes, PdfFileAccessDeniedError, type PdfPayload } from "./pdf";
@@ -41,6 +41,7 @@ export const sourcePayloadError = (
 // type, then scrapes webpage text or fetches PDF bytes.
 export const buildSourcePayloadFromTab = async (
   tab: chrome.tabs.Tab,
+  t: TranslateFn,
 ): Promise<SourcePayloadResolution> => {
   const sourceType = detectSourceType(tab.url);
 
@@ -55,14 +56,22 @@ export const buildSourcePayloadFromTab = async (
     } catch (error) {
       if (import.meta.env.DEV) console.error("Script Injection Error:", error);
       return sourcePayloadError(
-        "Cannot read this page",
-        "This page blocks extension script access. Try another site tab and try again.",
+        t("summaryErrors.injectionBlockedTitle", { defaultValue: "Cannot read this page" }),
+        t("summaryErrors.injectionBlockedMessage", {
+          defaultValue: "This page blocks extension script access. Try another site tab and try again.",
+        }),
         tab.url,
       );
     }
 
     if (!tabContent.text) {
-      return sourcePayloadError("No readable content", "Could not extract readable text from this page.", tab.url);
+      return sourcePayloadError(
+        t("summaryErrors.noReadableContentTitle", { defaultValue: "No readable content" }),
+        t("summaryErrors.noReadableContentMessage", {
+          defaultValue: "Could not extract readable text from this page.",
+        }),
+        tab.url,
+      );
     }
     sourceContent = tabContent.text;
   } else if (sourceType === "pdf") {
@@ -72,14 +81,19 @@ export const buildSourcePayloadFromTab = async (
       if (import.meta.env.DEV) console.error("PDF Fetch Error:", error);
       if (error instanceof PdfFileAccessDeniedError) {
         return sourcePayloadError(
-          "Local PDF access blocked",
-          "Open chrome://extensions, find ReadToRecall, and enable \"Allow access to file URLs\", then try again.",
+          t("summaryErrors.pdfFileAccessTitle", { defaultValue: "Local PDF access blocked" }),
+          t("summaryErrors.pdfFileAccessMessage", {
+            defaultValue:
+              "Open chrome://extensions, find ReadToRecall, and enable \"Allow access to file URLs\", then try again.",
+          }),
           tab.url,
         );
       }
       return sourcePayloadError(
-        "Could not read PDF",
-        "Could not fetch this PDF. Try opening it in a fresh tab and reloading.",
+        t("summaryErrors.pdfReadTitle", { defaultValue: "Could not read PDF" }),
+        t("summaryErrors.pdfReadMessage", {
+          defaultValue: "Could not fetch this PDF. Try opening it in a fresh tab and reloading.",
+        }),
         tab.url,
       );
     }

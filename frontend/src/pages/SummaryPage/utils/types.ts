@@ -91,15 +91,12 @@ export type ActionItemPostResult<TErrorPayload> =
   | { ok: false; status: number; errorPayload: TErrorPayload | null };
 
 export type PostActionItemArgs = {
-  baseUrl: string;
   type: ActionId;
   sourcePayload: SourcePayload;
-  isAuthenticated?: boolean;
   extras?: { length?: Length; format?: Format; language?: Language; quizDifficulty?: QuizDifficulty };
 };
 
 export type RequestActionItemArgs = {
-  baseUrl: string;
   language: Language;
   type: ActionId;
   sourcePayload: SourcePayload;

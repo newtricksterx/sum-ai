@@ -44,12 +44,3 @@ export const isYoutube = (url: string | undefined): boolean => {
     return false;
   }
 };
-
-// Reads a JSON error body off a non-OK fetch Response, swallowing parse failures so callers can fall back to a generic message.
-export const readErrorBody = async <T = unknown>(response: Response): Promise<T | null> => {
-  try {
-    return await response.json();
-  } catch {
-    return null;
-  }
-};
