@@ -1,4 +1,4 @@
-import { jsPDF } from "jspdf";
+import type { jsPDF as JsPDFType } from "jspdf";
 import type { TranscriptParagraph } from "./types";
 
 const PAGE_WIDTH = 210;
@@ -9,7 +9,7 @@ const TITLE_FONT_SIZE = 16;
 const BODY_FONT_SIZE = 11;
 const TIMESTAMP_FONT_SIZE = 10;
 
-const addPageIfNeeded = (doc: jsPDF, y: number, requiredSpace: number): number => {
+const addPageIfNeeded = (doc: JsPDFType, y: number, requiredSpace: number): number => {
   if (y + requiredSpace > doc.internal.pageSize.getHeight() - MARGIN) {
     doc.addPage();
     return MARGIN;
@@ -26,10 +26,11 @@ const formatTimestamp = (seconds: number): string => {
   return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
 };
 
-export const buildTranscriptPdf = (
+export const buildTranscriptPdf = async (
   title: string,
   paragraphs: TranscriptParagraph[],
-): Blob => {
+): Promise<Blob> => {
+  const { jsPDF } = await import("jspdf");
   const doc = new jsPDF();
   let y = MARGIN;
 
@@ -65,5 +66,5 @@ export const buildTranscriptPdf = (
     y += 4;
   }
 
-  return doc.output("blob");
+  return doc.output("blob") as Blob;
 };

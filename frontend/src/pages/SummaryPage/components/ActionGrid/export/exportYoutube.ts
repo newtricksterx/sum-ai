@@ -16,6 +16,6 @@ export const exportYoutube = async (
     );
   }
 
-  const blob = buildTranscriptPdf("YouTube Transcript", result.paragraphs);
+  const blob = await buildTranscriptPdf("YouTube Transcript", result.paragraphs);
   triggerDownload(blob, "transcript.pdf");
 };
