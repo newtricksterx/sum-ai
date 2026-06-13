@@ -6,7 +6,28 @@
   padding: 0.75rem;
   border-radius: 0.75rem;
   box-shadow: 0 2px 8px var(--color-shadow-soft);
-  transition: box-shadow 160ms ease;
+  transition: box-shadow 160ms ease, transform 160ms ease;
+}
+
+.history-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px var(--color-shadow-soft);
+}
+
+/* Light stagger on the inherited app-card-rise entry animation. */
+.history-card:nth-child(2) { animation-delay: 40ms; }
+.history-card:nth-child(3) { animation-delay: 80ms; }
+.history-card:nth-child(4) { animation-delay: 120ms; }
+.history-card:nth-child(n+5) { animation-delay: 160ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .history-card:hover {
+    transform: none;
+  }
+
+  .history-card {
+    animation-delay: 0ms;
+  }
 }
 
 .history-card-topline {

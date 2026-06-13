@@ -286,6 +286,24 @@
   font-size: 0.72rem;
   line-height: 1.55;
   color: var(--qz-success-text);
+  animation: qz-exp-in 200ms ease-out both;
+}
+
+@keyframes qz-exp-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qz-exp {
+    animation: none;
+  }
 }
 
 .qz-exp.wrong {
