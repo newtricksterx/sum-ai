@@ -91,17 +91,14 @@ export const useActionItem = () => {
       try {
         await waitForNextPaintTask();
 
-        if (options.resetSession) {
-          resetSession();
-          setSourcePayload(null);
-        }
-
+        // For a session-start (resetSession), do NOT touch the current session
+        // until the action actually succeeds. Resolving the source or the
+        // request itself can fail (e.g. a restricted page like the Chrome Web
+        // Store); on failure we leave the existing session intact and only
+        // surface the error to the caller.
         const resolved = await resolveSourcePayload({ forceActiveTab: options.forceActiveTab });
         if (resolved === null) {
           const sourceError = lastSourceErrorRef.current;
-          if (options.resetSession) {
-            startSession(sourceError?.sourceUrl ?? "");
-          }
           const fallbackDoc = errorDocument(
             t("summaryErrors.sourceReadTitle", { defaultValue: "Could not read source" }),
             t("summaryErrors.sourceReadMessage", {
@@ -109,7 +106,6 @@ export const useActionItem = () => {
             }),
           );
           const usedDoc = sourceError?.errorDocument ?? fallbackDoc;
-          syncHistory();
           return {
             success: false,
             errorMessage: extractErrorMessage(
@@ -133,12 +129,7 @@ export const useActionItem = () => {
           t,
         });
 
-        if (options.resetSession) {
-          startSession(result.sourceUrl ?? resolved.sourceUrl ?? "");
-        }
-
         if (!result.isSuccess) {
-          syncHistory();
           return {
             success: false,
             errorMessage: extractErrorMessage(
@@ -149,13 +140,18 @@ export const useActionItem = () => {
         }
 
         if (!result.document || result.document.blocks.length === 0) {
-          syncHistory();
           return {
             success: false,
             errorMessage: t("summaryErrors.emptyResponse", {
               defaultValue: "The backend returned an empty response.",
             }),
           };
+        }
+
+        // Success: only now do we replace the current session with a new one.
+        if (options.resetSession) {
+          resetSession();
+          startSession(result.sourceUrl ?? resolved.sourceUrl ?? "");
         }
 
         addSessionActionItem({

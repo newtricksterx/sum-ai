@@ -188,7 +188,7 @@ const fr = {
     sessionMismatch: {
       title: "La session appartient a une URL differente",
       description: "Cette session a ete creee depuis cette page :",
-      tooltip: "Vous devez etre sur la page d'origine pour generer une nouvelle action.",
+      tooltip: "Revenez à la page d'origine pour ajouter de nouvelles actions à cette session.",
       opensNewTab: "ouvre un nouvel onglet a : {{url}}",
       goToOriginal: "Aller a la page d'origine",
     },

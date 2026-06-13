@@ -21,7 +21,7 @@
 }
 
 .sessionmismatch-icon {
-    min-width: 0;
+    flex-shrink: 0;
 }
 
 .sessionmismatch-title {

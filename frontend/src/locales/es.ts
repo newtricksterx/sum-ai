@@ -188,7 +188,7 @@ const es = {
     sessionMismatch: {
       title: "La sesion pertenece a una URL diferente",
       description: "Esta sesion fue creada desde esta pagina:",
-      tooltip: "Debes estar en la pagina original para generar una nueva accion.",
+      tooltip: "Vuelve a la página original para añadir nuevas acciones a esta sesión.",
       opensNewTab: "abre una nueva pestana en: {{url}}",
       goToOriginal: "Ir a la pagina original",
     },

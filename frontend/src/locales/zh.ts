@@ -188,7 +188,7 @@
     sessionMismatch: {
       title: "会话属于不同的 URL",
       description: "此会话是从该页面创建的:",
-      tooltip: "你必须在原始页面才能生成新操作。",
+      tooltip: "返回原始页面以便为此会话添加新操作。",
       opensNewTab: "在新标签页打开: {{url}}",
       goToOriginal: "前往原始页面",
     },

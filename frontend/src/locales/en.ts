@@ -194,7 +194,7 @@
     sessionMismatch: {
       title: "Session belongs to a different URL",
       description: "This session was created from this page:",
-      tooltip: "You must be on the original page to generate a new action.",
+      tooltip: "Return to the original page to add new actions to this session.",
       opensNewTab: "opens a new tab at: {{url}}",
       goToOriginal: "Go to original page",
     },
